@@ -3,7 +3,7 @@
 
 declare global {
   namespace Vi {
-    interface JestAssertion<T = any> extends jest.Matchers<void, T> {}
+    type JestAssertion<T = unknown> = jest.Matchers<void, T>;
   }
 }
 

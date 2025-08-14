@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useState, useEffect, useRef } from 'react';
+import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,29 +7,38 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { recipeSchema, type RecipeFormData } from '@/lib/schemas';
-import { useCreateRecipe, useUpdateRecipe } from '@/hooks/use-recipes';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { toast } from '@/hooks/use-toast';
+import { useCreateRecipe, useUpdateRecipe, useUploadImage } from '@/hooks/use-recipes';
+import { useLocation } from 'react-router-dom';
+import { X, Upload, Plus } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 import type { Recipe } from '@/lib/supabase';
 
 interface RecipeFormProps {
   recipe?: Recipe;
+  initialData?: RecipeFormData;
+  existingRecipe?: Recipe;
+  onSuccess?: () => void;
 }
 
-export function RecipeForm({ recipe }: RecipeFormProps) {
-  const navigate = useNavigate();
+export function RecipeForm({ recipe, initialData, existingRecipe, onSuccess }: RecipeFormProps) {
   const location = useLocation();
   const editRecipe = location.state?.recipe || recipe;
-  const isEditing = !!editRecipe;
   
   const createRecipe = useCreateRecipe();
   const updateRecipe = useUpdateRecipe();
+  const uploadImage = useUploadImage();
+
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
+    control,
+    setValue,
   } = useForm<RecipeFormData>({
     resolver: zodResolver(recipeSchema),
     defaultValues: editRecipe ? {
@@ -50,7 +59,7 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
   const { fields, append, remove } = useFieldArray({
     control,
     name: 'ingredients',
-  });
+  } as const);
 
   useEffect(() => {
     if (initialData) {
@@ -97,7 +106,7 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
       const recipeData = {
         ...data,
         ingredients: data.ingredients.filter(ingredient => ingredient.trim() !== ''),
-        image_url: imageUrl,
+        image_url: imageUrl || null,
       };
 
       if (existingRecipe) {

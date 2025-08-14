@@ -10,7 +10,7 @@ import type { Recipe } from '@/lib/supabase';
 export function AddRecipePage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [parsedData, setParsedData] = useState<RecipeFormData | null>(null);
+  const [, setParsedData] = useState<RecipeFormData | null>(null);
   const [showParser, setShowParser] = useState(true);
   
   // Check if we're editing an existing recipe
@@ -116,7 +116,6 @@ export function AddRecipePage() {
             )}
             
             <RecipeForm
-              initialData={parsedData || undefined}
               existingRecipe={existingRecipe}
               onSuccess={handleSuccess}
             />

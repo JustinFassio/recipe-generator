@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { RecipeCard } from '@/components/recipes/recipe-card';
 import type { Recipe } from '@/lib/supabase';
 

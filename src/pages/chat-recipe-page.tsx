@@ -67,7 +67,6 @@ export function ChatRecipePage() {
           <div className="bg-white rounded-lg shadow-sm">
             <div className="p-6">
               <RecipeForm
-                initialData={generatedRecipe}
                 onSuccess={handleRecipeSaved}
               />
             </div>

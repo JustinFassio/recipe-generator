@@ -105,7 +105,6 @@ Makes about 48 cookies. Store in airtight container.`;
                       variant="outline"
                       size="sm"
                       onClick={loadExample}
-                      className="mt-2"
                       className="mt-2 border-green-600 text-green-600 hover:bg-green-50"
                     >
                       Load Example

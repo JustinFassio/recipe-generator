@@ -20,7 +20,7 @@ export function AuthWrapper({ children }: AuthWrapperProps) {
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      (_event, session) => {
         setUser(session?.user ?? null);
         setLoading(false);
       }
