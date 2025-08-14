@@ -1,0 +1,128 @@
+import { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft } from 'lucide-react';
+import { ParseRecipeForm } from '@/components/recipes/parse-recipe-form';
+import { RecipeForm } from '@/components/recipes/recipe-form';
+import type { RecipeFormData } from '@/lib/schemas';
+import type { Recipe } from '@/lib/supabase';
+
+export function AddRecipePage() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [parsedData, setParsedData] = useState<RecipeFormData | null>(null);
+  const [showParser, setShowParser] = useState(true);
+  
+  // Check if we're editing an existing recipe
+  const existingRecipe = location.state?.recipe as Recipe | undefined;
+
+  useEffect(() => {
+    // If editing an existing recipe, skip the parser and go straight to the form
+    if (existingRecipe) {
+      setShowParser(false);
+      setParsedData({
+        title: existingRecipe.title,
+        ingredients: existingRecipe.ingredients,
+        instructions: existingRecipe.instructions,
+        notes: existingRecipe.notes,
+        image_url: existingRecipe.image_url || '',
+      });
+    }
+  }, [existingRecipe]);
+
+  const handleParsed = (data: RecipeFormData) => {
+    setParsedData(data);
+    setShowParser(false);
+  };
+
+  const handleSuccess = () => {
+    navigate('/');
+  };
+
+  const handleBackToParser = () => {
+    setParsedData(null);
+    setShowParser(true);
+  };
+
+  const handleCancel = () => {
+    navigate('/');
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-6">
+          <Button
+            variant="ghost"
+            onClick={handleCancel}
+            className="mb-4"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Recipes
+          </Button>
+          
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            {existingRecipe ? 'Edit Recipe' : 'Add New Recipe'}
+          </h1>
+          <p className="text-gray-600">
+            {existingRecipe 
+              ? 'Update your recipe details'
+              : showParser 
+                ? 'Parse your recipe from text or create one manually'
+                : 'Review and edit your parsed recipe'
+            }
+          </p>
+        </div>
+
+        {showParser && !existingRecipe ? (
+          <div className="space-y-6">
+            <ParseRecipeForm onParsed={handleParsed} />
+            
+            <div className="text-center">
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-300" />
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-gradient-to-br from-orange-50 to-teal-50 text-gray-500">
+                    Or
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="text-center">
+              <Button
+                variant="outline"
+                onClick={() => setShowParser(false)}
+                className="border-green-600 text-green-600 hover:bg-green-50"
+              >
+                Create Recipe Manually
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {!existingRecipe && (
+              <div className="flex items-center justify-between">
+                <Button
+                  variant="ghost"
+                  onClick={handleBackToParser}
+                >
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Back to Parser
+                </Button>
+              </div>
+            )}
+            
+            <RecipeForm
+              initialData={parsedData || undefined}
+              existingRecipe={existingRecipe}
+              onSuccess={handleSuccess}
+            />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

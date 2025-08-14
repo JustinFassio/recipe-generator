@@ -1,0 +1,129 @@
+import '@testing-library/jest-dom';
+import { vi } from 'vitest';
+
+// Mock environment variables
+vi.mock('@/lib/supabase', () => ({
+  supabase: {
+    auth: {
+      getUser: vi.fn(),
+      getSession: vi.fn(),
+      onAuthStateChange: vi.fn(() => ({
+        data: { subscription: { unsubscribe: vi.fn() } },
+      })),
+    },
+    from: vi.fn(() => ({
+      select: vi.fn(() => ({
+        order: vi.fn(() => Promise.resolve({ data: [], error: null })),
+      })),
+      eq: vi.fn(() => ({
+        single: vi.fn(() => Promise.resolve({ data: null, error: null })),
+      })),
+      insert: vi.fn(() => ({
+        select: vi.fn(() => ({
+          single: vi.fn(() => Promise.resolve({ data: null, error: null })),
+        })),
+      })),
+      update: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          select: vi.fn(() => ({
+            single: vi.fn(() => Promise.resolve({ data: null, error: null })),
+          })),
+        })),
+      })),
+      delete: vi.fn(() => ({
+        eq: vi.fn(() => Promise.resolve({ error: null })),
+      })),
+    })),
+    storage: {
+      from: vi.fn(() => ({
+        upload: vi.fn(() => Promise.resolve({ error: null })),
+        getPublicUrl: vi.fn(() => ({ data: { publicUrl: 'test-url' } })),
+      })),
+    },
+  },
+}));
+
+// Mock React Query with proper implementation
+vi.mock('@tanstack/react-query', () => ({
+  QueryClient: vi.fn(() => ({
+    invalidateQueries: vi.fn(),
+  })),
+  QueryClientProvider: ({ children }: { children: React.ReactNode }) => children,
+  useQuery: vi.fn(({ queryFn, enabled = true }) => {
+    if (!enabled) {
+      return {
+        data: undefined,
+        isLoading: false,
+        error: null,
+      };
+    }
+    
+    // Return the result of queryFn directly for testing
+    try {
+      const data = queryFn ? queryFn() : [];
+      return {
+        data,
+        isLoading: false,
+        error: null,
+      };
+    } catch (error) {
+      return {
+        data: undefined,
+        isLoading: false,
+        error,
+      };
+    }
+  }),
+  useMutation: vi.fn(() => ({
+    mutate: vi.fn(),
+    mutateAsync: vi.fn(),
+    isLoading: false,
+    error: null,
+  })),
+  useQueryClient: vi.fn(() => ({
+    invalidateQueries: vi.fn(),
+  })),
+}));
+
+// Mock React Router
+vi.mock('react-router-dom', () => ({
+  BrowserRouter: ({ children }: { children: React.ReactNode }) => children,
+  Routes: ({ children }: { children: React.ReactNode }) => children,
+  Route: ({ children }: { children: React.ReactNode }) => children,
+  useNavigate: vi.fn(() => vi.fn()),
+  useParams: vi.fn(() => ({})),
+}));
+
+// Mock toast
+vi.mock('@/hooks/use-toast', () => ({
+  toast: vi.fn(),
+}));
+
+// Mock window.matchMedia
+Object.defineProperty(window, 'matchMedia', {
+  writable: true,
+  value: vi.fn().mockImplementation(query => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: vi.fn(), // deprecated
+    removeListener: vi.fn(), // deprecated
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    dispatchEvent: vi.fn(),
+  })),
+});
+
+// Mock ResizeObserver
+global.ResizeObserver = vi.fn().mockImplementation(() => ({
+  observe: vi.fn(),
+  unobserve: vi.fn(),
+  disconnect: vi.fn(),
+}));
+
+// Mock IntersectionObserver
+global.IntersectionObserver = vi.fn().mockImplementation(() => ({
+  observe: vi.fn(),
+  unobserve: vi.fn(),
+  disconnect: vi.fn(),
+}));
