@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
-import { ChatInterface } from '@/components/chat/chat-interface';
+import { ChatInterface } from '@/components/chat/ChatInterface';
 import { RecipeForm } from '@/components/recipes/recipe-form';
 import type { RecipeFormData } from '@/lib/schemas';
 
@@ -22,6 +22,7 @@ export function ChatRecipePage() {
 
   const handleBackToChat = () => {
     setShowEditor(false);
+    setGeneratedRecipe(null);
   };
 
   return (
@@ -45,7 +46,7 @@ export function ChatRecipePage() {
               <p className="text-gray-600">
                 {showEditor 
                   ? 'Review and customize your AI-generated recipe before saving'
-                  : 'Chat with AI to create personalized recipes step by step'
+                  : 'Choose your recipe assistant and create personalized recipes step by step'
                 }
               </p>
             </div>
@@ -67,6 +68,7 @@ export function ChatRecipePage() {
           <div className="bg-white rounded-lg shadow-sm">
             <div className="p-6">
               <RecipeForm
+                initialData={generatedRecipe}
                 onSuccess={handleRecipeSaved}
               />
             </div>

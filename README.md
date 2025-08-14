@@ -130,6 +130,10 @@ If you're an AI agent working on this project, please refer to:
    ```env
    VITE_SUPABASE_URL=your_supabase_url
    VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+   
+   # OpenAI Configuration (for AI Recipe Creator)
+   VITE_OPENAI_API_KEY=your_openai_api_key
+   VITE_OPENAI_MODEL=gpt-4-turbo-preview
    ```
 
 5. **Start the development server**
@@ -188,10 +192,11 @@ The app includes intelligent recipe parsing that can handle:
 
 ### AI Chat Interface
 The AI recipe creator provides:
-- Conversational recipe generation
-- Step-by-step recipe creation
-- Context-aware responses
-- Recipe saving and editing
+- **Multiple Personas**: Choose from Chef Marco (Italian expert), Dr. Sarah (nutritionist), or Aunt Jenny (home cook)
+- **Conversational Recipe Generation**: Natural language recipe creation with context awareness
+- **Structured Output**: Automatically generates properly formatted recipes
+- **Persona-Specific Guidance**: Each assistant provides specialized cooking advice and tips
+- **Recipe Saving and Editing**: Seamless integration with the recipe management system
 
 ### Image Management
 - Secure file uploads to Supabase Storage

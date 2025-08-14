@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
+import type { FieldArrayPath } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -56,10 +57,10 @@ export function RecipeForm({ recipe, initialData, existingRecipe, onSuccess }: R
     },
   });
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove } = useFieldArray<RecipeFormData, FieldArrayPath<RecipeFormData>>({
     control,
-    name: 'ingredients',
-  } as const);
+    name: 'ingredients' as FieldArrayPath<RecipeFormData>,
+  });
 
   useEffect(() => {
     if (initialData) {
