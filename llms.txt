@@ -1,0 +1,412 @@
+# LLMs.txt - Recipe Generator Project
+
+## 🤖 **For AI Agents Working on This Project**
+
+This file provides essential context and guidelines for AI agents contributing to the Recipe Generator project. Please read this file before making any changes to understand the project architecture, patterns, and quality standards.
+
+---
+
+## 📋 **Project Overview**
+
+**Recipe Generator** is a React-based web application that enables users to create personalized recipes through AI-powered conversations. Users interact with different AI personas (Chef Marco, Dr. Sarah, Aunt Jenny, Dr. Sage Vitalis) to generate recipes, which are then parsed and saved to their collection.
+
+### **Key Features**
+- **AI Recipe Creation**: Natural language recipe generation through chat
+- **Multiple AI Personas**: 4 different AI assistants with unique personalities
+- **Smart API Routing**: Automatic selection between OpenAI Chat Completions and Assistants API
+- **Recipe Parsing**: Convert natural language to structured recipe data
+- **Recipe Management**: Save, edit, and organize recipes in a digital cookbook
+
+---
+
+## 🏗️ **Technical Architecture**
+
+### **Technology Stack**
+- **Frontend**: React 18 + TypeScript + Vite
+- **Styling**: Tailwind CSS + shadcn/ui components
+- **State Management**: React hooks + TanStack Query
+- **Backend**: Supabase (database, auth, file storage)
+- **AI Integration**: OpenAI API (Chat Completions + Assistants API)
+- **Testing**: Vitest + React Testing Library
+- **Quality**: ESLint + Prettier + Husky hooks
+
+### **Core Architecture Patterns**
+
+#### **1. Atomic Component Design**
+- **Single Responsibility**: Each component has one clear purpose
+- **Composable**: Components can be combined to create complex UIs
+- **Reusable**: Components are designed for reuse across the application
+
+**Key Components**:
+- `PersonaSelector`: AI persona selection interface
+- `ChatHeader`: Chat interface header with actions
+- `AssistantBadge`: Visual indicator for Assistant-powered personas
+- `ChatInterface`: Main chat container and orchestrator
+
+#### **2. Custom Hook Pattern**
+- **State Encapsulation**: Complex state logic is encapsulated in custom hooks
+- **Reusability**: Hooks can be shared across components
+- **Testability**: Hooks can be tested independently
+
+**Key Hooks**:
+- `useConversation`: Manages all chat state and AI interactions
+- `useRecipes`: Handles recipe data fetching and mutations
+- `useToast`: Provides toast notification functionality
+
+#### **3. Service Layer Pattern**
+- **API Abstraction**: External API calls are abstracted into service classes
+- **Error Handling**: Centralized error handling and retry logic
+- **Smart Routing**: Automatic API selection based on persona configuration
+
+**Key Services**:
+- `OpenAIAPI`: Handles Chat Completions API with smart routing
+- `AssistantAPI`: Manages OpenAI Assistants API with thread management
+
+---
+
+## 📚 **Essential Documentation**
+
+### **Primary Documentation**
+- **`docs/workflows/ai-recipe-creation-workflow.md`**: Complete user journey from persona selection to saved recipe
+- **`docs/workflows/recipe-save-flow.md`**: Technical implementation of recipe parsing and saving
+- **`docs/workflows/openai-integration-flow.md`**: AI system architecture and API integration
+- **`docs/workflows/state-management-flow.md`**: Component architecture and data flow patterns
+- **`docs/workflows/troubleshooting.md`**: Common issues and solutions
+
+### **Quality Assurance**
+- **`docs/quality-assurance/PRE-PR-VERIFICATION.md`**: Automated verification system
+- **`docs/quality-assurance/PRE-PR-VERIFICATION-CHECKLIST.md`**: Comprehensive diagnostic checklist
+- **`docs/quality-assurance/AI-AGENT-QUICK-REFERENCE.md`**: Essential commands and patterns
+
+---
+
+## 🔧 **Development Guidelines**
+
+### **Before Making Changes**
+
+1. **Read the Documentation**: Start with the workflow documentation in `docs/workflows/`
+2. **Check Current Status**: Run `npm run verify:quick` to understand the current state
+3. **Review Existing Patterns**: Study the atomic components and custom hooks
+4. **Understand the Architecture**: Familiarize yourself with the state management flow
+
+### **Code Standards**
+
+#### **Component Structure**
+```typescript
+// ✅ Correct pattern
+interface ComponentNameProps {
+  prop1: string;
+  prop2?: number;
+}
+
+export function ComponentName({ prop1, prop2 }: ComponentNameProps) {
+  const [state, setState] = useState('');
+  
+  return (
+    <div>
+      {/* JSX with proper accessibility */}
+    </div>
+  );
+}
+```
+
+#### **Hook Structure**
+```typescript
+// ✅ Correct pattern
+export function useCustomHook(param: string) {
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['key', param],
+    queryFn: () => fetchData(param),
+  });
+
+  return { data, isLoading, error };
+}
+```
+
+#### **Service Layer**
+```typescript
+// ✅ Correct pattern
+export class APIService {
+  private readonly apiKey: string;
+  
+  constructor() {
+    this.apiKey = import.meta.env.VITE_API_KEY;
+  }
+  
+  async makeRequest(): Promise<Response> {
+    // Implementation with error handling
+  }
+}
+```
+
+### **Testing Requirements**
+
+#### **Component Tests**
+```typescript
+// Required test structure
+import { render, screen, fireEvent } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { ComponentName } from '@/components/path/component';
+
+describe('ComponentName', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('should render correctly', () => {
+    // Test implementation
+  });
+});
+```
+
+#### **Hook Tests**
+```typescript
+// Required test structure
+import { renderHook } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
+import { useCustomHook } from '@/hooks/use-custom-hook';
+
+describe('useCustomHook', () => {
+  it('should return expected structure', () => {
+    const { result } = renderHook(() => useCustomHook('test'));
+    expect(result.current).toHaveProperty('data');
+  });
+});
+```
+
+---
+
+## 🚨 **Critical Implementation Details**
+
+### **Recent Bug Fixes (January 2025)**
+
+#### **Recipe Save Flow Issue**
+- **Problem**: Recipes were parsing successfully but not saving to database
+- **Root Cause**: Duplicate `chat-interface.tsx` files causing import conflicts
+- **Solution**: Fixed import paths and implemented auto-trigger recipe editor
+- **Files Affected**: `src/pages/chat-recipe-page.tsx`, `src/components/chat/ChatInterface.tsx`
+
+#### **Auto-Trigger Pattern**
+```typescript
+// ✅ Correct implementation in ChatInterface.tsx
+useEffect(() => {
+  if (generatedRecipe) {
+    onRecipeGenerated(generatedRecipe);
+  }
+}, [generatedRecipe, onRecipeGenerated]);
+```
+
+### **AI Integration Patterns**
+
+#### **Smart API Routing**
+```typescript
+// ✅ Correct pattern in openai.ts
+async sendMessageWithPersona(messages: Message[], persona: PersonaType, threadId?: string) {
+  const personaConfig = RECIPE_BOT_PERSONAS[persona];
+  
+  if (personaConfig.assistantId && personaConfig.isAssistantPowered) {
+    return this.chatWithAssistant(messages, persona, threadId);
+  } else {
+    return this.chatWithPersona(messages, persona);
+  }
+}
+```
+
+#### **Assistant API Timeout Protection**
+```typescript
+// ✅ Correct pattern in assistantAPI.ts
+async pollRunCompletion(threadId: string, runId: string, maxAttempts = 30): Promise<void> {
+  // 60-second timeout with exponential backoff
+  // Automatic fallback to Chat Completions on timeout
+}
+```
+
+### **State Management Patterns**
+
+#### **useConversation Hook**
+```typescript
+// ✅ Correct state structure
+interface ConversationState {
+  persona: PersonaType | null;
+  messages: Message[];
+  generatedRecipe: RecipeFormData | null;
+  isLoading: boolean;
+  showPersonaSelector: boolean;
+  threadId: string | null;
+  isUsingAssistant: boolean;
+}
+```
+
+#### **Optimistic Updates**
+```typescript
+// ✅ Correct pattern
+setMessages(prev => [...prev, userMessage]); // Immediate update
+const response = await apiCall(); // API call
+setMessages(prev => [...prev, aiMessage]); // Add response
+```
+
+---
+
+## 🧪 **Quality Assurance**
+
+### **Pre-Change Verification**
+```bash
+# Always run before making changes
+npm run verify:quick
+```
+
+### **Post-Change Verification**
+```bash
+# Always run after making changes
+npm run verify
+```
+
+### **Quality Gates**
+- ✅ **Tests Pass**: 26 tests across 3 test files
+- ✅ **Linting Clean**: No ESLint errors (warnings are acceptable)
+- ✅ **TypeScript Compiles**: No type errors
+- ✅ **Build Succeeds**: Production build works
+- ✅ **Formatting**: Prettier compliance
+
+### **Coverage Requirements**
+- **Components**: Test rendering and user interactions
+- **Hooks**: Test state changes and side effects
+- **Services**: Test API calls and error handling
+- **Utilities**: Test pure functions
+
+---
+
+## 🚀 **Common Development Tasks**
+
+### **Adding New AI Personas**
+1. **Update Persona Configuration**: Add to `RECIPE_BOT_PERSONAS` in `src/lib/openai.ts`
+2. **Add Persona Icons**: Update `getPersonaIcon` functions in components
+3. **Update Documentation**: Add persona details to workflow documentation
+4. **Test Integration**: Verify API routing and error handling
+
+### **Modifying Recipe Parsing**
+1. **Update Parser**: Modify `parseRecipeFromText` in `src/lib/api.ts`
+2. **Update Tests**: Add test cases for new parsing scenarios
+3. **Update Documentation**: Document parsing changes in recipe-save-flow.md
+4. **Test End-to-End**: Verify complete workflow still works
+
+### **Adding New Components**
+1. **Follow Atomic Pattern**: Single responsibility, composable design
+2. **Add TypeScript Interfaces**: Proper prop typing
+3. **Add Tests**: Component rendering and interaction tests
+4. **Update Documentation**: Add to relevant workflow documentation
+5. **Check Accessibility**: Proper ARIA labels and keyboard navigation
+
+### **Modifying State Management**
+1. **Use Custom Hooks**: Encapsulate state logic in hooks
+2. **Follow Immutable Updates**: Use functional state updates
+3. **Add Error Handling**: Graceful error recovery
+4. **Update Tests**: Test state changes and side effects
+5. **Update Documentation**: Document state flow changes
+
+---
+
+## 🔍 **Troubleshooting Guide**
+
+### **Common Issues**
+
+#### **Recipe Not Saving**
+- **Check**: Import paths in `src/pages/chat-recipe-page.tsx`
+- **Verify**: `onRecipeGenerated` callback is being called
+- **Debug**: Check `useConversation.convertToRecipe` function
+
+#### **AI Not Responding**
+- **Check**: OpenAI API key in `.env` file
+- **Verify**: Network connectivity and API status
+- **Debug**: Check browser console for error messages
+
+#### **Assistant API Hanging**
+- **Check**: Thread management in `AssistantAPI`
+- **Verify**: Timeout protection is working
+- **Debug**: Check polling logs in browser console
+
+#### **TypeScript Errors**
+- **Check**: Import statements and type definitions
+- **Verify**: Component prop interfaces match usage
+- **Debug**: Run `npx tsc --noEmit` for detailed errors
+
+### **Debugging Commands**
+```bash
+# Check current status
+npm run verify:quick
+
+# Run specific checks
+npm run lint
+npm run test:run
+npm run build
+
+# Debug specific files
+npx tsc --noEmit src/path/to/file.ts
+npm run lint src/path/to/file.ts
+```
+
+---
+
+## 📝 **Communication Guidelines**
+
+### **When Making Changes**
+1. **Reference Documentation**: Link to relevant workflow documentation
+2. **Explain Patterns**: Reference existing architectural patterns
+3. **Document Decisions**: Explain why specific approaches were chosen
+4. **Update Tests**: Ensure test coverage is maintained
+
+### **When Reporting Issues**
+1. **Check Documentation**: Review troubleshooting guide first
+2. **Provide Context**: Include relevant code and error messages
+3. **Reference Patterns**: Mention which architectural patterns are involved
+4. **Suggest Solutions**: Propose fixes based on existing patterns
+
+---
+
+## 🎯 **Success Criteria**
+
+### **Code Quality**
+- ✅ **Follows Patterns**: Uses established architectural patterns
+- ✅ **Well Tested**: Comprehensive test coverage
+- ✅ **Properly Typed**: Full TypeScript compliance
+- ✅ **Accessible**: WCAG 2.1 AA compliance
+- ✅ **Performant**: No unnecessary re-renders or API calls
+
+### **User Experience**
+- ✅ **Intuitive Flow**: Users can create recipes without instructions
+- ✅ **Fast Performance**: AI responses under 3 seconds
+- ✅ **High Reliability**: Recipe parsing success rate > 95%
+- ✅ **Clear Feedback**: Actionable error messages and loading states
+
+### **Maintainability**
+- ✅ **Clear Architecture**: Easy to understand and modify
+- ✅ **Comprehensive Documentation**: All workflows documented
+- ✅ **Quality Assurance**: Automated verification pipeline
+- ✅ **Consistent Patterns**: Reusable components and hooks
+
+---
+
+## 📞 **Getting Help**
+
+### **Documentation Resources**
+- **Workflow Documentation**: `docs/workflows/`
+- **Quality Assurance**: `docs/quality-assurance/`
+- **Test Examples**: `src/__tests__/`
+- **Component Patterns**: `src/components/`
+
+### **Key Files to Reference**
+- **Main App**: `src/App.tsx`
+- **Chat Interface**: `src/components/chat/ChatInterface.tsx`
+- **Conversation Hook**: `src/hooks/useConversation.ts`
+- **OpenAI Integration**: `src/lib/openai.ts`
+- **Recipe Parsing**: `src/lib/api.ts`
+
+---
+
+**Last Updated**: January 2025  
+**Project Status**: ✅ ACTIVE & WELL-DOCUMENTED  
+**AI Agent Ready**: ✅ COMPREHENSIVE GUIDANCE PROVIDED
+
+---
+
+*This file serves as the primary reference for AI agents working on the Recipe Generator project. Always consult this file before making changes to ensure consistency with the established architecture and quality standards.*
