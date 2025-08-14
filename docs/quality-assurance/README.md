@@ -1,6 +1,6 @@
 # Quality Assurance Documentation
 
-This directory contains comprehensive documentation for the Recipe Rolodex project's quality assurance and verification systems.
+This directory contains comprehensive documentation for the Recipe Generator project's quality assurance and verification systems.
 
 ## 📋 **Documentation Overview**
 

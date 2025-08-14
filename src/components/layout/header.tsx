@@ -17,7 +17,7 @@ export function Header() {
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center space-x-4">
             <ChefHat className="h-8 w-8 text-orange-500" />
-            <h1 className="text-2xl font-bold text-gray-900">Recipe Rolodex</h1>
+            <h1 className="text-2xl font-bold text-gray-900">Recipe Generator</h1>
           </div>
           
           <nav className="flex items-center space-x-4">

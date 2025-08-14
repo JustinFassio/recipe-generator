@@ -6,7 +6,7 @@
 
 ## Overview
 
-This document outlines the comprehensive pre-PR verification system implemented for the Recipe Rolodex project. The system catches issues before they reach GitHub, ensuring faster reviews, fewer CI failures, and a consistently healthy codebase.
+This document outlines the comprehensive pre-PR verification system implemented for the Recipe Generator project. The system catches issues before they reach GitHub, ensuring faster reviews, fewer CI failures, and a consistently healthy codebase.
 
 ## Implementation Status
 

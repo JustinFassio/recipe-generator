@@ -1,4 +1,4 @@
-# Recipe Rolodex 🍳
+# Recipe Generator 🍳
 
 A modern, full-stack recipe management application built with React, TypeScript, and Supabase. Create, organize, and discover delicious recipes with AI-powered assistance.
 
@@ -236,4 +236,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ---
 
-**Recipe Rolodex** - Your digital cookbook companion 🍳
+**Recipe Generator** - Your digital cookbook companion 🍳

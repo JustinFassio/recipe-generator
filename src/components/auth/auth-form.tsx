@@ -65,7 +65,7 @@ export function AuthForm() {
           <div className="flex items-center justify-center mb-4">
             <ChefHat className="h-12 w-12 text-orange-500" />
           </div>
-          <CardTitle className="text-2xl font-bold">Recipe Rolodex</CardTitle>
+          <CardTitle className="text-2xl font-bold">Recipe Generator</CardTitle>
           <CardDescription>
             Your digital cookbook for collecting and organizing recipes
           </CardDescription>

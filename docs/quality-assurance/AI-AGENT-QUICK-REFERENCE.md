@@ -1,6 +1,6 @@
 # AI Agent Quick Reference Guide
 
-**For AI agents working on the Recipe Rolodex project**
+**For AI agents working on the Recipe Generator project**
 
 ---
 
