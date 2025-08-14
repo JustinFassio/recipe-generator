@@ -112,7 +112,7 @@ If you're an AI agent working on this project, please refer to:
 1. **Clone the repository**
    ```bash
    git clone <repository-url>
-   cd recipe-rolodex
+   cd recipe-generator
    ```
 
 2. **Install dependencies**

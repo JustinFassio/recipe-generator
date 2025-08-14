@@ -1,5 +1,5 @@
 /*
-# Recipe Rolodex Database Schema
+# Recipe Generator Database Schema
 
 1. New Tables
    - `recipes`
