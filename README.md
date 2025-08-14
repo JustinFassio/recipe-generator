@@ -5,6 +5,7 @@ A modern, full-stack recipe management application built with React, TypeScript,
 ## ✨ Features
 
 ### 🍽️ Recipe Management
+
 - **Create & Edit Recipes**: Add new recipes with ingredients, instructions, and notes
 - **Recipe Parsing**: Paste recipe text and automatically parse into structured format
 - **Image Upload**: Add photos to your recipes with cloud storage
@@ -12,16 +13,19 @@ A modern, full-stack recipe management application built with React, TypeScript,
 - **Responsive Design**: Beautiful UI that works on desktop and mobile
 
 ### 🤖 AI-Powered Features
+
 - **AI Recipe Creator**: Chat with an AI assistant to generate custom recipes
 - **Smart Parsing**: Automatically extract recipe components from text
 - **Conversational Interface**: Natural language recipe creation
 
 ### 🔐 Authentication & Security
+
 - **User Authentication**: Secure login with Supabase Auth
 - **Row-Level Security**: Users can only access their own recipes
 - **Protected Routes**: Automatic authentication checks
 
 ### 🎨 Modern UI/UX
+
 - **Shadcn/ui Components**: Beautiful, accessible UI components
 - **Tailwind CSS**: Modern styling with utility classes
 - **Responsive Layout**: Works seamlessly across all devices
@@ -31,6 +35,7 @@ A modern, full-stack recipe management application built with React, TypeScript,
 ## 🛠️ Tech Stack
 
 ### Frontend
+
 - **React 18** - Modern React with hooks and functional components
 - **TypeScript** - Type-safe development
 - **Vite** - Fast build tool and development server
@@ -40,6 +45,7 @@ A modern, full-stack recipe management application built with React, TypeScript,
 - **Zod** - Schema validation
 
 ### Testing & Quality
+
 - **Vitest** - Fast unit testing framework
 - **React Testing Library** - Component testing utilities
 - **Prettier** - Code formatting
@@ -47,6 +53,7 @@ A modern, full-stack recipe management application built with React, TypeScript,
 - **Husky** - Git hooks for pre-commit verification
 
 ### UI & Styling
+
 - **Tailwind CSS** - Utility-first CSS framework
 - **Shadcn/ui** - High-quality React components
 - **Radix UI** - Accessible component primitives
@@ -54,6 +61,7 @@ A modern, full-stack recipe management application built with React, TypeScript,
 - **Tailwind CSS Animate** - Smooth animations
 
 ### Backend & Database
+
 - **Supabase** - Backend-as-a-Service
   - PostgreSQL database
   - Real-time subscriptions
@@ -62,6 +70,7 @@ A modern, full-stack recipe management application built with React, TypeScript,
   - Authentication
 
 ### Development Tools
+
 - **ESLint** - Code linting
 - **TypeScript ESLint** - TypeScript-specific linting rules
 - **PostCSS** - CSS processing
@@ -86,11 +95,13 @@ src/
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js 18+ 
+
+- Node.js 18+
 - npm or yarn
 - Supabase account
 
 ### Quality Assurance
+
 This project includes a comprehensive Pre-PR Verification System that ensures code quality:
 
 - **Automated Testing**: 26 tests covering components, hooks, and utilities
@@ -103,19 +114,23 @@ This project includes a comprehensive Pre-PR Verification System that ensures co
 For detailed information, see [Quality Assurance Documentation](docs/quality-assurance/README.md).
 
 ### For AI Agents
+
 If you're an AI agent working on this project, please refer to:
+
 - **[AI Agent Quick Reference](docs/quality-assurance/AI-AGENT-QUICK-REFERENCE.md)** - Essential commands and patterns
 - **[Pre-PR Verification Checklist](docs/quality-assurance/PRE-PR-VERIFICATION-CHECKLIST.md)** - Comprehensive diagnostic checklist
 
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone <repository-url>
    cd recipe-generator
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
@@ -127,16 +142,18 @@ If you're an AI agent working on this project, please refer to:
 
 4. **Environment Variables**
    Create a `.env` file in the root directory:
+
    ```env
    VITE_SUPABASE_URL=your_supabase_url
    VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-   
+
    # OpenAI Configuration (for AI Recipe Creator)
    VITE_OPENAI_API_KEY=your_openai_api_key
    VITE_OPENAI_MODEL=gpt-4-turbo-preview
    ```
 
 5. **Start the development server**
+
    ```bash
    npm run dev
    ```
@@ -147,6 +164,7 @@ If you're an AI agent working on this project, please refer to:
 ## 🗄️ Database Schema
 
 ### Recipes Table
+
 ```sql
 CREATE TABLE recipes (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -162,6 +180,7 @@ CREATE TABLE recipes (
 ```
 
 ### Security Policies
+
 - Users can only view, create, update, and delete their own recipes
 - Recipe images are stored in user-specific folders
 - Row-level security is enabled on all tables
@@ -184,14 +203,18 @@ CREATE TABLE recipes (
 ## 🎯 Key Features Explained
 
 ### Recipe Parsing
+
 The app includes intelligent recipe parsing that can handle:
+
 - JSON format recipes (from external APIs)
 - Markdown-style text recipes
 - Complex nested ingredient structures
 - Multiple instruction sections
 
 ### AI Chat Interface
+
 The AI recipe creator provides:
+
 - **Multiple Personas**: Choose from Chef Marco (Italian expert), Dr. Sarah (nutritionist), or Aunt Jenny (home cook)
 - **Conversational Recipe Generation**: Natural language recipe creation with context awareness
 - **Structured Output**: Automatically generates properly formatted recipes
@@ -199,6 +222,7 @@ The AI recipe creator provides:
 - **Recipe Saving and Editing**: Seamless integration with the recipe management system
 
 ### Image Management
+
 - Secure file uploads to Supabase Storage
 - User-specific storage folders
 - Public URL generation for images

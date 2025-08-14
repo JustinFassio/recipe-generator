@@ -48,7 +48,8 @@ vi.mock('@tanstack/react-query', () => ({
   QueryClient: vi.fn(() => ({
     invalidateQueries: vi.fn(),
   })),
-  QueryClientProvider: ({ children }: { children: React.ReactNode }) => children,
+  QueryClientProvider: ({ children }: { children: React.ReactNode }) =>
+    children,
   useQuery: vi.fn(({ queryFn, enabled = true }) => {
     if (!enabled) {
       return {
@@ -57,7 +58,7 @@ vi.mock('@tanstack/react-query', () => ({
         error: null,
       };
     }
-    
+
     // Return the result of queryFn directly for testing
     try {
       const data = queryFn ? queryFn() : [];
@@ -102,7 +103,7 @@ vi.mock('@/hooks/use-toast', () => ({
 // Mock window.matchMedia
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
-  value: vi.fn().mockImplementation(query => ({
+  value: vi.fn().mockImplementation((query) => ({
     matches: false,
     media: query,
     onchange: null,

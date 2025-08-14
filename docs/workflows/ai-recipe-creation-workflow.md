@@ -26,25 +26,28 @@ The AI Recipe Creation Workflow is the core user experience of the Recipe Genera
 ## 📋 **Detailed Step-by-Step Flow**
 
 ### **Step 1: Navigation to Chat Page**
+
 - **Entry Point**: User clicks "AI Recipe Creator" from main navigation
 - **URL**: `/chat`
 - **Component**: `ChatRecipePage`
 
 ### **Step 2: Persona Selection**
+
 - **UI Component**: `PersonaSelector`
 - **Available Personas**:
   - **Chef Marco** (Italian Chef) - Chat Completions API
-  - **Dr. Sarah** (Nutritionist) - Chat Completions API  
+  - **Dr. Sarah** (Nutritionist) - Chat Completions API
   - **Aunt Jenny** (Home Cook) - Chat Completions API
   - **Dr. Sage Vitalis** (Assistant Nutritionist) - Assistants API ⚡
 
 - **User Action**: Click on desired persona card
-- **System Response**: 
+- **System Response**:
   - Persona selected and stored in state
   - Welcome message displayed
   - Chat interface activated
 
 ### **Step 3: AI Conversation**
+
 - **UI Component**: `ChatInterface`
 - **User Actions**:
   - Type messages in chat input
@@ -58,13 +61,15 @@ The AI Recipe Creation Workflow is the core user experience of the Recipe Genera
   - Follow-up questions about ingredients, dietary restrictions, etc.
 
 ### **Step 4: Recipe Generation**
+
 - **Trigger**: User describes desired recipe through conversation
-- **AI Behavior**: 
+- **AI Behavior**:
   - Provides recipe information in natural Markdown format
   - Includes ingredients, instructions, tips, and variations
   - Maintains conversational tone throughout
 
 ### **Step 5: Recipe Parsing (Save Recipe)**
+
 - **UI Component**: `ChatHeader` - Blue "Save Recipe" button
 - **User Action**: Click "Save Recipe" button
 - **System Process**:
@@ -76,6 +81,7 @@ The AI Recipe Creation Workflow is the core user experience of the Recipe Genera
   6. **Auto-Navigate**: Transition to recipe editor
 
 ### **Step 6: Recipe Review & Edit**
+
 - **UI Component**: `RecipeForm` in editor mode
 - **Display**: Parsed recipe data in editable form fields
 - **User Actions**:
@@ -85,6 +91,7 @@ The AI Recipe Creation Workflow is the core user experience of the Recipe Genera
   - Customize serving size, prep time, cook time
 
 ### **Step 7: Recipe Saving**
+
 - **UI Component**: `RecipeForm` - Green "Save Recipe" button
 - **User Action**: Click "Save Recipe" in the form
 - **System Process**:
@@ -94,6 +101,7 @@ The AI Recipe Creation Workflow is the core user experience of the Recipe Genera
   4. **Navigation**: Redirect to recipes collection
 
 ### **Step 8: Recipe Collection**
+
 - **UI Component**: `RecipesPage`
 - **Display**: New recipe appears in user's collection
 - **User Actions**: View, edit, or delete saved recipes
@@ -103,6 +111,7 @@ The AI Recipe Creation Workflow is the core user experience of the Recipe Genera
 ### **Key Components**
 
 #### **1. ChatRecipePage** (`src/pages/chat-recipe-page.tsx`)
+
 ```typescript
 // Main page component that orchestrates the workflow
 - Manages showEditor state (chat vs form view)
@@ -111,6 +120,7 @@ The AI Recipe Creation Workflow is the core user experience of the Recipe Genera
 ```
 
 #### **2. ChatInterface** (`src/components/chat/ChatInterface.tsx`)
+
 ```typescript
 // Core chat component using atomic design
 - Uses useConversation hook for state management
@@ -120,6 +130,7 @@ The AI Recipe Creation Workflow is the core user experience of the Recipe Genera
 ```
 
 #### **3. useConversation** (`src/hooks/useConversation.ts`)
+
 ```typescript
 // Custom hook managing all conversation state
 - Persona selection and management
@@ -129,6 +140,7 @@ The AI Recipe Creation Workflow is the core user experience of the Recipe Genera
 ```
 
 #### **4. OpenAI Integration** (`src/lib/openai.ts`)
+
 ```typescript
 // Smart routing between APIs
 - Chat Completions API for standard personas
@@ -155,18 +167,21 @@ The AI Recipe Creation Workflow is the core user experience of the Recipe Genera
 ## 🎨 **User Experience Features**
 
 ### **Conversational Flow**
+
 - **Natural Language**: Users describe recipes in plain English
 - **Follow-up Questions**: AI asks clarifying questions
 - **Contextual Responses**: AI maintains conversation context
 - **Persona Consistency**: Each AI maintains unique personality
 
 ### **Visual Feedback**
+
 - **Typing Indicators**: Loading states during AI responses
 - **Button States**: "Parsing Recipe..." feedback
 - **Toast Notifications**: Success/error messages
 - **Auto-scroll**: Chat messages stay in view
 
 ### **Accessibility**
+
 - **Keyboard Navigation**: Full keyboard support
 - **Screen Reader Support**: ARIA labels and semantic HTML
 - **Focus Management**: Proper focus handling
@@ -175,17 +190,20 @@ The AI Recipe Creation Workflow is the core user experience of the Recipe Genera
 ## 🚨 **Error Handling & Fallbacks**
 
 ### **API Failures**
+
 - **429 Rate Limits**: Exponential backoff with user feedback
 - **Network Errors**: Retry logic with timeout
 - **Invalid API Keys**: Clear error messages
 - **Assistant Timeouts**: Automatic fallback to Chat Completions
 
 ### **Parsing Failures**
+
 - **Invalid Recipe Text**: Error toast with retry option
 - **Missing Required Fields**: Form validation feedback
 - **Malformed Data**: Graceful degradation
 
 ### **State Recovery**
+
 - **Page Refresh**: Conversation history preserved in session
 - **Navigation**: Proper cleanup and initialization
 - **Error Boundaries**: Component-level error recovery
@@ -193,12 +211,14 @@ The AI Recipe Creation Workflow is the core user experience of the Recipe Genera
 ## 📊 **Performance Optimizations**
 
 ### **API Efficiency**
+
 - **Message History Limiting**: Only send last 10 messages
 - **Smart Caching**: Persona configurations cached
 - **Debounced Input**: Prevent rapid API calls
 - **Connection Pooling**: Reuse HTTP connections
 
 ### **UI Responsiveness**
+
 - **Optimistic Updates**: Immediate message display
 - **Lazy Loading**: Components loaded on demand
 - **Memoization**: Prevent unnecessary re-renders
@@ -207,12 +227,14 @@ The AI Recipe Creation Workflow is the core user experience of the Recipe Genera
 ## 🔍 **Monitoring & Analytics**
 
 ### **Key Metrics**
+
 - **Conversation Length**: Average messages per recipe
 - **Success Rate**: Recipes successfully saved
 - **API Response Times**: Performance monitoring
 - **Error Rates**: Failure tracking by type
 
 ### **User Behavior**
+
 - **Persona Preferences**: Most popular AI assistants
 - **Recipe Categories**: Common recipe types
 - **Editing Patterns**: How users modify parsed recipes
@@ -221,12 +243,14 @@ The AI Recipe Creation Workflow is the core user experience of the Recipe Genera
 ## 🎯 **Success Criteria**
 
 ### **User Experience**
+
 - ✅ **Intuitive Flow**: Users can create recipes without instructions
 - ✅ **Fast Response Times**: AI responses under 3 seconds
 - ✅ **High Accuracy**: Recipe parsing success rate > 95%
 - ✅ **Error Recovery**: Clear error messages with actionable steps
 
 ### **Technical Performance**
+
 - ✅ **Reliable Parsing**: Consistent recipe structure extraction
 - ✅ **API Resilience**: Graceful handling of API failures
 - ✅ **State Management**: Proper cleanup and memory management

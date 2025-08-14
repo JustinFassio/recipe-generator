@@ -14,14 +14,14 @@ interface ChatHeaderProps {
   onChangeAssistant: () => void;
 }
 
-export function ChatHeader({ 
-  selectedPersona, 
-  generatedRecipe, 
+export function ChatHeader({
+  selectedPersona,
+  generatedRecipe,
   isLoading,
-  onSaveRecipe, 
+  onSaveRecipe,
   onConvertToRecipe,
-  onNewRecipe, 
-  onChangeAssistant 
+  onNewRecipe,
+  onChangeAssistant,
 }: ChatHeaderProps) {
   const getPersonaIcon = (persona: PersonaType) => {
     switch (persona) {
@@ -54,40 +54,53 @@ export function ChatHeader({
   };
 
   return (
-    <div className="flex items-center justify-between p-4 border-b bg-white rounded-t-lg">
+    <div className="flex items-center justify-between rounded-t-lg border-b bg-white p-4">
       <div className="flex items-center space-x-3">
         <Avatar className={`h-10 w-10 ${getPersonaColor(selectedPersona)}`}>
-          <AvatarFallback>
-            {getPersonaIcon(selectedPersona)}
-          </AvatarFallback>
+          <AvatarFallback>{getPersonaIcon(selectedPersona)}</AvatarFallback>
         </Avatar>
         <div>
-          <h2 className="font-semibold text-gray-900">{RECIPE_BOT_PERSONAS[selectedPersona].name}</h2>
-          <p className="text-sm text-gray-500">Let's create something delicious together!</p>
+          <h2 className="font-semibold text-gray-900">
+            {RECIPE_BOT_PERSONAS[selectedPersona].name}
+          </h2>
+          <p className="text-sm text-gray-500">
+            Let's create something delicious together!
+          </p>
         </div>
       </div>
       <div className="flex items-center space-x-2">
         {generatedRecipe ? (
           // Show save button after recipe is generated
-          <Button onClick={onSaveRecipe} className="bg-green-600 hover:bg-green-700">
-            <Save className="h-4 w-4 mr-2" />
+          <Button
+            onClick={onSaveRecipe}
+            className="bg-green-600 hover:bg-green-700"
+          >
+            <Save className="mr-2 h-4 w-4" />
             Save Recipe
           </Button>
         ) : (
           // Show convert button to create recipe from conversation
-          <Button 
-            onClick={onConvertToRecipe} 
+          <Button
+            onClick={onConvertToRecipe}
             disabled={isLoading}
             className="bg-blue-600 hover:bg-blue-700"
           >
-            <Save className="h-4 w-4 mr-2" />
+            <Save className="mr-2 h-4 w-4" />
             {isLoading ? 'Parsing Recipe...' : 'Save Recipe'}
           </Button>
         )}
-        <Button variant="outline" onClick={onNewRecipe} className="border-green-600 text-green-600 hover:bg-green-50">
+        <Button
+          variant="outline"
+          onClick={onNewRecipe}
+          className="border-green-600 text-green-600 hover:bg-green-50"
+        >
           New Recipe
         </Button>
-        <Button variant="outline" onClick={onChangeAssistant} className="border-orange-500 text-orange-600 hover:bg-orange-50">
+        <Button
+          variant="outline"
+          onClick={onChangeAssistant}
+          className="border-orange-500 text-orange-600 hover:bg-orange-50"
+        >
           Change Assistant
         </Button>
       </div>

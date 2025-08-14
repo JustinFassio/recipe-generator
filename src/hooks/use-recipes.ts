@@ -20,7 +20,7 @@ export const useRecipe = (id: string) => {
 
 export const useCreateRecipe = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: recipeApi.createRecipe,
     onSuccess: () => {
@@ -43,7 +43,7 @@ export const useCreateRecipe = () => {
 
 export const useUpdateRecipe = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: ({ id, updates }: { id: string; updates: Partial<Recipe> }) =>
       recipeApi.updateRecipe(id, updates),
@@ -67,7 +67,7 @@ export const useUpdateRecipe = () => {
 
 export const useDeleteRecipe = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: recipeApi.deleteRecipe,
     onSuccess: () => {
@@ -94,7 +94,8 @@ export const useParseRecipe = () => {
     onError: (error) => {
       toast({
         title: 'Error',
-        description: 'Failed to parse recipe. Please check the format and try again.',
+        description:
+          'Failed to parse recipe. Please check the format and try again.',
         variant: 'destructive',
       });
       console.error('Parse recipe error:', error);

@@ -33,23 +33,23 @@ export function RecipeCard({ recipe, onEdit, onView }: RecipeCardProps) {
 
   return (
     <>
-      <Card className="group hover:shadow-lg transition-all duration-200 overflow-hidden">
+      <Card className="group overflow-hidden transition-all duration-200 hover:shadow-lg">
         {recipe.image_url && (
           <div className="aspect-video overflow-hidden">
             <img
               src={recipe.image_url}
               alt={recipe.title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+              className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-105"
             />
           </div>
         )}
-        
+
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between">
-            <CardTitle className="text-lg font-semibold line-clamp-2">
+            <CardTitle className="line-clamp-2 text-lg font-semibold">
               {recipe.title}
             </CardTitle>
-            <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="flex items-center space-x-1 opacity-0 transition-opacity group-hover:opacity-100">
               <Button
                 variant="ghost"
                 size="sm"
@@ -77,7 +77,7 @@ export function RecipeCard({ recipe, onEdit, onView }: RecipeCardProps) {
             </div>
           </div>
         </CardHeader>
-        
+
         <CardContent className="pt-0">
           <div className="space-y-3">
             <div className="flex items-center justify-between text-sm text-gray-500">
@@ -88,16 +88,16 @@ export function RecipeCard({ recipe, onEdit, onView }: RecipeCardProps) {
                 {new Date(recipe.created_at).toLocaleDateString()}
               </span>
             </div>
-            
+
             {recipe.instructions && (
-              <p className="text-sm text-gray-600 line-clamp-3">
+              <p className="line-clamp-3 text-sm text-gray-600">
                 {recipe.instructions}
               </p>
             )}
-            
+
             {recipe.notes && (
-              <div className="pt-2 border-t">
-                <p className="text-xs text-gray-500 italic line-clamp-2">
+              <div className="border-t pt-2">
+                <p className="line-clamp-2 text-xs italic text-gray-500">
                   {recipe.notes}
                 </p>
               </div>
@@ -111,7 +111,8 @@ export function RecipeCard({ recipe, onEdit, onView }: RecipeCardProps) {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Recipe</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete "{recipe.title}"? This action cannot be undone.
+              Are you sure you want to delete "{recipe.title}"? This action
+              cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

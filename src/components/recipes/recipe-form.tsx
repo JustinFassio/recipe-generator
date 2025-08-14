@@ -8,7 +8,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { recipeSchema, type RecipeFormData } from '@/lib/schemas';
-import { useCreateRecipe, useUpdateRecipe, useUploadImage } from '@/hooks/use-recipes';
+import {
+  useCreateRecipe,
+  useUpdateRecipe,
+  useUploadImage,
+} from '@/hooks/use-recipes';
 import { useLocation } from 'react-router-dom';
 import { X, Upload, Plus } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
@@ -21,10 +25,15 @@ interface RecipeFormProps {
   onSuccess?: () => void;
 }
 
-export function RecipeForm({ recipe, initialData, existingRecipe, onSuccess }: RecipeFormProps) {
+export function RecipeForm({
+  recipe,
+  initialData,
+  existingRecipe,
+  onSuccess,
+}: RecipeFormProps) {
   const location = useLocation();
   const editRecipe = location.state?.recipe || recipe;
-  
+
   const createRecipe = useCreateRecipe();
   const updateRecipe = useUpdateRecipe();
   const uploadImage = useUploadImage();
@@ -42,22 +51,27 @@ export function RecipeForm({ recipe, initialData, existingRecipe, onSuccess }: R
     setValue,
   } = useForm<RecipeFormData>({
     resolver: zodResolver(recipeSchema),
-    defaultValues: editRecipe ? {
-      title: editRecipe.title,
-      ingredients: editRecipe.ingredients,
-      instructions: editRecipe.instructions,
-      notes: editRecipe.notes || '',
-      image_url: editRecipe.image_url || '',
-    } : {
-      title: '',
-      ingredients: [''],
-      instructions: '',
-      notes: '',
-      image_url: '',
-    },
+    defaultValues: editRecipe
+      ? {
+          title: editRecipe.title,
+          ingredients: editRecipe.ingredients,
+          instructions: editRecipe.instructions,
+          notes: editRecipe.notes || '',
+          image_url: editRecipe.image_url || '',
+        }
+      : {
+          title: '',
+          ingredients: [''],
+          instructions: '',
+          notes: '',
+          image_url: '',
+        },
   });
 
-  const { fields, append, remove } = useFieldArray<RecipeFormData, FieldArrayPath<RecipeFormData>>({
+  const { fields, append, remove } = useFieldArray<
+    RecipeFormData,
+    FieldArrayPath<RecipeFormData>
+  >({
     control,
     name: 'ingredients' as FieldArrayPath<RecipeFormData>,
   });
@@ -66,7 +80,9 @@ export function RecipeForm({ recipe, initialData, existingRecipe, onSuccess }: R
     if (initialData) {
       reset({
         title: initialData.title || '',
-        ingredients: initialData.ingredients?.length ? initialData.ingredients : [''],
+        ingredients: initialData.ingredients?.length
+          ? initialData.ingredients
+          : [''],
         instructions: initialData.instructions || '',
         notes: initialData.notes || '',
         image_url: initialData.image_url || '',
@@ -95,7 +111,9 @@ export function RecipeForm({ recipe, initialData, existingRecipe, onSuccess }: R
 
       // Upload new image if one was selected
       if (imageFile) {
-        const { data: { user } } = await supabase.auth.getUser();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
         if (user) {
           imageUrl = await uploadImage.mutateAsync({
             file: imageFile,
@@ -106,7 +124,9 @@ export function RecipeForm({ recipe, initialData, existingRecipe, onSuccess }: R
 
       const recipeData = {
         ...data,
-        ingredients: data.ingredients.filter(ingredient => ingredient.trim() !== ''),
+        ingredients: data.ingredients.filter(
+          (ingredient) => ingredient.trim() !== ''
+        ),
         image_url: imageUrl || null,
       };
 
@@ -151,7 +171,9 @@ export function RecipeForm({ recipe, initialData, existingRecipe, onSuccess }: R
               className="mt-1"
             />
             {errors.title && (
-              <p className="text-sm text-red-500 mt-1">{errors.title.message}</p>
+              <p className="mt-1 text-sm text-red-500">
+                {errors.title.message}
+              </p>
             )}
           </div>
 
@@ -159,11 +181,11 @@ export function RecipeForm({ recipe, initialData, existingRecipe, onSuccess }: R
             <Label>Recipe Image</Label>
             <div className="mt-2 space-y-4">
               {imagePreview && (
-                <div className="relative w-full h-48 bg-gray-100 rounded-lg overflow-hidden">
+                <div className="relative h-48 w-full overflow-hidden rounded-lg bg-gray-100">
                   <img
                     src={imagePreview}
                     alt="Recipe preview"
-                    className="w-full h-full object-cover"
+                    className="h-full w-full object-cover"
                   />
                   <Button
                     type="button"
@@ -174,13 +196,13 @@ export function RecipeForm({ recipe, initialData, existingRecipe, onSuccess }: R
                       setImageFile(null);
                       setValue('image_url', '');
                     }}
-                    className="absolute top-2 right-2 bg-white/80 hover:bg-white"
+                    className="absolute right-2 top-2 bg-white/80 hover:bg-white"
                   >
                     <X className="h-4 w-4" />
                   </Button>
                 </div>
               )}
-              
+
               <div className="flex items-center space-x-2">
                 <input
                   ref={fileInputRef}
@@ -195,7 +217,7 @@ export function RecipeForm({ recipe, initialData, existingRecipe, onSuccess }: R
                   onClick={() => fileInputRef.current?.click()}
                   className="border-green-600 text-green-600 hover:bg-green-50"
                 >
-                  <Upload className="h-4 w-4 mr-2" />
+                  <Upload className="mr-2 h-4 w-4" />
                   Upload Image
                 </Button>
               </div>
@@ -215,7 +237,7 @@ export function RecipeForm({ recipe, initialData, existingRecipe, onSuccess }: R
               onClick={addIngredient}
               className="border-green-600 text-green-600 hover:bg-green-50"
             >
-              <Plus className="h-4 w-4 mr-2" />
+              <Plus className="mr-2 h-4 w-4" />
               Add Ingredient
             </Button>
           </CardTitle>
@@ -244,7 +266,9 @@ export function RecipeForm({ recipe, initialData, existingRecipe, onSuccess }: R
             ))}
           </div>
           {errors.ingredients && (
-            <p className="text-sm text-red-500 mt-2">{errors.ingredients.message}</p>
+            <p className="mt-2 text-sm text-red-500">
+              {errors.ingredients.message}
+            </p>
           )}
         </CardContent>
       </Card>
@@ -261,7 +285,9 @@ export function RecipeForm({ recipe, initialData, existingRecipe, onSuccess }: R
             className="resize-none"
           />
           {errors.instructions && (
-            <p className="text-sm text-red-500 mt-1">{errors.instructions.message}</p>
+            <p className="mt-1 text-sm text-red-500">
+              {errors.instructions.message}
+            </p>
           )}
         </CardContent>
       </Card>
@@ -283,13 +309,22 @@ export function RecipeForm({ recipe, initialData, existingRecipe, onSuccess }: R
       <div className="flex justify-end space-x-2">
         <Button
           type="submit"
-          disabled={createRecipe.isPending || updateRecipe.isPending || uploadImage.isPending}
+          disabled={
+            createRecipe.isPending ||
+            updateRecipe.isPending ||
+            uploadImage.isPending
+          }
           className="min-w-32"
         >
-          {createRecipe.isPending || updateRecipe.isPending || uploadImage.isPending
-            ? existingRecipe ? 'Updating...' : 'Creating...'
-            : existingRecipe ? 'Update Recipe' : 'Create Recipe'
-          }
+          {createRecipe.isPending ||
+          updateRecipe.isPending ||
+          uploadImage.isPending
+            ? existingRecipe
+              ? 'Updating...'
+              : 'Creating...'
+            : existingRecipe
+              ? 'Update Recipe'
+              : 'Create Recipe'}
         </Button>
       </div>
     </form>

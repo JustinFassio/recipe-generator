@@ -25,26 +25,22 @@ describe('RecipeCard', () => {
 
   it('should render recipe information correctly', () => {
     render(
-      <RecipeCard
-        recipe={mockRecipe}
-        onEdit={mockOnEdit}
-        onView={mockOnView}
-      />
+      <RecipeCard recipe={mockRecipe} onEdit={mockOnEdit} onView={mockOnView} />
     );
 
     expect(screen.getByText('Test Recipe')).toBeInTheDocument();
-    expect(screen.getByText('Test cooking instructions for the recipe.')).toBeInTheDocument();
-    expect(screen.getByText('Test notes and tips for the recipe.')).toBeInTheDocument();
+    expect(
+      screen.getByText('Test cooking instructions for the recipe.')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('Test notes and tips for the recipe.')
+    ).toBeInTheDocument();
     expect(screen.getByText('3 ingredients')).toBeInTheDocument();
   });
 
   it('should call onView when view button is clicked', () => {
     render(
-      <RecipeCard
-        recipe={mockRecipe}
-        onEdit={mockOnEdit}
-        onView={mockOnView}
-      />
+      <RecipeCard recipe={mockRecipe} onEdit={mockOnEdit} onView={mockOnView} />
     );
 
     // Find the view button by its icon (Eye icon)
@@ -57,11 +53,7 @@ describe('RecipeCard', () => {
 
   it('should call onEdit when edit button is clicked', () => {
     render(
-      <RecipeCard
-        recipe={mockRecipe}
-        onEdit={mockOnEdit}
-        onView={mockOnView}
-      />
+      <RecipeCard recipe={mockRecipe} onEdit={mockOnEdit} onView={mockOnView} />
     );
 
     // Find the edit button by its icon (Edit icon)
@@ -88,16 +80,15 @@ describe('RecipeCard', () => {
 
     const image = screen.getByAltText('Test Recipe');
     expect(image).toBeInTheDocument();
-    expect(image).toHaveAttribute('src', 'https://example.com/recipe-image.jpg');
+    expect(image).toHaveAttribute(
+      'src',
+      'https://example.com/recipe-image.jpg'
+    );
   });
 
   it('should not display image section when no image is available', () => {
     render(
-      <RecipeCard
-        recipe={mockRecipe}
-        onEdit={mockOnEdit}
-        onView={mockOnView}
-      />
+      <RecipeCard recipe={mockRecipe} onEdit={mockOnEdit} onView={mockOnView} />
     );
 
     // Should not have an image element
@@ -107,7 +98,8 @@ describe('RecipeCard', () => {
   it('should truncate long titles appropriately', () => {
     const longTitleRecipe = {
       ...mockRecipe,
-      title: 'This is a very long recipe title that should be truncated when it exceeds the maximum length allowed by the component',
+      title:
+        'This is a very long recipe title that should be truncated when it exceeds the maximum length allowed by the component',
     };
 
     render(
@@ -124,11 +116,7 @@ describe('RecipeCard', () => {
 
   it('should display ingredient count correctly', () => {
     render(
-      <RecipeCard
-        recipe={mockRecipe}
-        onEdit={mockOnEdit}
-        onView={mockOnView}
-      />
+      <RecipeCard recipe={mockRecipe} onEdit={mockOnEdit} onView={mockOnView} />
     );
 
     expect(screen.getByText('3 ingredients')).toBeInTheDocument();
@@ -153,11 +141,7 @@ describe('RecipeCard', () => {
 
   it('should display creation date', () => {
     render(
-      <RecipeCard
-        recipe={mockRecipe}
-        onEdit={mockOnEdit}
-        onView={mockOnView}
-      />
+      <RecipeCard recipe={mockRecipe} onEdit={mockOnEdit} onView={mockOnView} />
     );
 
     // The date should be formatted and displayed

@@ -7,7 +7,11 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Wand2 } from 'lucide-react';
-import { parseRecipeSchema, type ParseRecipeFormData, type RecipeFormData } from '@/lib/schemas';
+import {
+  parseRecipeSchema,
+  type ParseRecipeFormData,
+  type RecipeFormData,
+} from '@/lib/schemas';
 import { useParseRecipe } from '@/hooks/use-recipes';
 
 interface ParseRecipeFormProps {
@@ -78,7 +82,7 @@ Makes about 48 cookies. Store in airtight container.`;
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
-            <div className="flex items-center justify-between mb-2">
+            <div className="mb-2 flex items-center justify-between">
               <Label htmlFor="recipeText">Recipe Content *</Label>
               <Button
                 type="button"
@@ -89,16 +93,22 @@ Makes about 48 cookies. Store in airtight container.`;
                 {showExample ? 'Hide' : 'Show'} Example
               </Button>
             </div>
-            
+
             {showExample && (
               <Alert className="mb-4">
                 <AlertDescription>
                   <div className="space-y-2">
                     <p className="font-medium">Supported formats:</p>
-                    <ul className="text-sm space-y-1 ml-4">
-                      <li>• Markdown with headings (# Title, ## Ingredients, ## Instructions)</li>
+                    <ul className="ml-4 space-y-1 text-sm">
+                      <li>
+                        • Markdown with headings (# Title, ## Ingredients, ##
+                        Instructions)
+                      </li>
                       <li>• Lists with - or * or numbered items</li>
-                      <li>• JSON with title, ingredients[], instructions, notes fields</li>
+                      <li>
+                        • JSON with title, ingredients[], instructions, notes
+                        fields
+                      </li>
                     </ul>
                     <Button
                       type="button"
@@ -122,7 +132,9 @@ Makes about 48 cookies. Store in airtight container.`;
               className="resize-none font-mono text-sm"
             />
             {errors.recipeText && (
-              <p className="text-sm text-red-500 mt-1">{errors.recipeText.message}</p>
+              <p className="mt-1 text-sm text-red-500">
+                {errors.recipeText.message}
+              </p>
             )}
           </div>
 
@@ -133,12 +145,12 @@ Makes about 48 cookies. Store in airtight container.`;
           >
             {parseRecipe.isPending ? (
               <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Parsing Recipe...
               </>
             ) : (
               <>
-                <Wand2 className="h-4 w-4 mr-2" />
+                <Wand2 className="mr-2 h-4 w-4" />
                 Parse Recipe
               </>
             )}

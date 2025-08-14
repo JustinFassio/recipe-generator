@@ -28,6 +28,7 @@ npm run verify
 ## 📋 **Before Making Changes**
 
 1. **Check current status**:
+
    ```bash
    npm run test:run && npm run lint && npm run format:check
    ```
@@ -48,6 +49,7 @@ npm run verify
 ## 🧪 **Testing Requirements**
 
 ### **New Components Must Have Tests**
+
 ```typescript
 // src/__tests__/components/your-component.test.tsx
 import { render, screen, fireEvent } from '@testing-library/react';
@@ -67,6 +69,7 @@ describe('YourComponent', () => {
 ```
 
 ### **New Hooks Must Have Tests**
+
 ```typescript
 // src/__tests__/hooks/use-your-hook.test.ts
 import { renderHook } from '@testing-library/react';
@@ -87,6 +90,7 @@ describe('useYourHook', () => {
 ## 🔧 **Code Standards**
 
 ### **Component Structure**
+
 ```typescript
 import { useState } from 'react';
 import type { ComponentProps } from '@/types';
@@ -98,7 +102,7 @@ interface ComponentNameProps {
 
 export function ComponentName({ prop1, prop2 }: ComponentNameProps) {
   const [state, setState] = useState('');
-  
+
   return (
     <div>
       {/* JSX with proper accessibility */}
@@ -108,6 +112,7 @@ export function ComponentName({ prop1, prop2 }: ComponentNameProps) {
 ```
 
 ### **Hook Structure**
+
 ```typescript
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -127,18 +132,21 @@ export function useCustomHook(param: string) {
 ## 🚨 **Common Issues to Fix**
 
 ### **Linting Errors**
+
 - Remove unused imports
 - Fix TypeScript strict mode violations
 - Remove console.log statements
 - Use proper naming conventions
 
 ### **Test Failures**
+
 - Mock external dependencies properly
 - Use proper async/await patterns
 - Test user interactions, not implementation details
 - Ensure proper cleanup in beforeEach/afterEach
 
 ### **TypeScript Errors**
+
 - No `any` types - use proper interfaces
 - Explicit typing for all parameters
 - Proper generic usage
@@ -178,6 +186,7 @@ Before suggesting any changes, ensure:
 ## 🆘 **When Things Go Wrong**
 
 ### **Test Failures**
+
 ```bash
 # Get detailed test output
 npm run test:run -- --reporter=verbose
@@ -187,6 +196,7 @@ npm run test:run src/__tests__/path/to/test.test.ts
 ```
 
 ### **Linting Issues**
+
 ```bash
 # Auto-fix what can be fixed
 npm run lint -- --fix
@@ -196,6 +206,7 @@ npm run lint src/path/to/file.ts
 ```
 
 ### **TypeScript Issues**
+
 ```bash
 # Get detailed type errors
 npx tsc --noEmit --pretty

@@ -4,7 +4,16 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Send, User, Loader2, ChefHat, Heart, Home, Bot, Brain } from 'lucide-react';
+import {
+  Send,
+  User,
+  Loader2,
+  ChefHat,
+  Heart,
+  Home,
+  Bot,
+  Brain,
+} from 'lucide-react';
 import { PersonaSelector } from './PersonaSelector';
 import { ChatHeader } from './ChatHeader';
 import { useConversation } from '@/hooks/useConversation';
@@ -36,9 +45,13 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
   useEffect(() => {
     // Auto-scroll to bottom when new messages are added
     if (scrollAreaRef.current) {
-      const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
+      const scrollContainer = scrollAreaRef.current.querySelector(
+        '[data-radix-scroll-area-viewport]'
+      );
       if (scrollContainer) {
-        (scrollContainer as HTMLElement).scrollTop = (scrollContainer as HTMLElement).scrollHeight;
+        (scrollContainer as HTMLElement).scrollTop = (
+          scrollContainer as HTMLElement
+        ).scrollHeight;
       }
     }
   }, [messages]);
@@ -52,10 +65,10 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
 
   const handleSendMessage = async () => {
     if (!inputValue.trim() || isLoading) return;
-    
+
     const messageContent = inputValue.trim();
     setInputValue('');
-    
+
     await sendMessage(messageContent);
     inputRef.current?.focus();
   };
@@ -114,9 +127,9 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-8rem)] max-w-4xl mx-auto">
+    <div className="mx-auto flex h-[calc(100vh-8rem)] max-w-4xl flex-col">
       {/* Chat Header */}
-      <ChatHeader 
+      <ChatHeader
         selectedPersona={persona}
         generatedRecipe={generatedRecipe}
         isLoading={isLoading}
@@ -127,25 +140,27 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
       />
 
       {/* Chat Messages */}
-      <ScrollArea ref={scrollAreaRef} className="flex-1 p-4 bg-gray-50">
+      <ScrollArea ref={scrollAreaRef} className="flex-1 bg-gray-50 p-4">
         <div className="space-y-4">
           {messages.map((message) => (
             <div
               key={message.id}
               className={`flex items-start space-x-3 ${
-                message.role === 'user' ? 'flex-row-reverse space-x-reverse' : ''
+                message.role === 'user'
+                  ? 'flex-row-reverse space-x-reverse'
+                  : ''
               }`}
             >
-              <Avatar className={`h-8 w-8 ${
-                message.role === 'user' 
-                  ? 'bg-green-100' 
-                  : getPersonaColor(persona)
-              }`}>
-                <AvatarFallback className={
-                  message.role === 'user' 
-                    ? 'text-green-600' 
-                    : ''
-                }>
+              <Avatar
+                className={`h-8 w-8 ${
+                  message.role === 'user'
+                    ? 'bg-green-100'
+                    : getPersonaColor(persona)
+                }`}
+              >
+                <AvatarFallback
+                  className={message.role === 'user' ? 'text-green-600' : ''}
+                >
                   {message.role === 'user' ? (
                     <User className="h-4 w-4" />
                   ) : (
@@ -153,43 +168,47 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
                   )}
                 </AvatarFallback>
               </Avatar>
-              
-              <Card className={`max-w-[80%] ${
-                message.role === 'user' 
-                  ? 'bg-green-500 text-white' 
-                  : 'bg-white'
-              }`}>
+
+              <Card
+                className={`max-w-[80%] ${
+                  message.role === 'user'
+                    ? 'bg-green-500 text-white'
+                    : 'bg-white'
+                }`}
+              >
                 <CardContent className="p-3">
                   <div className="whitespace-pre-wrap text-sm leading-relaxed">
                     {message.content}
                   </div>
-                  <div className={`text-xs mt-2 ${
-                    message.role === 'user' 
-                      ? 'text-green-100' 
-                      : 'text-gray-500'
-                  }`}>
-                    {message.timestamp.toLocaleTimeString([], { 
-                      hour: '2-digit', 
-                      minute: '2-digit' 
+                  <div
+                    className={`mt-2 text-xs ${
+                      message.role === 'user'
+                        ? 'text-green-100'
+                        : 'text-gray-500'
+                    }`}
+                  >
+                    {message.timestamp.toLocaleTimeString([], {
+                      hour: '2-digit',
+                      minute: '2-digit',
                     })}
                   </div>
                 </CardContent>
               </Card>
             </div>
           ))}
-          
+
           {isLoading && (
             <div className="flex items-start space-x-3">
               <Avatar className={`h-8 w-8 ${getPersonaColor(persona)}`}>
-                <AvatarFallback>
-                  {getPersonaIcon(persona)}
-                </AvatarFallback>
+                <AvatarFallback>{getPersonaIcon(persona)}</AvatarFallback>
               </Avatar>
               <Card className="bg-white">
                 <CardContent className="p-3">
                   <div className="flex items-center space-x-2">
                     <Loader2 className="h-4 w-4 animate-spin text-orange-500" />
-                    <span className="text-sm text-gray-600">{RECIPE_BOT_PERSONAS[persona].name} is thinking...</span>
+                    <span className="text-sm text-gray-600">
+                      {RECIPE_BOT_PERSONAS[persona].name} is thinking...
+                    </span>
                   </div>
                 </CardContent>
               </Card>
@@ -199,7 +218,7 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
       </ScrollArea>
 
       {/* Chat Input */}
-      <div className="p-4 bg-white border-t rounded-b-lg">
+      <div className="rounded-b-lg border-t bg-white p-4">
         <div className="flex items-center space-x-2">
           <Input
             ref={inputRef}
@@ -210,8 +229,8 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
             disabled={isLoading}
             className="flex-1"
           />
-          <Button 
-            onClick={handleSendMessage} 
+          <Button
+            onClick={handleSendMessage}
             disabled={!inputValue.trim() || isLoading}
             size="sm"
             className="bg-green-600 hover:bg-green-700"
@@ -219,7 +238,7 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
             <Send className="h-4 w-4" />
           </Button>
         </div>
-        <p className="text-xs text-gray-500 mt-2">
+        <p className="mt-2 text-xs text-gray-500">
           Press Enter to send, or Shift+Enter for a new line
         </p>
       </div>

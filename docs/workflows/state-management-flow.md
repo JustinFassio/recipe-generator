@@ -57,11 +57,14 @@ The Recipe Generator uses a modern React state management architecture combining
 ### **1. Page-Level State Management**
 
 #### **ChatRecipePage** (`src/pages/chat-recipe-page.tsx`)
+
 ```typescript
 export function ChatRecipePage() {
   const navigate = useNavigate();
   const [showEditor, setShowEditor] = useState(false);
-  const [generatedRecipe, setGeneratedRecipe] = useState<RecipeFormData | null>(null);
+  const [generatedRecipe, setGeneratedRecipe] = useState<RecipeFormData | null>(
+    null
+  );
 
   // Callback when recipe is generated from chat
   const handleRecipeGenerated = (recipe: RecipeFormData) => {
@@ -83,6 +86,7 @@ export function ChatRecipePage() {
 ```
 
 **State Responsibilities**:
+
 - ✅ **View Management**: Controls chat vs editor display
 - ✅ **Recipe Data**: Manages generated recipe between components
 - ✅ **Navigation**: Handles routing after save completion
@@ -91,15 +95,16 @@ export function ChatRecipePage() {
 ### **2. Conversation State Management**
 
 #### **useConversation Hook** (`src/hooks/useConversation.ts`)
+
 ```typescript
 interface ConversationState {
-  persona: PersonaType | null;           // Selected AI assistant
-  messages: Message[];                   // Chat history
+  persona: PersonaType | null; // Selected AI assistant
+  messages: Message[]; // Chat history
   generatedRecipe: RecipeFormData | null; // Parsed recipe data
-  isLoading: boolean;                    // API call status
-  showPersonaSelector: boolean;          // UI state
-  threadId: string | null;               // Assistant API thread
-  isUsingAssistant: boolean;            // API routing flag
+  isLoading: boolean; // API call status
+  showPersonaSelector: boolean; // UI state
+  threadId: string | null; // Assistant API thread
+  isUsingAssistant: boolean; // API routing flag
 }
 
 interface ConversationActions {
@@ -116,19 +121,22 @@ interface ConversationActions {
 **State Flow Patterns**:
 
 #### **Persona Selection Flow**
+
 ```typescript
 const selectPersona = useCallback((selectedPersona: PersonaType) => {
   setPersona(selectedPersona);
   setShowPersonaSelector(false);
-  
+
   // Determine API routing
   const personaConfig = RECIPE_BOT_PERSONAS[selectedPersona];
-  const usingAssistant = !!(personaConfig.assistantId && personaConfig.isAssistantPowered);
+  const usingAssistant = !!(
+    personaConfig.assistantId && personaConfig.isAssistantPowered
+  );
   setIsUsingAssistant(usingAssistant);
-  
+
   // Reset thread for new persona
   setThreadId(null);
-  
+
   // Initialize conversation
   const welcomeMessage: Message = {
     id: '1',
@@ -136,85 +144,89 @@ const selectPersona = useCallback((selectedPersona: PersonaType) => {
     content: `Hello! I'm ${personaConfig.name}. ${personaConfig.description || 'Let me help you create amazing recipes!'}`,
     timestamp: new Date(),
   };
-  
+
   setMessages([welcomeMessage]);
 }, []);
 ```
 
 #### **Message Sending Flow**
+
 ```typescript
-const sendMessage = useCallback(async (content: string) => {
-  if (!content.trim() || isLoading || !persona) return;
+const sendMessage = useCallback(
+  async (content: string) => {
+    if (!content.trim() || isLoading || !persona) return;
 
-  // Add user message immediately (optimistic update)
-  const userMessage: Message = {
-    id: Date.now().toString(),
-    role: 'user',
-    content: content.trim(),
-    timestamp: new Date(),
-  };
-
-  setMessages(prev => [...prev, userMessage]);
-  setIsLoading(true);
-
-  try {
-    // Smart API routing
-    const response = await openaiAPI.sendMessageWithPersona(
-      [...messages, userMessage],
-      persona,
-      threadId
-    );
-    
-    // Update thread ID for Assistant API
-    if (response.threadId) {
-      setThreadId(response.threadId);
-    }
-    
-    // Add AI response
-    const assistantMessage: Message = {
-      id: (Date.now() + 1).toString(),
-      role: 'assistant',
-      content: response.message,
+    // Add user message immediately (optimistic update)
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: content.trim(),
       timestamp: new Date(),
     };
 
-    setMessages(prev => [...prev, assistantMessage]);
-  } catch (error) {
-    // Error handling with user feedback
-    handleSendMessageError(error);
-  } finally {
-    setIsLoading(false);
-  }
-}, [messages, persona, threadId, isLoading]);
+    setMessages((prev) => [...prev, userMessage]);
+    setIsLoading(true);
+
+    try {
+      // Smart API routing
+      const response = await openaiAPI.sendMessageWithPersona(
+        [...messages, userMessage],
+        persona,
+        threadId
+      );
+
+      // Update thread ID for Assistant API
+      if (response.threadId) {
+        setThreadId(response.threadId);
+      }
+
+      // Add AI response
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: response.message,
+        timestamp: new Date(),
+      };
+
+      setMessages((prev) => [...prev, assistantMessage]);
+    } catch (error) {
+      // Error handling with user feedback
+      handleSendMessageError(error);
+    } finally {
+      setIsLoading(false);
+    }
+  },
+  [messages, persona, threadId, isLoading]
+);
 ```
 
 #### **Recipe Conversion Flow**
+
 ```typescript
 const convertToRecipe = useCallback(async () => {
   try {
     setIsLoading(true);
-    
+
     // Extract recipe content from conversation
     const assistantMessages = messages
-      .filter(msg => msg.role === 'assistant')
+      .filter((msg) => msg.role === 'assistant')
       .slice(-3);
-    
+
     if (assistantMessages.length === 0) {
       throw new Error('No recipe content found in conversation');
     }
-    
-    const recipeText = assistantMessages
-      .map(msg => msg.content)
-      .join('\n\n');
+
+    const recipeText = assistantMessages.map((msg) => msg.content).join('\n\n');
 
     // Parse using existing infrastructure
     const recipe = await parseRecipeFromText(recipeText);
-    
+
     setGeneratedRecipe(recipe);
-    
+
     toast({
       title: 'Recipe Parsed!',
-      description: 'Your recipe has been parsed and is ready to review and save.',
+      description:
+        'Your recipe has been parsed and is ready to review and save.',
     });
   } catch (error) {
     handleConversionError(error);
@@ -227,6 +239,7 @@ const convertToRecipe = useCallback(async () => {
 ### **3. Component Communication Patterns**
 
 #### **Parent-Child Communication**
+
 ```typescript
 // ChatRecipePage → ChatInterface
 <ChatInterface onRecipeGenerated={handleRecipeGenerated} />
@@ -247,6 +260,7 @@ const {
 ```
 
 #### **Sibling Component Communication**
+
 ```typescript
 // PersonaSelector → ChatHeader (via useConversation)
 // PersonaSelector calls selectPersona()
@@ -258,6 +272,7 @@ const {
 ```
 
 #### **Auto-trigger Pattern**
+
 ```typescript
 // ChatInterface automatically triggers parent callback
 useEffect(() => {
@@ -290,6 +305,7 @@ ChatInterface (Container)
 ### **Component Responsibilities**
 
 #### **PersonaSelector** (`src/components/chat/PersonaSelector.tsx`)
+
 ```typescript
 interface PersonaSelectorProps {
   onPersonaSelect: (persona: PersonaType) => void;
@@ -303,6 +319,7 @@ interface PersonaSelectorProps {
 ```
 
 #### **ChatHeader** (`src/components/chat/ChatHeader.tsx`)
+
 ```typescript
 interface ChatHeaderProps {
   selectedPersona: PersonaType;
@@ -322,6 +339,7 @@ interface ChatHeaderProps {
 ```
 
 #### **AssistantBadge** (`src/components/chat/AssistantBadge.tsx`)
+
 ```typescript
 // Responsibilities:
 // ✅ Visual indicator for Assistant-powered personas
@@ -342,6 +360,7 @@ API Response ← Service Layer ← Hook Effect ← State Change
 ### **State Update Patterns**
 
 #### **Optimistic Updates**
+
 ```typescript
 // Immediately show user message
 setMessages(prev => [...prev, userMessage]);
@@ -354,20 +373,22 @@ setMessages(prev => [...prev, aiMessage]);
 ```
 
 #### **Error Recovery**
+
 ```typescript
 try {
   // Attempt operation
   await riskyOperation();
 } catch (error) {
   // Revert optimistic update
-  setMessages(prev => prev.filter(msg => msg.id !== optimisticId));
-  
+  setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId));
+
   // Show error feedback
   toast({ title: 'Error', description: error.message });
 }
 ```
 
 #### **Loading States**
+
 ```typescript
 // Start loading
 setIsLoading(true);
@@ -375,7 +396,7 @@ setIsLoading(true);
 try {
   // Perform async operation
   const result = await asyncOperation();
-  
+
   // Update state with result
   setData(result);
 } finally {
@@ -389,6 +410,7 @@ try {
 ### **Cross-Component State Sync**
 
 #### **Recipe Generation Trigger**
+
 ```typescript
 // useConversation sets generatedRecipe
 setGeneratedRecipe(parsedRecipe);
@@ -410,6 +432,7 @@ const handleRecipeGenerated = (recipe: RecipeFormData) => {
 ### **State Cleanup Patterns**
 
 #### **Component Unmount Cleanup**
+
 ```typescript
 useEffect(() => {
   return () => {
@@ -422,6 +445,7 @@ useEffect(() => {
 ```
 
 #### **Navigation Cleanup**
+
 ```typescript
 const handleBackToChat = () => {
   setShowEditor(false);
@@ -434,10 +458,14 @@ const handleBackToChat = () => {
 ### **Memoization Strategies**
 
 #### **useCallback for Functions**
+
 ```typescript
-const sendMessage = useCallback(async (content: string) => {
-  // Function body
-}, [messages, persona, threadId, isLoading]);
+const sendMessage = useCallback(
+  async (content: string) => {
+    // Function body
+  },
+  [messages, persona, threadId, isLoading]
+);
 
 const selectPersona = useCallback((selectedPersona: PersonaType) => {
   // Function body
@@ -445,14 +473,15 @@ const selectPersona = useCallback((selectedPersona: PersonaType) => {
 ```
 
 #### **useMemo for Computed Values**
+
 ```typescript
-const assistantMessages = useMemo(() => 
-  messages.filter(msg => msg.role === 'assistant'),
+const assistantMessages = useMemo(
+  () => messages.filter((msg) => msg.role === 'assistant'),
   [messages]
 );
 
-const canSaveRecipe = useMemo(() => 
-  assistantMessages.length > 0 && !isLoading,
+const canSaveRecipe = useMemo(
+  () => assistantMessages.length > 0 && !isLoading,
   [assistantMessages.length, isLoading]
 );
 ```
@@ -460,19 +489,21 @@ const canSaveRecipe = useMemo(() =>
 ### **State Update Optimization**
 
 #### **Functional Updates**
+
 ```typescript
 // ✅ Functional update (prevents stale closure)
-setMessages(prev => [...prev, newMessage]);
+setMessages((prev) => [...prev, newMessage]);
 
 // ❌ Direct update (can cause stale closure issues)
 setMessages([...messages, newMessage]);
 ```
 
 #### **Batch Updates**
+
 ```typescript
 // React automatically batches these updates
 setIsLoading(false);
-setMessages(prev => [...prev, response]);
+setMessages((prev) => [...prev, response]);
 setThreadId(response.threadId);
 ```
 
@@ -481,6 +512,7 @@ setThreadId(response.threadId);
 ### **Development Tools**
 
 #### **React DevTools Integration**
+
 ```typescript
 // Add display names for better debugging
 useConversation.displayName = 'useConversation';
@@ -488,6 +520,7 @@ ChatInterface.displayName = 'ChatInterface';
 ```
 
 #### **State Logging**
+
 ```typescript
 useEffect(() => {
   if (process.env.NODE_ENV === 'development') {
@@ -496,7 +529,7 @@ useEffect(() => {
       messageCount: messages.length,
       hasGeneratedRecipe: !!generatedRecipe,
       isLoading,
-      showPersonaSelector
+      showPersonaSelector,
     });
   }
 }, [persona, messages.length, generatedRecipe, isLoading, showPersonaSelector]);
@@ -505,6 +538,7 @@ useEffect(() => {
 ### **State Validation**
 
 #### **Runtime Type Checking**
+
 ```typescript
 const validateMessage = (message: unknown): message is Message => {
   return (
@@ -521,12 +555,14 @@ const validateMessage = (message: unknown): message is Message => {
 ## 📊 **State Monitoring**
 
 ### **Performance Metrics**
+
 - **State Update Frequency**: Monitor excessive re-renders
 - **Memory Usage**: Track state object sizes
 - **Component Mount/Unmount**: Lifecycle performance
 - **API Call Efficiency**: Minimize redundant requests
 
 ### **Error Tracking**
+
 - **State Corruption**: Invalid state transitions
 - **Memory Leaks**: Uncleaned event listeners
 - **Stale Closures**: Outdated state references
@@ -535,6 +571,7 @@ const validateMessage = (message: unknown): message is Message => {
 ---
 
 **Related Documentation**:
+
 - [AI Recipe Creation Workflow](ai-recipe-creation-workflow.md)
 - [OpenAI Integration Flow](openai-integration-flow.md)
 - [Recipe Save Flow](recipe-save-flow.md)

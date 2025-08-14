@@ -12,7 +12,7 @@ export function AddRecipePage() {
   const location = useLocation();
   const [, setParsedData] = useState<RecipeFormData | null>(null);
   const [showParser, setShowParser] = useState(true);
-  
+
   // Check if we're editing an existing recipe
   const existingRecipe = location.state?.recipe as Recipe | undefined;
 
@@ -50,41 +50,36 @@ export function AddRecipePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-6">
-          <Button
-            variant="ghost"
-            onClick={handleCancel}
-            className="mb-4"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
+          <Button variant="ghost" onClick={handleCancel} className="mb-4">
+            <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Recipes
           </Button>
-          
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+
+          <h1 className="mb-2 text-3xl font-bold text-gray-900">
             {existingRecipe ? 'Edit Recipe' : 'Add New Recipe'}
           </h1>
           <p className="text-gray-600">
-            {existingRecipe 
+            {existingRecipe
               ? 'Update your recipe details'
-              : showParser 
+              : showParser
                 ? 'Parse your recipe from text or create one manually'
-                : 'Review and edit your parsed recipe'
-            }
+                : 'Review and edit your parsed recipe'}
           </p>
         </div>
 
         {showParser && !existingRecipe ? (
           <div className="space-y-6">
             <ParseRecipeForm onParsed={handleParsed} />
-            
+
             <div className="text-center">
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-gray-300" />
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-gradient-to-br from-orange-50 to-teal-50 text-gray-500">
+                  <span className="bg-gradient-to-br from-orange-50 to-teal-50 px-2 text-gray-500">
                     Or
                   </span>
                 </div>
@@ -105,16 +100,13 @@ export function AddRecipePage() {
           <div className="space-y-6">
             {!existingRecipe && (
               <div className="flex items-center justify-between">
-                <Button
-                  variant="ghost"
-                  onClick={handleBackToParser}
-                >
-                  <ArrowLeft className="h-4 w-4 mr-2" />
+                <Button variant="ghost" onClick={handleBackToParser}>
+                  <ArrowLeft className="mr-2 h-4 w-4" />
                   Back to Parser
                 </Button>
               </div>
             )}
-            
+
             <RecipeForm
               existingRecipe={existingRecipe}
               onSuccess={handleSuccess}

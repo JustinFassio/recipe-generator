@@ -12,14 +12,16 @@ export function Header() {
   };
 
   return (
-    <header className="bg-white shadow-sm border-b">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+    <header className="border-b bg-white shadow-sm">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex h-16 items-center justify-between">
           <div className="flex items-center space-x-4">
             <ChefHat className="h-8 w-8 text-orange-500" />
-            <h1 className="text-2xl font-bold text-gray-900">Recipe Generator</h1>
+            <h1 className="text-2xl font-bold text-gray-900">
+              Recipe Generator
+            </h1>
           </div>
-          
+
           <nav className="flex items-center space-x-4">
             <Button
               variant={location.pathname === '/' ? 'default' : 'ghost'}
@@ -28,9 +30,15 @@ export function Header() {
               Recipes
             </Button>
             <Button
-              variant={location.pathname === '/chat-recipe' ? 'default' : 'ghost'}
+              variant={
+                location.pathname === '/chat-recipe' ? 'default' : 'ghost'
+              }
               onClick={() => navigate('/chat-recipe')}
-              className={location.pathname === '/chat-recipe' ? '' : 'bg-orange-500 hover:bg-orange-600 text-white'}
+              className={
+                location.pathname === '/chat-recipe'
+                  ? ''
+                  : 'bg-orange-500 text-white hover:bg-orange-600'
+              }
             >
               AI Recipe Creator
             </Button>
@@ -40,7 +48,7 @@ export function Header() {
               onClick={handleSignOut}
               className="ml-4"
             >
-              <LogOut className="h-4 w-4 mr-2" />
+              <LogOut className="mr-2 h-4 w-4" />
               Sign Out
             </Button>
           </nav>

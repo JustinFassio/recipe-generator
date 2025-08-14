@@ -55,8 +55,8 @@ export function PersonaSelector({ onPersonaSelect }: PersonaSelectorProps) {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-8rem)] max-w-4xl mx-auto">
-      <div className="flex items-center justify-between p-4 border-b bg-white rounded-t-lg">
+    <div className="mx-auto flex h-[calc(100vh-8rem)] max-w-4xl flex-col">
+      <div className="flex items-center justify-between rounded-t-lg border-b bg-white p-4">
         <div className="flex items-center space-x-3">
           <Avatar className="h-10 w-10 bg-orange-100">
             <AvatarFallback className="text-orange-600">
@@ -64,33 +64,41 @@ export function PersonaSelector({ onPersonaSelect }: PersonaSelectorProps) {
             </AvatarFallback>
           </Avatar>
           <div>
-            <h2 className="font-semibold text-gray-900">Choose Your Recipe Assistant</h2>
-            <p className="text-sm text-gray-500">Select a persona to start creating recipes together!</p>
+            <h2 className="font-semibold text-gray-900">
+              Choose Your Recipe Assistant
+            </h2>
+            <p className="text-sm text-gray-500">
+              Select a persona to start creating recipes together!
+            </p>
           </div>
         </div>
       </div>
 
-      <div className="flex-1 p-6 bg-gray-50">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="flex-1 bg-gray-50 p-6">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {Object.entries(RECIPE_BOT_PERSONAS).map(([key, persona]) => (
-            <Card 
+            <Card
               key={key}
-              className="cursor-pointer hover:shadow-md transition-shadow"
+              className="cursor-pointer transition-shadow hover:shadow-md"
               onClick={() => onPersonaSelect(key as PersonaType)}
             >
-              <CardContent className="p-6 text-center relative">
-                <AssistantBadge isAssistantPowered={persona.isAssistantPowered} />
-                
-                <div className={`inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 ${getPersonaColor(key as PersonaType)}`}>
+              <CardContent className="relative p-6 text-center">
+                <AssistantBadge
+                  isAssistantPowered={persona.isAssistantPowered}
+                />
+
+                <div
+                  className={`mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full ${getPersonaColor(key as PersonaType)}`}
+                >
                   {getPersonaIcon(key as PersonaType)}
                 </div>
-                <h3 className="text-lg font-semibold mb-2">{persona.name}</h3>
+                <h3 className="mb-2 text-lg font-semibold">{persona.name}</h3>
                 <p className="text-sm text-gray-600">
                   {getPersonaDescription(key as PersonaType)}
                 </p>
-                
+
                 {persona.isAssistantPowered && (
-                  <p className="text-xs text-purple-600 mt-2 font-medium">
+                  <p className="mt-2 text-xs font-medium text-purple-600">
                     🤖 Powered by OpenAI Assistant
                   </p>
                 )}

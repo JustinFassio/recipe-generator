@@ -9,6 +9,7 @@
 ## 🔍 **Pre-Change Diagnostics**
 
 ### **1. Project Health Assessment**
+
 - [ ] **Check current test status**: `npm run test:run`
 - [ ] **Verify linting status**: `npm run lint`
 - [ ] **Check formatting**: `npm run format:check`
@@ -17,6 +18,7 @@
 - [ ] **Security audit**: `npm audit`
 
 ### **2. Code Quality Baseline**
+
 - [ ] **Test coverage report**: `npm run test:coverage`
 - [ ] **Identify uncovered files/functions**
 - [ ] **Check for existing linting errors**
@@ -28,6 +30,7 @@
 ## 🛠️ **Change Implementation Guidelines**
 
 ### **3. Code Structure Standards**
+
 - [ ] **File organization**: Follow existing patterns in `src/` structure
 - [ ] **Import organization**: Group imports (React, external, internal, relative)
 - [ ] **Component structure**: Use functional components with TypeScript
@@ -35,6 +38,7 @@
 - [ ] **Type definitions**: Use proper TypeScript interfaces and types
 
 ### **4. Testing Requirements**
+
 - [ ] **Component tests**: Create tests for new React components
 - [ ] **Hook tests**: Test custom hooks with `renderHook`
 - [ ] **Utility tests**: Test pure functions and utilities
@@ -42,6 +46,7 @@
 - [ ] **Mock external dependencies**: Supabase, React Query, Router
 
 ### **5. Code Quality Standards**
+
 - [ ] **ESLint compliance**: No unused variables, proper naming
 - [ ] **TypeScript strict mode**: No `any` types, proper interfaces
 - [ ] **Prettier formatting**: Consistent code style
@@ -53,6 +58,7 @@
 ## 🧪 **Testing Implementation Checklist**
 
 ### **6. Test File Structure**
+
 ```typescript
 // Required test file structure
 import { render, screen, fireEvent } from '@testing-library/react';
@@ -75,6 +81,7 @@ describe('ComponentName', () => {
 ```
 
 ### **7. Test Coverage Requirements**
+
 - [ ] **Component rendering**: Test that components render without errors
 - [ ] **Props handling**: Test component behavior with different props
 - [ ] **User interactions**: Test clicks, form submissions, navigation
@@ -82,6 +89,7 @@ describe('ComponentName', () => {
 - [ ] **Edge cases**: Test boundary conditions and error scenarios
 
 ### **8. Mocking Strategy**
+
 ```typescript
 // Required mocks in src/test/setup.ts
 - Supabase client and auth
@@ -96,6 +104,7 @@ describe('ComponentName', () => {
 ## 🔧 **Pre-Commit Verification**
 
 ### **9. Automated Checks**
+
 - [ ] **Run full verification**: `npm run verify`
 - [ ] **Quick verification**: `npm run verify:quick`
 - [ ] **Test coverage check**: Ensure thresholds are met
@@ -103,6 +112,7 @@ describe('ComponentName', () => {
 - [ ] **Security scan**: Check for vulnerabilities
 
 ### **10. Manual Quality Checks**
+
 - [ ] **Code review**: Review for logical errors and edge cases
 - [ ] **Performance review**: Check for memory leaks or performance issues
 - [ ] **Accessibility review**: Ensure keyboard navigation and screen reader support
@@ -114,6 +124,7 @@ describe('ComponentName', () => {
 ## 📋 **File-Specific Guidelines**
 
 ### **11. Component Files**
+
 ```typescript
 // Required structure for React components
 import { useState, useEffect } from 'react';
@@ -133,6 +144,7 @@ export function ComponentName({ prop1, prop2 }: ComponentNameProps) {
 ```
 
 ### **12. Hook Files**
+
 ```typescript
 // Required structure for custom hooks
 import { useState, useEffect } from 'react';
@@ -144,12 +156,13 @@ export function useCustomHook(param: string) {
     data,
     isLoading,
     error,
-    mutate
+    mutate,
   };
 }
 ```
 
 ### **13. Utility Files**
+
 ```typescript
 // Required structure for utility functions
 import { z } from 'zod';
@@ -169,6 +182,7 @@ export function utilityFunction(input: string): string {
 ## 🚨 **Common Issues to Avoid**
 
 ### **14. Testing Pitfalls**
+
 - [ ] **Avoid testing implementation details**: Focus on behavior, not internals
 - [ ] **Don't test third-party libraries**: Mock them instead
 - [ ] **Avoid flaky tests**: Use proper async handling and mocks
@@ -176,6 +190,7 @@ export function utilityFunction(input: string): string {
 - [ ] **Avoid testing multiple concerns**: One test per behavior
 
 ### **15. Code Quality Issues**
+
 - [ ] **No unused imports**: Remove all unused imports
 - [ ] **No console.log statements**: Remove debugging code
 - [ ] **No hardcoded values**: Use constants or configuration
@@ -183,6 +198,7 @@ export function utilityFunction(input: string): string {
 - [ ] **No commented-out code**: Remove or implement
 
 ### **16. TypeScript Issues**
+
 - [ ] **No `any` types**: Use proper type definitions
 - [ ] **No implicit any**: Explicitly type all parameters
 - [ ] **No unused variables**: Remove or use all declared variables
@@ -194,6 +210,7 @@ export function utilityFunction(input: string): string {
 ## 🔄 **Post-Change Verification**
 
 ### **17. Final Checks**
+
 - [ ] **All tests pass**: `npm run test:run`
 - [ ] **No linting errors**: `npm run lint`
 - [ ] **Formatting is correct**: `npm run format:check`
@@ -202,6 +219,7 @@ export function utilityFunction(input: string): string {
 - [ ] **Coverage maintained**: Check coverage report
 
 ### **18. Documentation Updates**
+
 - [ ] **Update README**: If adding new features or changing setup
 - [ ] **Update component documentation**: Add JSDoc comments
 - [ ] **Update test documentation**: Document test patterns
@@ -212,6 +230,7 @@ export function utilityFunction(input: string): string {
 ## 📊 **Success Metrics**
 
 ### **19. Quality Indicators**
+
 - [ ] **Test coverage > 80%**: For new code
 - [ ] **Zero linting errors**: Clean codebase
 - [ ] **Zero TypeScript errors**: Type safety
@@ -219,6 +238,7 @@ export function utilityFunction(input: string): string {
 - [ ] **Test execution time < 10 seconds**: Fast feedback
 
 ### **20. Maintenance Indicators**
+
 - [ ] **No security vulnerabilities**: Clean npm audit
 - [ ] **Up-to-date dependencies**: Regular updates
 - [ ] **Consistent code style**: Prettier compliance
@@ -230,6 +250,7 @@ export function utilityFunction(input: string): string {
 ## 🆘 **Troubleshooting Guide**
 
 ### **21. Common Failures**
+
 ```bash
 # Test failures
 npm run test:run -- --reporter=verbose
@@ -245,6 +266,7 @@ npm run build -- --debug
 ```
 
 ### **22. Debugging Steps**
+
 1. **Check error messages**: Read full error output
 2. **Verify dependencies**: Ensure all packages are installed
 3. **Check TypeScript version**: Ensure compatibility
@@ -256,6 +278,7 @@ npm run build -- --debug
 ## 📝 **Checklist Usage Instructions**
 
 ### **For AI Agents:**
+
 1. **Before making changes**: Run sections 1-2
 2. **During implementation**: Follow sections 3-8
 3. **Before committing**: Complete sections 9-16
@@ -263,6 +286,7 @@ npm run build -- --debug
 5. **If issues arise**: Use section 21-22
 
 ### **For Human Developers:**
+
 1. **Use as a manual checklist** before pushing code
 2. **Reference during code reviews**
 3. **Use for onboarding new team members**
@@ -276,4 +300,4 @@ npm run build -- --debug
 
 ---
 
-*This checklist ensures that all code changes meet the project's quality standards before reaching the automated Pre-PR Verification System.*
+_This checklist ensures that all code changes meet the project's quality standards before reaching the automated Pre-PR Verification System._

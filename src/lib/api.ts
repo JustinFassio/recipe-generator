@@ -26,8 +26,12 @@ export const recipeApi = {
   },
 
   // Create a new recipe
-  async createRecipe(recipe: Omit<Recipe, 'id' | 'user_id' | 'created_at' | 'updated_at'>): Promise<Recipe> {
-    const { data: { user } } = await supabase.auth.getUser();
+  async createRecipe(
+    recipe: Omit<Recipe, 'id' | 'user_id' | 'created_at' | 'updated_at'>
+  ): Promise<Recipe> {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) throw new Error('User not authenticated');
 
     const { data, error } = await supabase
@@ -55,10 +59,7 @@ export const recipeApi = {
 
   // Delete a recipe
   async deleteRecipe(id: string): Promise<void> {
-    const { error } = await supabase
-      .from('recipes')
-      .delete()
-      .eq('id', id);
+    const { error } = await supabase.from('recipes').delete().eq('id', id);
 
     if (error) throw error;
   },
@@ -79,7 +80,7 @@ export const recipeApi = {
       .getPublicUrl(fileName);
 
     return data.publicUrl;
-  }
+  },
 };
 
 // Parse recipe from text using external API
@@ -94,14 +95,14 @@ export async function parseRecipeFromText(text: string): Promise<{
   try {
     // Try to parse as JSON first
     const parsed = JSON.parse(text);
-    
+
     // Handle complex nested JSON structure
     if (parsed.name || parsed.title) {
       const title = parsed.name || parsed.title || 'Untitled Recipe';
       let ingredients: string[] = [];
       let instructions = '';
       let notes = '';
-      
+
       // Handle nested ingredients object with categories
       if (parsed.ingredients && typeof parsed.ingredients === 'object') {
         if (Array.isArray(parsed.ingredients)) {
@@ -112,8 +113,10 @@ export async function parseRecipeFromText(text: string): Promise<{
           for (const [category, items] of Object.entries(parsed.ingredients)) {
             if (Array.isArray(items)) {
               // Add category header
-              ingredients.push(`--- ${category.charAt(0).toUpperCase() + category.slice(1)} ---`);
-              
+              ingredients.push(
+                `--- ${category.charAt(0).toUpperCase() + category.slice(1)} ---`
+              );
+
               for (const item of items) {
                 if (typeof item === 'string') {
                   ingredients.push(item);
@@ -130,18 +133,21 @@ export async function parseRecipeFromText(text: string): Promise<{
           }
         }
       }
-      
+
       // Handle instructions - combine basic_instructions and instructions
       const instructionParts: string[] = [];
-      
-      if (parsed.basic_instructions && Array.isArray(parsed.basic_instructions)) {
+
+      if (
+        parsed.basic_instructions &&
+        Array.isArray(parsed.basic_instructions)
+      ) {
         instructionParts.push('**Preparation:**');
         parsed.basic_instructions.forEach((step: string, index: number) => {
           instructionParts.push(`${index + 1}. ${step}`);
         });
         instructionParts.push(''); // Add blank line
       }
-      
+
       if (parsed.instructions && Array.isArray(parsed.instructions)) {
         if (instructionParts.length > 0) {
           instructionParts.push('**Cooking Instructions:**');
@@ -153,17 +159,17 @@ export async function parseRecipeFromText(text: string): Promise<{
       } else if (typeof parsed.instructions === 'string') {
         instructionParts.push(parsed.instructions);
       }
-      
+
       instructions = instructionParts.join('\n');
-      
+
       // Handle notes - combine various optional sections
       const notesParts: string[] = [];
-      
+
       if (parsed.servings) {
         notesParts.push(`**Servings:** ${parsed.servings}`);
         notesParts.push('');
       }
-      
+
       if (parsed.tips_and_tricks && Array.isArray(parsed.tips_and_tricks)) {
         notesParts.push('**Tips & Tricks:**');
         parsed.tips_and_tricks.forEach((tip: string) => {
@@ -171,7 +177,7 @@ export async function parseRecipeFromText(text: string): Promise<{
         });
         notesParts.push('');
       }
-      
+
       if (parsed.substitutions && Array.isArray(parsed.substitutions)) {
         notesParts.push('**Substitutions:**');
         parsed.substitutions.forEach((sub: string) => {
@@ -179,7 +185,7 @@ export async function parseRecipeFromText(text: string): Promise<{
         });
         notesParts.push('');
       }
-      
+
       if (parsed.pairings && Array.isArray(parsed.pairings)) {
         notesParts.push('**Pairings:**');
         parsed.pairings.forEach((pairing: string) => {
@@ -187,52 +193,59 @@ export async function parseRecipeFromText(text: string): Promise<{
         });
         notesParts.push('');
       }
-      
+
       if (parsed.notes) {
         notesParts.push('**Additional Notes:**');
         notesParts.push(parsed.notes);
       }
-      
+
       notes = notesParts.join('\n').trim();
-      
+
       return {
         title,
         ingredients,
         instructions,
-        notes
+        notes,
       };
     }
-    
+
     // Fallback for simple JSON format
     return {
       title: parsed.title || parsed.name || 'Untitled Recipe',
       ingredients: Array.isArray(parsed.ingredients) ? parsed.ingredients : [],
       instructions: parsed.instructions || '',
-      notes: parsed.notes || ''
+      notes: parsed.notes || '',
     };
   } catch {
     // If not JSON, treat as markdown and do basic parsing
-    const lines = text.split('\n').filter(line => line.trim());
+    const lines = text.split('\n').filter((line) => line.trim());
     let title = 'Untitled Recipe';
     const ingredients: string[] = [];
     let instructions = '';
     let notes = '';
-    
+
     let currentSection = '';
-    
+
     for (const line of lines) {
       const trimmed = line.trim();
-      
+
       if (trimmed.startsWith('#')) {
         title = trimmed.replace(/^#+\s*/, '');
         currentSection = 'title';
       } else if (trimmed.toLowerCase().includes('ingredient')) {
         currentSection = 'ingredients';
-      } else if (trimmed.toLowerCase().includes('instruction') || trimmed.toLowerCase().includes('direction')) {
+      } else if (
+        trimmed.toLowerCase().includes('instruction') ||
+        trimmed.toLowerCase().includes('direction')
+      ) {
         currentSection = 'instructions';
       } else if (trimmed.toLowerCase().includes('note')) {
         currentSection = 'notes';
-      } else if (trimmed.startsWith('-') || trimmed.startsWith('*') || /^\d+\./.test(trimmed)) {
+      } else if (
+        trimmed.startsWith('-') ||
+        trimmed.startsWith('*') ||
+        /^\d+\./.test(trimmed)
+      ) {
         if (currentSection === 'ingredients') {
           ingredients.push(trimmed.replace(/^[-*]\s*|\d+\.\s*/, ''));
         } else if (currentSection === 'instructions') {
@@ -248,12 +261,12 @@ export async function parseRecipeFromText(text: string): Promise<{
         }
       }
     }
-    
+
     return {
       title,
       ingredients,
       instructions: instructions.trim(),
-      notes: notes.trim()
+      notes: notes.trim(),
     };
   }
 }

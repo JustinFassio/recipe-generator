@@ -25,7 +25,7 @@ interface PersonaConfig {
 // Persona configurations
 export const RECIPE_BOT_PERSONAS: Record<string, PersonaConfig> = {
   chef: {
-    name: "Chef Marco",
+    name: 'Chef Marco',
     systemPrompt: `You are Chef Marco, an experienced Italian chef with 20+ years of culinary expertise. You specialize in Mediterranean cuisine and love teaching cooking techniques.
 
 Your personality:
@@ -50,9 +50,9 @@ When generating a complete recipe, structure it as a JSON object with:
   "notes": "Tips, variations, and additional notes"
 }`,
   },
-  
+
   nutritionist: {
-    name: "Dr. Sarah",
+    name: 'Dr. Sarah',
     systemPrompt: `You are Dr. Sarah, a registered dietitian and nutrition expert. You focus on healthy, balanced meals that are both nutritious and delicious.
 
 Your personality:
@@ -77,9 +77,9 @@ When generating a complete recipe, structure it as a JSON object with:
   "notes": "Nutritional info, tips, and healthy variations"
 }`,
   },
-  
+
   homeCook: {
-    name: "Aunt Jenny",
+    name: 'Aunt Jenny',
     systemPrompt: `You are Aunt Jenny, a beloved home cook who has been cooking for family and friends for decades. You specialize in comfort food and family-friendly recipes.
 
 Your personality:
@@ -104,9 +104,9 @@ When generating a complete recipe, structure it as a JSON object with:
   "notes": "Family tips, variations, and serving suggestions"
 }`,
   },
-  
+
   assistantNutritionist: {
-    name: "Dr. Sage Vitalis",
+    name: 'Dr. Sage Vitalis',
     systemPrompt: `You are Dr. Sage Vitalis, an advanced AI nutritionist with deep expertise in personalized nutrition, metabolic health, and evidence-based dietary interventions.
 
 Your capabilities:
@@ -137,10 +137,11 @@ When generating a complete recipe, structure it as a JSON object with:
 }
 
 Note: This is fallback mode - use this prompt if Assistant API is unavailable.`,
-    assistantId: "asst_o3VGUZBpdYTdKEyKYoKua8ys",
+    assistantId: 'asst_o3VGUZBpdYTdKEyKYoKua8ys',
     isAssistantPowered: true,
-    description: "Advanced AI nutritionist with personalized meal planning and health insights"
-  }
+    description:
+      'Advanced AI nutritionist with personalized meal planning and health insights',
+  },
 };
 
 export type PersonaType = keyof typeof RECIPE_BOT_PERSONAS;
@@ -156,49 +157,55 @@ class OpenAIAPI {
   constructor() {
     this.apiKey = import.meta.env.VITE_OPENAI_API_KEY;
     this.model = import.meta.env.VITE_OPENAI_MODEL || 'gpt-4o-mini';
-    
+
     if (!this.apiKey) {
-      throw new Error('OpenAI API key not found. Please set VITE_OPENAI_API_KEY in your environment variables.');
+      throw new Error(
+        'OpenAI API key not found. Please set VITE_OPENAI_API_KEY in your environment variables.'
+      );
     }
-    
+
     // Initialize Assistant API
     this.assistantAPI = new AssistantAPI(this.apiKey);
   }
 
-  private async requestWithRetry(url: string, init: RequestInit, retries = this.maxRetries): Promise<Response> {
+  private async requestWithRetry(
+    url: string,
+    init: RequestInit,
+    retries = this.maxRetries
+  ): Promise<Response> {
     let delay = 500;
     for (let attempt = 0; attempt <= retries; attempt++) {
       try {
         const response = await fetch(url, init);
-        
+
         // Success - return response
         if (response.ok) {
           return response;
         }
-        
+
         // Rate limit or server error - retry with backoff
         if (response.status === 429 || response.status >= 500) {
           if (attempt === retries) {
             return response; // Return the failed response on final attempt
           }
-          
+
           // Add jitter to prevent thundering herd
           const jitter = Math.random() * 200;
-          await new Promise(resolve => setTimeout(resolve, delay + jitter));
+          await new Promise((resolve) => setTimeout(resolve, delay + jitter));
           delay *= 2; // Exponential backoff
           continue;
         }
-        
+
         // Other errors (4xx) - don't retry
         return response;
       } catch (error) {
         if (attempt === retries) {
           throw error;
         }
-        
+
         // Network error - retry with backoff
         const jitter = Math.random() * 200;
-        await new Promise(resolve => setTimeout(resolve, delay + jitter));
+        await new Promise((resolve) => setTimeout(resolve, delay + jitter));
         delay *= 2;
       }
     }
@@ -210,52 +217,63 @@ class OpenAIAPI {
     persona: PersonaType
   ): Promise<ChatResponse> {
     const personaConfig = RECIPE_BOT_PERSONAS[persona];
-    
+
     // Limit conversation history to save tokens and reduce 429 risk
     const recentMessages = messages.slice(-this.maxConversationTurns);
-    
+
     // Prepare messages for OpenAI API
     const openAIMessages = [
       {
         role: 'system' as const,
-        content: personaConfig.systemPrompt
+        content: personaConfig.systemPrompt,
       },
-      ...recentMessages.map(msg => ({
+      ...recentMessages.map((msg) => ({
         role: msg.role as 'user' | 'assistant',
-        content: msg.content
-      }))
+        content: msg.content,
+      })),
     ];
 
     try {
       // Use retry logic for the API call
-      const response = await this.requestWithRetry(`${this.baseURL}/chat/completions`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: this.model,
-          messages: openAIMessages,
-          temperature: 0.8, // Natural and creative for conversation
-          max_tokens: 800,
-          top_p: 1.0,
-          // No response_format - let it respond naturally
-        }),
-      });
+      const response = await this.requestWithRetry(
+        `${this.baseURL}/chat/completions`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${this.apiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: this.model,
+            messages: openAIMessages,
+            temperature: 0.8, // Natural and creative for conversation
+            max_tokens: 800,
+            top_p: 1.0,
+            // No response_format - let it respond naturally
+          }),
+        }
+      );
 
       if (!response.ok) {
         const errorText = await response.text();
         if (response.status === 429) {
-          throw new Error('Rate limit exceeded. Please wait a moment and try again.');
+          throw new Error(
+            'Rate limit exceeded. Please wait a moment and try again.'
+          );
         }
         if (response.status === 401) {
-          throw new Error('Invalid API key. Please check your OpenAI configuration.');
+          throw new Error(
+            'Invalid API key. Please check your OpenAI configuration.'
+          );
         }
         if (response.status === 403) {
-          throw new Error('Access denied. Please check your OpenAI account permissions.');
+          throw new Error(
+            'Access denied. Please check your OpenAI account permissions.'
+          );
         }
-        throw new Error(`OpenAI API error: ${response.status} ${response.statusText}${errorText ? ` - ${errorText}` : ''}`);
+        throw new Error(
+          `OpenAI API error: ${response.status} ${response.statusText}${errorText ? ` - ${errorText}` : ''}`
+        );
       }
 
       const data = await response.json();
@@ -268,23 +286,26 @@ class OpenAIAPI {
       // Simple natural text response - no JSON parsing during chat
       // Recipe detection will happen when user clicks "Save Recipe"
       return {
-        message: assistantMessage
+        message: assistantMessage,
       };
-
     } catch (error) {
       console.error('OpenAI API error:', error);
-      
+
       // Provide more specific error messages
       if (error instanceof Error) {
         if (error.message.includes('Rate limit')) {
-          throw new Error('Too many requests. Please wait 30 seconds and try again.');
+          throw new Error(
+            'Too many requests. Please wait 30 seconds and try again.'
+          );
         }
         if (error.message.includes('API key')) {
-          throw new Error('OpenAI API key issue. Please check your configuration.');
+          throw new Error(
+            'OpenAI API key issue. Please check your configuration.'
+          );
         }
         throw error;
       }
-      
+
       throw new Error('Failed to get AI response. Please try again.');
     }
   }
@@ -295,47 +316,57 @@ class OpenAIAPI {
     persona: PersonaType
   ): Promise<ChatResponse> {
     const personaConfig = RECIPE_BOT_PERSONAS[persona];
-    
+
     // Limit conversation history
     const recentMessages = messages.slice(-this.maxConversationTurns);
-    
+
     const openAIMessages = [
       {
         role: 'system' as const,
-        content: personaConfig.systemPrompt + '\n\nPlease respond with a valid JSON object containing the complete recipe in this exact format: {"title": "Recipe Name", "ingredients": ["ingredient 1", "ingredient 2"], "instructions": "Step-by-step instructions", "notes": "Additional notes"}'
+        content:
+          personaConfig.systemPrompt +
+          '\n\nPlease respond with a valid JSON object containing the complete recipe in this exact format: {"title": "Recipe Name", "ingredients": ["ingredient 1", "ingredient 2"], "instructions": "Step-by-step instructions", "notes": "Additional notes"}',
       },
-      ...recentMessages.map(msg => ({
+      ...recentMessages.map((msg) => ({
         role: msg.role as 'user' | 'assistant',
-        content: msg.content
+        content: msg.content,
       })),
       {
         role: 'user' as const,
-        content: 'Please create a complete, structured recipe based on our conversation.'
-      }
+        content:
+          'Please create a complete, structured recipe based on our conversation.',
+      },
     ];
 
     try {
-      const response = await this.requestWithRetry(`${this.baseURL}/chat/completions`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: this.model,
-          messages: openAIMessages,
-          temperature: 0.7,
-          max_tokens: 1000,
-          response_format: { type: "json_object" } // Only use JSON format when explicitly requesting structured recipe
-        }),
-      });
+      const response = await this.requestWithRetry(
+        `${this.baseURL}/chat/completions`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${this.apiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: this.model,
+            messages: openAIMessages,
+            temperature: 0.7,
+            max_tokens: 1000,
+            response_format: { type: 'json_object' }, // Only use JSON format when explicitly requesting structured recipe
+          }),
+        }
+      );
 
       if (!response.ok) {
         const errorText = await response.text();
         if (response.status === 429) {
-          throw new Error('Rate limit exceeded. Please wait a moment and try again.');
+          throw new Error(
+            'Rate limit exceeded. Please wait a moment and try again.'
+          );
         }
-        throw new Error(`OpenAI API error: ${response.status} ${response.statusText}${errorText ? ` - ${errorText}` : ''}`);
+        throw new Error(
+          `OpenAI API error: ${response.status} ${response.statusText}${errorText ? ` - ${errorText}` : ''}`
+        );
       }
 
       const data = await response.json();
@@ -352,21 +383,24 @@ class OpenAIAPI {
             message: `Perfect! I've created a complete recipe for you:`,
             recipe: {
               title: parsed.title,
-              ingredients: Array.isArray(parsed.ingredients) ? parsed.ingredients : [],
+              ingredients: Array.isArray(parsed.ingredients)
+                ? parsed.ingredients
+                : [],
               instructions: parsed.instructions,
-              notes: parsed.notes || ''
-            }
+              notes: parsed.notes || '',
+            },
           };
         }
       } catch {
         // JSON parsing failed
-        throw new Error('Failed to generate structured recipe. Please try again.');
+        throw new Error(
+          'Failed to generate structured recipe. Please try again.'
+        );
       }
 
       return {
-        message: assistantMessage
+        message: assistantMessage,
       };
-
     } catch (error) {
       console.error('OpenAI API error:', error);
       if (error instanceof Error) {
@@ -387,14 +421,18 @@ class OpenAIAPI {
     message: string
   ): Promise<{ response: ChatResponse; threadId: string }> {
     try {
-      const result = await this.assistantAPI.sendMessage(threadId, assistantId, message);
-      
+      const result = await this.assistantAPI.sendMessage(
+        threadId,
+        assistantId,
+        message
+      );
+
       return {
         response: {
           message: result.response.message,
-          recipe: result.response.recipe
+          recipe: result.response.recipe,
         },
-        threadId: result.threadId
+        threadId: result.threadId,
       };
     } catch (error) {
       console.error('Assistant API error:', error);
@@ -411,44 +449,54 @@ class OpenAIAPI {
     threadId?: string | null
   ): Promise<ChatResponse & { threadId?: string }> {
     const personaConfig = RECIPE_BOT_PERSONAS[persona];
-    
+
     // Check if persona supports Assistant API
     if (personaConfig.assistantId && personaConfig.isAssistantPowered) {
       try {
         const userMessage = messages[messages.length - 1];
-        
+
         // Add a timeout to prevent hanging
         const assistantPromise = this.chatWithAssistant(
           threadId || null,
           personaConfig.assistantId,
           userMessage.content
         );
-        
+
         const timeoutPromise = new Promise<never>((_, reject) => {
           setTimeout(() => {
-            reject(new Error('Assistant API request timed out after 60 seconds'));
+            reject(
+              new Error('Assistant API request timed out after 60 seconds')
+            );
           }, 60000); // 60 second timeout
         });
-        
+
         const result = await Promise.race([assistantPromise, timeoutPromise]);
-        
+
         return {
           message: result.response.message,
           recipe: result.response.recipe,
-          threadId: result.threadId
+          threadId: result.threadId,
         };
       } catch (assistantError) {
-        console.warn('Assistant API failed, falling back to Chat Completions:', assistantError);
-        
+        console.warn(
+          'Assistant API failed, falling back to Chat Completions:',
+          assistantError
+        );
+
         // Show user that we're falling back
-        if (assistantError instanceof Error && assistantError.message.includes('timeout')) {
-          console.log('Assistant API timed out, using Chat Completions instead');
+        if (
+          assistantError instanceof Error &&
+          assistantError.message.includes('timeout')
+        ) {
+          console.log(
+            'Assistant API timed out, using Chat Completions instead'
+          );
         }
-        
+
         // Fall through to Chat Completions fallback
       }
     }
-    
+
     // Fallback to Chat Completions API
     const chatResponse = await this.chatWithPersona(messages, persona);
     return chatResponse;

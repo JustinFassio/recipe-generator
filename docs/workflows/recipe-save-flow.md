@@ -40,22 +40,23 @@ The Recipe Save Flow is the critical technical process that transforms natural l
 ### **Phase 1: Recipe Text Extraction**
 
 #### **Component**: `useConversation.convertToRecipe()`
+
 **Location**: `src/hooks/useConversation.ts:195-230`
 
 ```typescript
 const convertToRecipe = useCallback(async () => {
   try {
     setIsLoading(true);
-    
+
     // Extract the last few assistant messages to get complete recipe content
     const assistantMessages = messages
       .filter(msg => msg.role === 'assistant')
       .slice(-3); // Get last 3 assistant messages
-    
+
     if (assistantMessages.length === 0) {
       throw new Error('No recipe content found in conversation');
     }
-    
+
     // Combine the assistant messages to get the full recipe text
     const recipeText = assistantMessages
       .map(msg => msg.content)
@@ -63,6 +64,7 @@ const convertToRecipe = useCallback(async () => {
 ```
 
 **Key Features**:
+
 - ✅ **Smart Extraction**: Gets last 3 assistant messages for complete context
 - ✅ **Content Filtering**: Only includes AI-generated content
 - ✅ **Text Joining**: Combines messages with proper spacing
@@ -71,6 +73,7 @@ const convertToRecipe = useCallback(async () => {
 ### **Phase 2: Recipe Parsing**
 
 #### **Function**: `parseRecipeFromText()`
+
 **Location**: `src/lib/api.ts` (imported from `src/hooks/use-recipes.ts`)
 
 ```typescript
@@ -86,6 +89,7 @@ toast({
 ```
 
 **Key Features**:
+
 - ✅ **Reuses Existing Logic**: Same parser as manual recipe entry
 - ✅ **Structured Output**: Returns `RecipeFormData` interface
 - ✅ **Error Handling**: Throws descriptive errors for invalid input
@@ -94,6 +98,7 @@ toast({
 ### **Phase 3: Auto-trigger Recipe Editor**
 
 #### **Component**: `ChatInterface.useEffect()`
+
 **Location**: `src/components/chat/ChatInterface.tsx:46-51`
 
 ```typescript
@@ -106,6 +111,7 @@ useEffect(() => {
 ```
 
 **Key Features**:
+
 - ✅ **Automatic Transition**: No manual user action required
 - ✅ **State-driven**: Triggered by `generatedRecipe` state change
 - ✅ **Clean Dependencies**: Proper useEffect dependencies
@@ -114,6 +120,7 @@ useEffect(() => {
 ### **Phase 4: Recipe Form Display**
 
 #### **Component**: `ChatRecipePage.handleRecipeGenerated()`
+
 **Location**: `src/pages/chat-recipe-page.tsx:16-19`
 
 ```typescript
@@ -124,6 +131,7 @@ const handleRecipeGenerated = (recipe: RecipeFormData) => {
 ```
 
 **Key Features**:
+
 - ✅ **State Management**: Updates both recipe and UI state
 - ✅ **View Switching**: Changes from chat to editor view
 - ✅ **Data Flow**: Passes recipe data to form component
@@ -132,6 +140,7 @@ const handleRecipeGenerated = (recipe: RecipeFormData) => {
 ### **Phase 5: Database Persistence**
 
 #### **Component**: `RecipeForm.onSubmit()`
+
 **Location**: `src/components/recipes/recipe-form.tsx` (via `useRecipes` hook)
 
 ```typescript
@@ -148,6 +157,7 @@ const handleRecipeSaved = () => {
 ```
 
 **Key Features**:
+
 - ✅ **Form Validation**: Zod schema validation before save
 - ✅ **Database Integration**: Supabase insertion with error handling
 - ✅ **Success Feedback**: Toast notifications and navigation
@@ -156,6 +166,7 @@ const handleRecipeSaved = () => {
 ## 🐛 **Recent Bug Fix: Duplicate File Issue**
 
 ### **Problem Identified**
+
 The save flow was broken due to a duplicate file causing import conflicts:
 
 ```
@@ -164,6 +175,7 @@ The save flow was broken due to a duplicate file causing import conflicts:
 ```
 
 ### **Root Cause**
+
 - `src/pages/chat-recipe-page.tsx` was importing the old file
 - The old file didn't have the fixed save flow logic
 - Recipe parsing worked but editor never triggered
@@ -171,6 +183,7 @@ The save flow was broken due to a duplicate file causing import conflicts:
 ### **Solution Applied**
 
 #### **1. Updated Import Path**
+
 ```typescript
 // BEFORE (broken)
 import { ChatInterface } from '@/components/chat/chat-interface';
@@ -180,12 +193,14 @@ import { ChatInterface } from '@/components/chat/ChatInterface';
 ```
 
 #### **2. Deleted Duplicate File**
+
 ```bash
 # Removed conflicting file
 rm src/components/chat/chat-interface.tsx
 ```
 
 #### **3. Verified Auto-trigger Logic**
+
 ```typescript
 // Added to ChatInterface.tsx
 useEffect(() => {
@@ -202,13 +217,13 @@ useEffect(() => {
 ```typescript
 // useConversation State
 interface ConversationState {
-  persona: PersonaType | null;           // Selected AI persona
-  messages: Message[];                   // Complete conversation
+  persona: PersonaType | null; // Selected AI persona
+  messages: Message[]; // Complete conversation
   generatedRecipe: RecipeFormData | null; // Parsed recipe data
-  isLoading: boolean;                    // Parse/save status
-  showPersonaSelector: boolean;          // UI state
-  threadId: string | null;               // Assistant API thread
-  isUsingAssistant: boolean;            // API routing
+  isLoading: boolean; // Parse/save status
+  showPersonaSelector: boolean; // UI state
+  threadId: string | null; // Assistant API thread
+  isUsingAssistant: boolean; // API routing
 }
 ```
 
@@ -216,13 +231,13 @@ interface ConversationState {
 
 ```typescript
 // Step 1: Raw AI Messages
-Message[] → 
-// Step 2: Filtered Assistant Messages  
-Message[] → 
+Message[] →
+// Step 2: Filtered Assistant Messages
+Message[] →
 // Step 3: Combined Text
-string → 
+string →
 // Step 4: Parsed Recipe
-RecipeFormData → 
+RecipeFormData →
 // Step 5: Database Record
 Recipe
 ```
@@ -234,12 +249,12 @@ Recipe
 ```typescript
 catch (error) {
   console.error('Recipe parsing error:', error);
-  
+
   let errorDescription = 'Failed to parse recipe from conversation. Please try again.';
   if (error instanceof Error) {
     errorDescription = `Parsing failed: ${error.message}`;
   }
-  
+
   toast({
     title: 'Recipe Parsing Failed',
     description: errorDescription,
@@ -249,6 +264,7 @@ catch (error) {
 ```
 
 **Error Types Handled**:
+
 - ✅ **No Recipe Content**: Empty conversation validation
 - ✅ **Invalid Format**: Malformed recipe text
 - ✅ **Missing Fields**: Required recipe components
@@ -264,6 +280,7 @@ finally {
 ```
 
 **Recovery Features**:
+
 - ✅ **Loading State Reset**: Always clears loading indicators
 - ✅ **User Feedback**: Clear error messages with actionable steps
 - ✅ **Retry Capability**: User can attempt parsing again
@@ -272,16 +289,19 @@ finally {
 ## 🚀 **Performance Optimizations**
 
 ### **Message Processing**
+
 - **Limited History**: Only processes last 3 assistant messages
 - **Efficient Filtering**: Single pass through message array
 - **Memory Management**: Proper cleanup of temporary variables
 
 ### **State Updates**
+
 - **Batched Updates**: Single state update per successful parse
 - **Optimized Re-renders**: Proper dependency arrays in useEffect
 - **Memoization**: Callback functions wrapped with useCallback
 
 ### **API Integration**
+
 - **Reused Infrastructure**: Leverages existing `parseRecipeFromText`
 - **Consistent Validation**: Same rules as manual recipe entry
 - **Error Boundary**: Isolated error handling per operation
@@ -298,7 +318,7 @@ describe('convertToRecipe', () => {
   it('should show appropriate error messages');
 });
 
-// ChatInterface.test.tsx  
+// ChatInterface.test.tsx
 describe('recipe generation flow', () => {
   it('should auto-trigger editor when recipe is generated');
   it('should pass recipe data to parent callback');
@@ -341,7 +361,7 @@ describe('complete save flow', () => {
 console.log('Recipe parsing started', { messageCount, persona });
 console.log('Recipe parsed successfully', { title, ingredientCount });
 
-// Error Events  
+// Error Events
 console.error('Recipe parsing failed', { error, messageCount });
 console.error('Database save failed', { error, recipeData });
 ```
@@ -349,6 +369,7 @@ console.error('Database save failed', { error, recipeData });
 ## ✅ **Verification Checklist**
 
 ### **Flow Validation**
+
 - [ ] **Parse Button Works**: Click triggers parsing process
 - [ ] **Auto-transition**: Editor appears after successful parse
 - [ ] **Form Pre-fill**: Recipe data populates form fields
@@ -356,6 +377,7 @@ console.error('Database save failed', { error, recipeData });
 - [ ] **Error Handling**: Clear messages for all failure cases
 
 ### **Technical Validation**
+
 - [ ] **State Management**: No memory leaks or stale closures
 - [ ] **Error Boundaries**: Graceful error recovery
 - [ ] **Performance**: No blocking operations on UI thread

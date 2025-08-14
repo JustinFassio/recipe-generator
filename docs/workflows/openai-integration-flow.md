@@ -34,6 +34,7 @@ The Recipe Generator integrates with OpenAI through two different APIs to provid
 ### **Chat Completions API Personas**
 
 #### **1. Chef Marco (Italian Chef)**
+
 ```typescript
 {
   name: "Chef Marco",
@@ -43,6 +44,7 @@ The Recipe Generator integrates with OpenAI through two different APIs to provid
 ```
 
 #### **2. Dr. Sarah (Nutritionist)**
+
 ```typescript
 {
   name: "Dr. Sarah",
@@ -52,9 +54,10 @@ The Recipe Generator integrates with OpenAI through two different APIs to provid
 ```
 
 #### **3. Aunt Jenny (Home Cook)**
+
 ```typescript
 {
-  name: "Aunt Jenny", 
+  name: "Aunt Jenny",
   systemPrompt: `You are Aunt Jenny, a warm and experienced home cook...`,
   // Uses Chat Completions API
 }
@@ -63,6 +66,7 @@ The Recipe Generator integrates with OpenAI through two different APIs to provid
 ### **Assistants API Persona**
 
 #### **4. Dr. Sage Vitalis (Assistant Nutritionist)**
+
 ```typescript
 {
   name: "Dr. Sage Vitalis",
@@ -76,17 +80,18 @@ The Recipe Generator integrates with OpenAI through two different APIs to provid
 ## 🔀 **Smart Routing Implementation**
 
 ### **Route Decision Logic**
+
 **Location**: `src/lib/openai.ts:sendMessageWithPersona()`
 
 ```typescript
 async sendMessageWithPersona(
-  messages: Message[], 
-  persona: PersonaType, 
+  messages: Message[],
+  persona: PersonaType,
   threadId?: string | null
 ): Promise<{ message: string; threadId?: string }> {
-  
+
   const personaConfig = RECIPE_BOT_PERSONAS[persona];
-  
+
   // Smart routing: Check if persona uses Assistant API
   if (personaConfig.assistantId && personaConfig.isAssistantPowered) {
     return this.chatWithAssistant(messages, persona, threadId);
@@ -100,35 +105,38 @@ async sendMessageWithPersona(
 ### **Chat Completions API Flow**
 
 #### **Configuration**
+
 ```typescript
 const response = await fetch('https://api.openai.com/v1/chat/completions', {
   method: 'POST',
   headers: {
-    'Authorization': `Bearer ${this.apiKey}`,
+    Authorization: `Bearer ${this.apiKey}`,
     'Content-Type': 'application/json',
   },
   body: JSON.stringify({
     model: this.model,
     messages: formattedMessages,
-    temperature: 0.8,      // Creative but focused
-    max_tokens: 800,       // Reasonable response length
-    top_p: 1.0,           // Full vocabulary access
+    temperature: 0.8, // Creative but focused
+    max_tokens: 800, // Reasonable response length
+    top_p: 1.0, // Full vocabulary access
   }),
 });
 ```
 
 #### **Message Formatting**
+
 ```typescript
 const formattedMessages = [
   { role: 'system', content: personaConfig.systemPrompt },
-  ...messages.slice(-10).map(msg => ({
+  ...messages.slice(-10).map((msg) => ({
     role: msg.role,
-    content: msg.content
-  }))
+    content: msg.content,
+  })),
 ];
 ```
 
 **Key Features**:
+
 - ✅ **System Prompt Injection**: Each persona gets unique personality
 - ✅ **Message History Limiting**: Last 10 messages for context
 - ✅ **Optimized Parameters**: Balanced creativity and coherence
@@ -137,6 +145,7 @@ const formattedMessages = [
 ### **Assistants API Flow**
 
 #### **Thread Management**
+
 ```typescript
 // Create new thread if none exists
 if (!threadId) {
@@ -149,32 +158,35 @@ await this.assistantAPI.addMessageToThread(threadId, userMessage.content);
 ```
 
 #### **Run Creation & Polling**
+
 ```typescript
 // Create run with assistant
 const run = await this.assistantAPI.createRun(
-  threadId, 
+  threadId,
   personaConfig.assistantId!
 );
 
 // Poll for completion with timeout
 const completedRun = await this.assistantAPI.pollRunCompletion(
-  threadId, 
+  threadId,
   run.id
 );
 ```
 
 #### **Response Extraction**
+
 ```typescript
 // Get latest assistant message
 const latestMessage = await this.assistantAPI.getLatestMessage(threadId);
 
-return { 
-  message: latestMessage, 
-  threadId 
+return {
+  message: latestMessage,
+  threadId,
 };
 ```
 
 **Key Features**:
+
 - ✅ **Persistent Threads**: Maintains conversation context across sessions
 - ✅ **Advanced AI Capabilities**: Leverages OpenAI's most sophisticated models
 - ✅ **Automatic Polling**: Handles asynchronous processing
@@ -185,6 +197,7 @@ return {
 ### **Request Optimization**
 
 #### **Exponential Backoff**
+
 ```typescript
 private async requestWithRetry<T>(
   requestFn: () => Promise<T>,
@@ -195,7 +208,7 @@ private async requestWithRetry<T>(
       return await requestFn();
     } catch (error) {
       if (attempt === maxRetries) throw error;
-      
+
       const delay = Math.pow(2, attempt) * 1000; // 2s, 4s, 8s
       await new Promise(resolve => setTimeout(resolve, delay));
     }
@@ -204,6 +217,7 @@ private async requestWithRetry<T>(
 ```
 
 #### **Connection Pooling**
+
 - ✅ **Reused Connections**: HTTP keep-alive for multiple requests
 - ✅ **Request Batching**: Minimize API calls where possible
 - ✅ **Caching**: Persona configurations cached in memory
@@ -211,16 +225,18 @@ private async requestWithRetry<T>(
 ### **Response Optimization**
 
 #### **Streaming Responses** (Future Enhancement)
+
 ```typescript
 // Potential streaming implementation
 const stream = await fetch('/api/chat/stream', {
   method: 'POST',
   body: JSON.stringify({ messages, persona }),
-  headers: { 'Accept': 'text/event-stream' }
+  headers: { Accept: 'text/event-stream' },
 });
 ```
 
 #### **Response Compression**
+
 - ✅ **Gzip Compression**: Automatic HTTP compression
 - ✅ **Minimal Payloads**: Only send necessary message data
 - ✅ **Efficient Parsing**: Fast JSON processing
@@ -228,6 +244,7 @@ const stream = await fetch('/api/chat/stream', {
 ## 🔒 **Security Implementation**
 
 ### **API Key Management**
+
 ```typescript
 // Environment variable validation
 if (!import.meta.env.VITE_OPENAI_API_KEY) {
@@ -239,11 +256,10 @@ private readonly apiKey = import.meta.env.VITE_OPENAI_API_KEY;
 ```
 
 ### **Request Sanitization**
+
 ```typescript
 // Input validation and sanitization
-const sanitizedContent = userMessage.content
-  .trim()
-  .slice(0, 4000); // Limit message length
+const sanitizedContent = userMessage.content.trim().slice(0, 4000); // Limit message length
 
 // Prevent prompt injection
 const safeSystemPrompt = personaConfig.systemPrompt
@@ -252,11 +268,12 @@ const safeSystemPrompt = personaConfig.systemPrompt
 ```
 
 ### **Error Information Filtering**
+
 ```typescript
 // Don't expose internal errors to users
 catch (error) {
   console.error('OpenAI API error:', error);
-  
+
   // Generic user-facing error
   throw new Error('Failed to get AI response. Please try again.');
 }
@@ -267,6 +284,7 @@ catch (error) {
 ### **API Error Types**
 
 #### **Rate Limiting (429)**
+
 ```typescript
 if (error.status === 429) {
   toast({
@@ -274,13 +292,14 @@ if (error.status === 429) {
     description: 'Please wait a moment before sending another message.',
     variant: 'destructive',
   });
-  
+
   // Implement exponential backoff
   await this.requestWithRetry(() => apiCall());
 }
 ```
 
 #### **Authentication (401)**
+
 ```typescript
 if (error.status === 401) {
   toast({
@@ -292,6 +311,7 @@ if (error.status === 401) {
 ```
 
 #### **Assistant Timeout**
+
 ```typescript
 // 60-second timeout for Assistant API
 const timeoutPromise = new Promise((_, reject) =>
@@ -301,7 +321,7 @@ const timeoutPromise = new Promise((_, reject) =>
 try {
   const response = await Promise.race([
     this.assistantAPI.sendMessage(threadId, message),
-    timeoutPromise
+    timeoutPromise,
   ]);
 } catch (error) {
   // Fallback to Chat Completions API
@@ -312,6 +332,7 @@ try {
 ### **Fallback Mechanisms**
 
 #### **Assistant to Chat Completions Fallback**
+
 ```typescript
 async chatWithAssistant(messages: Message[], persona: PersonaType, threadId?: string | null) {
   try {
@@ -319,7 +340,7 @@ async chatWithAssistant(messages: Message[], persona: PersonaType, threadId?: st
     return await this.assistantAPI.sendMessage(threadId, userMessage);
   } catch (error) {
     console.warn('Assistant API failed, falling back to Chat Completions:', error);
-    
+
     // Fallback to Chat Completions
     const response = await this.chatWithPersona(messages, persona);
     return { message: response };
@@ -330,6 +351,7 @@ async chatWithAssistant(messages: Message[], persona: PersonaType, threadId?: st
 ## 📊 **Monitoring & Analytics**
 
 ### **Performance Metrics**
+
 ```typescript
 // Track API performance
 const startTime = performance.now();
@@ -339,11 +361,12 @@ const duration = performance.now() - startTime;
 console.log(`API call completed in ${duration}ms`, {
   persona,
   messageCount: messages.length,
-  responseLength: response.length
+  responseLength: response.length,
 });
 ```
 
 ### **Error Tracking**
+
 ```typescript
 // Structured error logging
 console.error('API Error Details', {
@@ -351,11 +374,12 @@ console.error('API Error Details', {
   status: error.status,
   persona,
   timestamp: new Date().toISOString(),
-  messageCount: messages.length
+  messageCount: messages.length,
 });
 ```
 
 ### **Usage Analytics**
+
 - **Persona Popularity**: Track which AI assistants are used most
 - **Conversation Length**: Average messages per session
 - **Success Rates**: API call success/failure ratios
@@ -364,6 +388,7 @@ console.error('API Error Details', {
 ## 🔧 **Configuration Management**
 
 ### **Environment Variables**
+
 ```bash
 # Required for Chat Completions API
 VITE_OPENAI_API_KEY=sk-proj-...
@@ -375,31 +400,34 @@ VITE_OPENAI_PROJECT=proj-...
 ```
 
 ### **Model Configuration**
+
 ```typescript
 // Model selection strategy
 const modelConfig = {
   'gpt-4o-mini': {
     maxTokens: 800,
     temperature: 0.8,
-    costPerToken: 0.0001
+    costPerToken: 0.0001,
   },
   'gpt-4': {
-    maxTokens: 1000, 
+    maxTokens: 1000,
     temperature: 0.7,
-    costPerToken: 0.003
-  }
+    costPerToken: 0.003,
+  },
 };
 ```
 
 ## 🚀 **Future Enhancements**
 
 ### **Planned Features**
+
 - **Streaming Responses**: Real-time message delivery
 - **Function Calling**: Structured recipe generation
 - **Image Analysis**: Recipe photo interpretation
 - **Voice Integration**: Speech-to-text recipe creation
 
 ### **Scalability Improvements**
+
 - **Response Caching**: Cache common recipe patterns
 - **Load Balancing**: Multiple API key rotation
 - **Regional APIs**: Geo-distributed API endpoints
@@ -408,6 +436,7 @@ const modelConfig = {
 ---
 
 **Related Documentation**:
+
 - [AI Recipe Creation Workflow](ai-recipe-creation-workflow.md)
 - [Recipe Save Flow](recipe-save-flow.md)
 - [Troubleshooting Guide](troubleshooting.md)
