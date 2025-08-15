@@ -11,21 +11,29 @@ export function SupabaseTest() {
 
     try {
       // Test 1: Basic connection
-      const { data, error } = await supabase.from('recipes').select('count').limit(1);
-      
+      const { error } = await supabase.from('recipes').select('count').limit(1);
+
       if (error) {
         if (error.code === 'PGRST116') {
-          setTestResult('❌ 401 Error: Invalid API key. Please check your VITE_SUPABASE_ANON_KEY');
+          setTestResult(
+            '❌ 401 Error: Invalid API key. Please check your VITE_SUPABASE_ANON_KEY'
+          );
         } else if (error.code === 'PGRST301') {
-          setTestResult('❌ 404 Error: Table not found. Please check your database schema');
+          setTestResult(
+            '❌ 404 Error: Table not found. Please check your database schema'
+          );
         } else {
           setTestResult(`❌ Error: ${error.message} (Code: ${error.code})`);
         }
       } else {
-        setTestResult('✅ Connection successful! Supabase is working correctly.');
+        setTestResult(
+          '✅ Connection successful! Supabase is working correctly.'
+        );
       }
     } catch (err) {
-      setTestResult(`❌ Connection failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      setTestResult(
+        `❌ Connection failed: ${err instanceof Error ? err.message : 'Unknown error'}`
+      );
     } finally {
       setIsLoading(false);
     }
@@ -34,7 +42,7 @@ export function SupabaseTest() {
   const showEnvironmentInfo = () => {
     const url = import.meta.env.VITE_SUPABASE_URL;
     const key = import.meta.env.VITE_SUPABASE_ANON_KEY;
-    
+
     setTestResult(`
 🔍 Environment Information:
 URL: ${url ? '✅ Set' : '❌ Missing'}
@@ -51,7 +59,7 @@ URL Format: ${url?.startsWith('https://') ? '✅ HTTPS' : '❌ Not HTTPS'}
         <p className="text-sm text-gray-600">
           Test your Supabase connection to debug the 401 error
         </p>
-        
+
         <div className="flex gap-2">
           <button
             onClick={testConnection}
@@ -75,7 +83,9 @@ URL Format: ${url?.startsWith('https://') ? '✅ HTTPS' : '❌ Not HTTPS'}
         )}
 
         <div className="mt-4 rounded-lg bg-base-200 p-3">
-          <h4 className="mb-2 text-sm font-bold">Common 401 Error Solutions:</h4>
+          <h4 className="mb-2 text-sm font-bold">
+            Common 401 Error Solutions:
+          </h4>
           <ol className="list-inside list-decimal space-y-1 text-xs">
             <li>Use the "anon public" key, not the "service_role" key</li>
             <li>Ensure the key starts with "eyJ..."</li>
