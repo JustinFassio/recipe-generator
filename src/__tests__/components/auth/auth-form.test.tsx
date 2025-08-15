@@ -25,11 +25,11 @@ describe('AuthForm', () => {
     vi.clearAllMocks();
     // Set up default mock return values
     vi.mocked(mockSupabase.auth.signInWithPassword).mockResolvedValue({
-      data: null,
+      data: { user: null, session: null },
       error: null,
     });
     vi.mocked(mockSupabase.auth.signUp).mockResolvedValue({
-      data: null,
+      data: { user: null, session: null },
       error: null,
     });
   });
@@ -126,7 +126,11 @@ describe('AuthForm', () => {
       vi.mocked(mockSupabase.auth.signInWithPassword).mockImplementation(
         () =>
           new Promise((resolve) =>
-            setTimeout(() => resolve({ data: null, error: null }), 100)
+            setTimeout(
+              () =>
+                resolve({ data: { user: null, session: null }, error: null }),
+              100
+            )
           )
       );
 
@@ -181,7 +185,11 @@ describe('AuthForm', () => {
       vi.mocked(mockSupabase.auth.signUp).mockImplementation(
         () =>
           new Promise((resolve) =>
-            setTimeout(() => resolve({ data: null, error: null }), 100)
+            setTimeout(
+              () =>
+                resolve({ data: { user: null, session: null }, error: null }),
+              100
+            )
           )
       );
 
