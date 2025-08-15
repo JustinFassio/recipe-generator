@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import { ChefHat, LogOut } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 export function Header() {
   const location = useLocation();
@@ -12,17 +13,18 @@ export function Header() {
   };
 
   return (
-    <header className="border-b bg-white shadow-sm">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <ChefHat className="h-8 w-8 text-orange-500" />
-            <h1 className="text-2xl font-bold text-gray-900">
-              Recipe Generator
-            </h1>
-          </div>
+    <header className="navbar bg-base-100 border-b shadow-sm">
+      <div className="navbar-start">
+        <div className="flex items-center space-x-4">
+          <ChefHat className="h-8 w-8 text-primary" />
+          <h1 className="text-2xl font-bold text-base-content">
+            Recipe Generator
+          </h1>
+        </div>
+      </div>
 
-          <nav className="flex items-center space-x-4">
+      <div className="navbar-end">
+        <nav className="flex items-center space-x-4">
             <Button
               variant={location.pathname === '/' ? 'default' : 'ghost'}
               onClick={() => navigate('/')}
@@ -42,6 +44,7 @@ export function Header() {
             >
               AI Recipe Creator
             </Button>
+            <ThemeToggle />
             <Button
               variant="outline"
               size="sm"
@@ -51,8 +54,7 @@ export function Header() {
               <LogOut className="mr-2 h-4 w-4" />
               Sign Out
             </Button>
-          </nav>
-        </div>
+        </nav>
       </div>
     </header>
   );

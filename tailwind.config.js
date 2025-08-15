@@ -80,5 +80,31 @@ export default {
       },
     },
   },
-  plugins: [require('tailwindcss-animate')],
+  plugins: [require('tailwindcss-animate'), require('daisyui')],
+  daisyui: {
+    themes: [
+      {
+        recipeGenerator: {
+          "primary": "#16a34a",
+          "secondary": "#f59e0b", 
+          "accent": "#8b5cf6",
+          "neutral": "#374151",
+          "base-100": "#ffffff",
+          "info": "#3abff8",
+          "success": "#36d399",
+          "warning": "#fbbd23",
+          "error": "#f87272",
+        },
+      },
+      "light",
+      "dark"
+    ],
+    darkTheme: "dark",
+    base: true,
+    styled: true,
+    utils: true,
+    prefix: "",
+    logs: true,
+    themeRoot: ":root",
+  },
 };

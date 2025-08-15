@@ -232,32 +232,48 @@ export function useConversation(): ConversationState & ConversationActions {
         .join('\n\n');
 
       // Debug logs for troubleshooting
-      console.log('Raw recipe text to parse:', recipeText.substring(0, 200) + '...');
+      console.log(
+        'Raw recipe text to parse:',
+        recipeText.substring(0, 200) + '...'
+      );
       console.log('Number of assistant messages:', assistantMessages.length);
-      console.log('Full conversation context:', messages.map(m => `${m.role}: ${m.content.substring(0, 100)}...`));
+      console.log(
+        'Full conversation context:',
+        messages.map((m) => `${m.role}: ${m.content.substring(0, 100)}...`)
+      );
 
       // Check if the text actually contains recipe-like content
-      const hasRecipeContent = /ingredient|instruction|recipe|cook|bake|mix|add|cup|tablespoon|teaspoon|oz|lb/i.test(recipeText);
-      const hasJsonRecipe = /{\s*"title"|"ingredients"|"instructions"/i.test(recipeText);
-      
+      const hasRecipeContent =
+        /ingredient|instruction|recipe|cook|bake|mix|add|cup|tablespoon|teaspoon|oz|lb/i.test(
+          recipeText
+        );
+      const hasJsonRecipe = /{\s*"title"|"ingredients"|"instructions"/i.test(
+        recipeText
+      );
+
       // Only block if it's clearly advice content AND doesn't have recipe structure
-      const isPureAdviceContent = /meal plan|integration|implementation|outcome|strategy|approach/i.test(recipeText) && 
-                                  !/ingredient|instruction|recipe|cook|bake/i.test(recipeText) && 
-                                  !hasJsonRecipe;
-      
+      const isPureAdviceContent =
+        /meal plan|integration|implementation|outcome|strategy|approach/i.test(
+          recipeText
+        ) &&
+        !/ingredient|instruction|recipe|cook|bake/i.test(recipeText) &&
+        !hasJsonRecipe;
+
       if (!hasRecipeContent && !hasJsonRecipe) {
         toast({
           title: 'No Recipe Found',
-          description: 'The conversation doesn\'t contain a complete recipe yet. Try asking the AI to provide a full recipe with ingredients and instructions.',
+          description:
+            "The conversation doesn't contain a complete recipe yet. Try asking the AI to provide a full recipe with ingredients and instructions.",
           variant: 'destructive',
         });
         return;
       }
-      
+
       if (isPureAdviceContent) {
         toast({
           title: 'No Recipe Found',
-          description: 'The AI is providing meal planning advice instead of a recipe. Ask for a complete recipe with specific ingredients and cooking instructions.',
+          description:
+            'The AI is providing meal planning advice instead of a recipe. Ask for a complete recipe with specific ingredients and cooking instructions.',
           variant: 'destructive',
         });
         return;
@@ -265,7 +281,7 @@ export function useConversation(): ConversationState & ConversationActions {
 
       // Use the existing parsing infrastructure (same as parse-recipe-form)
       const recipe = await parseRecipeFromText(recipeText);
-      
+
       console.log('Parsed recipe result:', recipe);
 
       setGeneratedRecipe(recipe);
@@ -302,8 +318,9 @@ export function useConversation(): ConversationState & ConversationActions {
 
   const requestCompleteRecipe = useCallback(async () => {
     if (!persona) return;
-    
-    const recipeRequest = "Can you please provide a complete recipe with a clear title, list of ingredients with measurements, and step-by-step cooking instructions? I'd like to save this as a recipe card.";
+
+    const recipeRequest =
+      "Can you please provide a complete recipe with a clear title, list of ingredients with measurements, and step-by-step cooking instructions? I'd like to save this as a recipe card.";
     await sendMessage(recipeRequest);
   }, [persona, sendMessage]);
 
