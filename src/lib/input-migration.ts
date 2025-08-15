@@ -36,7 +36,7 @@ export const createDaisyUIInputClasses = (
   size?: 'xs' | 'sm' | 'md' | 'lg',
   className?: string
 ): string => {
-  const baseClasses = 'input';
+  const baseClasses = 'input text-gray-900 placeholder:text-gray-500 bg-white';
 
   // Map variant to DaisyUI classes
   const variantClasses =
