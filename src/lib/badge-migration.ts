@@ -9,33 +9,11 @@
 import { cn } from '@/lib/utils';
 
 /**
- * Creates DaisyUI badge classes based on the variant
- *
- * @param variant - The badge variant (default, secondary, destructive, outline)
- * @param className - Additional CSS classes to apply
- * @returns DaisyUI badge classes
- */
-export function createDaisyUIBadgeClasses(
-  variant: 'default' | 'secondary' | 'destructive' | 'outline' = 'default',
-  className?: string
-): string {
-  const baseClasses = 'badge badge-sm';
-
-  const variantClasses = {
-    default: 'badge-primary',
-    secondary: 'badge-secondary',
-    destructive: 'badge-error',
-    outline: 'badge-outline',
-  };
-
-  return cn(baseClasses, variantClasses[variant], className);
-}
-
-/**
  * Badge variant mapping for DaisyUI
  * Maps shadcn/ui variants to DaisyUI equivalents
+ * Single source of truth for badge variant mappings
  */
-export const badgeVariantMap = {
+const BADGE_VARIANT_MAP = {
   default: 'badge-primary',
   secondary: 'badge-secondary',
   destructive: 'badge-error',
@@ -43,6 +21,27 @@ export const badgeVariantMap = {
 } as const;
 
 /**
+ * Creates DaisyUI badge classes based on the variant
+ *
+ * @param variant - The badge variant (default, secondary, destructive, outline)
+ * @param className - Additional CSS classes to apply
+ * @returns DaisyUI badge classes
+ */
+export function createDaisyUIBadgeClasses(
+  variant: keyof typeof BADGE_VARIANT_MAP = 'default',
+  className?: string
+): string {
+  const baseClasses = 'badge badge-sm';
+  return cn(baseClasses, BADGE_VARIANT_MAP[variant], className);
+}
+
+/**
+ * Badge variant mapping for DaisyUI
+ * Maps shadcn/ui variants to DaisyUI equivalents
+ */
+export const badgeVariantMap = BADGE_VARIANT_MAP;
+
+/**
  * Type for badge variants
  */
-export type BadgeVariant = keyof typeof badgeVariantMap;
+export type BadgeVariant = keyof typeof BADGE_VARIANT_MAP;
