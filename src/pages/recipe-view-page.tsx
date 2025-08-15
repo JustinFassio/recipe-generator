@@ -2,7 +2,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useRecipe } from '@/hooks/use-recipes';
 import { RecipeView } from '@/components/recipes/recipe-view';
 import { createDaisyUICardClasses } from '@/lib/card-migration';
-import { Skeleton } from '@/components/ui/skeleton';
+import { createDaisyUISkeletonClasses } from '@/lib/skeleton-migration';
 import { ChefHat } from 'lucide-react';
 
 export function RecipeViewPage() {
@@ -15,19 +15,26 @@ export function RecipeViewPage() {
       <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50">
         <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
           <div className="space-y-6">
-            <Skeleton className="h-10 w-48" />
+            <div className={createDaisyUISkeletonClasses('h-10 w-48')} />
             <div className={createDaisyUICardClasses('bordered')}>
               <div className="card-body p-6">
-                <Skeleton className="mb-4 h-64 w-full" />
-                <Skeleton className="mb-2 h-8 w-3/4" />
-                <Skeleton className="h-4 w-1/2" />
+                <div
+                  className={createDaisyUISkeletonClasses('mb-4 h-64 w-full')}
+                />
+                <div
+                  className={createDaisyUISkeletonClasses('mb-2 h-8 w-3/4')}
+                />
+                <div className={createDaisyUISkeletonClasses('h-4 w-1/2')} />
               </div>
             </div>
             <div className={createDaisyUICardClasses('bordered')}>
               <div className="card-body space-y-4 p-6">
-                <Skeleton className="h-6 w-32" />
+                <div className={createDaisyUISkeletonClasses('h-6 w-32')} />
                 {Array.from({ length: 6 }).map((_, i) => (
-                  <Skeleton key={i} className="h-4 w-full" />
+                  <div
+                    key={i}
+                    className={createDaisyUISkeletonClasses('h-4 w-full')}
+                  />
                 ))}
               </div>
             </div>
