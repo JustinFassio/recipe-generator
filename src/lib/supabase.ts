@@ -28,10 +28,10 @@ if (!supabaseUrl || !supabaseAnonKey) {
 }
 
 // Validate Supabase URL format
-if (!supabaseUrl.startsWith('https://')) {
-  console.error('❌ Invalid Supabase URL format. Should start with https://');
+if (!supabaseUrl.startsWith('https://') && !supabaseUrl.startsWith('http://127.0.0.1')) {
+  console.error('❌ Invalid Supabase URL format. Should start with https:// or http://127.0.0.1 for local development');
   console.error('   Safari requires HTTPS for production sites.');
-  throw new Error('Invalid Supabase URL format - must use HTTPS');
+  throw new Error('Invalid Supabase URL format - must use HTTPS for production or http://127.0.0.1 for local development');
 }
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
