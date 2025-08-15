@@ -3,7 +3,10 @@ import { createDaisyUIButtonClasses } from '@/lib/button-migration';
 import { createDaisyUIInputClasses } from '@/lib/input-migration';
 import { createDaisyUICardClasses } from '@/lib/card-migration';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import {
+  createDaisyUIAvatarClasses,
+  createDaisyUIAvatarPlaceholderClasses,
+} from '@/lib/avatar-migration';
 import {
   Send,
   User,
@@ -151,23 +154,28 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
                   : ''
               }`}
             >
-              <Avatar
-                className={`h-8 w-8 ${
-                  message.role === 'user'
-                    ? 'bg-green-100'
-                    : getPersonaColor(persona)
-                }`}
+              <div
+                className={createDaisyUIAvatarClasses(
+                  'sm',
+                  `h-8 w-8 ${
+                    message.role === 'user'
+                      ? 'bg-green-100'
+                      : getPersonaColor(persona)
+                  }`
+                )}
               >
-                <AvatarFallback
-                  className={message.role === 'user' ? 'text-green-600' : ''}
+                <div
+                  className={createDaisyUIAvatarPlaceholderClasses(
+                    message.role === 'user' ? 'text-green-600' : ''
+                  )}
                 >
                   {message.role === 'user' ? (
                     <User className="h-4 w-4" />
                   ) : (
                     getPersonaIcon(persona)
                   )}
-                </AvatarFallback>
-              </Avatar>
+                </div>
+              </div>
 
               <div
                 className={`${createDaisyUICardClasses('bordered')} max-w-[80%] ${
@@ -199,9 +207,16 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
 
           {isLoading && (
             <div className="flex items-start space-x-3">
-              <Avatar className={`h-8 w-8 ${getPersonaColor(persona)}`}>
-                <AvatarFallback>{getPersonaIcon(persona)}</AvatarFallback>
-              </Avatar>
+              <div
+                className={createDaisyUIAvatarClasses(
+                  'sm',
+                  `h-8 w-8 ${getPersonaColor(persona)}`
+                )}
+              >
+                <div className={createDaisyUIAvatarPlaceholderClasses()}>
+                  {getPersonaIcon(persona)}
+                </div>
+              </div>
               <div
                 className={`${createDaisyUICardClasses('bordered')} bg-white`}
               >

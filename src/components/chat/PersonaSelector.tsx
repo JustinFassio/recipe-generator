@@ -1,5 +1,8 @@
 import { createDaisyUICardClasses } from '@/lib/card-migration';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import {
+  createDaisyUIAvatarClasses,
+  createDaisyUIAvatarPlaceholderClasses,
+} from '@/lib/avatar-migration';
 import { Bot, ChefHat, Heart, Home, Brain } from 'lucide-react';
 import { RECIPE_BOT_PERSONAS, type PersonaType } from '@/lib/openai';
 import { AssistantBadge } from './AssistantBadge';
@@ -58,11 +61,20 @@ export function PersonaSelector({ onPersonaSelect }: PersonaSelectorProps) {
     <div className="mx-auto flex h-[calc(100vh-8rem)] max-w-4xl flex-col">
       <div className="flex items-center justify-between rounded-t-lg border-b bg-white p-4">
         <div className="flex items-center space-x-3">
-          <Avatar className="h-10 w-10 bg-orange-100">
-            <AvatarFallback className="text-orange-600">
+          <div
+            className={createDaisyUIAvatarClasses(
+              'md',
+              'h-10 w-10 bg-orange-100'
+            )}
+          >
+            <div
+              className={createDaisyUIAvatarPlaceholderClasses(
+                'text-orange-600'
+              )}
+            >
               <Bot className="h-5 w-5" />
-            </AvatarFallback>
-          </Avatar>
+            </div>
+          </div>
           <div>
             <h2 className="font-semibold text-gray-900">
               Choose Your Recipe Assistant

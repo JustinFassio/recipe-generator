@@ -2,12 +2,16 @@ import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { createDaisyUIButtonClasses } from '@/lib/button-migration';
 import { createDaisyUIInputClasses } from '@/lib/input-migration';
-import { Label } from '@/components/ui/label';
+import { createDaisyUILabelClasses } from '@/lib/label-migration';
 import {
   createDaisyUICardClasses,
   createDaisyUICardTitleClasses,
 } from '@/lib/card-migration';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  createDaisyUITabsClasses,
+  createDaisyUITabClasses,
+  createDaisyUITabContentClasses,
+} from '@/lib/tabs-migration';
 import { ChefHat } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
@@ -15,6 +19,7 @@ export function AuthForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState<'signin' | 'signup'>('signin');
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,16 +86,31 @@ export function AuthForm() {
           </p>
         </div>
         <div className="card-body">
-          <Tabs defaultValue="signin" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin">Sign In</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
-            </TabsList>
+          <div className={createDaisyUITabsClasses('bordered', 'md', 'w-full')}>
+            <a
+              className={createDaisyUITabClasses('tab-active')}
+              onClick={() => setActiveTab('signin')}
+            >
+              Sign In
+            </a>
+            <a
+              className={createDaisyUITabClasses()}
+              onClick={() => setActiveTab('signup')}
+            >
+              Sign Up
+            </a>
+          </div>
 
-            <TabsContent value="signin">
+          <div className={createDaisyUITabContentClasses()}>
+            {activeTab === 'signin' && (
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+                  <label
+                    htmlFor="email"
+                    className={createDaisyUILabelClasses()}
+                  >
+                    Email
+                  </label>
                   <input
                     id="email"
                     type="email"
@@ -103,7 +123,12 @@ export function AuthForm() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
+                  <label
+                    htmlFor="password"
+                    className={createDaisyUILabelClasses()}
+                  >
+                    Password
+                  </label>
                   <input
                     id="password"
                     type="password"
@@ -124,12 +149,17 @@ export function AuthForm() {
                   {loading ? 'Signing In...' : 'Sign In'}
                 </button>
               </form>
-            </TabsContent>
+            )}
 
-            <TabsContent value="signup">
+            {activeTab === 'signup' && (
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="signup-email">Email</Label>
+                  <label
+                    htmlFor="signup-email"
+                    className={createDaisyUILabelClasses()}
+                  >
+                    Email
+                  </label>
                   <input
                     id="signup-email"
                     type="email"
@@ -142,7 +172,12 @@ export function AuthForm() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signup-password">Password</Label>
+                  <label
+                    htmlFor="signup-password"
+                    className={createDaisyUILabelClasses()}
+                  >
+                    Password
+                  </label>
                   <input
                     id="signup-password"
                     type="password"
@@ -164,8 +199,8 @@ export function AuthForm() {
                   {loading ? 'Creating Account...' : 'Sign Up'}
                 </button>
               </form>
-            </TabsContent>
-          </Tabs>
+            )}
+          </div>
         </div>
       </div>
     </div>

@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { createDaisyUIButtonClasses } from '@/lib/button-migration';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
+import { createDaisyUITextareaClasses } from '@/lib/textarea-migration';
+import { createDaisyUILabelClasses } from '@/lib/label-migration';
 import {
   createDaisyUICardClasses,
   createDaisyUICardTitleClasses,
@@ -86,7 +86,12 @@ Makes about 48 cookies. Store in airtight container.`;
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
             <div className="mb-2 flex items-center justify-between">
-              <Label htmlFor="recipeText">Recipe Content *</Label>
+              <label
+                htmlFor="recipeText"
+                className={createDaisyUILabelClasses()}
+              >
+                Recipe Content *
+              </label>
               <button
                 type="button"
                 className={createDaisyUIButtonClasses('ghost', 'sm')}
@@ -124,12 +129,16 @@ Makes about 48 cookies. Store in airtight container.`;
               </Alert>
             )}
 
-            <Textarea
+            <textarea
               id="recipeText"
               {...register('recipeText')}
               placeholder="Paste your recipe here (Markdown, JSON, or plain text)..."
               rows={8}
-              className="resize-none font-mono text-sm"
+              className={createDaisyUITextareaClasses(
+                'default',
+                'md',
+                'resize-none font-mono text-sm'
+              )}
             />
             {errors.recipeText && (
               <p className="mt-1 text-sm text-red-500">
