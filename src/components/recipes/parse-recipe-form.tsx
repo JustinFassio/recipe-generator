@@ -4,7 +4,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { createDaisyUIButtonClasses } from '@/lib/button-migration';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  createDaisyUICardClasses,
+  createDaisyUICardTitleClasses,
+} from '@/lib/card-migration';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Wand2 } from 'lucide-react';
 import {
@@ -72,14 +75,14 @@ Makes about 48 cookies. Store in airtight container.`;
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center space-x-2">
+    <div className={createDaisyUICardClasses('bordered')}>
+      <div className="card-body">
+        <h3
+          className={`${createDaisyUICardTitleClasses()} flex items-center space-x-2`}
+        >
           <Wand2 className="h-5 w-5 text-orange-500" />
           <span>Parse Recipe</span>
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
+        </h3>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
             <div className="mb-2 flex items-center justify-between">
@@ -153,7 +156,7 @@ Makes about 48 cookies. Store in airtight container.`;
             )}
           </button>
         </form>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

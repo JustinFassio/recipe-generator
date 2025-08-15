@@ -1,5 +1,8 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { createDaisyUIButtonClasses } from '@/lib/button-migration';
+import {
+  createDaisyUICardClasses,
+  createDaisyUICardTitleClasses,
+} from '@/lib/card-migration';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { ArrowLeft, Clock, Users, Edit, Calendar } from 'lucide-react';
@@ -37,8 +40,8 @@ export function RecipeView({ recipe, onEdit, onBack }: RecipeViewProps) {
       </div>
 
       {/* Recipe Header */}
-      <Card>
-        <CardHeader className="pb-4">
+      <div className={createDaisyUICardClasses('bordered')}>
+        <div className="card-body pb-4">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
             {recipe.image_url && (
               <div className="lg:w-1/3">
@@ -50,9 +53,11 @@ export function RecipeView({ recipe, onEdit, onBack }: RecipeViewProps) {
               </div>
             )}
             <div className="flex-1">
-              <CardTitle className="mb-4 text-2xl font-bold lg:text-3xl">
+              <h3
+                className={`${createDaisyUICardTitleClasses()} mb-4 text-2xl font-bold lg:text-3xl`}
+              >
                 {recipe.title}
-              </CardTitle>
+              </h3>
               <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
                 <div className="flex items-center">
                   <Users className="mr-1 h-4 w-4" />
@@ -77,15 +82,17 @@ export function RecipeView({ recipe, onEdit, onBack }: RecipeViewProps) {
               </div>
             </div>
           </div>
-        </CardHeader>
-      </Card>
+        </div>
+      </div>
 
       {/* Ingredients */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-xl font-semibold">Ingredients</CardTitle>
-        </CardHeader>
-        <CardContent>
+      <div className={createDaisyUICardClasses('bordered')}>
+        <div className="card-body">
+          <h3
+            className={`${createDaisyUICardTitleClasses()} text-xl font-semibold`}
+          >
+            Ingredients
+          </h3>
           <div className="space-y-3">
             {recipe.ingredients.map((ingredient, index) => (
               <div key={index} className="flex items-start">
@@ -111,15 +118,17 @@ export function RecipeView({ recipe, onEdit, onBack }: RecipeViewProps) {
               </div>
             ))}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Instructions */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-xl font-semibold">Instructions</CardTitle>
-        </CardHeader>
-        <CardContent>
+      <div className={createDaisyUICardClasses('bordered')}>
+        <div className="card-body">
+          <h3
+            className={`${createDaisyUICardTitleClasses()} text-xl font-semibold`}
+          >
+            Instructions
+          </h3>
           <div className="space-y-4">
             {recipe.instructions.split('\n').map((line, index) => {
               const trimmedLine = line.trim();
@@ -163,16 +172,18 @@ export function RecipeView({ recipe, onEdit, onBack }: RecipeViewProps) {
               );
             })}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Notes */}
       {recipe.notes && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-xl font-semibold">Notes</CardTitle>
-          </CardHeader>
-          <CardContent>
+        <div className={createDaisyUICardClasses('bordered')}>
+          <div className="card-body">
+            <h3
+              className={`${createDaisyUICardTitleClasses()} text-xl font-semibold`}
+            >
+              Notes
+            </h3>
             <div className="space-y-4">
               {recipe.notes.split('\n').map((line, index) => {
                 const trimmedLine = line.trim();
@@ -216,8 +227,8 @@ export function RecipeView({ recipe, onEdit, onBack }: RecipeViewProps) {
                 );
               })}
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
     </div>
   );
