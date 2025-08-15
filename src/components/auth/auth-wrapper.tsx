@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { User } from '@supabase/supabase-js';
 import { AuthForm } from './auth-form';
-import { SafariError } from '@/components/ui/safari-error';
 
 interface AuthWrapperProps {
   children: React.ReactNode;
@@ -39,12 +38,7 @@ export function AuthWrapper({ children }: AuthWrapperProps) {
   }
 
   if (!user) {
-    return (
-      <div>
-        <SafariError />
-        <AuthForm />
-      </div>
-    );
+    return <AuthForm />;
   }
 
   return <>{children}</>;

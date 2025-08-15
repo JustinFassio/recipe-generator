@@ -30,7 +30,6 @@ function AppContent() {
           <Route path="/recipe/:id" element={<RecipeViewPage />} />
         </Routes>
       </main>
-
     </div>
   );
 }
