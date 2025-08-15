@@ -92,6 +92,23 @@ src/
 └── main.tsx           # Application entry point
 ```
 
+## 🌐 Live Application
+
+**Recipe Generator is now live!** 🎉
+
+- **Production URL**: [https://recipegenerator.app](https://recipegenerator.app)
+- **Status**: ✅ Active and fully functional
+- **Deployment**: Vercel with automatic deployments from GitHub
+
+### Production Features
+
+- **AI Recipe Creation**: Chat with AI assistants to generate custom recipes
+- **Recipe Management**: Create, edit, and organize your digital cookbook
+- **Smart Parsing**: Automatically extract recipes from text or AI conversations
+- **User Authentication**: Secure login with Supabase Auth
+- **Cloud Storage**: Recipe images stored securely in Supabase
+- **Responsive Design**: Works perfectly on desktop and mobile devices
+
 ## 🚀 Getting Started
 
 ### Prerequisites
@@ -200,6 +217,30 @@ CREATE TABLE recipes (
 - `npm run verify` - Run full verification suite
 - `npm run verify:quick` - Quick verification (skip format check)
 
+## 🚀 Deployment
+
+### Production Deployment
+
+Recipe Generator is deployed on **Vercel** with the following configuration:
+
+- **Framework**: Vite
+- **Build Command**: `npm run build`
+- **Output Directory**: `dist`
+- **Environment Variables**: Configured for Supabase and OpenAI integration
+- **Custom Domain**: [recipegenerator.app](https://recipegenerator.app)
+- **Auto-Deploy**: Enabled from GitHub main branch
+
+### Environment Variables (Production)
+
+The following environment variables are configured in Vercel:
+
+```env
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+VITE_OPENAI_API_KEY=your_openai_api_key
+VITE_OPENAI_MODEL=gpt-4o-mini
+```
+
 ## 🎯 Key Features Explained
 
 ### Recipe Parsing
@@ -263,6 +304,30 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - [Tailwind CSS](https://tailwindcss.com/) for styling
 - [Vite](https://vitejs.dev/) for the build tool
 
+## 📊 Project Status
+
+### ✅ Production Ready Features
+
+- **Core Recipe Management**: ✅ Complete and tested
+- **AI Recipe Creation**: ✅ Fully functional with multiple personas
+- **User Authentication**: ✅ Secure Supabase integration
+- **Image Upload**: ✅ Cloud storage with user isolation
+- **Recipe Parsing**: ✅ Smart JSON and markdown parsing
+- **Responsive Design**: ✅ Mobile and desktop optimized
+- **Database Security**: ✅ Row-level security policies
+- **Error Handling**: ✅ Comprehensive error recovery
+- **Performance**: ✅ Optimized build and loading
+
+### 🎯 Recent Improvements
+
+- **Enhanced Recipe Parsing**: Fixed issues with AI-generated JSON recipes
+- **Smart Content Detection**: Distinguishes recipes from meal planning advice
+- **Markdown Code Block Support**: Handles JSON wrapped in markdown
+- **Flexible Field Validation**: Supports both "title" and "name" fields
+- **Improved User Experience**: Better error messages and guidance
+
 ---
 
 **Recipe Generator** - Your digital cookbook companion 🍳
+
+**Live at**: [https://recipegenerator.app](https://recipegenerator.app)
