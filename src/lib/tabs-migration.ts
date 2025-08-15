@@ -43,11 +43,10 @@ export function createDaisyUITabsClasses(
   size: keyof typeof TABS_SIZE_MAP = 'md',
   className?: string
 ): string {
-  const baseClasses = 'tabs';
   const variantClasses = TABS_VARIANT_MAP[variant];
   const sizeClasses = TABS_SIZE_MAP[size];
 
-  return cn(baseClasses, variantClasses, sizeClasses, className);
+  return cn(variantClasses, sizeClasses, className);
 }
 
 /**
