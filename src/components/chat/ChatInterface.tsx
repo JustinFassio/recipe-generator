@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import { createDaisyUIButtonClasses } from '@/lib/button-migration';
-import { Input } from '@/components/ui/input';
+import { createDaisyUIInputClasses } from '@/lib/input-migration';
 import { createDaisyUICardClasses } from '@/lib/card-migration';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -222,14 +222,17 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
       {/* Chat Input */}
       <div className="rounded-b-lg border-t bg-white p-4">
         <div className="flex items-center space-x-2">
-          <Input
+          <input
             ref={inputRef}
+            type="text"
             value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setInputValue(e.target.value)
+            }
             onKeyPress={handleKeyPress}
             placeholder="Type your message here..."
             disabled={isLoading}
-            className="flex-1"
+            className={`${createDaisyUIInputClasses('bordered')} flex-1`}
           />
           <button
             onClick={handleSendMessage}

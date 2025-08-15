@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { createDaisyUIButtonClasses } from '@/lib/button-migration';
-import { Input } from '@/components/ui/input';
+import { createDaisyUIInputClasses } from '@/lib/input-migration';
 import { createDaisyUICardClasses } from '@/lib/card-migration';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Plus, Search, ChefHat } from 'lucide-react';
@@ -92,11 +92,12 @@ export function RecipesPage() {
           <div className="mt-6">
             <div className="relative">
               <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-              <Input
+              <input
+                type="text"
                 placeholder="Search recipes, ingredients, or instructions..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className={`${createDaisyUIInputClasses('bordered')} pl-10`}
               />
             </div>
           </div>
