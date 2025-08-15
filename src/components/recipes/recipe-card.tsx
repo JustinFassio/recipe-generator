@@ -37,7 +37,7 @@ export function RecipeCard({ recipe, onEdit, onView }: RecipeCardProps) {
   return (
     <>
       <div
-        className={`${createDaisyUICardClasses('bordered')} group overflow-hidden transition-all duration-200 hover:shadow-lg`}
+        className={`${createDaisyUICardClasses('bordered')} group overflow-hidden border border-gray-200 transition-all duration-200 hover:border-gray-300 hover:shadow-lg`}
       >
         {recipe.image_url && (
           <div className="aspect-video overflow-hidden">
