@@ -43,9 +43,8 @@ describe('RecipeCard', () => {
       <RecipeCard recipe={mockRecipe} onEdit={mockOnEdit} onView={mockOnView} />
     );
 
-    // Find the view button by its icon (Eye icon)
-    const buttons = screen.getAllByRole('button');
-    const viewButton = buttons[0]; // First button is view
+    // Find the view button by its aria-label or test-id
+    const viewButton = screen.getByRole('button', { name: /view/i });
     fireEvent.click(viewButton);
 
     expect(mockOnView).toHaveBeenCalledWith(mockRecipe);
@@ -56,9 +55,8 @@ describe('RecipeCard', () => {
       <RecipeCard recipe={mockRecipe} onEdit={mockOnEdit} onView={mockOnView} />
     );
 
-    // Find the edit button by its icon (Edit icon)
-    const buttons = screen.getAllByRole('button');
-    const editButton = buttons[1]; // Second button is edit
+    // Find the edit button by its aria-label or test-id
+    const editButton = screen.getByRole('button', { name: /edit/i });
     fireEvent.click(editButton);
 
     expect(mockOnEdit).toHaveBeenCalledWith(mockRecipe);

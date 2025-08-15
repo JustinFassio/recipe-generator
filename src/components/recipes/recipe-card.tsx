@@ -60,18 +60,21 @@ export function RecipeCard({ recipe, onEdit, onView }: RecipeCardProps) {
               <button
                 className={`${createDaisyUIButtonClasses('ghost', 'sm')} h-8 w-8 p-0`}
                 onClick={() => onView?.(recipe)}
+                aria-label="View recipe"
               >
                 <Eye className="h-4 w-4" />
               </button>
               <button
                 className={`${createDaisyUIButtonClasses('ghost', 'sm')} h-8 w-8 p-0`}
                 onClick={() => onEdit?.(recipe)}
+                aria-label="Edit recipe"
               >
                 <Edit className="h-4 w-4" />
               </button>
               <button
                 className={`${createDaisyUIButtonClasses('ghost', 'sm')} h-8 w-8 p-0 text-red-500 hover:text-red-700`}
                 onClick={() => setShowDeleteDialog(true)}
+                aria-label="Delete recipe"
               >
                 <Trash2 className="h-4 w-4" />
               </button>
