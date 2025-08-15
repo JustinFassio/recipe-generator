@@ -4,7 +4,7 @@ import {
   createDaisyUICardTitleClasses,
 } from '@/lib/card-migration';
 import { createDaisyUIBadgeClasses } from '@/lib/badge-migration';
-import { Separator } from '@/components/ui/separator';
+import { createDaisyUISeparatorClasses } from '@/lib/separator-migration';
 import { ArrowLeft, Clock, Users, Edit, Calendar } from 'lucide-react';
 import type { Recipe } from '@/lib/supabase';
 
@@ -99,7 +99,12 @@ export function RecipeView({ recipe, onEdit, onBack }: RecipeViewProps) {
                 {ingredient.startsWith('---') && ingredient.endsWith('---') ? (
                   // Category header
                   <div className="w-full">
-                    <Separator className="mb-2" />
+                    <div
+                      className={createDaisyUISeparatorClasses(
+                        'horizontal',
+                        'mb-2'
+                      )}
+                    />
                     <h4 className="mb-2 text-lg font-semibold text-gray-800">
                       {ingredient.replace(/^---\s*/, '').replace(/\s*---$/, '')}
                     </h4>
@@ -139,7 +144,12 @@ export function RecipeView({ recipe, onEdit, onBack }: RecipeViewProps) {
               if (trimmedLine.startsWith('**') && trimmedLine.endsWith('**')) {
                 return (
                   <div key={index} className="mt-6 first:mt-0">
-                    <Separator className="mb-3" />
+                    <div
+                      className={createDaisyUISeparatorClasses(
+                        'horizontal',
+                        'mb-3'
+                      )}
+                    />
                     <h4 className="text-lg font-semibold text-gray-800">
                       {trimmedLine.replace(/\*\*/g, '')}
                     </h4>

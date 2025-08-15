@@ -2,7 +2,7 @@ import React, { useRef, useEffect } from 'react';
 import { createDaisyUIButtonClasses } from '@/lib/button-migration';
 import { createDaisyUIInputClasses } from '@/lib/input-migration';
 import { createDaisyUICardClasses } from '@/lib/card-migration';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { createDaisyUIScrollAreaClasses } from '@/lib/scroll-area-migration';
 import {
   createDaisyUIAvatarClasses,
   createDaisyUIAvatarPlaceholderClasses,
@@ -48,14 +48,7 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
   useEffect(() => {
     // Auto-scroll to bottom when new messages are added
     if (scrollAreaRef.current) {
-      const scrollContainer = scrollAreaRef.current.querySelector(
-        '[data-radix-scroll-area-viewport]'
-      );
-      if (scrollContainer) {
-        (scrollContainer as HTMLElement).scrollTop = (
-          scrollContainer as HTMLElement
-        ).scrollHeight;
-      }
+      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
     }
   }, [messages]);
 
@@ -143,7 +136,13 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
       />
 
       {/* Chat Messages */}
-      <ScrollArea ref={scrollAreaRef} className="flex-1 bg-gray-50 p-4">
+      <div
+        ref={scrollAreaRef}
+        className={createDaisyUIScrollAreaClasses(
+          'default',
+          'flex-1 bg-gray-50 p-4'
+        )}
+      >
         <div className="space-y-4">
           {messages.map((message) => (
             <div
@@ -232,7 +231,7 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
             </div>
           )}
         </div>
-      </ScrollArea>
+      </div>
 
       {/* Chat Input */}
       <div className="rounded-b-lg border-t bg-white p-4">
