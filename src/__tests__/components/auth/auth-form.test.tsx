@@ -7,10 +7,8 @@ import { supabase } from '@/lib/supabase';
 vi.mock('@/lib/supabase', () => ({
   supabase: {
     auth: {
-      signUp: vi.fn().mockResolvedValue({ data: null, error: null }),
-      signInWithPassword: vi
-        .fn()
-        .mockResolvedValue({ data: null, error: null }),
+      signUp: vi.fn(),
+      signInWithPassword: vi.fn(),
     },
   },
 }));
@@ -25,6 +23,15 @@ describe('AuthForm', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    // Set up default mock return values
+    vi.mocked(mockSupabase.auth.signInWithPassword).mockResolvedValue({
+      data: null,
+      error: null,
+    });
+    vi.mocked(mockSupabase.auth.signUp).mockResolvedValue({
+      data: null,
+      error: null,
+    });
   });
 
   describe('Tab Functionality', () => {
@@ -116,7 +123,7 @@ describe('AuthForm', () => {
     });
 
     it('should show loading state during sign in', async () => {
-      mockSupabase.auth.signInWithPassword.mockImplementation(
+      vi.mocked(mockSupabase.auth.signInWithPassword).mockImplementation(
         () =>
           new Promise((resolve) =>
             setTimeout(() => resolve({ data: null, error: null }), 100)
@@ -171,7 +178,7 @@ describe('AuthForm', () => {
     });
 
     it('should show loading state during sign up', async () => {
-      mockSupabase.auth.signUp.mockImplementation(
+      vi.mocked(mockSupabase.auth.signUp).mockImplementation(
         () =>
           new Promise((resolve) =>
             setTimeout(() => resolve({ data: null, error: null }), 100)
