@@ -97,7 +97,7 @@ export function RecipeForm({
     if (existingRecipe?.image_url) {
       setImagePreview(existingRecipe.image_url);
     }
-  }, [existingRecipe]);
+  }, [existingRecipe?.image_url]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
