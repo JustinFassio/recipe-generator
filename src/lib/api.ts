@@ -83,6 +83,15 @@ export const recipeApi = {
   },
 };
 
+// Types for the new JSON recipe format
+interface IngredientItem {
+  item: string;
+  amount?: string;
+  prep?: string;
+}
+
+// RecipeJSON interface removed as it's not used directly due to dynamic JSON parsing
+
 // Parse recipe from text using external API
 export async function parseRecipeFromText(text: string): Promise<{
   title: string;
@@ -93,8 +102,36 @@ export async function parseRecipeFromText(text: string): Promise<{
   // This would typically call your LLM proxy endpoint
   // For now, we'll simulate the parsing with a basic implementation
   try {
+    console.log('Attempting to parse as JSON...');
+    
+    let jsonText = text;
+    
+    // Check if JSON is wrapped in markdown code blocks
+    const jsonBlockMatch = text.match(/```json\s*([\s\S]*?)\s*```/);
+    if (jsonBlockMatch) {
+      jsonText = jsonBlockMatch[1];
+      console.log('Extracted JSON from markdown code block');
+    }
+    
     // Try to parse as JSON first
-    const parsed = JSON.parse(text);
+    const parsed = JSON.parse(jsonText);
+    
+    console.log('Successfully parsed JSON format');
+
+    // Validate required fields - be flexible about field names
+    const hasTitle = parsed.title || parsed.name;
+    const hasIngredients = parsed.ingredients && Array.isArray(parsed.ingredients);
+    const hasInstructions = parsed.instructions;
+    
+    if (!hasTitle) {
+      throw new Error('Missing required field: title or name');
+    }
+    if (!hasIngredients) {
+      throw new Error('Missing required field: ingredients (must be an array)');
+    }
+    if (!hasInstructions) {
+      throw new Error('Missing required field: instructions');
+    }
 
     // Handle complex nested JSON structure
     if (parsed.name || parsed.title) {
@@ -106,27 +143,42 @@ export async function parseRecipeFromText(text: string): Promise<{
       // Handle nested ingredients object with categories
       if (parsed.ingredients && typeof parsed.ingredients === 'object') {
         if (Array.isArray(parsed.ingredients)) {
-          // Simple array format
-          ingredients = parsed.ingredients;
+          // Simple array format - convert to strings
+          ingredients = parsed.ingredients.map((item: string | IngredientItem) => 
+            typeof item === 'string' ? item : `${item.amount || ''} ${item.item || ''} ${item.prep ? `, ${item.prep}` : ''}`.trim()
+          );
         } else {
-          // Nested object format with categories
-          for (const [category, items] of Object.entries(parsed.ingredients)) {
-            if (Array.isArray(items)) {
-              // Add category header
-              ingredients.push(
-                `--- ${category.charAt(0).toUpperCase() + category.slice(1)} ---`
-              );
+          // Nested object format with categories (main, sauce, toppings, etc.)
+          const categoryOrder = ['main', 'sauce', 'toppings', 'garnish']; // Preferred order
+          const allCategories = Object.keys(parsed.ingredients);
+          
+          // Process categories in preferred order, then any remaining
+          const orderedCategories = [
+            ...categoryOrder.filter(cat => allCategories.includes(cat)),
+            ...allCategories.filter(cat => !categoryOrder.includes(cat))
+          ];
+
+          for (const category of orderedCategories) {
+            const items = parsed.ingredients[category];
+            if (Array.isArray(items) && items.length > 0) {
+              // Add category header with proper capitalization
+              const categoryTitle = category.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+              ingredients.push(`--- ${categoryTitle} ---`);
 
               for (const item of items) {
                 if (typeof item === 'string') {
                   ingredients.push(item);
-                } else if (typeof item === 'object' && item.item) {
-                  // Handle structured ingredient objects
+                } else if (typeof item === 'object' && item !== null) {
+                  // Handle structured ingredient objects: { item, amount, prep }
+                  const typedItem = item as IngredientItem;
                   let ingredientStr = '';
-                  if (item.amount) ingredientStr += `${item.amount} `;
-                  ingredientStr += item.item;
-                  if (item.prep) ingredientStr += `, ${item.prep}`;
-                  ingredients.push(ingredientStr);
+                  if (typedItem.amount) ingredientStr += `${typedItem.amount} `;
+                  if (typedItem.item) ingredientStr += typedItem.item;
+                  if (typedItem.prep) ingredientStr += `, ${typedItem.prep}`;
+                  
+                  if (ingredientStr.trim()) {
+                    ingredients.push(ingredientStr.trim());
+                  }
                 }
               }
             }
@@ -134,30 +186,37 @@ export async function parseRecipeFromText(text: string): Promise<{
         }
       }
 
-      // Handle instructions - combine basic_instructions and instructions
+      // Handle instructions - support both array and string formats
       const instructionParts: string[] = [];
 
-      if (
-        parsed.basic_instructions &&
-        Array.isArray(parsed.basic_instructions)
-      ) {
+      // Add basic/preparation instructions first (if present)
+      if (parsed.basic_instructions && Array.isArray(parsed.basic_instructions) && parsed.basic_instructions.length > 0) {
         instructionParts.push('**Preparation:**');
         parsed.basic_instructions.forEach((step: string, index: number) => {
-          instructionParts.push(`${index + 1}. ${step}`);
+          if (step && step.trim()) {
+            instructionParts.push(`${index + 1}. ${step.trim()}`);
+          }
         });
         instructionParts.push(''); // Add blank line
       }
 
-      if (parsed.instructions && Array.isArray(parsed.instructions)) {
+      // Add main cooking instructions
+      if (Array.isArray(parsed.instructions) && parsed.instructions.length > 0) {
         if (instructionParts.length > 0) {
           instructionParts.push('**Cooking Instructions:**');
         }
-        parsed.instructions.forEach((step: string, index: number) => {
-          const stepNumber = parsed.basic_instructions ? index + 1 : index + 1;
-          instructionParts.push(`${stepNumber}. ${step}`);
+        parsed.instructions.forEach((step: string) => {
+          if (step && step.trim()) {
+            // Remove any existing numbering and add clean formatting
+            const cleanStep = step.trim().replace(/^\d+\.\s*/, '');
+            instructionParts.push(cleanStep);
+          }
         });
-      } else if (typeof parsed.instructions === 'string') {
-        instructionParts.push(parsed.instructions);
+      } else if (typeof parsed.instructions === 'string' && parsed.instructions.trim()) {
+        if (instructionParts.length > 0) {
+          instructionParts.push('**Cooking Instructions:**');
+        }
+        instructionParts.push(parsed.instructions.trim());
       }
 
       instructions = instructionParts.join('\n');
@@ -165,38 +224,49 @@ export async function parseRecipeFromText(text: string): Promise<{
       // Handle notes - combine various optional sections
       const notesParts: string[] = [];
 
+      // Add servings information
       if (parsed.servings) {
         notesParts.push(`**Servings:** ${parsed.servings}`);
         notesParts.push('');
       }
 
-      if (parsed.tips_and_tricks && Array.isArray(parsed.tips_and_tricks)) {
+      // Add tips and tricks
+      if (parsed.tips_and_tricks && Array.isArray(parsed.tips_and_tricks) && parsed.tips_and_tricks.length > 0) {
         notesParts.push('**Tips & Tricks:**');
         parsed.tips_and_tricks.forEach((tip: string) => {
-          notesParts.push(`• ${tip}`);
+          if (tip && tip.trim()) {
+            notesParts.push(`• ${tip.trim()}`);
+          }
         });
         notesParts.push('');
       }
 
-      if (parsed.substitutions && Array.isArray(parsed.substitutions)) {
+      // Add substitutions
+      if (parsed.substitutions && Array.isArray(parsed.substitutions) && parsed.substitutions.length > 0) {
         notesParts.push('**Substitutions:**');
         parsed.substitutions.forEach((sub: string) => {
-          notesParts.push(`• ${sub}`);
+          if (sub && sub.trim()) {
+            notesParts.push(`• ${sub.trim()}`);
+          }
         });
         notesParts.push('');
       }
 
-      if (parsed.pairings && Array.isArray(parsed.pairings)) {
+      // Add pairings
+      if (parsed.pairings && Array.isArray(parsed.pairings) && parsed.pairings.length > 0) {
         notesParts.push('**Pairings:**');
         parsed.pairings.forEach((pairing: string) => {
-          notesParts.push(`• ${pairing}`);
+          if (pairing && pairing.trim()) {
+            notesParts.push(`• ${pairing.trim()}`);
+          }
         });
         notesParts.push('');
       }
 
-      if (parsed.notes) {
+      // Add any additional notes
+      if (parsed.notes && typeof parsed.notes === 'string' && parsed.notes.trim()) {
         notesParts.push('**Additional Notes:**');
-        notesParts.push(parsed.notes);
+        notesParts.push(parsed.notes.trim());
       }
 
       notes = notesParts.join('\n').trim();
@@ -217,8 +287,37 @@ export async function parseRecipeFromText(text: string): Promise<{
       notes: parsed.notes || '',
     };
   } catch {
+    console.log('JSON parsing failed, trying markdown parsing');
+    console.log('Text preview:', text.substring(0, 200) + '...');
+    
+    // Try to extract recipe content from the text if it contains non-recipe content
+    let processedText = text;
+    
+    // Look for recipe-like sections and extract them
+    const recipeKeywords = ['ingredient', 'instruction', 'recipe', 'cook', 'bake', 'prepare', 'serve', 'mix', 'add', 'heat', 'boil', 'fry', 'season', 'cup', 'tablespoon', 'teaspoon', 'oz', 'lb', 'gram'];
+    const lines = text.split('\n');
+    
+    // Find the first line that contains recipe-related content
+    let recipeStartIndex = -1;
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].toLowerCase();
+      if (recipeKeywords.some(keyword => line.includes(keyword))) {
+        recipeStartIndex = i;
+        break;
+      }
+    }
+    
+    // If we found recipe content, start from there
+    if (recipeStartIndex >= 0) {
+      processedText = lines.slice(recipeStartIndex).join('\n');
+      console.log('Extracted recipe content starting from line', recipeStartIndex);
+    } else {
+      // If no clear recipe content found, try to extract any structured content
+      console.log('No clear recipe keywords found, using full text');
+    }
+    
     // If not JSON, treat as markdown and do basic parsing
-    const lines = text.split('\n').filter((line) => line.trim());
+    const processedLines = processedText.split('\n').filter((line) => line.trim());
     let title = 'Untitled Recipe';
     const ingredients: string[] = [];
     let instructions = '';
@@ -226,20 +325,27 @@ export async function parseRecipeFromText(text: string): Promise<{
 
     let currentSection = '';
 
-    for (const line of lines) {
+    for (const line of processedLines) {
       const trimmed = line.trim();
+      const lowerTrimmed = trimmed.toLowerCase();
 
       if (trimmed.startsWith('#')) {
-        title = trimmed.replace(/^#+\s*/, '');
-        currentSection = 'title';
-      } else if (trimmed.toLowerCase().includes('ingredient')) {
+        // Only use as title if it looks like a recipe title
+        const potentialTitle = trimmed.replace(/^#+\s*/, '');
+        if (potentialTitle.length > 0 && !lowerTrimmed.includes('implementation') && !lowerTrimmed.includes('outcome')) {
+          title = potentialTitle;
+          currentSection = 'title';
+        }
+      } else if (lowerTrimmed.includes('ingredient')) {
         currentSection = 'ingredients';
       } else if (
-        trimmed.toLowerCase().includes('instruction') ||
-        trimmed.toLowerCase().includes('direction')
+        lowerTrimmed.includes('instruction') ||
+        lowerTrimmed.includes('direction') ||
+        lowerTrimmed.includes('step') ||
+        lowerTrimmed.includes('method')
       ) {
         currentSection = 'instructions';
-      } else if (trimmed.toLowerCase().includes('note')) {
+      } else if (lowerTrimmed.includes('note') || lowerTrimmed.includes('tip')) {
         currentSection = 'notes';
       } else if (
         trimmed.startsWith('-') ||
@@ -256,17 +362,35 @@ export async function parseRecipeFromText(text: string): Promise<{
           instructions += trimmed + '\n';
         } else if (currentSection === 'notes') {
           notes += trimmed + '\n';
-        } else if (!currentSection && !title) {
+        } else if (!currentSection && title === 'Untitled Recipe' && 
+                   !lowerTrimmed.includes('implementation') && 
+                   !lowerTrimmed.includes('outcome') &&
+                   !lowerTrimmed.includes('analysis') &&
+                   trimmed.length < 100) {
+          // Only use as title if it's short and doesn't contain non-recipe words
           title = trimmed;
         }
       }
     }
 
-    return {
+    // If we didn't find much recipe content, provide a helpful default
+    if (ingredients.length === 0 && instructions.trim() === '') {
+      return {
+        title: 'Recipe from AI Conversation',
+        ingredients: ['Please ask the AI to provide specific ingredients'],
+        instructions: 'Please ask the AI to provide step-by-step cooking instructions.',
+        notes: `Original AI response: ${text.substring(0, 500)}${text.length > 500 ? '...' : ''}\n\nTip: Try asking the AI something like "Can you give me a complete recipe with ingredients and instructions?"`
+      };
+    }
+    
+    const result = {
       title,
       ingredients,
       instructions: instructions.trim(),
       notes: notes.trim(),
     };
+    
+    console.log('Markdown parsing result:', result);
+    return result;
   }
 }
