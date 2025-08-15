@@ -5,7 +5,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { createDaisyUIButtonClasses } from '@/lib/button-migration';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  createDaisyUICardClasses,
+  createDaisyUICardTitleClasses,
+} from '@/lib/card-migration';
 import { Label } from '@/components/ui/label';
 import { recipeSchema, type RecipeFormData } from '@/lib/schemas';
 import {
@@ -100,8 +103,21 @@ export function RecipeForm({
     const file = e.target.files?.[0];
     if (file) {
       setImageFile(file);
-      const previewUrl = URL.createObjectURL(file);
-      setImagePreview(previewUrl);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const addIngredient = () => {
+    append('');
+  };
+
+  const removeIngredient = (index: number) => {
+    if (fields.length > 1) {
+      remove(index);
     }
   };
 
@@ -109,24 +125,26 @@ export function RecipeForm({
     try {
       let imageUrl = data.image_url;
 
-      // Upload new image if one was selected
+      // Upload image if there's a new file
       if (imageFile) {
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-        if (user) {
-          imageUrl = await uploadImage.mutateAsync({
-            file: imageFile,
-            userId: user.id,
-          });
+        const fileName = `${Date.now()}-${imageFile.name}`;
+        const { error: uploadError } = await supabase.storage
+          .from('recipe-images')
+          .upload(fileName, imageFile);
+
+        if (uploadError) {
+          throw new Error('Failed to upload image');
         }
+
+        const { data: urlData } = supabase.storage
+          .from('recipe-images')
+          .getPublicUrl(fileName);
+
+        imageUrl = urlData.publicUrl;
       }
 
       const recipeData = {
         ...data,
-        ingredients: data.ingredients.filter(
-          (ingredient) => ingredient.trim() !== ''
-        ),
         image_url: imageUrl || null,
       };
 
@@ -145,87 +163,79 @@ export function RecipeForm({
     }
   };
 
-  const addIngredient = () => {
-    append('');
-  };
-
-  const removeIngredient = (index: number) => {
-    if (fields.length > 1) {
-      remove(index);
-    }
-  };
-
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Recipe Details</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor="title">Recipe Title *</Label>
-            <Input
-              id="title"
-              {...register('title')}
-              placeholder="Enter recipe title"
-              className="mt-1"
-            />
-            {errors.title && (
-              <p className="mt-1 text-sm text-red-500">
-                {errors.title.message}
-              </p>
-            )}
-          </div>
+      <div className={createDaisyUICardClasses('bordered')}>
+        <div className="card-body">
+          <h3 className={createDaisyUICardTitleClasses()}>Recipe Details</h3>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="title">Recipe Title *</Label>
+              <Input
+                id="title"
+                {...register('title')}
+                placeholder="Enter recipe title"
+                className="mt-1"
+              />
+              {errors.title && (
+                <p className="mt-1 text-sm text-red-500">
+                  {errors.title.message}
+                </p>
+              )}
+            </div>
 
-          <div>
-            <Label>Recipe Image</Label>
-            <div className="mt-2 space-y-4">
-              {imagePreview && (
-                <div className="relative h-48 w-full overflow-hidden rounded-lg bg-gray-100">
-                  <img
-                    src={imagePreview}
-                    alt="Recipe preview"
-                    className="h-full w-full object-cover"
+            <div>
+              <Label>Recipe Image</Label>
+              <div className="mt-2 space-y-4">
+                {imagePreview && (
+                  <div className="relative h-48 w-full overflow-hidden rounded-lg bg-gray-100">
+                    <img
+                      src={imagePreview}
+                      alt="Recipe preview"
+                      className="h-full w-full object-cover"
+                    />
+                    <button
+                      type="button"
+                      className={`${createDaisyUIButtonClasses('ghost', 'sm')} absolute right-2 top-2 bg-white/80 hover:bg-white`}
+                      onClick={() => {
+                        setImagePreview('');
+                        setImageFile(null);
+                        setValue('image_url', '');
+                      }}
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                )}
+
+                <div className="flex items-center space-x-2">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="hidden"
                   />
                   <button
                     type="button"
-                    className={`${createDaisyUIButtonClasses('ghost', 'sm')} absolute right-2 top-2 bg-white/80 hover:bg-white`}
-                    onClick={() => {
-                      setImagePreview('');
-                      setImageFile(null);
-                      setValue('image_url', '');
-                    }}
+                    className={`${createDaisyUIButtonClasses('outline')} border-green-600 text-green-600 hover:bg-green-50`}
+                    onClick={() => fileInputRef.current?.click()}
                   >
-                    <X className="h-4 w-4" />
+                    <Upload className="mr-2 h-4 w-4" />
+                    Upload Image
                   </button>
                 </div>
-              )}
-
-              <div className="flex items-center space-x-2">
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  className="hidden"
-                />
-                <button
-                  type="button"
-                  className={`${createDaisyUIButtonClasses('outline')} border-green-600 text-green-600 hover:bg-green-50`}
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <Upload className="mr-2 h-4 w-4" />
-                  Upload Image
-                </button>
               </div>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
+      <div className={createDaisyUICardClasses('bordered')}>
+        <div className="card-body">
+          <h3
+            className={`${createDaisyUICardTitleClasses()} flex items-center justify-between`}
+          >
             Ingredients *
             <button
               type="button"
@@ -235,9 +245,7 @@ export function RecipeForm({
               <Plus className="mr-2 h-4 w-4" />
               Add Ingredient
             </button>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
+          </h3>
           <div className="space-y-2">
             {fields.map((field, index) => (
               <div key={field.id} className="flex items-center space-x-2">
@@ -263,14 +271,12 @@ export function RecipeForm({
               {errors.ingredients.message}
             </p>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Instructions *</CardTitle>
-        </CardHeader>
-        <CardContent>
+      <div className={createDaisyUICardClasses('bordered')}>
+        <div className="card-body">
+          <h3 className={createDaisyUICardTitleClasses()}>Instructions *</h3>
           <Textarea
             {...register('instructions')}
             placeholder="Enter cooking instructions..."
@@ -282,22 +288,20 @@ export function RecipeForm({
               {errors.instructions.message}
             </p>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Notes</CardTitle>
-        </CardHeader>
-        <CardContent>
+      <div className={createDaisyUICardClasses('bordered')}>
+        <div className="card-body">
+          <h3 className={createDaisyUICardTitleClasses()}>Notes</h3>
           <Textarea
             {...register('notes')}
             placeholder="Additional notes, tips, or variations..."
             rows={3}
             className="resize-none"
           />
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       <div className="flex justify-end space-x-2">
         <button

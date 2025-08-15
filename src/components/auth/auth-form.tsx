@@ -65,17 +65,6 @@ export function AuthForm() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-orange-50 to-teal-50 p-4">
       <div className="w-full max-w-md space-y-6">
-        {/* DaisyUI Card Test */}
-        <div className="card-bordered card border-2 border-red-500 bg-base-100 shadow-xl">
-          <div className="card-body">
-            <h2 className="card-title">DaisyUI Card Test</h2>
-            <p>
-              This card has a red border to make it visible. If you can see
-              this, DaisyUI cards are working!
-            </p>
-          </div>
-        </div>
-
         <div
           className={`${createDaisyUICardClasses('bordered')} w-full max-w-md`}
         >
