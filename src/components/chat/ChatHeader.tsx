@@ -1,5 +1,8 @@
 import { createDaisyUIButtonClasses } from '@/lib/button-migration';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import {
+  createDaisyUIAvatarClasses,
+  createDaisyUIAvatarPlaceholderClasses,
+} from '@/lib/avatar-migration';
 import { Save, ChefHat, Heart, Home, Bot, Brain } from 'lucide-react';
 import { RECIPE_BOT_PERSONAS, type PersonaType } from '@/lib/openai';
 import type { RecipeFormData } from '@/lib/schemas';
@@ -56,9 +59,16 @@ export function ChatHeader({
   return (
     <div className="flex items-center justify-between rounded-t-lg border-b bg-white p-4">
       <div className="flex items-center space-x-3">
-        <Avatar className={`h-10 w-10 ${getPersonaColor(selectedPersona)}`}>
-          <AvatarFallback>{getPersonaIcon(selectedPersona)}</AvatarFallback>
-        </Avatar>
+        <div
+          className={createDaisyUIAvatarClasses(
+            'md',
+            `h-10 w-10 ${getPersonaColor(selectedPersona)}`
+          )}
+        >
+          <div className={createDaisyUIAvatarPlaceholderClasses()}>
+            {getPersonaIcon(selectedPersona)}
+          </div>
+        </div>
         <div>
           <h2 className="font-semibold text-gray-900">
             {RECIPE_BOT_PERSONAS[selectedPersona].name}

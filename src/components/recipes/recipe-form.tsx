@@ -4,12 +4,12 @@ import type { FieldArrayPath } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { createDaisyUIButtonClasses } from '@/lib/button-migration';
 import { createDaisyUIInputClasses } from '@/lib/input-migration';
-import { Textarea } from '@/components/ui/textarea';
+import { createDaisyUITextareaClasses } from '@/lib/textarea-migration';
 import {
   createDaisyUICardClasses,
   createDaisyUICardTitleClasses,
 } from '@/lib/card-migration';
-import { Label } from '@/components/ui/label';
+import { createDaisyUILabelClasses } from '@/lib/label-migration';
 import { recipeSchema, type RecipeFormData } from '@/lib/schemas';
 import {
   useCreateRecipe,
@@ -158,7 +158,9 @@ export function RecipeForm({
           <h3 className={createDaisyUICardTitleClasses()}>Recipe Details</h3>
           <div className="space-y-4">
             <div>
-              <Label htmlFor="title">Recipe Title *</Label>
+              <label htmlFor="title" className={createDaisyUILabelClasses()}>
+                Recipe Title *
+              </label>
               <input
                 id="title"
                 type="text"
@@ -174,7 +176,9 @@ export function RecipeForm({
             </div>
 
             <div>
-              <Label>Recipe Image</Label>
+              <label className={createDaisyUILabelClasses()}>
+                Recipe Image
+              </label>
               <div className="mt-2 space-y-4">
                 {imagePreview && (
                   <div className="relative h-48 w-full overflow-hidden rounded-lg bg-gray-100">
@@ -267,11 +271,15 @@ export function RecipeForm({
       <div className={createDaisyUICardClasses('bordered')}>
         <div className="card-body">
           <h3 className={createDaisyUICardTitleClasses()}>Instructions *</h3>
-          <Textarea
+          <textarea
             {...register('instructions')}
             placeholder="Enter cooking instructions..."
             rows={6}
-            className="resize-none"
+            className={createDaisyUITextareaClasses(
+              'default',
+              'md',
+              'resize-none'
+            )}
           />
           {errors.instructions && (
             <p className="mt-1 text-sm text-red-500">
@@ -284,11 +292,15 @@ export function RecipeForm({
       <div className={createDaisyUICardClasses('bordered')}>
         <div className="card-body">
           <h3 className={createDaisyUICardTitleClasses()}>Notes</h3>
-          <Textarea
+          <textarea
             {...register('notes')}
             placeholder="Additional notes, tips, or variations..."
             rows={3}
-            className="resize-none"
+            className={createDaisyUITextareaClasses(
+              'default',
+              'md',
+              'resize-none'
+            )}
           />
         </div>
       </div>
