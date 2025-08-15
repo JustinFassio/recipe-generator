@@ -11,8 +11,8 @@ const mockRecipe: Recipe = {
   notes: 'Test notes and tips for the recipe.',
   image_url: null,
   user_id: 'user1',
-  created_at: '2024-01-01T00:00:00Z',
-  updated_at: '2024-01-01T00:00:00Z',
+  created_at: '2023-12-31T00:00:00Z',
+  updated_at: '2023-12-31T00:00:00Z',
 };
 
 describe('RecipeCard', () => {
@@ -143,6 +143,6 @@ describe('RecipeCard', () => {
     );
 
     // The date should be formatted and displayed
-    expect(screen.getByText('12/31/2023')).toBeInTheDocument();
+    expect(screen.getByText('12/30/2023')).toBeInTheDocument();
   });
 });
