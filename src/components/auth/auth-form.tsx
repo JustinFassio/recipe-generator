@@ -113,6 +113,7 @@ export function AuthForm() {
                         setPassword(e.target.value)
                       }
                       className={createDaisyUIInputClasses('bordered')}
+                      autoComplete="current-password"
                       required
                     />
                   </div>
@@ -151,6 +152,7 @@ export function AuthForm() {
                         setPassword(e.target.value)
                       }
                       className={createDaisyUIInputClasses('bordered')}
+                      autoComplete="new-password"
                       required
                       minLength={6}
                     />
