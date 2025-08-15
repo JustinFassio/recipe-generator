@@ -10,6 +10,11 @@ This directory contains comprehensive documentation for all workflows in the Rec
 - **[Recipe Save Flow](recipe-save-flow.md)** - Technical details of the recipe parsing and saving process
 - **[Troubleshooting Guide](troubleshooting.md)** - Common issues and solutions
 
+### **UI & Styling Workflows**
+
+- **[DaisyUI Integration Guide](daisyui-integration-guide.md)** - Complete guide to using DaisyUI components
+- **[DaisyUI Button Migration Plan](daisyui-button-migration-plan.md)** - Phased approach to replace shadcn/ui buttons
+
 ### **Technical Workflows**
 
 - **[OpenAI Integration Flow](openai-integration-flow.md)** - How the AI chat system works
@@ -37,6 +42,7 @@ This directory contains comprehensive documentation for all workflows in the Rec
 - **Supabase** for recipe data persistence
 - **React Hook Form** with Zod validation for forms
 - **TanStack Query** for data fetching and caching
+- **DaisyUI** with Tailwind CSS for component styling
 
 ### **Architecture Patterns**
 
@@ -50,6 +56,7 @@ This directory contains comprehensive documentation for all workflows in the Rec
 1. **Read the main workflow**: [AI Recipe Creation Workflow](ai-recipe-creation-workflow.md)
 2. **Understand the save process**: [Recipe Save Flow](recipe-save-flow.md)
 3. **Check troubleshooting**: [Troubleshooting Guide](troubleshooting.md)
+4. **Learn UI components**: [DaisyUI Integration Guide](daisyui-integration-guide.md)
 
 ---
 

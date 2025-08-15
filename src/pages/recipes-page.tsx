@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Button } from '@/components/ui/button';
+import { createDaisyUIButtonClasses } from '@/lib/button-migration';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -49,9 +49,12 @@ export function RecipesPage() {
               <p className="mb-4 text-gray-600">
                 We couldn't load your recipes. Please try refreshing the page.
               </p>
-              <Button onClick={() => window.location.reload()}>
+              <button
+                className={createDaisyUIButtonClasses('default')}
+                onClick={() => window.location.reload()}
+              >
                 Refresh Page
-              </Button>
+              </button>
             </CardContent>
           </Card>
         </div>
@@ -75,13 +78,13 @@ export function RecipesPage() {
               </p>
             </div>
 
-            <Button
+            <button
+              className={`${createDaisyUIButtonClasses('default')} self-start sm:self-auto`}
               onClick={() => navigate('/add')}
-              className="self-start sm:self-auto"
             >
               <Plus className="mr-2 h-4 w-4" />
               Add Recipe
-            </Button>
+            </button>
           </div>
 
           <div className="mt-6">
@@ -124,9 +127,12 @@ export function RecipesPage() {
                   Try adjusting your search terms or clear the search to see all
                   recipes.
                 </p>
-                <Button variant="outline" onClick={() => setSearchTerm('')}>
+                <button
+                  className={createDaisyUIButtonClasses('outline')}
+                  onClick={() => setSearchTerm('')}
+                >
                   Clear Search
-                </Button>
+                </button>
               </>
             ) : (
               <>
@@ -137,10 +143,13 @@ export function RecipesPage() {
                   Start building your digital cookbook by adding your first
                   recipe.
                 </p>
-                <Button onClick={() => navigate('/add')}>
+                <button
+                  className={createDaisyUIButtonClasses('default')}
+                  onClick={() => navigate('/add')}
+                >
                   <Plus className="mr-2 h-4 w-4" />
                   Add Your First Recipe
-                </Button>
+                </button>
               </>
             )}
           </div>

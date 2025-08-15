@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Button } from '@/components/ui/button';
+import { createDaisyUIButtonClasses } from '@/lib/button-migration';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -84,14 +84,13 @@ Makes about 48 cookies. Store in airtight container.`;
           <div>
             <div className="mb-2 flex items-center justify-between">
               <Label htmlFor="recipeText">Recipe Content *</Label>
-              <Button
+              <button
                 type="button"
-                variant="ghost"
-                size="sm"
+                className={createDaisyUIButtonClasses('ghost', 'sm')}
                 onClick={() => setShowExample(!showExample)}
               >
                 {showExample ? 'Hide' : 'Show'} Example
-              </Button>
+              </button>
             </div>
 
             {showExample && (
@@ -110,15 +109,13 @@ Makes about 48 cookies. Store in airtight container.`;
                         fields
                       </li>
                     </ul>
-                    <Button
+                    <button
                       type="button"
-                      variant="outline"
-                      size="sm"
+                      className={`${createDaisyUIButtonClasses('outline', 'sm')} mt-2 border-green-600 text-green-600 hover:bg-green-50`}
                       onClick={loadExample}
-                      className="mt-2 border-green-600 text-green-600 hover:bg-green-50"
                     >
                       Load Example
-                    </Button>
+                    </button>
                   </div>
                 </AlertDescription>
               </Alert>
@@ -138,10 +135,10 @@ Makes about 48 cookies. Store in airtight container.`;
             )}
           </div>
 
-          <Button
+          <button
             type="submit"
+            className={`${createDaisyUIButtonClasses('default')} w-full`}
             disabled={parseRecipe.isPending}
-            className="w-full"
           >
             {parseRecipe.isPending ? (
               <>
@@ -154,7 +151,7 @@ Makes about 48 cookies. Store in airtight container.`;
                 Parse Recipe
               </>
             )}
-          </Button>
+          </button>
         </form>
       </CardContent>
     </Card>

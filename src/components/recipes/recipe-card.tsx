@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { createDaisyUIButtonClasses } from '@/lib/button-migration';
 import { Badge } from '@/components/ui/badge';
 import { Trash2, Edit, Eye } from 'lucide-react';
 import type { Recipe } from '@/lib/supabase';
@@ -50,30 +50,24 @@ export function RecipeCard({ recipe, onEdit, onView }: RecipeCardProps) {
               {recipe.title}
             </CardTitle>
             <div className="flex items-center space-x-1 opacity-0 transition-opacity group-hover:opacity-100">
-              <Button
-                variant="ghost"
-                size="sm"
+              <button
+                className={`${createDaisyUIButtonClasses('ghost', 'sm')} h-8 w-8 p-0`}
                 onClick={() => onView?.(recipe)}
-                className="h-8 w-8 p-0"
               >
                 <Eye className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
+              </button>
+              <button
+                className={`${createDaisyUIButtonClasses('ghost', 'sm')} h-8 w-8 p-0`}
                 onClick={() => onEdit?.(recipe)}
-                className="h-8 w-8 p-0"
               >
                 <Edit className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
+              </button>
+              <button
+                className={`${createDaisyUIButtonClasses('ghost', 'sm')} h-8 w-8 p-0 text-red-500 hover:text-red-700`}
                 onClick={() => setShowDeleteDialog(true)}
-                className="h-8 w-8 p-0 text-red-500 hover:text-red-700"
               >
                 <Trash2 className="h-4 w-4" />
-              </Button>
+              </button>
             </div>
           </div>
         </CardHeader>

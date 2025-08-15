@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Button } from '@/components/ui/button';
+import { createDaisyUIButtonClasses } from '@/lib/button-migration';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -106,9 +106,13 @@ export function AuthForm() {
                     required
                   />
                 </div>
-                <Button type="submit" className="w-full" disabled={loading}>
+                <button
+                  type="submit"
+                  className={`${createDaisyUIButtonClasses('default')} w-full`}
+                  disabled={loading}
+                >
                   {loading ? 'Signing In...' : 'Sign In'}
-                </Button>
+                </button>
               </form>
             </TabsContent>
 
@@ -135,9 +139,13 @@ export function AuthForm() {
                     minLength={6}
                   />
                 </div>
-                <Button type="submit" className="w-full" disabled={loading}>
+                <button
+                  type="submit"
+                  className={`${createDaisyUIButtonClasses('default')} w-full`}
+                  disabled={loading}
+                >
                   {loading ? 'Creating Account...' : 'Sign Up'}
-                </Button>
+                </button>
               </form>
             </TabsContent>
           </Tabs>

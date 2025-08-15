@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import type { FieldArrayPath } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Button } from '@/components/ui/button';
+import { createDaisyUIButtonClasses } from '@/lib/button-migration';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -187,19 +187,17 @@ export function RecipeForm({
                     alt="Recipe preview"
                     className="h-full w-full object-cover"
                   />
-                  <Button
+                  <button
                     type="button"
-                    variant="ghost"
-                    size="sm"
+                    className={`${createDaisyUIButtonClasses('ghost', 'sm')} absolute right-2 top-2 bg-white/80 hover:bg-white`}
                     onClick={() => {
                       setImagePreview('');
                       setImageFile(null);
                       setValue('image_url', '');
                     }}
-                    className="absolute right-2 top-2 bg-white/80 hover:bg-white"
                   >
                     <X className="h-4 w-4" />
-                  </Button>
+                  </button>
                 </div>
               )}
 
@@ -211,15 +209,14 @@ export function RecipeForm({
                   onChange={handleImageChange}
                   className="hidden"
                 />
-                <Button
+                <button
                   type="button"
-                  variant="outline"
+                  className={`${createDaisyUIButtonClasses('outline')} border-green-600 text-green-600 hover:bg-green-50`}
                   onClick={() => fileInputRef.current?.click()}
-                  className="border-green-600 text-green-600 hover:bg-green-50"
                 >
                   <Upload className="mr-2 h-4 w-4" />
                   Upload Image
-                </Button>
+                </button>
               </div>
             </div>
           </div>
@@ -230,16 +227,14 @@ export function RecipeForm({
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             Ingredients *
-            <Button
+            <button
               type="button"
-              variant="outline"
-              size="sm"
+              className={`${createDaisyUIButtonClasses('outline', 'sm')} border-green-600 text-green-600 hover:bg-green-50`}
               onClick={addIngredient}
-              className="border-green-600 text-green-600 hover:bg-green-50"
             >
               <Plus className="mr-2 h-4 w-4" />
               Add Ingredient
-            </Button>
+            </button>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -252,15 +247,13 @@ export function RecipeForm({
                   className="flex-1"
                 />
                 {fields.length > 1 && (
-                  <Button
+                  <button
                     type="button"
-                    variant="ghost"
-                    size="sm"
+                    className={`${createDaisyUIButtonClasses('ghost', 'sm')} text-red-500 hover:text-red-700`}
                     onClick={() => removeIngredient(index)}
-                    className="text-red-500 hover:text-red-700"
                   >
                     <X className="h-4 w-4" />
-                  </Button>
+                  </button>
                 )}
               </div>
             ))}
@@ -307,14 +300,14 @@ export function RecipeForm({
       </Card>
 
       <div className="flex justify-end space-x-2">
-        <Button
+        <button
           type="submit"
+          className={`${createDaisyUIButtonClasses('default')} min-w-32`}
           disabled={
             createRecipe.isPending ||
             updateRecipe.isPending ||
             uploadImage.isPending
           }
-          className="min-w-32"
         >
           {createRecipe.isPending ||
           updateRecipe.isPending ||
@@ -325,7 +318,7 @@ export function RecipeForm({
             : existingRecipe
               ? 'Update Recipe'
               : 'Create Recipe'}
-        </Button>
+        </button>
       </div>
     </form>
   );

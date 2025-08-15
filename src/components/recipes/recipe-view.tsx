@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { createDaisyUIButtonClasses } from '@/lib/button-migration';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { ArrowLeft, Clock, Users, Edit, Calendar } from 'lucide-react';
@@ -17,16 +17,22 @@ export function RecipeView({ recipe, onEdit, onBack }: RecipeViewProps) {
       {/* Header */}
       <div className="flex items-center justify-between">
         {onBack && (
-          <Button variant="ghost" onClick={onBack}>
+          <button
+            className={createDaisyUIButtonClasses('ghost')}
+            onClick={onBack}
+          >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Recipes
-          </Button>
+          </button>
         )}
         {onEdit && (
-          <Button onClick={onEdit}>
+          <button
+            className={createDaisyUIButtonClasses('default')}
+            onClick={onEdit}
+          >
             <Edit className="mr-2 h-4 w-4" />
             Edit Recipe
-          </Button>
+          </button>
         )}
       </div>
 

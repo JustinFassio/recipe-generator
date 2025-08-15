@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/button';
+import { createDaisyUIButtonClasses } from '@/lib/button-migration';
 import { ChefHat, LogOut } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -25,33 +25,32 @@ export function Header() {
 
       <div className="navbar-end">
         <nav className="flex items-center space-x-4">
-          <Button
-            variant={location.pathname === '/' ? 'default' : 'ghost'}
+          <button
+            className={createDaisyUIButtonClasses(
+              location.pathname === '/' ? 'default' : 'ghost'
+            )}
             onClick={() => navigate('/')}
           >
             Recipes
-          </Button>
-          <Button
-            variant={location.pathname === '/chat-recipe' ? 'default' : 'ghost'}
-            onClick={() => navigate('/chat-recipe')}
-            className={
+          </button>
+          <button
+            className={`${createDaisyUIButtonClasses(location.pathname === '/chat-recipe' ? 'default' : 'ghost')} ${
               location.pathname === '/chat-recipe'
                 ? ''
                 : 'bg-orange-500 text-white hover:bg-orange-600'
-            }
+            }`}
+            onClick={() => navigate('/chat-recipe')}
           >
             AI Recipe Creator
-          </Button>
+          </button>
           <ThemeToggle />
-          <Button
-            variant="outline"
-            size="sm"
+          <button
+            className={`${createDaisyUIButtonClasses('outline', 'sm')} ml-4`}
             onClick={handleSignOut}
-            className="ml-4"
           >
             <LogOut className="mr-2 h-4 w-4" />
             Sign Out
-          </Button>
+          </button>
         </nav>
       </div>
     </header>

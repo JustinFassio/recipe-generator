@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
+import { createDaisyUIButtonClasses } from '@/lib/button-migration';
 import { ArrowLeft } from 'lucide-react';
 import { ParseRecipeForm } from '@/components/recipes/parse-recipe-form';
 import { RecipeForm } from '@/components/recipes/recipe-form';
@@ -52,10 +52,13 @@ export function AddRecipePage() {
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50">
       <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-6">
-          <Button variant="ghost" onClick={handleCancel} className="mb-4">
+          <button
+            className={`${createDaisyUIButtonClasses('ghost')} mb-4`}
+            onClick={handleCancel}
+          >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Recipes
-          </Button>
+          </button>
 
           <h1 className="mb-2 text-3xl font-bold text-gray-900">
             {existingRecipe ? 'Edit Recipe' : 'Add New Recipe'}
@@ -87,23 +90,25 @@ export function AddRecipePage() {
             </div>
 
             <div className="text-center">
-              <Button
-                variant="outline"
+              <button
+                className={`${createDaisyUIButtonClasses('outline')} border-green-600 text-green-600 hover:bg-green-50`}
                 onClick={() => setShowParser(false)}
-                className="border-green-600 text-green-600 hover:bg-green-50"
               >
                 Create Recipe Manually
-              </Button>
+              </button>
             </div>
           </div>
         ) : (
           <div className="space-y-6">
             {!existingRecipe && (
               <div className="flex items-center justify-between">
-                <Button variant="ghost" onClick={handleBackToParser}>
+                <button
+                  className={createDaisyUIButtonClasses('ghost')}
+                  onClick={handleBackToParser}
+                >
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Back to Parser
-                </Button>
+                </button>
               </div>
             )}
 

@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
+import { createDaisyUIButtonClasses } from '@/lib/button-migration';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -229,14 +229,13 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
             disabled={isLoading}
             className="flex-1"
           />
-          <Button
+          <button
             onClick={handleSendMessage}
             disabled={!inputValue.trim() || isLoading}
-            size="sm"
-            className="bg-green-600 hover:bg-green-700"
+            className={`${createDaisyUIButtonClasses('default', 'sm')} bg-green-600 hover:bg-green-700`}
           >
             <Send className="h-4 w-4" />
-          </Button>
+          </button>
         </div>
         <p className="mt-2 text-xs text-gray-500">
           Press Enter to send, or Shift+Enter for a new line

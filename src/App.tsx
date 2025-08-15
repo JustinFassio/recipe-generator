@@ -7,6 +7,7 @@ import { RecipesPage } from '@/pages/recipes-page';
 import { AddRecipePage } from '@/pages/add-recipe-page';
 import { RecipeViewPage } from '@/pages/recipe-view-page';
 import { ChatRecipePage } from '@/pages/chat-recipe-page';
+
 import { Toaster } from '@/components/ui/toaster';
 
 const queryClient = new QueryClient({
