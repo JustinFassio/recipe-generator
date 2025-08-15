@@ -8,7 +8,10 @@ import {
   createDaisyUICardClasses,
   createDaisyUICardTitleClasses,
 } from '@/lib/card-migration';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import {
+  createDaisyUIAlertClasses,
+  createDaisyUIAlertDescriptionClasses,
+} from '@/lib/alert-migration';
 import { Loader2, Wand2 } from 'lucide-react';
 import {
   parseRecipeSchema,
@@ -102,8 +105,8 @@ Makes about 48 cookies. Store in airtight container.`;
             </div>
 
             {showExample && (
-              <Alert className="mb-4">
-                <AlertDescription>
+              <div className={createDaisyUIAlertClasses('default', 'mb-4')}>
+                <div className={createDaisyUIAlertDescriptionClasses()}>
                   <div className="space-y-2">
                     <p className="font-medium">Supported formats:</p>
                     <ul className="ml-4 space-y-1 text-sm">
@@ -125,8 +128,8 @@ Makes about 48 cookies. Store in airtight container.`;
                       Load Example
                     </button>
                   </div>
-                </AlertDescription>
-              </Alert>
+                </div>
+              </div>
             )}
 
             <textarea
