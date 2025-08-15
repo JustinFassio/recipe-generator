@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useRecipe } from '@/hooks/use-recipes';
 import { RecipeView } from '@/components/recipes/recipe-view';
-import { Card, CardContent } from '@/components/ui/card';
+import { createDaisyUICardClasses } from '@/lib/card-migration';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ChefHat } from 'lucide-react';
 
@@ -16,21 +16,21 @@ export function RecipeViewPage() {
         <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
           <div className="space-y-6">
             <Skeleton className="h-10 w-48" />
-            <Card>
-              <div className="p-6">
+            <div className={createDaisyUICardClasses('bordered')}>
+              <div className="card-body p-6">
                 <Skeleton className="mb-4 h-64 w-full" />
                 <Skeleton className="mb-2 h-8 w-3/4" />
                 <Skeleton className="h-4 w-1/2" />
               </div>
-            </Card>
-            <Card>
-              <div className="space-y-4 p-6">
+            </div>
+            <div className={createDaisyUICardClasses('bordered')}>
+              <div className="card-body space-y-4 p-6">
                 <Skeleton className="h-6 w-32" />
                 {Array.from({ length: 6 }).map((_, i) => (
                   <Skeleton key={i} className="h-4 w-full" />
                 ))}
               </div>
-            </Card>
+            </div>
           </div>
         </div>
       </div>
@@ -41,15 +41,17 @@ export function RecipeViewPage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50 p-4">
         <div className="mx-auto max-w-2xl pt-20">
-          <Card className="p-8 text-center">
-            <CardContent>
+          <div
+            className={`${createDaisyUICardClasses('bordered')} p-8 text-center`}
+          >
+            <div className="card-body">
               <ChefHat className="mx-auto mb-4 h-12 w-12 text-red-400" />
               <h2 className="mb-2 text-xl font-semibold">Recipe not found</h2>
               <p className="mb-4 text-gray-600">
                 The recipe you're looking for doesn't exist or has been deleted.
               </p>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       </div>
     );

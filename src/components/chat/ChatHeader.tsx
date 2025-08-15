@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/button';
+import { createDaisyUIButtonClasses } from '@/lib/button-migration';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Save, ChefHat, Heart, Home, Bot, Brain } from 'lucide-react';
 import { RECIPE_BOT_PERSONAS, type PersonaType } from '@/lib/openai';
@@ -71,38 +71,36 @@ export function ChatHeader({
       <div className="flex items-center space-x-2">
         {generatedRecipe ? (
           // Show save button after recipe is generated
-          <Button
+          <button
             onClick={onSaveRecipe}
-            className="bg-green-600 hover:bg-green-700"
+            className={`${createDaisyUIButtonClasses('default')} bg-green-600 hover:bg-green-700`}
           >
             <Save className="mr-2 h-4 w-4" />
             Save Recipe
-          </Button>
+          </button>
         ) : (
           // Show convert button to create recipe from conversation
-          <Button
+          <button
             onClick={onConvertToRecipe}
             disabled={isLoading}
-            className="bg-blue-600 hover:bg-blue-700"
+            className={`${createDaisyUIButtonClasses('default')} bg-blue-600 hover:bg-blue-700`}
           >
             <Save className="mr-2 h-4 w-4" />
             {isLoading ? 'Parsing Recipe...' : 'Save Recipe'}
-          </Button>
+          </button>
         )}
-        <Button
-          variant="outline"
+        <button
+          className={`${createDaisyUIButtonClasses('outline')} border-green-600 text-green-600 hover:bg-green-50`}
           onClick={onNewRecipe}
-          className="border-green-600 text-green-600 hover:bg-green-50"
         >
           New Recipe
-        </Button>
-        <Button
-          variant="outline"
+        </button>
+        <button
+          className={`${createDaisyUIButtonClasses('outline')} border-orange-500 text-orange-600 hover:bg-orange-50`}
           onClick={onChangeAssistant}
-          className="border-orange-500 text-orange-600 hover:bg-orange-50"
         >
           Change Assistant
-        </Button>
+        </button>
       </div>
     </div>
   );

@@ -1,5 +1,8 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { createDaisyUIButtonClasses } from '@/lib/button-migration';
+import {
+  createDaisyUICardClasses,
+  createDaisyUICardTitleClasses,
+} from '@/lib/card-migration';
 import { Badge } from '@/components/ui/badge';
 import { Trash2, Edit, Eye } from 'lucide-react';
 import type { Recipe } from '@/lib/supabase';
@@ -33,7 +36,9 @@ export function RecipeCard({ recipe, onEdit, onView }: RecipeCardProps) {
 
   return (
     <>
-      <Card className="group overflow-hidden transition-all duration-200 hover:shadow-lg">
+      <div
+        className={`${createDaisyUICardClasses('bordered')} group overflow-hidden border border-gray-200 transition-all duration-200 hover:border-gray-300 hover:shadow-lg`}
+      >
         {recipe.image_url && (
           <div className="aspect-video overflow-hidden">
             <img
@@ -44,48 +49,45 @@ export function RecipeCard({ recipe, onEdit, onView }: RecipeCardProps) {
           </div>
         )}
 
-        <CardHeader className="pb-3">
+        <div className="card-body pb-3">
           <div className="flex items-start justify-between">
-            <CardTitle className="line-clamp-2 text-lg font-semibold">
+            <h3
+              className={`${createDaisyUICardTitleClasses()} line-clamp-2 text-lg font-semibold`}
+            >
               {recipe.title}
-            </CardTitle>
+            </h3>
             <div className="flex items-center space-x-1 opacity-0 transition-opacity group-hover:opacity-100">
-              <Button
-                variant="ghost"
-                size="sm"
+              <button
+                className={`${createDaisyUIButtonClasses('ghost', 'sm')} h-8 w-8 p-0`}
                 onClick={() => onView?.(recipe)}
-                className="h-8 w-8 p-0"
+                aria-label="View recipe"
               >
                 <Eye className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
+              </button>
+              <button
+                className={`${createDaisyUIButtonClasses('ghost', 'sm')} h-8 w-8 p-0`}
                 onClick={() => onEdit?.(recipe)}
-                className="h-8 w-8 p-0"
+                aria-label="Edit recipe"
               >
                 <Edit className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
+              </button>
+              <button
+                className={`${createDaisyUIButtonClasses('ghost', 'sm')} h-8 w-8 p-0 text-red-500 hover:text-red-700`}
                 onClick={() => setShowDeleteDialog(true)}
-                className="h-8 w-8 p-0 text-red-500 hover:text-red-700"
+                aria-label="Delete recipe"
               >
                 <Trash2 className="h-4 w-4" />
-              </Button>
+              </button>
             </div>
           </div>
-        </CardHeader>
 
-        <CardContent className="pt-0">
           <div className="space-y-3">
             <div className="flex items-center justify-between text-sm text-gray-500">
               <Badge variant="secondary" className="text-xs">
                 {recipe.ingredients.length} ingredients
               </Badge>
               <span className="text-xs">
-                {new Date(recipe.created_at).toLocaleDateString()}
+                {new Date(recipe.created_at).toLocaleDateString('en-US')}
               </span>
             </div>
 
@@ -103,8 +105,8 @@ export function RecipeCard({ recipe, onEdit, onView }: RecipeCardProps) {
               </div>
             )}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>

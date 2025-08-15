@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
+import { createDaisyUIButtonClasses } from '@/lib/button-migration';
 import { ArrowLeft } from 'lucide-react';
 import { ChatInterface } from '@/components/chat/ChatInterface';
 import { RecipeForm } from '@/components/recipes/recipe-form';
@@ -31,14 +31,13 @@ export function ChatRecipePage() {
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50">
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-6">
-          <Button
-            variant="ghost"
+          <button
+            className={`${createDaisyUIButtonClasses('ghost')} mb-4`}
             onClick={() => navigate('/')}
-            className="mb-4"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Recipes
-          </Button>
+          </button>
 
           <div className="flex items-center justify-between">
             <div>
@@ -53,14 +52,13 @@ export function ChatRecipePage() {
             </div>
 
             {showEditor && (
-              <Button
-                variant="outline"
+              <button
+                className={`${createDaisyUIButtonClasses('outline')} border-orange-500 text-orange-600 hover:bg-orange-50`}
                 onClick={handleBackToChat}
-                className="border-orange-500 text-orange-600 hover:bg-orange-50"
               >
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Back to Chat
-              </Button>
+              </button>
             )}
           </div>
         </div>

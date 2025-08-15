@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent } from '@/components/ui/card';
+import { createDaisyUIButtonClasses } from '@/lib/button-migration';
+import { createDaisyUIInputClasses } from '@/lib/input-migration';
+import { createDaisyUICardClasses } from '@/lib/card-migration';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
@@ -169,14 +169,14 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
                 </AvatarFallback>
               </Avatar>
 
-              <Card
-                className={`max-w-[80%] ${
+              <div
+                className={`${createDaisyUICardClasses('bordered')} max-w-[80%] ${
                   message.role === 'user'
                     ? 'bg-green-500 text-white'
                     : 'bg-white'
                 }`}
               >
-                <CardContent className="p-3">
+                <div className="card-body p-3">
                   <div className="whitespace-pre-wrap text-sm leading-relaxed">
                     {message.content}
                   </div>
@@ -192,8 +192,8 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
                       minute: '2-digit',
                     })}
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </div>
           ))}
 
@@ -202,16 +202,18 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
               <Avatar className={`h-8 w-8 ${getPersonaColor(persona)}`}>
                 <AvatarFallback>{getPersonaIcon(persona)}</AvatarFallback>
               </Avatar>
-              <Card className="bg-white">
-                <CardContent className="p-3">
+              <div
+                className={`${createDaisyUICardClasses('bordered')} bg-white`}
+              >
+                <div className="card-body p-3">
                   <div className="flex items-center space-x-2">
                     <Loader2 className="h-4 w-4 animate-spin text-orange-500" />
                     <span className="text-sm text-gray-600">
                       {RECIPE_BOT_PERSONAS[persona].name} is thinking...
                     </span>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </div>
           )}
         </div>
@@ -220,23 +222,25 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
       {/* Chat Input */}
       <div className="rounded-b-lg border-t bg-white p-4">
         <div className="flex items-center space-x-2">
-          <Input
+          <input
             ref={inputRef}
+            type="text"
             value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setInputValue(e.target.value)
+            }
             onKeyPress={handleKeyPress}
             placeholder="Type your message here..."
             disabled={isLoading}
-            className="flex-1"
+            className={`${createDaisyUIInputClasses('bordered')} flex-1`}
           />
-          <Button
+          <button
             onClick={handleSendMessage}
             disabled={!inputValue.trim() || isLoading}
-            size="sm"
-            className="bg-green-600 hover:bg-green-700"
+            className={`${createDaisyUIButtonClasses('default', 'sm')} bg-green-600 hover:bg-green-700`}
           >
             <Send className="h-4 w-4" />
-          </Button>
+          </button>
         </div>
         <p className="mt-2 text-xs text-gray-500">
           Press Enter to send, or Shift+Enter for a new line

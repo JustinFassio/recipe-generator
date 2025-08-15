@@ -65,9 +65,14 @@ export const recipeApi = {
   },
 
   // Upload recipe image
-  async uploadImage(file: File, userId: string): Promise<string> {
+  async uploadImage(file: File): Promise<string> {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error('User not authenticated');
+
     const fileExt = file.name.split('.').pop();
-    const fileName = `${userId}/${Date.now()}.${fileExt}`;
+    const fileName = `${user.id}/${Date.now()}.${fileExt}`;
 
     const { error: uploadError } = await supabase.storage
       .from('recipe-images')

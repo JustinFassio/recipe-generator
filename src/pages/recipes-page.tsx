@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent } from '@/components/ui/card';
+import { createDaisyUIButtonClasses } from '@/lib/button-migration';
+import { createDaisyUIInputClasses } from '@/lib/input-migration';
+import { createDaisyUICardClasses } from '@/lib/card-migration';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Plus, Search, ChefHat } from 'lucide-react';
 import { useRecipes } from '@/hooks/use-recipes';
@@ -40,8 +40,10 @@ export function RecipesPage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50 p-4">
         <div className="mx-auto max-w-2xl pt-20">
-          <Card className="p-8 text-center">
-            <CardContent>
+          <div
+            className={`${createDaisyUICardClasses('bordered')} border border-gray-200 p-8 text-center`}
+          >
+            <div className="card-body">
               <ChefHat className="mx-auto mb-4 h-12 w-12 text-red-400" />
               <h2 className="mb-2 text-xl font-semibold">
                 Something went wrong
@@ -49,11 +51,14 @@ export function RecipesPage() {
               <p className="mb-4 text-gray-600">
                 We couldn't load your recipes. Please try refreshing the page.
               </p>
-              <Button onClick={() => window.location.reload()}>
+              <button
+                className={createDaisyUIButtonClasses('default')}
+                onClick={() => window.location.reload()}
+              >
                 Refresh Page
-              </Button>
-            </CardContent>
-          </Card>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -75,23 +80,24 @@ export function RecipesPage() {
               </p>
             </div>
 
-            <Button
+            <button
+              className={`${createDaisyUIButtonClasses('default')} self-start sm:self-auto`}
               onClick={() => navigate('/add')}
-              className="self-start sm:self-auto"
             >
               <Plus className="mr-2 h-4 w-4" />
               Add Recipe
-            </Button>
+            </button>
           </div>
 
           <div className="mt-6">
             <div className="relative">
               <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-              <Input
+              <input
+                type="text"
                 placeholder="Search recipes, ingredients, or instructions..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className={`${createDaisyUIInputClasses('bordered')} pl-10`}
               />
             </div>
           </div>
@@ -100,16 +106,19 @@ export function RecipesPage() {
         {isLoading ? (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {Array.from({ length: 8 }).map((_, i) => (
-              <Card key={i}>
+              <div
+                key={i}
+                className={`${createDaisyUICardClasses('bordered')} border border-gray-200`}
+              >
                 <div className="aspect-video">
                   <Skeleton className="h-full w-full" />
                 </div>
-                <div className="space-y-3 p-6">
+                <div className="card-body space-y-3">
                   <Skeleton className="h-6 w-3/4" />
                   <Skeleton className="h-4 w-1/2" />
                   <Skeleton className="h-16 w-full" />
                 </div>
-              </Card>
+              </div>
             ))}
           </div>
         ) : filteredRecipes.length === 0 ? (
@@ -124,9 +133,12 @@ export function RecipesPage() {
                   Try adjusting your search terms or clear the search to see all
                   recipes.
                 </p>
-                <Button variant="outline" onClick={() => setSearchTerm('')}>
+                <button
+                  className={createDaisyUIButtonClasses('outline')}
+                  onClick={() => setSearchTerm('')}
+                >
                   Clear Search
-                </Button>
+                </button>
               </>
             ) : (
               <>
@@ -137,10 +149,13 @@ export function RecipesPage() {
                   Start building your digital cookbook by adding your first
                   recipe.
                 </p>
-                <Button onClick={() => navigate('/add')}>
+                <button
+                  className={createDaisyUIButtonClasses('default')}
+                  onClick={() => navigate('/add')}
+                >
                   <Plus className="mr-2 h-4 w-4" />
                   Add Your First Recipe
-                </Button>
+                </button>
               </>
             )}
           </div>

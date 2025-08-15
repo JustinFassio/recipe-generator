@@ -5,7 +5,7 @@ import useEmblaCarousel, {
 } from 'embla-carousel-react';
 
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
+import { createDaisyUIButtonClasses } from '@/lib/button-migration';
 
 type CarouselApi = UseEmblaCarouselType[1];
 type UseCarouselParameters = Parameters<typeof useEmblaCarousel>;
@@ -194,58 +194,66 @@ CarouselItem.displayName = 'CarouselItem';
 
 const CarouselPrevious = React.forwardRef<
   HTMLButtonElement,
-  React.ComponentProps<typeof Button>
+  React.ButtonHTMLAttributes<HTMLButtonElement> & {
+    variant?: 'outline' | 'default' | 'secondary' | 'ghost';
+    size?: 'icon' | 'sm' | 'default' | 'lg';
+  }
 >(({ className, variant = 'outline', size = 'icon', ...props }, ref) => {
   const { orientation, scrollPrev, canScrollPrev } = useCarousel();
 
+  const buttonClasses = createDaisyUIButtonClasses(variant, size);
+  const positionClasses = cn(
+    'absolute h-8 w-8 rounded-full',
+    orientation === 'horizontal'
+      ? '-left-12 top-1/2 -translate-y-1/2'
+      : '-top-12 left-1/2 -translate-x-1/2 rotate-90',
+    className
+  );
+
   return (
-    <Button
+    <button
       ref={ref}
-      variant={variant}
-      size={size}
-      className={cn(
-        'absolute h-8 w-8 rounded-full',
-        orientation === 'horizontal'
-          ? '-left-12 top-1/2 -translate-y-1/2'
-          : '-top-12 left-1/2 -translate-x-1/2 rotate-90',
-        className
-      )}
+      className={`${buttonClasses} ${positionClasses}`}
       disabled={!canScrollPrev}
       onClick={scrollPrev}
       {...props}
     >
       <ArrowLeftIcon className="h-4 w-4" />
       <span className="sr-only">Previous slide</span>
-    </Button>
+    </button>
   );
 });
 CarouselPrevious.displayName = 'CarouselPrevious';
 
 const CarouselNext = React.forwardRef<
   HTMLButtonElement,
-  React.ComponentProps<typeof Button>
+  React.ButtonHTMLAttributes<HTMLButtonElement> & {
+    variant?: 'outline' | 'default' | 'secondary' | 'ghost';
+    size?: 'icon' | 'sm' | 'default' | 'lg';
+  }
 >(({ className, variant = 'outline', size = 'icon', ...props }, ref) => {
   const { orientation, scrollNext, canScrollNext } = useCarousel();
 
+  const buttonClasses = createDaisyUIButtonClasses(variant, size);
+  const positionClasses = cn(
+    'absolute h-8 w-8 rounded-full',
+    orientation === 'horizontal'
+      ? '-right-12 top-1/2 -translate-y-1/2'
+      : '-bottom-12 left-1/2 -translate-x-1/2 rotate-90',
+    className
+  );
+
   return (
-    <Button
+    <button
       ref={ref}
-      variant={variant}
-      size={size}
-      className={cn(
-        'absolute h-8 w-8 rounded-full',
-        orientation === 'horizontal'
-          ? '-right-12 top-1/2 -translate-y-1/2'
-          : '-bottom-12 left-1/2 -translate-x-1/2 rotate-90',
-        className
-      )}
+      className={`${buttonClasses} ${positionClasses}`}
       disabled={!canScrollNext}
       onClick={scrollNext}
       {...props}
     >
       <ArrowRightIcon className="h-4 w-4" />
       <span className="sr-only">Next slide</span>
-    </Button>
+    </button>
   );
 });
 CarouselNext.displayName = 'CarouselNext';

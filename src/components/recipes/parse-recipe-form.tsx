@@ -1,10 +1,13 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Button } from '@/components/ui/button';
+import { createDaisyUIButtonClasses } from '@/lib/button-migration';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  createDaisyUICardClasses,
+  createDaisyUICardTitleClasses,
+} from '@/lib/card-migration';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Wand2 } from 'lucide-react';
 import {
@@ -72,26 +75,25 @@ Makes about 48 cookies. Store in airtight container.`;
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center space-x-2">
+    <div className={createDaisyUICardClasses('bordered')}>
+      <div className="card-body">
+        <h3
+          className={`${createDaisyUICardTitleClasses()} flex items-center space-x-2`}
+        >
           <Wand2 className="h-5 w-5 text-orange-500" />
           <span>Parse Recipe</span>
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
+        </h3>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
             <div className="mb-2 flex items-center justify-between">
               <Label htmlFor="recipeText">Recipe Content *</Label>
-              <Button
+              <button
                 type="button"
-                variant="ghost"
-                size="sm"
+                className={createDaisyUIButtonClasses('ghost', 'sm')}
                 onClick={() => setShowExample(!showExample)}
               >
                 {showExample ? 'Hide' : 'Show'} Example
-              </Button>
+              </button>
             </div>
 
             {showExample && (
@@ -110,15 +112,13 @@ Makes about 48 cookies. Store in airtight container.`;
                         fields
                       </li>
                     </ul>
-                    <Button
+                    <button
                       type="button"
-                      variant="outline"
-                      size="sm"
+                      className={`${createDaisyUIButtonClasses('outline', 'sm')} mt-2 border-green-600 text-green-600 hover:bg-green-50`}
                       onClick={loadExample}
-                      className="mt-2 border-green-600 text-green-600 hover:bg-green-50"
                     >
                       Load Example
-                    </Button>
+                    </button>
                   </div>
                 </AlertDescription>
               </Alert>
@@ -138,10 +138,10 @@ Makes about 48 cookies. Store in airtight container.`;
             )}
           </div>
 
-          <Button
+          <button
             type="submit"
+            className={`${createDaisyUIButtonClasses('default')} w-full`}
             disabled={parseRecipe.isPending}
-            className="w-full"
           >
             {parseRecipe.isPending ? (
               <>
@@ -154,9 +154,9 @@ Makes about 48 cookies. Store in airtight container.`;
                 Parse Recipe
               </>
             )}
-          </Button>
+          </button>
         </form>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

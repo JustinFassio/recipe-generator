@@ -1,15 +1,12 @@
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { createDaisyUIButtonClasses } from '@/lib/button-migration';
+import { createDaisyUIInputClasses } from '@/lib/input-migration';
 import { Label } from '@/components/ui/label';
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from '@/components/ui/card';
+  createDaisyUICardClasses,
+  createDaisyUICardTitleClasses,
+} from '@/lib/card-migration';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ChefHat } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
@@ -67,17 +64,23 @@ export function AuthForm() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-orange-50 to-teal-50 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
+      <div
+        className={`${createDaisyUICardClasses('bordered')} w-full max-w-md`}
+      >
+        <div className="card-body text-center">
           <div className="mb-4 flex items-center justify-center">
             <ChefHat className="h-12 w-12 text-orange-500" />
           </div>
-          <CardTitle className="text-2xl font-bold">Recipe Generator</CardTitle>
-          <CardDescription>
+          <h3
+            className={`${createDaisyUICardTitleClasses()} text-2xl font-bold`}
+          >
+            Recipe Generator
+          </h3>
+          <p className="text-sm opacity-70">
             Your digital cookbook for collecting and organizing recipes
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+          </p>
+        </div>
+        <div className="card-body">
           <Tabs defaultValue="signin" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="signin">Sign In</TabsTrigger>
@@ -88,27 +91,38 @@ export function AuthForm() {
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
-                  <Input
+                  <input
                     id="email"
                     type="email"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setEmail(e.target.value)
+                    }
+                    className={createDaisyUIInputClasses('bordered')}
                     required
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="password">Password</Label>
-                  <Input
+                  <input
                     id="password"
                     type="password"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setPassword(e.target.value)
+                    }
+                    className={createDaisyUIInputClasses('bordered')}
+                    autoComplete="current-password"
                     required
                   />
                 </div>
-                <Button type="submit" className="w-full" disabled={loading}>
+                <button
+                  type="submit"
+                  className={`${createDaisyUIButtonClasses('default')} w-full`}
+                  disabled={loading}
+                >
                   {loading ? 'Signing In...' : 'Sign In'}
-                </Button>
+                </button>
               </form>
             </TabsContent>
 
@@ -116,33 +130,44 @@ export function AuthForm() {
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="signup-email">Email</Label>
-                  <Input
+                  <input
                     id="signup-email"
                     type="email"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setEmail(e.target.value)
+                    }
+                    className={createDaisyUIInputClasses('bordered')}
                     required
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signup-password">Password</Label>
-                  <Input
+                  <input
                     id="signup-password"
                     type="password"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setPassword(e.target.value)
+                    }
+                    className={createDaisyUIInputClasses('bordered')}
+                    autoComplete="new-password"
                     required
                     minLength={6}
                   />
                 </div>
-                <Button type="submit" className="w-full" disabled={loading}>
+                <button
+                  type="submit"
+                  className={`${createDaisyUIButtonClasses('default')} w-full`}
+                  disabled={loading}
+                >
                   {loading ? 'Creating Account...' : 'Sign Up'}
-                </Button>
+                </button>
               </form>
             </TabsContent>
           </Tabs>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }
