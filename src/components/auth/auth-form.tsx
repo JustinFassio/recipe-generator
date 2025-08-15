@@ -10,7 +10,6 @@ import {
 import {
   createDaisyUITabsClasses,
   createDaisyUITabClasses,
-  createDaisyUITabContentClasses,
 } from '@/lib/tabs-migration';
 import { ChefHat } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
@@ -86,8 +85,12 @@ export function AuthForm() {
           </p>
         </div>
         <div className="card-body">
-          <div className={createDaisyUITabsClasses('bordered', 'md', 'w-full')}>
+          <div
+            className={createDaisyUITabsClasses('bordered', 'md', 'w-full')}
+            role="tablist"
+          >
             <a
+              role="tab"
               className={createDaisyUITabClasses(
                 activeTab === 'signin' ? 'tab-active' : undefined
               )}
@@ -96,6 +99,7 @@ export function AuthForm() {
               Sign In
             </a>
             <a
+              role="tab"
               className={createDaisyUITabClasses(
                 activeTab === 'signup' ? 'tab-active' : undefined
               )}
@@ -105,7 +109,7 @@ export function AuthForm() {
             </a>
           </div>
 
-          <div className={createDaisyUITabContentClasses()}>
+          <div className="mt-4">
             {activeTab === 'signin' && (
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-2">
