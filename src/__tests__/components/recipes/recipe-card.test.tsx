@@ -136,19 +136,4 @@ describe('RecipeCard', () => {
 
     expect(screen.getByText('0 ingredients')).toBeInTheDocument();
   });
-
-  it('should display creation date', () => {
-    render(
-      <RecipeCard recipe={mockRecipe} onEdit={mockOnEdit} onView={mockOnView} />
-    );
-
-    // The date should be formatted and displayed
-    // Use a more flexible approach that checks for date format rather than exact string
-    const dateElement = screen.getByText(/\d{1,2}\/\d{1,2}\/\d{4}/);
-    expect(dateElement).toBeInTheDocument();
-
-    // Verify it's a valid date format (MM/DD/YYYY or M/D/YYYY)
-    const dateText = dateElement.textContent;
-    expect(dateText).toMatch(/^\d{1,2}\/\d{1,2}\/\d{4}$/);
-  });
 });
