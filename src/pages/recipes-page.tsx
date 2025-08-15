@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { createDaisyUIButtonClasses } from '@/lib/button-migration';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent } from '@/components/ui/card';
+import { createDaisyUICardClasses } from '@/lib/card-migration';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Plus, Search, ChefHat } from 'lucide-react';
 import { useRecipes } from '@/hooks/use-recipes';
@@ -40,8 +40,10 @@ export function RecipesPage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50 p-4">
         <div className="mx-auto max-w-2xl pt-20">
-          <Card className="p-8 text-center">
-            <CardContent>
+          <div
+            className={`${createDaisyUICardClasses('bordered')} p-8 text-center`}
+          >
+            <div className="card-body">
               <ChefHat className="mx-auto mb-4 h-12 w-12 text-red-400" />
               <h2 className="mb-2 text-xl font-semibold">
                 Something went wrong
@@ -55,8 +57,8 @@ export function RecipesPage() {
               >
                 Refresh Page
               </button>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -103,16 +105,16 @@ export function RecipesPage() {
         {isLoading ? (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {Array.from({ length: 8 }).map((_, i) => (
-              <Card key={i}>
+              <div key={i} className={createDaisyUICardClasses('bordered')}>
                 <div className="aspect-video">
                   <Skeleton className="h-full w-full" />
                 </div>
-                <div className="space-y-3 p-6">
+                <div className="card-body space-y-3">
                   <Skeleton className="h-6 w-3/4" />
                   <Skeleton className="h-4 w-1/2" />
                   <Skeleton className="h-16 w-full" />
                 </div>
-              </Card>
+              </div>
             ))}
           </div>
         ) : filteredRecipes.length === 0 ? (

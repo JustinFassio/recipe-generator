@@ -4,12 +4,9 @@ import { createDaisyUIButtonClasses } from '@/lib/button-migration';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from '@/components/ui/card';
+  createDaisyUICardClasses,
+  createDaisyUICardTitleClasses,
+} from '@/lib/card-migration';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ChefHat } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
@@ -79,19 +76,23 @@ export function AuthForm() {
           </div>
         </div>
 
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
+        <div
+          className={`${createDaisyUICardClasses('bordered')} w-full max-w-md`}
+        >
+          <div className="card-body text-center">
             <div className="mb-4 flex items-center justify-center">
               <ChefHat className="h-12 w-12 text-orange-500" />
             </div>
-            <CardTitle className="text-2xl font-bold">
+            <h3
+              className={`${createDaisyUICardTitleClasses()} text-2xl font-bold`}
+            >
               Recipe Generator
-            </CardTitle>
-            <CardDescription>
+            </h3>
+            <p className="text-sm opacity-70">
               Your digital cookbook for collecting and organizing recipes
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+            </p>
+          </div>
+          <div className="card-body">
             <Tabs defaultValue="signin" className="w-full">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="signin">Sign In</TabsTrigger>
@@ -163,8 +164,8 @@ export function AuthForm() {
                 </form>
               </TabsContent>
             </Tabs>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </div>
   );

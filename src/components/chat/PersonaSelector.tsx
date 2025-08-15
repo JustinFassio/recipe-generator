@@ -1,4 +1,4 @@
-import { Card, CardContent } from '@/components/ui/card';
+import { createDaisyUICardClasses } from '@/lib/card-migration';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Bot, ChefHat, Heart, Home, Brain } from 'lucide-react';
 import { RECIPE_BOT_PERSONAS, type PersonaType } from '@/lib/openai';
@@ -77,12 +77,12 @@ export function PersonaSelector({ onPersonaSelect }: PersonaSelectorProps) {
       <div className="flex-1 bg-gray-50 p-6">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {Object.entries(RECIPE_BOT_PERSONAS).map(([key, persona]) => (
-            <Card
+            <div
               key={key}
-              className="cursor-pointer transition-shadow hover:shadow-md"
+              className={`${createDaisyUICardClasses('bordered')} cursor-pointer transition-shadow hover:shadow-md`}
               onClick={() => onPersonaSelect(key as PersonaType)}
             >
-              <CardContent className="relative p-6 text-center">
+              <div className="card-body relative p-6 text-center">
                 <AssistantBadge
                   isAssistantPowered={persona.isAssistantPowered}
                 />
@@ -102,8 +102,8 @@ export function PersonaSelector({ onPersonaSelect }: PersonaSelectorProps) {
                     🤖 Powered by OpenAI Assistant
                   </p>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           ))}
         </div>
       </div>

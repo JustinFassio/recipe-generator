@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { createDaisyUIButtonClasses } from '@/lib/button-migration';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent } from '@/components/ui/card';
+import { createDaisyUICardClasses } from '@/lib/card-migration';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
@@ -169,14 +169,14 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
                 </AvatarFallback>
               </Avatar>
 
-              <Card
-                className={`max-w-[80%] ${
+              <div
+                className={`${createDaisyUICardClasses('bordered')} max-w-[80%] ${
                   message.role === 'user'
                     ? 'bg-green-500 text-white'
                     : 'bg-white'
                 }`}
               >
-                <CardContent className="p-3">
+                <div className="card-body p-3">
                   <div className="whitespace-pre-wrap text-sm leading-relaxed">
                     {message.content}
                   </div>
@@ -192,8 +192,8 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
                       minute: '2-digit',
                     })}
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </div>
           ))}
 
@@ -202,16 +202,18 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
               <Avatar className={`h-8 w-8 ${getPersonaColor(persona)}`}>
                 <AvatarFallback>{getPersonaIcon(persona)}</AvatarFallback>
               </Avatar>
-              <Card className="bg-white">
-                <CardContent className="p-3">
+              <div
+                className={`${createDaisyUICardClasses('bordered')} bg-white`}
+              >
+                <div className="card-body p-3">
                   <div className="flex items-center space-x-2">
                     <Loader2 className="h-4 w-4 animate-spin text-orange-500" />
                     <span className="text-sm text-gray-600">
                       {RECIPE_BOT_PERSONAS[persona].name} is thinking...
                     </span>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </div>
           )}
         </div>
