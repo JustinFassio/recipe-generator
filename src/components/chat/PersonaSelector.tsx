@@ -79,16 +79,16 @@ export function PersonaSelector({ onPersonaSelect }: PersonaSelectorProps) {
           {Object.entries(RECIPE_BOT_PERSONAS).map(([key, persona]) => (
             <div
               key={key}
-              className={`${createDaisyUICardClasses('bordered')} cursor-pointer transition-shadow hover:shadow-md`}
+              className={`${createDaisyUICardClasses('bordered')} cursor-pointer border-2 border-gray-200 transition-all duration-200 hover:border-gray-300 hover:shadow-lg`}
               onClick={() => onPersonaSelect(key as PersonaType)}
             >
-              <div className="card-body relative p-6 text-center">
+              <div className="card-body relative p-6 text-center transition-colors duration-200 hover:bg-gray-50">
                 <AssistantBadge
                   isAssistantPowered={persona.isAssistantPowered}
                 />
 
                 <div
-                  className={`mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full ${getPersonaColor(key as PersonaType)}`}
+                  className={`mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full border-2 border-white shadow-md ${getPersonaColor(key as PersonaType)}`}
                 >
                   {getPersonaIcon(key as PersonaType)}
                 </div>
