@@ -88,13 +88,17 @@ export function AuthForm() {
         <div className="card-body">
           <div className={createDaisyUITabsClasses('bordered', 'md', 'w-full')}>
             <a
-              className={createDaisyUITabClasses('tab-active')}
+              className={createDaisyUITabClasses(
+                activeTab === 'signin' ? 'tab-active' : undefined
+              )}
               onClick={() => setActiveTab('signin')}
             >
               Sign In
             </a>
             <a
-              className={createDaisyUITabClasses()}
+              className={createDaisyUITabClasses(
+                activeTab === 'signup' ? 'tab-active' : undefined
+              )}
               onClick={() => setActiveTab('signup')}
             >
               Sign Up
