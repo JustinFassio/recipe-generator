@@ -12,7 +12,10 @@ if (!supabaseUrl || !supabaseAnonKey) {
     supabaseAnonKey ? 'SET' : 'MISSING'
   );
 
-  if (supabaseUrl && (supabaseUrl.includes('127.0.0.1') || supabaseUrl.includes('localhost'))) {
+  if (
+    supabaseUrl &&
+    (supabaseUrl.includes('127.0.0.1') || supabaseUrl.includes('localhost'))
+  ) {
     console.error('❌ ERROR: Supabase URL points to localhost!');
     console.error('   This should point to your production Supabase project.');
     console.error('   Safari blocks localhost connections from HTTPS sites.');

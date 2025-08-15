@@ -12,10 +12,9 @@ export function SafariError() {
 
     // Check for localhost in Supabase URL
     const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-    const hasLocalhostUrl = supabaseUrl && (
-      supabaseUrl.includes('127.0.0.1') || 
-      supabaseUrl.includes('localhost')
-    );
+    const hasLocalhostUrl =
+      supabaseUrl &&
+      (supabaseUrl.includes('127.0.0.1') || supabaseUrl.includes('localhost'));
     setHasLocalhost(!!hasLocalhostUrl);
   }, []);
 
@@ -41,9 +40,9 @@ export function SafariError() {
       <div>
         <h3 className="font-bold">Safari Security Issue</h3>
         <div className="text-sm">
-          Safari is blocking connections to localhost from this HTTPS site. 
-          This is a security feature. Please update your environment variables 
-          to use your production Supabase URL.
+          Safari is blocking connections to localhost from this HTTPS site. This
+          is a security feature. Please update your environment variables to use
+          your production Supabase URL.
         </div>
       </div>
     </div>

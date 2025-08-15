@@ -9,6 +9,7 @@ import { RecipeViewPage } from '@/pages/recipe-view-page';
 import { ChatRecipePage } from '@/pages/chat-recipe-page';
 import { Toaster } from '@/components/ui/toaster';
 import { EnvDebug } from '@/components/ui/env-debug';
+import { SupabaseTest } from '@/components/ui/supabase-test';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -32,6 +33,7 @@ function AppContent() {
         </Routes>
       </main>
       <EnvDebug />
+      <SupabaseTest />
     </div>
   );
 }
