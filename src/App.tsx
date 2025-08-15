@@ -7,6 +7,7 @@ import { RecipesPage } from '@/pages/recipes-page';
 import { AddRecipePage } from '@/pages/add-recipe-page';
 import { RecipeViewPage } from '@/pages/recipe-view-page';
 import { ChatRecipePage } from '@/pages/chat-recipe-page';
+import { CardMigrationTestPage } from '@/pages/card-migration-test-page';
 
 import { Toaster } from '@/components/ui/toaster';
 
@@ -29,6 +30,7 @@ function AppContent() {
           <Route path="/add" element={<AddRecipePage />} />
           <Route path="/chat-recipe" element={<ChatRecipePage />} />
           <Route path="/recipe/:id" element={<RecipeViewPage />} />
+          <Route path="/card-test" element={<CardMigrationTestPage />} />
         </Routes>
       </main>
     </div>
