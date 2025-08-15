@@ -15,6 +15,7 @@ This directory contains comprehensive documentation for all workflows in the Rec
 - **[DaisyUI Integration Guide](daisyui-integration-guide.md)** - Complete guide to using DaisyUI components
 - **[DaisyUI Button Migration Plan](daisyui-button-migration-plan.md)** - Phased approach to replace shadcn/ui buttons
 - **[DaisyUI Card Migration Plan](daisyui-card-migration-plan.md)** - Strategic plan for migrating cards to DaisyUI
+- **[DaisyUI Input Migration Plan](daisyui-input-migration-plan.md)** - Phased approach to replace shadcn/ui inputs
 
 ### **Technical Workflows**
 
