@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { AuthForm } from '@/components/auth/auth-form';
@@ -27,11 +28,11 @@ describe('AuthForm', () => {
     vi.mocked(mockSupabase.auth.signInWithPassword).mockResolvedValue({
       data: { user: null, session: null },
       error: null,
-    });
+    } as any);
     vi.mocked(mockSupabase.auth.signUp).mockResolvedValue({
       data: { user: null, session: null },
       error: null,
-    });
+    } as any);
   });
 
   describe('Tab Functionality', () => {
@@ -128,7 +129,10 @@ describe('AuthForm', () => {
           new Promise((resolve) =>
             setTimeout(
               () =>
-                resolve({ data: { user: null, session: null }, error: null }),
+                resolve({
+                  data: { user: null, session: null },
+                  error: null,
+                } as any),
               100
             )
           )
@@ -187,7 +191,10 @@ describe('AuthForm', () => {
           new Promise((resolve) =>
             setTimeout(
               () =>
-                resolve({ data: { user: null, session: null }, error: null }),
+                resolve({
+                  data: { user: null, session: null },
+                  error: null,
+                } as any),
               100
             )
           )
