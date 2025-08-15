@@ -8,6 +8,7 @@ import { AddRecipePage } from '@/pages/add-recipe-page';
 import { RecipeViewPage } from '@/pages/recipe-view-page';
 import { ChatRecipePage } from '@/pages/chat-recipe-page';
 import { Toaster } from '@/components/ui/toaster';
+import { EnvDebug } from '@/components/ui/env-debug';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -30,6 +31,7 @@ function AppContent() {
           <Route path="/recipe/:id" element={<RecipeViewPage />} />
         </Routes>
       </main>
+      <EnvDebug />
     </div>
   );
 }

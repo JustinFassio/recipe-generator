@@ -13,7 +13,7 @@ export function Header() {
   };
 
   return (
-    <header className="navbar bg-base-100 border-b shadow-sm">
+    <header className="navbar border-b bg-base-100 shadow-sm">
       <div className="navbar-start">
         <div className="flex items-center space-x-4">
           <ChefHat className="h-8 w-8 text-primary" />
@@ -25,35 +25,33 @@ export function Header() {
 
       <div className="navbar-end">
         <nav className="flex items-center space-x-4">
-            <Button
-              variant={location.pathname === '/' ? 'default' : 'ghost'}
-              onClick={() => navigate('/')}
-            >
-              Recipes
-            </Button>
-            <Button
-              variant={
-                location.pathname === '/chat-recipe' ? 'default' : 'ghost'
-              }
-              onClick={() => navigate('/chat-recipe')}
-              className={
-                location.pathname === '/chat-recipe'
-                  ? ''
-                  : 'bg-orange-500 text-white hover:bg-orange-600'
-              }
-            >
-              AI Recipe Creator
-            </Button>
-            <ThemeToggle />
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleSignOut}
-              className="ml-4"
-            >
-              <LogOut className="mr-2 h-4 w-4" />
-              Sign Out
-            </Button>
+          <Button
+            variant={location.pathname === '/' ? 'default' : 'ghost'}
+            onClick={() => navigate('/')}
+          >
+            Recipes
+          </Button>
+          <Button
+            variant={location.pathname === '/chat-recipe' ? 'default' : 'ghost'}
+            onClick={() => navigate('/chat-recipe')}
+            className={
+              location.pathname === '/chat-recipe'
+                ? ''
+                : 'bg-orange-500 text-white hover:bg-orange-600'
+            }
+          >
+            AI Recipe Creator
+          </Button>
+          <ThemeToggle />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleSignOut}
+            className="ml-4"
+          >
+            <LogOut className="mr-2 h-4 w-4" />
+            Sign Out
+          </Button>
         </nav>
       </div>
     </header>

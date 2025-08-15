@@ -16,7 +16,7 @@ export function ThemeToggle() {
     const currentIndex = themes.indexOf(theme);
     const nextIndex = (currentIndex + 1) % themes.length;
     const newTheme = themes[nextIndex];
-    
+
     setTheme(newTheme);
     localStorage.setItem('theme', newTheme);
     document.documentElement.setAttribute('data-theme', newTheme);
@@ -25,7 +25,7 @@ export function ThemeToggle() {
   return (
     <button
       onClick={toggleTheme}
-      className="btn btn-circle btn-ghost"
+      className="btn btn-ghost btn-circle"
       title={`Current theme: ${theme}. Click to change.`}
     >
       {theme === 'dark' ? (
