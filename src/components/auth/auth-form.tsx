@@ -64,110 +64,108 @@ export function AuthForm() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-orange-50 to-teal-50 p-4">
-      <div className="w-full max-w-md space-y-6">
-        <div
-          className={`${createDaisyUICardClasses('bordered')} w-full max-w-md`}
-        >
-          <div className="card-body text-center">
-            <div className="mb-4 flex items-center justify-center">
-              <ChefHat className="h-12 w-12 text-orange-500" />
-            </div>
-            <h3
-              className={`${createDaisyUICardTitleClasses()} text-2xl font-bold`}
-            >
-              Recipe Generator
-            </h3>
-            <p className="text-sm opacity-70">
-              Your digital cookbook for collecting and organizing recipes
-            </p>
+      <div
+        className={`${createDaisyUICardClasses('bordered')} w-full max-w-md`}
+      >
+        <div className="card-body text-center">
+          <div className="mb-4 flex items-center justify-center">
+            <ChefHat className="h-12 w-12 text-orange-500" />
           </div>
-          <div className="card-body">
-            <Tabs defaultValue="signin" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="signin">Sign In</TabsTrigger>
-                <TabsTrigger value="signup">Sign Up</TabsTrigger>
-              </TabsList>
+          <h3
+            className={`${createDaisyUICardTitleClasses()} text-2xl font-bold`}
+          >
+            Recipe Generator
+          </h3>
+          <p className="text-sm opacity-70">
+            Your digital cookbook for collecting and organizing recipes
+          </p>
+        </div>
+        <div className="card-body">
+          <Tabs defaultValue="signin" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="signin">Sign In</TabsTrigger>
+              <TabsTrigger value="signup">Sign Up</TabsTrigger>
+            </TabsList>
 
-              <TabsContent value="signin">
-                <form onSubmit={handleSignIn} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <input
-                      id="email"
-                      type="email"
-                      value={email}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        setEmail(e.target.value)
-                      }
-                      className={createDaisyUIInputClasses('bordered')}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="password">Password</Label>
-                    <input
-                      id="password"
-                      type="password"
-                      value={password}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        setPassword(e.target.value)
-                      }
-                      className={createDaisyUIInputClasses('bordered')}
-                      autoComplete="current-password"
-                      required
-                    />
-                  </div>
-                  <button
-                    type="submit"
-                    className={`${createDaisyUIButtonClasses('default')} w-full`}
-                    disabled={loading}
-                  >
-                    {loading ? 'Signing In...' : 'Sign In'}
-                  </button>
-                </form>
-              </TabsContent>
+            <TabsContent value="signin">
+              <form onSubmit={handleSignIn} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setEmail(e.target.value)
+                    }
+                    className={createDaisyUIInputClasses('bordered')}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="password">Password</Label>
+                  <input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setPassword(e.target.value)
+                    }
+                    className={createDaisyUIInputClasses('bordered')}
+                    autoComplete="current-password"
+                    required
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className={`${createDaisyUIButtonClasses('default')} w-full`}
+                  disabled={loading}
+                >
+                  {loading ? 'Signing In...' : 'Sign In'}
+                </button>
+              </form>
+            </TabsContent>
 
-              <TabsContent value="signup">
-                <form onSubmit={handleSignUp} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-email">Email</Label>
-                    <input
-                      id="signup-email"
-                      type="email"
-                      value={email}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        setEmail(e.target.value)
-                      }
-                      className={createDaisyUIInputClasses('bordered')}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-password">Password</Label>
-                    <input
-                      id="signup-password"
-                      type="password"
-                      value={password}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        setPassword(e.target.value)
-                      }
-                      className={createDaisyUIInputClasses('bordered')}
-                      autoComplete="new-password"
-                      required
-                      minLength={6}
-                    />
-                  </div>
-                  <button
-                    type="submit"
-                    className={`${createDaisyUIButtonClasses('default')} w-full`}
-                    disabled={loading}
-                  >
-                    {loading ? 'Creating Account...' : 'Sign Up'}
-                  </button>
-                </form>
-              </TabsContent>
-            </Tabs>
-          </div>
+            <TabsContent value="signup">
+              <form onSubmit={handleSignUp} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="signup-email">Email</Label>
+                  <input
+                    id="signup-email"
+                    type="email"
+                    value={email}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setEmail(e.target.value)
+                    }
+                    className={createDaisyUIInputClasses('bordered')}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="signup-password">Password</Label>
+                  <input
+                    id="signup-password"
+                    type="password"
+                    value={password}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setPassword(e.target.value)
+                    }
+                    className={createDaisyUIInputClasses('bordered')}
+                    autoComplete="new-password"
+                    required
+                    minLength={6}
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className={`${createDaisyUIButtonClasses('default')} w-full`}
+                  disabled={loading}
+                >
+                  {loading ? 'Creating Account...' : 'Sign Up'}
+                </button>
+              </form>
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </div>

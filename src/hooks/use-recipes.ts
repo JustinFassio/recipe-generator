@@ -105,8 +105,7 @@ export const useParseRecipe = () => {
 
 export const useUploadImage = () => {
   return useMutation({
-    mutationFn: ({ file, userId }: { file: File; userId: string }) =>
-      recipeApi.uploadImage(file, userId),
+    mutationFn: (file: File) => recipeApi.uploadImage(file),
     onError: (error) => {
       toast({
         title: 'Error',

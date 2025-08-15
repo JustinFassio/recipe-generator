@@ -18,7 +18,7 @@ import {
 } from '@/hooks/use-recipes';
 import { useLocation } from 'react-router-dom';
 import { X, Upload, Plus } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+
 import type { Recipe } from '@/lib/supabase';
 
 interface RecipeFormProps {
@@ -103,11 +103,8 @@ export function RecipeForm({
     const file = e.target.files?.[0];
     if (file) {
       setImageFile(file);
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setImagePreview(e.target?.result as string);
-      };
-      reader.readAsDataURL(file);
+      const previewUrl = URL.createObjectURL(file);
+      setImagePreview(previewUrl);
     }
   };
 
@@ -127,20 +124,11 @@ export function RecipeForm({
 
       // Upload image if there's a new file
       if (imageFile) {
-        const fileName = `${Date.now()}-${imageFile.name}`;
-        const { error: uploadError } = await supabase.storage
-          .from('recipe-images')
-          .upload(fileName, imageFile);
-
-        if (uploadError) {
+        const uploadedUrl = await uploadImage.mutateAsync(imageFile);
+        if (!uploadedUrl) {
           throw new Error('Failed to upload image');
         }
-
-        const { data: urlData } = supabase.storage
-          .from('recipe-images')
-          .getPublicUrl(fileName);
-
-        imageUrl = urlData.publicUrl;
+        imageUrl = uploadedUrl;
       }
 
       const recipeData = {
