@@ -87,7 +87,7 @@ export function RecipeCard({ recipe, onEdit, onView }: RecipeCardProps) {
                 {recipe.ingredients.length} ingredients
               </Badge>
               <span className="text-xs">
-                {new Date(recipe.created_at).toLocaleDateString()}
+                {new Date(recipe.created_at).toLocaleDateString('en-US')}
               </span>
             </div>
 
