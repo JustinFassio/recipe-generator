@@ -3,7 +3,7 @@ import { useForm, useFieldArray } from 'react-hook-form';
 import type { FieldArrayPath } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { createDaisyUIButtonClasses } from '@/lib/button-migration';
-import { Input } from '@/components/ui/input';
+import { createDaisyUIInputClasses } from '@/lib/input-migration';
 import { Textarea } from '@/components/ui/textarea';
 import {
   createDaisyUICardClasses,
@@ -171,11 +171,12 @@ export function RecipeForm({
           <div className="space-y-4">
             <div>
               <Label htmlFor="title">Recipe Title *</Label>
-              <Input
+              <input
                 id="title"
+                type="text"
                 {...register('title')}
                 placeholder="Enter recipe title"
-                className="mt-1"
+                className={`${createDaisyUIInputClasses('bordered')} mt-1`}
               />
               {errors.title && (
                 <p className="mt-1 text-sm text-red-500">
@@ -249,10 +250,11 @@ export function RecipeForm({
           <div className="space-y-2">
             {fields.map((field, index) => (
               <div key={field.id} className="flex items-center space-x-2">
-                <Input
+                <input
+                  type="text"
                   {...register(`ingredients.${index}` as const)}
                   placeholder={`Ingredient ${index + 1}`}
-                  className="flex-1"
+                  className={`${createDaisyUIInputClasses('bordered')} flex-1`}
                 />
                 {fields.length > 1 && (
                   <button
