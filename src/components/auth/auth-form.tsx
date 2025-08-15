@@ -73,7 +73,10 @@ export function AuthForm() {
       >
         <div className="card-body text-center">
           <div className="mb-4 flex items-center justify-center">
-            <ChefHat className="h-12 w-12 text-orange-500" />
+            <ChefHat
+              className="h-12 w-12 text-orange-500"
+              data-testid="chef-hat-icon"
+            />
           </div>
           <h3
             className={`${createDaisyUICardTitleClasses()} text-2xl font-bold`}
