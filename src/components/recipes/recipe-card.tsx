@@ -3,7 +3,7 @@ import {
   createDaisyUICardClasses,
   createDaisyUICardTitleClasses,
 } from '@/lib/card-migration';
-import { Badge } from '@/components/ui/badge';
+import { createDaisyUIBadgeClasses } from '@/lib/badge-migration';
 import { Trash2, Edit, Eye } from 'lucide-react';
 import type { Recipe } from '@/lib/supabase';
 import { useDeleteRecipe } from '@/hooks/use-recipes';
@@ -83,9 +83,11 @@ export function RecipeCard({ recipe, onEdit, onView }: RecipeCardProps) {
 
           <div className="space-y-3">
             <div className="flex items-center justify-between text-sm text-gray-500">
-              <Badge variant="secondary" className="text-xs">
+              <span
+                className={createDaisyUIBadgeClasses('secondary', 'text-xs')}
+              >
                 {recipe.ingredients.length} ingredients
-              </Badge>
+              </span>
               <span className="text-xs">
                 {new Date(recipe.created_at).toLocaleDateString('en-US')}
               </span>

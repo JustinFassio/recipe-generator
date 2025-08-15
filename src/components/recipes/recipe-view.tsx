@@ -3,7 +3,7 @@ import {
   createDaisyUICardClasses,
   createDaisyUICardTitleClasses,
 } from '@/lib/card-migration';
-import { Badge } from '@/components/ui/badge';
+import { createDaisyUIBadgeClasses } from '@/lib/badge-migration';
 import { Separator } from '@/components/ui/separator';
 import { ArrowLeft, Clock, Users, Edit, Calendar } from 'lucide-react';
 import type { Recipe } from '@/lib/supabase';
@@ -61,9 +61,9 @@ export function RecipeView({ recipe, onEdit, onBack }: RecipeViewProps) {
               <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
                 <div className="flex items-center">
                   <Users className="mr-1 h-4 w-4" />
-                  <Badge variant="secondary">
+                  <span className={createDaisyUIBadgeClasses('secondary')}>
                     {recipe.ingredients.length} ingredients
-                  </Badge>
+                  </span>
                 </div>
                 <div className="flex items-center">
                   <Calendar className="mr-1 h-4 w-4" />
