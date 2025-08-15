@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { createDaisyUIButtonClasses } from '@/lib/button-migration';
 import { createDaisyUIInputClasses } from '@/lib/input-migration';
 import { createDaisyUICardClasses } from '@/lib/card-migration';
-import { Skeleton } from '@/components/ui/skeleton';
+import { createDaisyUISkeletonClasses } from '@/lib/skeleton-migration';
 import { Plus, Search, ChefHat } from 'lucide-react';
 import { useRecipes } from '@/hooks/use-recipes';
 import { RecipeCard } from '@/components/recipes/recipe-card';
@@ -111,12 +111,16 @@ export function RecipesPage() {
                 className={`${createDaisyUICardClasses('bordered')} border border-gray-200`}
               >
                 <div className="aspect-video">
-                  <Skeleton className="h-full w-full" />
+                  <div
+                    className={createDaisyUISkeletonClasses('h-full w-full')}
+                  />
                 </div>
                 <div className="card-body space-y-3">
-                  <Skeleton className="h-6 w-3/4" />
-                  <Skeleton className="h-4 w-1/2" />
-                  <Skeleton className="h-16 w-full" />
+                  <div className={createDaisyUISkeletonClasses('h-6 w-3/4')} />
+                  <div className={createDaisyUISkeletonClasses('h-4 w-1/2')} />
+                  <div
+                    className={createDaisyUISkeletonClasses('h-16 w-full')}
+                  />
                 </div>
               </div>
             ))}
