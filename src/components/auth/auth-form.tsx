@@ -1,41 +1,164 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { createDaisyUIButtonClasses } from '@/lib/button-migration';
-import { createDaisyUIInputClasses } from '@/lib/input-migration';
-import { createDaisyUILabelClasses } from '@/lib/label-migration';
-import {
-  createDaisyUICardClasses,
-  createDaisyUICardTitleClasses,
-} from '@/lib/card-migration';
-import {
-  createDaisyUITabsClasses,
-  createDaisyUITabClasses,
-} from '@/lib/tabs-migration';
-import { ChefHat } from 'lucide-react';
+
+import { User, Lock, Plus } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Divider } from '@/components/ui/divider';
+import type { Recipe } from '@/lib/supabase';
 
 export function AuthForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [acceptTerms, setAcceptTerms] = useState(false);
+  const [subscribeEmails, setSubscribeEmails] = useState(false);
   const [activeTab, setActiveTab] = useState<'signin' | 'signup'>('signin');
+  const [userRecipes, setUserRecipes] = useState<Recipe[]>([]);
+  const [recipesLoading, setRecipesLoading] = useState(true);
+
+  // Fetch recipes with images from the database
+  useEffect(() => {
+    const fetchRecipes = async () => {
+      try {
+        setRecipesLoading(true);
+        console.log('🔍 Fetching recipes with images...');
+        console.log('🔗 Supabase URL:', import.meta.env.VITE_SUPABASE_URL);
+        console.log(
+          '🔑 Supabase Key:',
+          import.meta.env.VITE_SUPABASE_ANON_KEY ? 'SET' : 'MISSING'
+        );
+
+        // Test the connection first
+        const { data: connectionTest, error: connectionError } = await supabase
+          .from('recipes')
+          .select('count')
+          .limit(1);
+
+        console.log('🔌 Connection test:', { connectionTest, connectionError });
+
+        // First, let's test if we can access the recipes table at all
+        const { data: allRecipes, error: allRecipesError } = await supabase
+          .from('recipes')
+          .select('*')
+          .limit(3);
+
+        console.log('🔍 Test query - all recipes:', {
+          allRecipes,
+          allRecipesError,
+        });
+
+        // Test the simple query that should work with the policy
+        const { data: simpleRecipes, error: simpleError } = await supabase
+          .from('recipes')
+          .select('title, image_url')
+          .not('image_url', 'is', null)
+          .limit(3);
+
+        console.log('🔍 Simple query test:', { simpleRecipes, simpleError });
+
+        // Test with a more specific query
+        const { data: specificRecipes, error: specificError } = await supabase
+          .from('recipes')
+          .select('id, title, image_url, user_id')
+          .not('image_url', 'is', null)
+          .not('image_url', 'eq', '')
+          .limit(5);
+
+        console.log('🔍 Specific query test:', {
+          specificRecipes,
+          specificError,
+        });
+
+        // For the auth page showcase, we want to show all recipes with images
+        // not just user-specific ones, so we'll query without RLS restrictions
+        const { data, error } = await supabase
+          .from('recipes')
+          .select('*')
+          .not('image_url', 'is', null)
+          .order('created_at', { ascending: false })
+          .limit(5);
+
+        console.log('📊 Database query result:', { data, error });
+        console.log('🔍 Query details:', {
+          table: 'recipes',
+          filter: 'image_url IS NOT NULL',
+          order: 'created_at DESC',
+          limit: 5,
+        });
+
+        if (error) {
+          console.error('❌ Error fetching recipes:', error);
+          console.error('❌ Error details:', {
+            message: error.message,
+            details: error.details,
+            hint: error.hint,
+            code: error.code,
+          });
+          setUserRecipes([]);
+        } else {
+          console.log('✅ Recipes fetched successfully:', data);
+          console.log('📸 Recipes with images found:', data?.length || 0);
+          if (data && data.length > 0) {
+            data.forEach((recipe, index) => {
+              console.log(`🍳 Recipe ${index + 1}:`, {
+                id: recipe.id,
+                title: recipe.title,
+                image_url: recipe.image_url,
+                user_id: recipe.user_id,
+                created_at: recipe.created_at,
+              });
+            });
+          }
+          setUserRecipes(data || []);
+        }
+      } catch (error) {
+        console.error('❌ Exception fetching recipes:', error);
+        setUserRecipes([]);
+      } finally {
+        setRecipesLoading(false);
+      }
+    };
+
+    fetchRecipes();
+  }, []);
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('🔍 Sign Up attempt:', {
+      email,
+      password,
+      acceptTerms,
+      subscribeEmails,
+    });
     setLoading(true);
 
+    if (!acceptTerms) {
+      console.log('❌ Terms not accepted');
+      toast({
+        title: 'Error',
+        description: 'Please accept the terms and conditions.',
+        variant: 'destructive',
+      });
+      setLoading(false);
+      return;
+    }
+
+    console.log('✅ Terms accepted, proceeding with signup...');
     const { error } = await supabase.auth.signUp({
       email,
       password,
     });
 
     if (error) {
+      console.error('❌ Signup error:', error);
       toast({
         title: 'Error',
         description: error.message,
         variant: 'destructive',
       });
     } else {
+      console.log('✅ Signup successful');
       toast({
         title: 'Success',
         description:
@@ -68,149 +191,303 @@ export function AuthForm() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-orange-50 to-teal-50 p-4">
-      <div
-        className={`${createDaisyUICardClasses('bordered')} w-full max-w-md`}
-      >
-        <div className="card-body text-center">
-          <div className="mb-4 flex items-center justify-center">
-            <ChefHat
-              className="h-12 w-12 text-orange-500"
-              data-testid="chef-hat-icon"
-            />
-          </div>
-          <h3
-            className={`${createDaisyUICardTitleClasses()} text-2xl font-bold`}
-          >
-            Recipe Generator
-          </h3>
-          <p className="text-sm opacity-70">
-            Your digital cookbook for collecting and organizing recipes
-          </p>
-        </div>
-        <div className="card-body">
-          <div
-            className={createDaisyUITabsClasses('bordered', 'md', 'w-full')}
-            role="tablist"
-          >
-            <a
-              role="tab"
-              className={createDaisyUITabClasses(
-                activeTab === 'signin' ? 'tab-active' : undefined
-              )}
-              onClick={() => setActiveTab('signin')}
-            >
-              Sign In
-            </a>
-            <a
-              role="tab"
-              className={createDaisyUITabClasses(
-                activeTab === 'signup' ? 'tab-active' : undefined
-              )}
-              onClick={() => setActiveTab('signup')}
-            >
-              Sign Up
-            </a>
-          </div>
+      <div className="flex w-full max-w-6xl flex-col gap-4 lg:flex-row">
+        {/* Left Side - Authentication Form */}
+        <div className="card flex min-h-[600px] flex-1 flex-col rounded-box border border-gray-200 bg-white p-8 shadow-xl lg:min-h-[600px]">
+          <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center">
+            {/* Header Section */}
+            <div className="mb-6 text-center">
+              {/* Logo */}
+              <div className="mb-4 flex items-center justify-center">
+                <div className="flex h-32 w-32 items-center justify-center sm:h-40 sm:w-40 md:h-48 md:w-48">
+                  <img
+                    src="/recipe-generator-logo.png"
+                    alt="Recipe Generator Logo"
+                    className="h-28 w-28 object-contain sm:h-36 sm:w-36 md:h-44 md:w-44"
+                    onError={(e) => {
+                      // Fallback to text if image fails to load
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                      const fallback = target.nextElementSibling as HTMLElement;
+                      if (fallback) fallback.style.display = 'flex';
+                    }}
+                  />
+                  <span className="hidden text-3xl font-bold text-gray-600 sm:text-4xl md:text-5xl">
+                    R
+                  </span>
+                </div>
+              </div>
 
-          <div className="mt-4">
+              {/* Main Title */}
+              <div className="mb-4 text-center">
+                <h1 className="bg-gradient-to-r from-green-600 via-green-500 to-yellow-500 bg-clip-text text-3xl font-bold text-transparent sm:text-4xl md:text-5xl">
+                  Mom's Recipe Generator
+                </h1>
+                <span className="sr-only">Recipe Generator</span>
+              </div>
+
+              <div className="mb-2 flex items-center justify-center">
+                <User className="mr-2 h-6 w-6 text-green-600" />
+                <Plus className="h-4 w-4 text-green-600" />
+              </div>
+              <div data-testid="chef-hat-icon" className="sr-only">
+                Chef Hat Icon
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900">
+                {activeTab === 'signin' ? 'Sign In' : 'Create new account'}
+              </h3>
+              <p className="mt-2 text-sm text-gray-600">
+                {activeTab === 'signin'
+                  ? 'Welcome back to your digital cookbook'
+                  : 'Registration is free and only takes a minute'}
+              </p>
+              <span className="sr-only">
+                Your digital cookbook for collecting and organizing recipes
+              </span>
+            </div>
+
+            {/* Sign In Form */}
             {activeTab === 'signin' && (
               <form onSubmit={handleSignIn} className="space-y-4">
-                <div className="space-y-2">
-                  <label
-                    htmlFor="email"
-                    className={createDaisyUILabelClasses()}
-                  >
-                    Email
+                <div className="form-control">
+                  <label className="label" htmlFor="email">
+                    <span className="label-text text-gray-700">Email</span>
                   </label>
-                  <input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setEmail(e.target.value)
-                    }
-                    className={createDaisyUIInputClasses('bordered')}
-                    required
-                  />
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
+                    <input
+                      id="email"
+                      type="email"
+                      placeholder="Email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="input-bordered input w-full border-gray-300 bg-white pl-10 text-gray-900 focus:border-green-500"
+                      required
+                    />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <label
-                    htmlFor="password"
-                    className={createDaisyUILabelClasses()}
-                  >
-                    Password
+
+                <div className="form-control">
+                  <label className="label" htmlFor="password">
+                    <span className="label-text text-gray-700">Password</span>
                   </label>
-                  <input
-                    id="password"
-                    type="password"
-                    value={password}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setPassword(e.target.value)
-                    }
-                    className={createDaisyUIInputClasses('bordered')}
-                    autoComplete="current-password"
-                    required
-                  />
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
+                    <input
+                      id="password"
+                      type="password"
+                      placeholder="Password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="input-bordered input w-full border-gray-300 bg-white pl-10 text-gray-900 focus:border-green-500"
+                      autoComplete="current-password"
+                      required
+                    />
+                  </div>
                 </div>
-                <button
-                  type="submit"
-                  className={`${createDaisyUIButtonClasses('default')} w-full`}
-                  disabled={loading}
-                >
-                  {loading ? 'Signing In...' : 'Sign In'}
-                </button>
+
+                <div className="form-control mt-6">
+                  <button
+                    type="submit"
+                    className="btn btn-primary w-full border-none bg-green-600 text-white hover:bg-green-700"
+                    disabled={loading}
+                  >
+                    {loading ? 'Signing In...' : 'Sign In'}
+                  </button>
+                </div>
               </form>
             )}
 
+            {/* Sign Up Form */}
             {activeTab === 'signup' && (
               <form onSubmit={handleSignUp} className="space-y-4">
-                <div className="space-y-2">
-                  <label
-                    htmlFor="signup-email"
-                    className={createDaisyUILabelClasses()}
-                  >
-                    Email
+                <div className="form-control">
+                  <label className="label" htmlFor="signup-email">
+                    <span className="label-text text-gray-700">Email</span>
                   </label>
-                  <input
-                    id="signup-email"
-                    type="email"
-                    value={email}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setEmail(e.target.value)
-                    }
-                    className={createDaisyUIInputClasses('bordered')}
-                    required
-                  />
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
+                    <input
+                      id="signup-email"
+                      type="email"
+                      placeholder="Email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="input-bordered input w-full border-gray-300 bg-white pl-10 text-gray-900 focus:border-green-500"
+                      required
+                    />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <label
-                    htmlFor="signup-password"
-                    className={createDaisyUILabelClasses()}
-                  >
-                    Password
+
+                <div className="form-control">
+                  <label className="label" htmlFor="signup-password">
+                    <span className="label-text text-gray-700">Password</span>
                   </label>
-                  <input
-                    id="signup-password"
-                    type="password"
-                    value={password}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setPassword(e.target.value)
-                    }
-                    className={createDaisyUIInputClasses('bordered')}
-                    autoComplete="new-password"
-                    required
-                    minLength={6}
-                  />
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
+                    <input
+                      id="signup-password"
+                      type="password"
+                      placeholder="Password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="input-bordered input w-full border-gray-300 bg-white pl-10 text-gray-900 focus:border-green-500"
+                      autoComplete="new-password"
+                      required
+                      minLength={8}
+                    />
+                  </div>
+                  <label className="label">
+                    <span className="label-text-alt text-red-500">
+                      <span className="mr-1 inline-block h-2 w-2 rounded-full bg-red-500"></span>
+                      Password must be 8+ characters
+                    </span>
+                  </label>
                 </div>
-                <button
-                  type="submit"
-                  className={`${createDaisyUIButtonClasses('default')} w-full`}
-                  disabled={loading}
-                >
-                  {loading ? 'Creating Account...' : 'Sign Up'}
-                </button>
+
+                <div className="form-control">
+                  <label className="label cursor-pointer justify-start gap-3">
+                    <Checkbox
+                      id="accept-terms"
+                      checked={acceptTerms}
+                      onCheckedChange={(checked) => setAcceptTerms(!!checked)}
+                    />
+                    <span className="label-text text-gray-700">
+                      Accept terms without reading
+                    </span>
+                  </label>
+                </div>
+
+                <div className="form-control">
+                  <label className="label cursor-pointer justify-start gap-3">
+                    <Checkbox
+                      id="subscribe-emails"
+                      checked={subscribeEmails}
+                      onCheckedChange={(checked) =>
+                        setSubscribeEmails(!!checked)
+                      }
+                    />
+                    <span className="label-text text-gray-700">
+                      Subscribe to spam emails
+                    </span>
+                  </label>
+                </div>
+
+                <div className="form-control mt-6">
+                  <button
+                    type="submit"
+                    className={`btn w-full border-none ${
+                      loading || !acceptTerms
+                        ? 'cursor-not-allowed bg-gray-400 text-gray-600'
+                        : 'bg-green-600 text-white hover:bg-green-700'
+                    }`}
+                    disabled={loading || !acceptTerms}
+                  >
+                    {loading
+                      ? 'Creating Account...'
+                      : !acceptTerms
+                        ? 'Accept terms to continue'
+                        : 'Register'}
+                  </button>
+                  {!acceptTerms && (
+                    <p className="mt-2 text-center text-xs text-red-500">
+                      Please accept the terms and conditions to continue
+                    </p>
+                  )}
+                </div>
               </form>
             )}
+
+            {/* Bottom Link */}
+            <div className="mt-4 text-center">
+              <a
+                href="#"
+                className="link link-hover text-sm text-green-600 hover:text-green-700"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setActiveTab(activeTab === 'signin' ? 'signup' : 'signin');
+                }}
+              >
+                {activeTab === 'signin' ? 'Or sign up' : 'Or sign in'}
+              </a>
+            </div>
+          </div>
+        </div>
+
+        {/* Divider - Only show on large screens */}
+        <div className="hidden lg:flex lg:items-center lg:justify-center">
+          <Divider className="divider-horizontal text-gray-500">AND</Divider>
+        </div>
+
+        {/* Right Side - User Recipes Showcase */}
+        <div className="card flex min-h-[400px] flex-1 flex-col rounded-box border border-gray-200 bg-white p-8 shadow-xl lg:min-h-[600px]">
+          <div className="flex flex-1 flex-col justify-center text-center">
+            <h3 className="mb-4 text-2xl font-bold text-gray-900">
+              Discover Amazing Recipes
+            </h3>
+            <p className="mb-6 text-sm text-gray-600">
+              Join our community of passionate home chefs
+            </p>
+
+            {recipesLoading ? (
+              <div className="mb-6 flex items-center justify-center">
+                <span className="loading loading-spinner loading-lg text-green-600"></span>
+              </div>
+            ) : userRecipes.length > 0 ? (
+              <>
+                {/* Stacked Recipe Images */}
+                <div className="stack mx-auto mb-6 w-48">
+                  {userRecipes.slice(0, 3).map((recipe) => (
+                    <img
+                      key={recipe.id}
+                      src={recipe.image_url!}
+                      className="rounded-box"
+                      alt={recipe.title}
+                      onLoad={() =>
+                        console.log(
+                          `✅ Image loaded successfully: ${recipe.title}`
+                        )
+                      }
+                      onError={(e) => {
+                        console.error(
+                          `❌ Image failed to load: ${recipe.title}`,
+                          recipe.image_url
+                        );
+                        const target = e.target as HTMLImageElement;
+                        console.error('Failed image element:', target);
+                      }}
+                    />
+                  ))}
+                </div>
+
+                {/* Recipe Titles and Users */}
+                <div className="space-y-3">
+                  {userRecipes.slice(0, 3).map((recipe) => (
+                    <div key={recipe.id} className="text-sm">
+                      <div className="font-semibold text-gray-900">
+                        {recipe.title}
+                      </div>
+                      <div className="text-gray-600">by {recipe.user_id}</div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <div className="text-center">
+                <p className="mb-4 text-gray-500">No recipes with images yet</p>
+                <p className="text-sm text-gray-600">
+                  Be the first to share your favorite recipes!
+                </p>
+              </div>
+            )}
+
+            <div className="mt-6">
+              <p className="text-xs text-gray-500">
+                {userRecipes.length > 0
+                  ? `Join thousands of home chefs sharing their favorite recipes`
+                  : `Be the first to share your favorite recipes with the community`}
+              </p>
+            </div>
           </div>
         </div>
       </div>

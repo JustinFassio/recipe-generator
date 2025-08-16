@@ -165,13 +165,13 @@ describe('AuthForm', () => {
     it('should handle sign up form submission', async () => {
       render(<AuthForm />);
 
-      // Switch to sign up tab
-      const signUpTab = screen.getByRole('tab', { name: /sign up/i });
-      fireEvent.click(signUpTab);
+      // Switch to sign up form using the link
+      const signUpLink = screen.getByRole('link', { name: /or sign up/i });
+      fireEvent.click(signUpLink);
 
       const emailInput = screen.getByLabelText(/email/i);
       const passwordInput = screen.getByLabelText(/password/i);
-      const signUpButton = screen.getByRole('button', { name: /sign up/i });
+      const signUpButton = screen.getByRole('button', { name: /register/i });
 
       fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
       fireEvent.change(passwordInput, { target: { value: 'password123' } });
@@ -202,13 +202,13 @@ describe('AuthForm', () => {
 
       render(<AuthForm />);
 
-      // Switch to sign up tab
-      const signUpTab = screen.getByRole('tab', { name: /sign up/i });
-      fireEvent.click(signUpTab);
+      // Switch to sign up form using the link
+      const signUpLink = screen.getByRole('link', { name: /or sign up/i });
+      fireEvent.click(signUpLink);
 
       const emailInput = screen.getByLabelText(/email/i);
       const passwordInput = screen.getByLabelText(/password/i);
-      const signUpButton = screen.getByRole('button', { name: /sign up/i });
+      const signUpButton = screen.getByRole('button', { name: /register/i });
 
       fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
       fireEvent.change(passwordInput, { target: { value: 'password123' } });
@@ -236,19 +236,22 @@ describe('AuthForm', () => {
         'password'
       );
 
-      // Switch to sign up tab
-      const signUpTab = screen.getByRole('tab', { name: /sign up/i });
-      fireEvent.click(signUpTab);
+      // Switch to sign up form using the link
+      const signUpLink = screen.getByRole('link', { name: /or sign up/i });
+      fireEvent.click(signUpLink);
 
       // Check sign up form IDs (should be different)
-      expect(screen.getByLabelText(/email/i)).toHaveAttribute(
-        'id',
-        'signup-email'
+      const emailInputs = screen.getAllByLabelText(/email/i);
+      const signUpEmailInput = emailInputs.find(
+        (input) => input.id === 'signup-email'
       );
-      expect(screen.getByLabelText(/password/i)).toHaveAttribute(
-        'id',
-        'signup-password'
+      expect(signUpEmailInput).toHaveAttribute('id', 'signup-email');
+
+      const passwordInputs = screen.getAllByLabelText(/password/i);
+      const signUpPasswordInput = passwordInputs.find(
+        (input) => input.id === 'signup-password'
       );
+      expect(signUpPasswordInput).toHaveAttribute('id', 'signup-password');
     });
   });
 
@@ -279,9 +282,9 @@ describe('AuthForm', () => {
       const passwordInput = screen.getByLabelText(/password/i);
       expect(passwordInput).toHaveAttribute('autocomplete', 'current-password');
 
-      // Switch to sign up tab
-      const signUpTab = screen.getByRole('tab', { name: /sign up/i });
-      fireEvent.click(signUpTab);
+      // Switch to sign up form using the link
+      const signUpLink = screen.getByRole('link', { name: /or sign up/i });
+      fireEvent.click(signUpLink);
 
       const signUpPasswordInput = screen
         .getAllByLabelText(/password/i)
