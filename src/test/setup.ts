@@ -106,8 +106,8 @@ vi.mock('@/hooks/use-toast', () => ({
   toast: vi.fn(),
 }));
 
-// Mock SimpleAuthProvider for tests
-vi.mock('@/contexts/SimpleAuthProvider', () => ({
+// Mock AuthProvider for tests
+vi.mock('@/contexts/AuthProvider', () => ({
   AuthProvider: ({ children }: { children: React.ReactNode }) => children,
   useAuth: vi.fn(() => ({
     user: null,

@@ -1,29 +1,20 @@
-import { createContext, useContext, useEffect, useState } from 'react';
-import { User, Session } from '@supabase/supabase-js';
-import { supabase, type Profile } from '@/lib/supabase';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { User } from '@supabase/supabase-js';
+import { supabase, Profile } from '@/lib/supabase';
+import { clearAuthTokens } from '@/lib/auth-utils';
 
-// Auth context type
-type AuthContextType = {
+interface SimpleAuthContextType {
   user: User | null;
   profile: Profile | null;
-  session: Session | null;
   loading: boolean;
-  refreshProfile: () => Promise<void>;
+  error: string | null;
   signOut: () => Promise<void>;
-};
+  refreshProfile: () => Promise<void>;
+}
 
-// Create context with default values
-const AuthContext = createContext<AuthContextType>({
-  user: null,
-  profile: null,
-  session: null,
-  loading: true,
-  refreshProfile: async () => {},
-  signOut: async () => {},
-});
+const AuthContext = createContext<SimpleAuthContextType | undefined>(undefined);
 
-// Custom hook to use auth context
-export function useAuth() {
+export function useAuth(): SimpleAuthContextType {
   const context = useContext(AuthContext);
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
@@ -31,72 +22,51 @@ export function useAuth() {
   return context;
 }
 
-// AuthProvider component
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Function to fetch user profile
-  const fetchProfile = async (userId: string): Promise<Profile | null> => {
+  const signOut = async (): Promise<void> => {
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('id, username, full_name, avatar_url, created_at, updated_at')
-        .eq('id', userId)
-        .single();
-
-      if (error) {
-        // If the profiles table doesn't exist yet (migrations not run), fail gracefully
-        if (error.code === '42P01') {
-          console.warn(
-            'Profiles table does not exist yet. Please run database migrations.'
-          );
-          return null;
-        }
-        console.error('Error fetching profile:', error);
-        return null;
-      }
-
-      return data;
-    } catch (error) {
-      console.error('Error in fetchProfile:', error);
-      return null;
-    }
-  };
-
-  // Function to refresh profile data
-  const refreshProfile = async () => {
-    if (!user) {
+      await supabase.auth.signOut();
+      setUser(null);
       setProfile(null);
-      return;
-    }
-
-    const profileData = await fetchProfile(user.id);
-    setProfile(profileData);
-  };
-
-  // Function to sign out
-  const signOut = async () => {
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        console.error('Error signing out:', error);
-        throw error;
-      }
+      setError(null);
     } catch (error) {
       console.error('Sign out error:', error);
-      throw error;
     }
   };
 
-  // Initialize auth state and set up auth listener
+  const refreshProfile = async (): Promise<void> => {
+    if (!user) return;
+
+    try {
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      if (profileError) {
+        console.error('Profile refresh error:', profileError);
+        setError(`Profile error: ${profileError.message}`);
+      } else {
+        console.log('Profile refreshed:', profileData);
+        setProfile(profileData);
+        setError(null);
+      }
+    } catch (error) {
+      console.error('Error refreshing profile:', error);
+    }
+  };
+
   useEffect(() => {
     let mounted = true;
 
-    // Get initial session
-    const initializeAuth = async () => {
+    // Simple initialization with cleanup for invalid sessions
+    const init = async () => {
       try {
         const {
           data: { session },
@@ -104,95 +74,68 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } = await supabase.auth.getSession();
 
         if (error) {
-          console.error('Error getting session:', error);
-          // If there's a session error, clear any stale tokens
-          if (
-            error.message?.includes('Invalid Refresh Token') ||
-            error.message?.includes('Refresh Token Not Found')
-          ) {
-            console.log('🔄 Clearing stale tokens due to refresh token error');
-            await supabase.auth.signOut();
-          }
-          if (mounted) {
-            setLoading(false);
-          }
-          return;
+          console.error('Session error:', error);
+          // Clear invalid session using existing utility
+          await clearAuthTokens();
         }
 
         if (mounted) {
-          setSession(session);
-          setUser(session?.user ?? null);
-
-          // Fetch profile if user exists
-          if (session?.user) {
-            const profileData = await fetchProfile(session.user.id);
-            if (mounted) {
-              setProfile(profileData);
-            }
+          if (session?.user && !error) {
+            setUser(session.user);
+            console.log('✅ User found:', session.user.email);
+          } else {
+            setUser(null);
+            console.log('❌ No user session or session invalid');
           }
-
           setLoading(false);
         }
       } catch (error) {
-        console.error('Error initializing auth:', error);
+        console.error('Auth init error:', error);
+        // Clear auth-related data on any auth error using existing utility
+        await clearAuthTokens();
+
         if (mounted) {
+          setUser(null);
+          setError(null); // Don't show error, just clear everything
           setLoading(false);
         }
       }
     };
 
-    initializeAuth();
+    init();
 
-    // Set up auth state change listener
+    // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('🔄 Auth event:', event);
       if (!mounted) return;
 
-      // Handle token refresh errors
-      if (event === 'TOKEN_REFRESHED' && !session) {
-        console.warn('Token refresh failed, clearing auth state');
-        setSession(null);
+      if (session?.user) {
+        setUser(session.user);
+        console.log('✅ User signed in:', session.user.email);
+      } else {
         setUser(null);
         setProfile(null);
-        setLoading(false);
-        return;
+        console.log('❌ User signed out');
       }
 
-      setSession(session);
-      setUser(session?.user ?? null);
-
-      // Handle profile data based on auth event
-      if (session?.user) {
-        // User signed in - fetch their profile
-        const profileData = await fetchProfile(session.user.id);
-        if (mounted) {
-          setProfile(profileData);
-        }
-      } else {
-        // User signed out - clear profile
-        setProfile(null);
-      }
-
-      // Auth is no longer loading after first state change
       setLoading(false);
     });
 
-    // Cleanup function
     return () => {
       mounted = false;
       subscription.unsubscribe();
     };
   }, []);
 
-  // Context value
-  const value: AuthContextType = {
+  const value: SimpleAuthContextType = {
     user,
     profile,
-    session,
     loading,
-    refreshProfile,
+    error,
     signOut,
+    refreshProfile,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -2,7 +2,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { AuthForm } from '@/components/auth/auth-form';
-import { AuthProvider } from '@/contexts/SimpleAuthProvider';
+import { AuthProvider } from '@/contexts/AuthProvider';
 
 // Mock SimpleAuthProvider
 vi.mock('@/contexts/SimpleAuthProvider', () => ({
