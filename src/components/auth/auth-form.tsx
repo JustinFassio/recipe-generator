@@ -5,6 +5,7 @@ import { User, Lock, Plus } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Divider } from '@/components/ui/divider';
+import { AppTitle } from '@/components/ui/app-title';
 import type { Recipe } from '@/lib/supabase';
 
 export function AuthForm() {
@@ -135,9 +136,7 @@ export function AuthForm() {
 
               {/* Main Title */}
               <div className="mb-4 text-center">
-                <h1 className="bg-gradient-to-r from-green-600 via-green-500 to-yellow-500 bg-clip-text text-3xl font-bold text-transparent sm:text-4xl md:text-5xl">
-                  Mom's Recipe Generator
-                </h1>
+                <AppTitle />
                 <span className="sr-only">Recipe Generator</span>
               </div>
 

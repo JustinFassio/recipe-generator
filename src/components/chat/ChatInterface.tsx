@@ -1,5 +1,4 @@
 import React, { useRef, useEffect } from 'react';
-import { createDaisyUIButtonClasses } from '@/lib/button-migration';
 import { createDaisyUIInputClasses } from '@/lib/input-migration';
 import { createDaisyUICardClasses } from '@/lib/card-migration';
 import { createDaisyUIScrollAreaClasses } from '@/lib/scroll-area-migration';
@@ -19,6 +18,7 @@ import {
 } from 'lucide-react';
 import { PersonaSelector } from './PersonaSelector';
 import { ChatHeader } from './ChatHeader';
+import { Button } from '@/components/ui/button';
 import { useConversation } from '@/hooks/useConversation';
 import { RECIPE_BOT_PERSONAS, type PersonaType } from '@/lib/openai';
 import type { RecipeFormData } from '@/lib/schemas';
@@ -248,13 +248,14 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
             disabled={isLoading}
             className={`${createDaisyUIInputClasses('bordered')} flex-1`}
           />
-          <button
+          <Button
             onClick={handleSendMessage}
             disabled={!inputValue.trim() || isLoading}
-            className={`${createDaisyUIButtonClasses('default', 'sm')} bg-green-600 hover:bg-green-700`}
+            size="sm"
+            className="bg-green-600 hover:bg-green-700"
           >
             <Send className="h-4 w-4" />
-          </button>
+          </Button>
         </div>
         <p className="mt-2 text-xs text-gray-500">
           Press Enter to send, or Shift+Enter for a new line

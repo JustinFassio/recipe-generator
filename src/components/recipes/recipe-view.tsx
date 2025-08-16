@@ -1,4 +1,3 @@
-import { createDaisyUIButtonClasses } from '@/lib/button-migration';
 import {
   createDaisyUICardClasses,
   createDaisyUICardTitleClasses,
@@ -6,6 +5,7 @@ import {
 import { createDaisyUIBadgeClasses } from '@/lib/badge-migration';
 import { createDaisyUISeparatorClasses } from '@/lib/separator-migration';
 import { ArrowLeft, Clock, Users, Edit, Calendar } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import type { Recipe } from '@/lib/supabase';
 
 interface RecipeViewProps {
@@ -18,24 +18,18 @@ export function RecipeView({ recipe, onEdit, onBack }: RecipeViewProps) {
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
         {onBack && (
-          <button
-            className={createDaisyUIButtonClasses('ghost')}
-            onClick={onBack}
-          >
+          <Button variant="ghost" onClick={onBack}>
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Recipes
-          </button>
+          </Button>
         )}
         {onEdit && (
-          <button
-            className={createDaisyUIButtonClasses('default')}
-            onClick={onEdit}
-          >
+          <Button onClick={onEdit}>
             <Edit className="mr-2 h-4 w-4" />
             Edit Recipe
-          </button>
+          </Button>
         )}
       </div>
 
@@ -48,17 +42,17 @@ export function RecipeView({ recipe, onEdit, onBack }: RecipeViewProps) {
                 <img
                   src={recipe.image_url}
                   alt={recipe.title}
-                  className="h-64 w-full rounded-lg object-cover lg:h-48"
+                  className="h-48 w-full rounded-lg object-cover sm:h-64 lg:h-48"
                 />
               </div>
             )}
             <div className="flex-1">
               <h3
-                className={`${createDaisyUICardTitleClasses()} mb-4 text-2xl font-bold lg:text-3xl`}
+                className={`${createDaisyUICardTitleClasses()} mb-4 text-xl font-bold sm:text-2xl lg:text-3xl`}
               >
                 {recipe.title}
               </h3>
-              <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
+              <div className="flex flex-col gap-2 text-sm text-gray-600 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
                 <div className="flex items-center">
                   <Users className="mr-1 h-4 w-4" />
                   <span className={createDaisyUIBadgeClasses('secondary')}>

@@ -1,4 +1,3 @@
-import { createDaisyUIButtonClasses } from '@/lib/button-migration';
 import {
   createDaisyUICardClasses,
   createDaisyUICardTitleClasses,
@@ -8,6 +7,7 @@ import { Trash2, Edit, Eye } from 'lucide-react';
 import type { Recipe } from '@/lib/supabase';
 import { useDeleteRecipe } from '@/hooks/use-recipes';
 import { useState } from 'react';
+import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -56,28 +56,34 @@ export function RecipeCard({ recipe, onEdit, onView }: RecipeCardProps) {
             >
               {recipe.title}
             </h3>
-            <div className="flex items-center space-x-1 opacity-0 transition-opacity group-hover:opacity-100">
-              <button
-                className={`${createDaisyUIButtonClasses('ghost', 'sm')} h-8 w-8 p-0`}
+            <div className="flex items-center space-x-1 opacity-0 transition-opacity group-hover:opacity-100 sm:opacity-0 sm:group-hover:opacity-100">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0"
                 onClick={() => onView?.(recipe)}
                 aria-label="View recipe"
               >
                 <Eye className="h-4 w-4" />
-              </button>
-              <button
-                className={`${createDaisyUIButtonClasses('ghost', 'sm')} h-8 w-8 p-0`}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0"
                 onClick={() => onEdit?.(recipe)}
                 aria-label="Edit recipe"
               >
                 <Edit className="h-4 w-4" />
-              </button>
-              <button
-                className={`${createDaisyUIButtonClasses('ghost', 'sm')} h-8 w-8 p-0 text-red-500 hover:text-red-700`}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0 text-red-500 hover:text-red-700"
                 onClick={() => setShowDeleteDialog(true)}
                 aria-label="Delete recipe"
               >
                 <Trash2 className="h-4 w-4" />
-              </button>
+              </Button>
             </div>
           </div>
 

@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import type { FieldArrayPath } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { createDaisyUIButtonClasses } from '@/lib/button-migration';
 import { createDaisyUIInputClasses } from '@/lib/input-migration';
 import { createDaisyUITextareaClasses } from '@/lib/textarea-migration';
 import {
@@ -18,6 +17,7 @@ import {
 } from '@/hooks/use-recipes';
 import { useLocation } from 'react-router-dom';
 import { X, Upload, Plus } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 import type { Recipe } from '@/lib/supabase';
 
@@ -187,9 +187,11 @@ export function RecipeForm({
                       alt="Recipe preview"
                       className="h-full w-full object-cover"
                     />
-                    <button
+                    <Button
                       type="button"
-                      className={`${createDaisyUIButtonClasses('ghost', 'sm')} absolute right-2 top-2 bg-white/80 hover:bg-white`}
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-2 top-2 bg-white/80 hover:bg-white"
                       onClick={() => {
                         setImagePreview('');
                         setImageFile(null);
@@ -197,7 +199,7 @@ export function RecipeForm({
                       }}
                     >
                       <X className="h-4 w-4" />
-                    </button>
+                    </Button>
                   </div>
                 )}
 
@@ -209,14 +211,15 @@ export function RecipeForm({
                     onChange={handleImageChange}
                     className="hidden"
                   />
-                  <button
+                  <Button
                     type="button"
-                    className={`${createDaisyUIButtonClasses('outline')} border-green-600 text-green-600 hover:bg-green-50`}
+                    variant="outline"
+                    className="border-green-600 text-green-600 hover:bg-green-50"
                     onClick={() => fileInputRef.current?.click()}
                   >
                     <Upload className="mr-2 h-4 w-4" />
                     Upload Image
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>
@@ -230,14 +233,16 @@ export function RecipeForm({
             className={`${createDaisyUICardTitleClasses()} flex items-center justify-between`}
           >
             Ingredients *
-            <button
+            <Button
               type="button"
-              className={`${createDaisyUIButtonClasses('outline', 'sm')} border-green-600 text-green-600 hover:bg-green-50`}
+              variant="outline"
+              size="sm"
+              className="border-green-600 text-green-600 hover:bg-green-50"
               onClick={addIngredient}
             >
               <Plus className="mr-2 h-4 w-4" />
               Add Ingredient
-            </button>
+            </Button>
           </h3>
           <div className="space-y-2">
             {fields.map((field, index) => (
@@ -249,13 +254,15 @@ export function RecipeForm({
                   className={`${createDaisyUIInputClasses('bordered')} flex-1`}
                 />
                 {fields.length > 1 && (
-                  <button
+                  <Button
                     type="button"
-                    className={`${createDaisyUIButtonClasses('ghost', 'sm')} text-red-500 hover:text-red-700`}
+                    variant="ghost"
+                    size="sm"
+                    className="text-red-500 hover:text-red-700"
                     onClick={() => removeIngredient(index)}
                   >
                     <X className="h-4 w-4" />
-                  </button>
+                  </Button>
                 )}
               </div>
             ))}
@@ -306,9 +313,9 @@ export function RecipeForm({
       </div>
 
       <div className="flex justify-end space-x-2">
-        <button
+        <Button
           type="submit"
-          className={`${createDaisyUIButtonClasses('default')} min-w-32`}
+          className="min-w-32"
           disabled={
             createRecipe.isPending ||
             updateRecipe.isPending ||
@@ -324,7 +331,7 @@ export function RecipeForm({
             : existingRecipe
               ? 'Update Recipe'
               : 'Create Recipe'}
-        </button>
+        </Button>
       </div>
     </form>
   );
