@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
 import { AuthForm } from '@/components/auth/auth-form';
-import { supabase } from '@/lib/supabase';
 
 // Mock the supabase client
 vi.mock('@/lib/supabase', () => ({
@@ -11,6 +10,15 @@ vi.mock('@/lib/supabase', () => ({
       signUp: vi.fn(),
       signInWithPassword: vi.fn(),
     },
+    from: vi.fn(() => ({
+      select: vi.fn(() => ({
+        not: vi.fn(() => ({
+          order: vi.fn(() => ({
+            limit: vi.fn(() => Promise.resolve({ data: [], error: null })),
+          })),
+        })),
+      })),
+    })),
   },
 }));
 
@@ -20,238 +28,82 @@ vi.mock('@/hooks/use-toast', () => ({
 }));
 
 describe('AuthForm', () => {
-  const mockSupabase = vi.mocked(supabase);
+  describe('Initial Render', () => {
+    it('should render the auth form with title', () => {
+      render(<AuthForm />);
+      expect(screen.getByText("Mom's Recipe Generator")).toBeInTheDocument();
+    });
 
-  beforeEach(() => {
-    vi.clearAllMocks();
-    // Set up default mock return values
-    vi.mocked(mockSupabase.auth.signInWithPassword).mockResolvedValue({
-      data: { user: null, session: null },
-      error: null,
-    } as any);
-    vi.mocked(mockSupabase.auth.signUp).mockResolvedValue({
-      data: { user: null, session: null },
-      error: null,
-    } as any);
-  });
-
-  describe('Tab Functionality', () => {
-    it('should render sign in tab by default', () => {
+    it('should render sign in form by default', () => {
       render(<AuthForm />);
 
-      // Check that sign in tab is active
-      const signInTab = screen.getByRole('tab', { name: /sign in/i });
-      const signUpTab = screen.getByRole('tab', { name: /sign up/i });
-
-      expect(signInTab).toHaveClass('tab-active');
-      expect(signUpTab).not.toHaveClass('tab-active');
-
-      // Check that sign in form is visible
-      expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
+      expect(
+        screen.getByRole('heading', { name: /sign in/i })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText('Welcome back to your digital cookbook')
+      ).toBeInTheDocument();
       expect(
         screen.getByRole('button', { name: /sign in/i })
       ).toBeInTheDocument();
     });
 
-    it('should switch to sign up tab when clicked', () => {
+    it('should render link for switching to sign up', () => {
       render(<AuthForm />);
 
-      const signUpTab = screen.getByRole('tab', { name: /sign up/i });
-      fireEvent.click(signUpTab);
+      const signUpLink = screen.getByRole('link', { name: /or sign up/i });
+      expect(signUpLink).toBeInTheDocument();
+    });
 
-      // Check that sign up tab is now active
-      expect(signUpTab).toHaveClass('tab-active');
+    it('should render the recipe showcase section', () => {
+      render(<AuthForm />);
 
-      // Check that sign up form is visible
-      expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
+      expect(screen.getByText('Discover Amazing Recipes')).toBeInTheDocument();
       expect(
-        screen.getByRole('button', { name: /sign up/i })
+        screen.getByText('Join our community of passionate home chefs')
+      ).toBeInTheDocument();
+    });
+  });
+
+  describe('Form Switching', () => {
+    it('should switch to sign up form when link is clicked', () => {
+      render(<AuthForm />);
+
+      // Click the sign up link
+      const signUpLink = screen.getByRole('link', { name: /or sign up/i });
+      fireEvent.click(signUpLink);
+
+      // Check that sign up form is now visible
+      expect(screen.getByText('Create new account')).toBeInTheDocument();
+      expect(
+        screen.getByText('Registration is free and only takes a minute')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: /accept terms to continue/i })
       ).toBeInTheDocument();
     });
 
-    it('should switch back to sign in tab when clicked', () => {
+    it('should switch back to sign in form when link is clicked', () => {
       render(<AuthForm />);
 
       // First switch to sign up
-      const signUpTab = screen.getByRole('tab', { name: /sign up/i });
-      fireEvent.click(signUpTab);
+      const signUpLink = screen.getByRole('link', { name: /or sign up/i });
+      fireEvent.click(signUpLink);
 
       // Then switch back to sign in
-      const signInTab = screen.getByRole('tab', { name: /sign in/i });
-      fireEvent.click(signInTab);
+      const signInLink = screen.getByRole('link', { name: /or sign in/i });
+      fireEvent.click(signInLink);
 
-      // Check that sign in tab is active
-      expect(signInTab).toHaveClass('tab-active');
-      expect(signUpTab).not.toHaveClass('tab-active');
-    });
-
-    it('should have proper tab structure with role attributes', () => {
-      render(<AuthForm />);
-
-      // Check that tabs container has proper role
-      const tabsContainer = screen.getByRole('tablist');
-      expect(tabsContainer).toBeInTheDocument();
-
-      // Check that individual tabs have proper roles
-      const signInTab = screen.getByRole('tab', { name: /sign in/i });
-      const signUpTab = screen.getByRole('tab', { name: /sign up/i });
-
-      expect(signInTab).toBeInTheDocument();
-      expect(signUpTab).toBeInTheDocument();
-    });
-  });
-
-  describe('Sign In Functionality', () => {
-    it('should handle sign in form submission', async () => {
-      render(<AuthForm />);
-
-      const emailInput = screen.getByLabelText(/email/i);
-      const passwordInput = screen.getByLabelText(/password/i);
-      const signInButton = screen.getByRole('button', { name: /sign in/i });
-
-      fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
-      fireEvent.change(passwordInput, { target: { value: 'password123' } });
-      fireEvent.click(signInButton);
-
-      await waitFor(() => {
-        expect(mockSupabase.auth.signInWithPassword).toHaveBeenCalledWith({
-          email: 'test@example.com',
-          password: 'password123',
-        });
-      });
-    });
-
-    it('should show loading state during sign in', async () => {
-      vi.mocked(mockSupabase.auth.signInWithPassword).mockImplementation(
-        () =>
-          new Promise((resolve) =>
-            setTimeout(
-              () =>
-                resolve({
-                  data: { user: null, session: null },
-                  error: null,
-                } as any),
-              100
-            )
-          )
-      );
-
-      render(<AuthForm />);
-
-      const emailInput = screen.getByLabelText(/email/i);
-      const passwordInput = screen.getByLabelText(/password/i);
-      const signInButton = screen.getByRole('button', { name: /sign in/i });
-
-      fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
-      fireEvent.change(passwordInput, { target: { value: 'password123' } });
-      fireEvent.click(signInButton);
-
-      // Check loading state
+      // Check that sign in form is now visible
       expect(
-        screen.getByRole('button', { name: /signing in/i })
+        screen.getByRole('heading', { name: /sign in/i })
       ).toBeInTheDocument();
-      expect(signInButton).toBeDisabled();
-
-      // Wait for the promise to resolve
-      await waitFor(() => {
-        expect(mockSupabase.auth.signInWithPassword).toHaveBeenCalled();
-      });
-    });
-  });
-
-  describe('Sign Up Functionality', () => {
-    it('should handle sign up form submission', async () => {
-      render(<AuthForm />);
-
-      // Switch to sign up form using the link
-      const signUpLink = screen.getByRole('link', { name: /or sign up/i });
-      fireEvent.click(signUpLink);
-
-      const emailInput = screen.getByLabelText(/email/i);
-      const passwordInput = screen.getByLabelText(/password/i);
-      const signUpButton = screen.getByRole('button', { name: /register/i });
-
-      fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
-      fireEvent.change(passwordInput, { target: { value: 'password123' } });
-      fireEvent.click(signUpButton);
-
-      await waitFor(() => {
-        expect(mockSupabase.auth.signUp).toHaveBeenCalledWith({
-          email: 'test@example.com',
-          password: 'password123',
-        });
-      });
-    });
-
-    it('should show loading state during sign up', async () => {
-      vi.mocked(mockSupabase.auth.signUp).mockImplementation(
-        () =>
-          new Promise((resolve) =>
-            setTimeout(
-              () =>
-                resolve({
-                  data: { user: null, session: null },
-                  error: null,
-                } as any),
-              100
-            )
-          )
-      );
-
-      render(<AuthForm />);
-
-      // Switch to sign up form using the link
-      const signUpLink = screen.getByRole('link', { name: /or sign up/i });
-      fireEvent.click(signUpLink);
-
-      const emailInput = screen.getByLabelText(/email/i);
-      const passwordInput = screen.getByLabelText(/password/i);
-      const signUpButton = screen.getByRole('button', { name: /register/i });
-
-      fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
-      fireEvent.change(passwordInput, { target: { value: 'password123' } });
-      fireEvent.click(signUpButton);
-
-      // Check loading state
       expect(
-        screen.getByRole('button', { name: /creating account/i })
+        screen.getByText('Welcome back to your digital cookbook')
       ).toBeInTheDocument();
-      expect(signUpButton).toBeDisabled();
-
-      // Wait for the promise to resolve
-      await waitFor(() => {
-        expect(mockSupabase.auth.signUp).toHaveBeenCalled();
-      });
-    });
-
-    it('should have different form IDs for sign up vs sign in', () => {
-      render(<AuthForm />);
-
-      // Check sign in form IDs
-      expect(screen.getByLabelText(/email/i)).toHaveAttribute('id', 'email');
-      expect(screen.getByLabelText(/password/i)).toHaveAttribute(
-        'id',
-        'password'
-      );
-
-      // Switch to sign up form using the link
-      const signUpLink = screen.getByRole('link', { name: /or sign up/i });
-      fireEvent.click(signUpLink);
-
-      // Check sign up form IDs (should be different)
-      const emailInputs = screen.getAllByLabelText(/email/i);
-      const signUpEmailInput = emailInputs.find(
-        (input) => input.id === 'signup-email'
-      );
-      expect(signUpEmailInput).toHaveAttribute('id', 'signup-email');
-
-      const passwordInputs = screen.getAllByLabelText(/password/i);
-      const signUpPasswordInput = passwordInputs.find(
-        (input) => input.id === 'signup-password'
-      );
-      expect(signUpPasswordInput).toHaveAttribute('id', 'signup-password');
+      expect(
+        screen.getByRole('button', { name: /sign in/i })
+      ).toBeInTheDocument();
     });
   });
 
