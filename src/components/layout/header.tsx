@@ -88,7 +88,7 @@ export function Header() {
 
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
-        <div className="fixed inset-0 top-16 z-[9999] border-b border-gray-200 bg-base-100 shadow-lg md:hidden">
+        <div className="fixed inset-0 top-16 z-50 border-b border-gray-200 bg-base-100 shadow-lg md:hidden">
           <nav className="flex flex-col space-y-2 p-4">
             <Button
               variant={location.pathname === '/' ? 'default' : 'ghost'}
