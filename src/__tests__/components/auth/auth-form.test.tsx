@@ -4,8 +4,8 @@ import { describe, it, expect, vi } from 'vitest';
 import { AuthForm } from '@/components/auth/auth-form';
 import { AuthProvider } from '@/contexts/AuthProvider';
 
-// Mock SimpleAuthProvider
-vi.mock('@/contexts/SimpleAuthProvider', () => ({
+// Mock AuthProvider
+vi.mock('@/contexts/AuthProvider', () => ({
   AuthProvider: ({ children }: { children: React.ReactNode }) => children,
   useAuth: vi.fn(() => ({
     user: null,
