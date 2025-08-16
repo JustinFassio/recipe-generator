@@ -1,10 +1,10 @@
 import { useEffect } from 'react';
+import { initializeTheme, THEME_NAME } from '@/lib/theme';
 
 export function ThemeToggle() {
   useEffect(() => {
-    // Always set to caramellatte theme
-    document.documentElement.setAttribute('data-theme', 'caramellatte');
-    localStorage.setItem('theme', 'caramellatte');
+    // Always set to caramellatte theme using centralized utility
+    initializeTheme(THEME_NAME);
   }, []);
 
   // This component now just ensures caramellatte theme is always applied

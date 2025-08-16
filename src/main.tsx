@@ -2,15 +2,10 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
+import { initializeTheme } from './lib/theme';
 
 // Initialize DaisyUI theme immediately
-document.documentElement.setAttribute('data-theme', 'caramellatte');
-localStorage.setItem('theme', 'caramellatte');
-
-console.log(
-  'Theme initialized in main.tsx:',
-  document.documentElement.getAttribute('data-theme')
-);
+initializeTheme('caramellatte', true);
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
