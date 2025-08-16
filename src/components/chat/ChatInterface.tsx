@@ -2,10 +2,7 @@ import React, { useRef, useEffect } from 'react';
 import { createDaisyUIInputClasses } from '@/lib/input-migration';
 import { createDaisyUICardClasses } from '@/lib/card-migration';
 import { createDaisyUIScrollAreaClasses } from '@/lib/scroll-area-migration';
-import {
-  createDaisyUIAvatarClasses,
-  createDaisyUIAvatarPlaceholderClasses,
-} from '@/lib/avatar-migration';
+
 import {
   Send,
   User,
@@ -154,19 +151,16 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
               }`}
             >
               <div
-                className={createDaisyUIAvatarClasses(
-                  'sm',
-                  `h-8 w-8 ${
-                    message.role === 'user'
-                      ? 'bg-green-100'
-                      : getPersonaColor(persona)
-                  }`
-                )}
+                className={`flex h-8 w-8 items-center justify-center rounded-full border-2 border-white shadow-sm ${
+                  message.role === 'user'
+                    ? 'bg-green-100'
+                    : getPersonaColor(persona)
+                }`}
               >
                 <div
-                  className={createDaisyUIAvatarPlaceholderClasses(
+                  className={`flex items-center justify-center ${
                     message.role === 'user' ? 'text-green-600' : ''
-                  )}
+                  }`}
                 >
                   {message.role === 'user' ? (
                     <User className="h-4 w-4" />
@@ -180,7 +174,7 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
                 className={`${createDaisyUICardClasses('bordered')} max-w-[80%] ${
                   message.role === 'user'
                     ? 'bg-green-500 text-white'
-                    : 'bg-white'
+                    : 'bg-base-100'
                 }`}
               >
                 <div className="card-body p-3">
@@ -207,17 +201,14 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
           {isLoading && (
             <div className="flex items-start space-x-3">
               <div
-                className={createDaisyUIAvatarClasses(
-                  'sm',
-                  `h-8 w-8 ${getPersonaColor(persona)}`
-                )}
+                className={`flex h-8 w-8 items-center justify-center rounded-full border-2 border-white shadow-sm ${getPersonaColor(persona)}`}
               >
-                <div className={createDaisyUIAvatarPlaceholderClasses()}>
+                <div className="flex items-center justify-center">
                   {getPersonaIcon(persona)}
                 </div>
               </div>
               <div
-                className={`${createDaisyUICardClasses('bordered')} bg-white`}
+                className={`${createDaisyUICardClasses('bordered')} bg-base-100`}
               >
                 <div className="card-body p-3">
                   <div className="flex items-center space-x-2">
@@ -234,7 +225,7 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
       </div>
 
       {/* Chat Input */}
-      <div className="rounded-b-lg border-t bg-white p-4">
+      <div className="rounded-b-lg border-t bg-base-100 p-4">
         <div className="flex items-center space-x-2">
           <input
             ref={inputRef}

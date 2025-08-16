@@ -1,8 +1,5 @@
 import { createDaisyUICardClasses } from '@/lib/card-migration';
-import {
-  createDaisyUIAvatarClasses,
-  createDaisyUIAvatarPlaceholderClasses,
-} from '@/lib/avatar-migration';
+
 import { Bot, ChefHat, Heart, Home, Brain } from 'lucide-react';
 import { RECIPE_BOT_PERSONAS, type PersonaType } from '@/lib/openai';
 import { AssistantBadge } from './AssistantBadge';
@@ -59,19 +56,10 @@ export function PersonaSelector({ onPersonaSelect }: PersonaSelectorProps) {
 
   return (
     <div className="mx-auto flex h-[calc(100vh-8rem)] max-w-4xl flex-col">
-      <div className="flex items-center justify-between rounded-t-lg border-b bg-white p-4">
+      <div className="flex items-center justify-between rounded-t-lg border-b bg-base-100 p-4">
         <div className="flex items-center space-x-3">
-          <div
-            className={createDaisyUIAvatarClasses(
-              'md',
-              'h-10 w-10 bg-orange-100'
-            )}
-          >
-            <div
-              className={createDaisyUIAvatarPlaceholderClasses(
-                'text-orange-600'
-              )}
-            >
+          <div className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-white bg-orange-100 shadow-sm">
+            <div className="flex items-center justify-center text-orange-600">
               <Bot className="h-5 w-5" />
             </div>
           </div>
