@@ -8,20 +8,16 @@ import { supabase } from './supabase';
  */
 
 /**
- * Clear all local auth data and force a fresh sign-in
+ * Clear all auth data and force a fresh sign-in
  * This is useful when users are stuck in a loading state
+ * Uses Supabase's built-in signOut() to properly clear all session data
  */
 export async function clearAuthAndReload(): Promise<void> {
   try {
-    // Sign out from Supabase
+    // Sign out from Supabase - this clears all relevant session data
     await supabase.auth.signOut();
 
-    // Clear any local storage that might be causing issues
-    localStorage.removeItem('supabase.auth.token');
-    localStorage.removeItem('supabase.auth.expires_at');
-    localStorage.removeItem('supabase.auth.refresh_token');
-
-    // Clear any session storage
+    // Clear any session storage that might contain additional auth data
     sessionStorage.clear();
 
     // Reload the page to start fresh
