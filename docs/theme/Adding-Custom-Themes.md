@@ -14,13 +14,13 @@ daisyui: {
   themes: [
     {
       caramellatte: {
-        primary: '#3d2817',      // Dark brown (was black)
-        secondary: '#6b4423',    // Medium brown
-        accent: '#8b5a2b',       // Lighter brown
-        neutral: '#5d4037',      // Rich brown
-        'base-100': '#fef7ed',   // Cream background
-        'base-200': '#f5e6d3',   // Medium cream
-        'base-300': '#e7d5c4',   // Light cream
+        primary: '#3d2817', // Dark brown (was black)
+        secondary: '#6b4423', // Medium brown
+        accent: '#8b5a2b', // Lighter brown
+        neutral: '#5d4037', // Rich brown
+        'base-100': '#fef7ed', // Cream background
+        'base-200': '#f5e6d3', // Medium cream
+        'base-300': '#e7d5c4', // Light cream
         'base-content': '#3d2817', // Dark brown text
         'primary-content': '#ffffff', // White text on primary
         'secondary-content': '#e7d5c4', // Light text on secondary

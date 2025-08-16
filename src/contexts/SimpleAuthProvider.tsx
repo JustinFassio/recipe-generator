@@ -65,12 +65,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     let mounted = true;
-    
+
     // Simple initialization with cleanup for invalid sessions
     const init = async () => {
       try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
+        const {
+          data: { session },
+          error,
+        } = await supabase.auth.getSession();
+
         if (error) {
           console.error('Session error:', error);
           // Clear invalid session
@@ -78,7 +81,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           localStorage.clear();
           sessionStorage.clear();
         }
-        
+
         if (mounted) {
           if (session?.user && !error) {
             setUser(session.user);
@@ -95,7 +98,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await supabase.auth.signOut();
         localStorage.clear();
         sessionStorage.clear();
-        
+
         if (mounted) {
           setUser(null);
           setError(null); // Don't show error, just clear everything
@@ -107,23 +110,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     init();
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        console.log('🔄 Auth event:', event);
-        if (!mounted) return;
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('🔄 Auth event:', event);
+      if (!mounted) return;
 
-        if (session?.user) {
-          setUser(session.user);
-          console.log('✅ User signed in:', session.user.email);
-        } else {
-          setUser(null);
-          setProfile(null);
-          console.log('❌ User signed out');
-        }
-        
-        setLoading(false);
+      if (session?.user) {
+        setUser(session.user);
+        console.log('✅ User signed in:', session.user.email);
+      } else {
+        setUser(null);
+        setProfile(null);
+        console.log('❌ User signed out');
       }
-    );
+
+      setLoading(false);
+    });
 
     return () => {
       mounted = false;

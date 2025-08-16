@@ -2,7 +2,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { AuthForm } from '@/components/auth/auth-form';
-import { AuthProvider } from '@/contexts/DebugAuthProvider';
+import { AuthProvider } from '@/contexts/SimpleAuthProvider';
 
 // Test wrapper to provide auth context
 const renderWithAuth = (component: React.ReactElement) => {

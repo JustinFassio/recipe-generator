@@ -78,7 +78,7 @@ export function RecipesPage() {
               </p>
             </div>
 
-            <div className="flex flex-col gap-2 self-start sm:self-auto sm:flex-row">
+            <div className="flex flex-col gap-2 self-start sm:flex-row sm:self-auto">
               <Button
                 variant={
                   location.pathname === '/chat-recipe' ? 'default' : 'ghost'
@@ -93,10 +93,7 @@ export function RecipesPage() {
                 <Sparkles className="mr-2 h-4 w-4" />
                 AI Recipe Creator
               </Button>
-              <Button
-                className=""
-                onClick={() => navigate('/add')}
-              >
+              <Button className="" onClick={() => navigate('/add')}>
                 <Plus className="mr-2 h-4 w-4" />
                 Add Recipe
               </Button>

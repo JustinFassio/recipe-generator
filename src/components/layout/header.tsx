@@ -49,7 +49,6 @@ export function Header() {
               Recipes
             </Button>
 
-
             <AccessibilityProvider />
 
             {/* User Profile Dropdown */}

@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { AuthForm } from '@/components/auth/auth-form';
-import { AuthProvider } from '@/contexts/DebugAuthProvider';
+import { AuthProvider } from '@/contexts/SimpleAuthProvider';
 import { act } from '@testing-library/react';
 
 // Mock Supabase
