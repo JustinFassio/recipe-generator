@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createDaisyUIButtonClasses } from '@/lib/button-migration';
 import { ArrowLeft } from 'lucide-react';
 import { ChatInterface } from '@/components/chat/ChatInterface';
 import { RecipeForm } from '@/components/recipes/recipe-form';
+import { Button } from '@/components/ui/button';
 import type { RecipeFormData } from '@/lib/schemas';
 
 export function ChatRecipePage() {
@@ -31,20 +31,21 @@ export function ChatRecipePage() {
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50">
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-6">
-          <button
-            className={`${createDaisyUIButtonClasses('ghost')} mb-4`}
+          <Button
+            variant="ghost"
+            className="mb-4"
             onClick={() => navigate('/')}
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Recipes
-          </button>
+          </Button>
 
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
             <div>
-              <h1 className="mb-2 text-3xl font-bold text-gray-900">
+              <h1 className="mb-2 text-2xl font-bold text-gray-900 sm:text-3xl">
                 {showEditor ? 'Review & Edit Recipe' : 'AI Recipe Creator'}
               </h1>
-              <p className="text-gray-600">
+              <p className="text-sm text-gray-600 sm:text-base">
                 {showEditor
                   ? 'Review and customize your AI-generated recipe before saving'
                   : 'Choose your recipe assistant and create personalized recipes step by step'}
@@ -52,13 +53,14 @@ export function ChatRecipePage() {
             </div>
 
             {showEditor && (
-              <button
-                className={`${createDaisyUIButtonClasses('outline')} border-orange-500 text-orange-600 hover:bg-orange-50`}
+              <Button
+                variant="outline"
+                className="border-orange-500 text-orange-600 hover:bg-orange-50"
                 onClick={handleBackToChat}
               >
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Back to Chat
-              </button>
+              </Button>
             )}
           </div>
         </div>

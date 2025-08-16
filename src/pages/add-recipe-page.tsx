@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { createDaisyUIButtonClasses } from '@/lib/button-migration';
 import { ArrowLeft } from 'lucide-react';
 import { ParseRecipeForm } from '@/components/recipes/parse-recipe-form';
 import { RecipeForm } from '@/components/recipes/recipe-form';
+import { Button } from '@/components/ui/button';
 import type { RecipeFormData } from '@/lib/schemas';
 import type { Recipe } from '@/lib/supabase';
 
@@ -52,18 +52,15 @@ export function AddRecipePage() {
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50">
       <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-6">
-          <button
-            className={`${createDaisyUIButtonClasses('ghost')} mb-4`}
-            onClick={handleCancel}
-          >
+          <Button variant="ghost" className="mb-4" onClick={handleCancel}>
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Recipes
-          </button>
+          </Button>
 
-          <h1 className="mb-2 text-3xl font-bold text-gray-900">
+          <h1 className="mb-2 text-2xl font-bold text-gray-900 sm:text-3xl">
             {existingRecipe ? 'Edit Recipe' : 'Add New Recipe'}
           </h1>
-          <p className="text-gray-600">
+          <p className="text-sm text-gray-600 sm:text-base">
             {existingRecipe
               ? 'Update your recipe details'
               : showParser
@@ -90,25 +87,23 @@ export function AddRecipePage() {
             </div>
 
             <div className="text-center">
-              <button
-                className={`${createDaisyUIButtonClasses('outline')} border-green-600 text-green-600 hover:bg-green-50`}
+              <Button
+                variant="outline"
+                className="border-green-600 text-green-600 hover:bg-green-50"
                 onClick={() => setShowParser(false)}
               >
                 Create Recipe Manually
-              </button>
+              </Button>
             </div>
           </div>
         ) : (
           <div className="space-y-6">
             {!existingRecipe && (
               <div className="flex items-center justify-between">
-                <button
-                  className={createDaisyUIButtonClasses('ghost')}
-                  onClick={handleBackToParser}
-                >
+                <Button variant="ghost" onClick={handleBackToParser}>
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Back to Parser
-                </button>
+                </Button>
               </div>
             )}
 

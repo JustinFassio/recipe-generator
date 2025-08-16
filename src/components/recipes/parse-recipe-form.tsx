@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { createDaisyUIButtonClasses } from '@/lib/button-migration';
 import { createDaisyUITextareaClasses } from '@/lib/textarea-migration';
 import { createDaisyUILabelClasses } from '@/lib/label-migration';
 import {
@@ -13,6 +12,7 @@ import {
   createDaisyUIAlertDescriptionClasses,
 } from '@/lib/alert-migration';
 import { Loader2, Wand2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import {
   parseRecipeSchema,
   type ParseRecipeFormData,
@@ -95,13 +95,14 @@ Makes about 48 cookies. Store in airtight container.`;
               >
                 Recipe Content *
               </label>
-              <button
+              <Button
                 type="button"
-                className={createDaisyUIButtonClasses('ghost', 'sm')}
+                variant="ghost"
+                size="sm"
                 onClick={() => setShowExample(!showExample)}
               >
                 {showExample ? 'Hide' : 'Show'} Example
-              </button>
+              </Button>
             </div>
 
             {showExample && (
@@ -120,13 +121,15 @@ Makes about 48 cookies. Store in airtight container.`;
                         fields
                       </li>
                     </ul>
-                    <button
+                    <Button
                       type="button"
-                      className={`${createDaisyUIButtonClasses('outline', 'sm')} mt-2 border-green-600 text-green-600 hover:bg-green-50`}
+                      variant="outline"
+                      size="sm"
+                      className="mt-2 border-green-600 text-green-600 hover:bg-green-50"
                       onClick={loadExample}
                     >
                       Load Example
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -150,9 +153,9 @@ Makes about 48 cookies. Store in airtight container.`;
             )}
           </div>
 
-          <button
+          <Button
             type="submit"
-            className={`${createDaisyUIButtonClasses('default')} w-full`}
+            className="w-full"
             disabled={parseRecipe.isPending}
           >
             {parseRecipe.isPending ? (
@@ -166,7 +169,7 @@ Makes about 48 cookies. Store in airtight container.`;
                 Parse Recipe
               </>
             )}
-          </button>
+          </Button>
         </form>
       </div>
     </div>

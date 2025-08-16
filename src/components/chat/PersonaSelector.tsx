@@ -86,26 +86,28 @@ export function PersonaSelector({ onPersonaSelect }: PersonaSelectorProps) {
         </div>
       </div>
 
-      <div className="flex-1 bg-gray-50 p-6">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+      <div className="flex-1 bg-gray-50 p-4 sm:p-6">
+        <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3">
           {Object.entries(RECIPE_BOT_PERSONAS).map(([key, persona]) => (
             <div
               key={key}
               className={`${createDaisyUICardClasses('bordered')} cursor-pointer border-2 border-gray-200 transition-all duration-200 hover:border-gray-300 hover:shadow-lg`}
               onClick={() => onPersonaSelect(key as PersonaType)}
             >
-              <div className="card-body relative p-6 text-center transition-colors duration-200 hover:bg-gray-50">
+              <div className="card-body relative p-4 text-center transition-colors duration-200 hover:bg-gray-50 sm:p-6">
                 <AssistantBadge
                   isAssistantPowered={persona.isAssistantPowered}
                 />
 
                 <div
-                  className={`mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full border-2 border-white shadow-md ${getPersonaColor(key as PersonaType)}`}
+                  className={`mb-3 inline-flex h-12 w-12 items-center justify-center rounded-full border-2 border-white shadow-md sm:mb-4 sm:h-16 sm:w-16 ${getPersonaColor(key as PersonaType)}`}
                 >
                   {getPersonaIcon(key as PersonaType)}
                 </div>
-                <h3 className="mb-2 text-lg font-semibold">{persona.name}</h3>
-                <p className="text-sm text-gray-600">
+                <h3 className="mb-2 text-base font-semibold sm:text-lg">
+                  {persona.name}
+                </h3>
+                <p className="text-xs text-gray-600 sm:text-sm">
                   {getPersonaDescription(key as PersonaType)}
                 </p>
 
