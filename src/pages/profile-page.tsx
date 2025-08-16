@@ -515,7 +515,7 @@ export default function ProfilePage() {
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
                         placeholder="Enter new password"
-                        minLength={8}
+                        minLength={6}
                       />
                     </div>
                   </div>
@@ -532,12 +532,12 @@ export default function ProfilePage() {
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         placeholder="Confirm new password"
-                        minLength={8}
+                        minLength={6}
                       />
                     </div>
                     <label className="label">
                       <span className="label-text-alt text-base-content/60">
-                        Password must be at least 8 characters long
+                        Password must be at least 6 characters long
                       </span>
                     </label>
                   </div>
