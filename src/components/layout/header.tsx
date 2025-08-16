@@ -1,5 +1,5 @@
 import { LogOut, Menu, X, User, Settings } from 'lucide-react';
-import { useAuth } from '@/contexts/SimpleAuthProvider';
+import { useAuth } from '@/contexts/AuthProvider';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { AccessibilityProvider } from '@/components/ui/accessibility-provider';
 import { AppTitle } from '@/components/ui/app-title';

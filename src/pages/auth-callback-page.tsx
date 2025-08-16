@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
-import { useAuth } from '@/contexts/SimpleAuthProvider';
+import { useAuth } from '@/contexts/AuthProvider';
 
 export default function AuthCallbackPage() {
   const navigate = useNavigate();

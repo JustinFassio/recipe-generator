@@ -1,6 +1,6 @@
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/SimpleAuthProvider';
-import { clearAuthAndReload, recoverAuth } from '@/lib/auth-recovery';
+import { useAuth } from '@/contexts/AuthProvider';
+import { clearAuthAndReload, recoverAuth } from '@/lib/auth-utils';
 import { useState, useEffect } from 'react';
 
 interface ProtectedRouteProps {

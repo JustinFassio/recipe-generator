@@ -106,12 +106,23 @@ vi.mock('@/hooks/use-toast', () => ({
   toast: vi.fn(),
 }));
 
-// Mock SimpleAuthProvider for tests
-vi.mock('@/contexts/SimpleAuthProvider', () => ({
+// Mock AuthProvider for tests
+vi.mock('@/contexts/AuthProvider', () => ({
   AuthProvider: ({ children }: { children: React.ReactNode }) => children,
   useAuth: vi.fn(() => ({
-    user: null,
-    profile: null,
+    user: {
+      id: 'test-user-id',
+      email: 'test@example.com',
+      user_metadata: { full_name: 'Test User' },
+    },
+    profile: {
+      id: 'test-user-id',
+      username: 'testuser',
+      full_name: 'Test User',
+      avatar_url: null,
+      created_at: '2024-01-01T00:00:00Z',
+      updated_at: '2024-01-01T00:00:00Z',
+    },
     loading: false,
     error: null,
     signOut: vi.fn(),

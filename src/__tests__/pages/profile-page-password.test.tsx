@@ -1,7 +1,7 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import ProfilePage from '@/pages/profile-page';
-import { AuthProvider } from '@/contexts/SimpleAuthProvider';
+import { AuthProvider } from '@/contexts/AuthProvider';
 import { act } from '@testing-library/react';
 
 // Mock SimpleAuthProvider

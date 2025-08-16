@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { useAuth } from '@/contexts/SimpleAuthProvider';
+import { useAuth } from '@/contexts/AuthProvider';
 import {
   updateProfile,
   updateEmail,
