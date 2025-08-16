@@ -339,13 +339,13 @@ export function AuthForm() {
                       className="input-bordered input w-full border-gray-300 bg-white pl-10 text-gray-900 focus:border-green-500"
                       autoComplete="new-password"
                       required
-                      minLength={8}
+                      minLength={6}
                     />
                   </div>
                   <label className="label">
                     <span className="label-text-alt text-red-500">
                       <span className="mr-1 inline-block h-2 w-2 rounded-full bg-red-500"></span>
-                      Password must be 8+ characters
+                      Password must be 6+ characters
                     </span>
                   </label>
                 </div>
