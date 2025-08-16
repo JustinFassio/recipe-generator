@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from '@/contexts/DebugAuthProvider';
+import { AuthProvider } from '@/contexts/SimpleAuthProvider';
 import { ProtectedRoute, PublicRoute } from '@/components/auth/ProtectedRoute';
 import { Header } from '@/components/layout/header';
 import { RecipesPage } from '@/pages/recipes-page';

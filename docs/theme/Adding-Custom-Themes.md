@@ -4,9 +4,11 @@ This guide shows you how to add custom themes like "Caramellatte" to your Recipe
 
 ## ⚠️ Important: DaisyUI Version Compatibility
 
-**This project uses DaisyUI 4**, not DaisyUI 5. The configuration formats are different:
+**This project uses DaisyUI 5.0.50**, which supports both the traditional configuration format and the new CSS-based theme format.
 
-### DaisyUI 4 (Current Project) ✅
+### DaisyUI 5 (Current Project) ✅
+
+The project currently uses the traditional configuration format in `tailwind.config.js`:
 
 ```javascript
 // tailwind.config.js
@@ -14,22 +16,38 @@ daisyui: {
   themes: [
     {
       caramellatte: {
-        primary: '#d97706',
-        secondary: '#92400e',
-        accent: '#f59e0b',
-        neutral: '#3d2817',
-        'base-100': '#fef7ed',
-        // ... other colors
+        primary: '#3d2817', // Dark brown (was black)
+        secondary: '#6b4423', // Medium brown
+        accent: '#8b5a2b', // Lighter brown
+        neutral: '#5d4037', // Rich brown
+        'base-100': '#fef7ed', // Cream background
+        'base-200': '#f5e6d3', // Medium cream
+        'base-300': '#e7d5c4', // Light cream
+        'base-content': '#3d2817', // Dark brown text
+        'primary-content': '#ffffff', // White text on primary
+        'secondary-content': '#e7d5c4', // Light text on secondary
+        'accent-content': '#e7d5c4', // Light text on accent
+        'neutral-content': '#fef7ed', // Light text on neutral
+        info: '#3abff8',
+        'info-content': '#e7d5c4',
+        success: '#36d399',
+        'success-content': '#e7d5c4',
+        warning: '#fbbd23',
+        'warning-content': '#3d2817',
+        error: '#f87272',
+        'error-content': '#3d2817',
       },
     },
   ];
 }
 ```
 
-### DaisyUI 5 (Not Compatible) ❌
+### Alternative: DaisyUI 5 CSS Format (Also Supported) ✅
+
+DaisyUI 5 also supports the new CSS-based theme format:
 
 ```css
-/* This format won't work in this project */
+/* This format is also supported in DaisyUI 5 */
 @plugin "daisyui/theme" {
   name: 'caramellatte';
   --color-primary: oklch(0% 0 0);
@@ -38,7 +56,7 @@ daisyui: {
 }
 ```
 
-**If you have DaisyUI 5 CSS, convert it to DaisyUI 4 format using the steps below.**
+**Both formats work with DaisyUI 5. Choose the one that fits your workflow best.**
 
 ## Quick Start: Adding a Custom Theme
 
@@ -52,15 +70,26 @@ daisyui: {
     {
       // Your existing themes...
       caramellatte: {
-        primary: '#d97706',      // Orange
-        secondary: '#92400e',    // Brown
-        accent: '#f59e0b',       // Amber
-        neutral: '#3d2817',      // Dark brown
-        'base-100': '#fef7ed',   // Cream
+        primary: '#3d2817',      // Dark brown (was black)
+        secondary: '#6b4423',    // Medium brown
+        accent: '#8b5a2b',       // Lighter brown
+        neutral: '#5d4037',      // Rich brown
+        'base-100': '#fef7ed',   // Cream background
+        'base-200': '#f5e6d3',   // Medium cream
+        'base-300': '#e7d5c4',   // Light cream
+        'base-content': '#3d2817', // Dark brown text
+        'primary-content': '#ffffff', // White text on primary
+        'secondary-content': '#e7d5c4', // Light text on secondary
+        'accent-content': '#e7d5c4', // Light text on accent
+        'neutral-content': '#fef7ed', // Light text on neutral
         info: '#3abff8',         // Blue
+        'info-content': '#e7d5c4',
         success: '#36d399',      // Green
+        'success-content': '#e7d5c4',
         warning: '#fbbd23',      // Yellow
+        'warning-content': '#3d2817',
         error: '#f87272',        // Red
+        'error-content': '#3d2817',
       },
     },
     // Built-in themes...
@@ -95,9 +124,9 @@ const allThemes = [
 2. Click the theme toggle to cycle through themes
 3. Your new theme should appear in the rotation
 
-## Converting DaisyUI 5 CSS to DaisyUI 4
+## Using DaisyUI 5 CSS Format (Alternative)
 
-If you have DaisyUI 5 CSS like this:
+DaisyUI 5 supports both configuration formats. If you prefer the CSS-based approach:
 
 ```css
 @plugin "daisyui/theme" {
@@ -110,9 +139,12 @@ If you have DaisyUI 5 CSS like this:
 }
 ```
 
-Convert it to DaisyUI 4 format:
+### Converting Between Formats
+
+If you need to convert between OKLCH (CSS format) and hex (config format):
 
 ```javascript
+// OKLCH to Hex conversion example
 caramellatte: {
   primary: '#000000',        // Convert oklch(0% 0 0) to hex
   secondary: '#3d2817',      // Convert oklch(22.45% 0.075 37.85) to hex
@@ -126,7 +158,7 @@ caramellatte: {
 
 - Use [OKLCH to Hex Converter](https://oklch.com/)
 - Or use browser dev tools to convert colors
-- DaisyUI 5 uses OKLCH, DaisyUI 4 uses hex colors
+- DaisyUI 5 CSS format uses OKLCH, config format uses hex colors
 
 ## Theme Color Guidelines
 
@@ -175,19 +207,30 @@ caramellatte: {
 
 ### Coffee & Latte Themes
 
-**Caramellatte** (Already added):
+**Caramellatte** (Current theme):
 
 ```javascript
 caramellatte: {
-  primary: '#d97706',      // Caramel orange
-  secondary: '#92400e',    // Rich brown
-  accent: '#f59e0b',       // Golden amber
-  neutral: '#3d2817',      // Dark brown
-  'base-100': '#fef7ed',   // Cream
+  primary: '#3d2817',      // Dark brown (was black)
+  secondary: '#6b4423',    // Medium brown
+  accent: '#8b5a2b',       // Lighter brown
+  neutral: '#5d4037',      // Rich brown
+  'base-100': '#fef7ed',   // Cream background
+  'base-200': '#f5e6d3',   // Medium cream
+  'base-300': '#e7d5c4',   // Light cream
+  'base-content': '#3d2817', // Dark brown text
+  'primary-content': '#ffffff', // White text on primary
+  'secondary-content': '#e7d5c4', // Light text on secondary
+  'accent-content': '#e7d5c4', // Light text on accent
+  'neutral-content': '#fef7ed', // Light text on neutral
   info: '#3abff8',
+  'info-content': '#e7d5c4',
   success: '#36d399',
+  'success-content': '#e7d5c4',
   warning: '#fbbd23',
+  'warning-content': '#3d2817',
   error: '#f87272',
+  'error-content': '#3d2817',
 }
 ```
 
@@ -300,7 +343,10 @@ console.log(document.documentElement.getAttribute('data-theme'));
 1. Verify hex color format: `#RRGGBB`
 2. Check for CSS specificity conflicts
 3. Ensure DaisyUI is properly configured
-4. Rebuild the project: `npm run build`
+4. **Check for conflicting CSS custom properties** in `src/index.css`
+5. Rebuild the project: `npm run build`
+
+**Important**: If buttons appear black despite updating the DaisyUI theme, check that the CSS custom properties in `src/index.css` match your theme colors. The CSS variables can override the DaisyUI theme system.
 
 ### Build Errors
 
@@ -311,10 +357,10 @@ console.log(document.documentElement.getAttribute('data-theme'));
 
 ### DaisyUI 5 CSS Issues
 
-1. **Don't use DaisyUI 5 CSS syntax** in this project
-2. Convert OKLCH colors to hex format
-3. Use the DaisyUI 4 configuration format
-4. Ensure you're editing `tailwind.config.js`, not CSS files
+1. **Both CSS and config formats are supported** in DaisyUI 5
+2. Choose the format that works best for your workflow
+3. If using CSS format, ensure proper `@plugin` syntax
+4. If using config format, ensure proper JSON structure in `tailwind.config.js`
 
 ## Best Practices
 
@@ -323,7 +369,7 @@ console.log(document.documentElement.getAttribute('data-theme'));
 3. **Testing**: Test themes in both light and dark contexts
 4. **Documentation**: Add theme descriptions to your docs
 5. **Organization**: Group related themes together in the config
-6. **Version**: Always use DaisyUI 4 format for this project
+6. **Version**: This project uses DaisyUI 5.0.50 - both CSS and config formats are supported
 
 ## Example: Complete Theme Addition
 

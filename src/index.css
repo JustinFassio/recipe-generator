@@ -46,10 +46,10 @@ h1 {
   /* Apply Caramellatte theme globally */
   html[data-theme='caramellatte'] {
     color-scheme: light;
-    --color-primary: #000000;
-    --color-secondary: #3d2817;
-    --color-accent: #6b4423;
-    --color-neutral: #8b5a2b;
+    --color-primary: #3d2817;
+    --color-secondary: #6b4423;
+    --color-accent: #8b5a2b;
+    --color-neutral: #5d4037;
     --color-base-100: #fef7ed;
     --color-base-200: #f5e6d3;
     --color-base-300: #e7d5c4;
@@ -63,7 +63,7 @@ h1 {
     --color-success: #36d399;
     --color-success-content: #e7d5c4;
     --color-warning: #fbbd23;
-    --color-warning-content: #6b4423;
+    --color-warning-content: #3d2817;
     --color-error: #f87272;
     --color-error-content: #3d2817;
   }

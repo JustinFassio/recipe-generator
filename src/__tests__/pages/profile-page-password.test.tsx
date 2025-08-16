@@ -1,60 +1,25 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import ProfilePage from '@/pages/profile-page';
-import { AuthProvider } from '@/contexts/DebugAuthProvider';
+import { AuthProvider } from '@/contexts/SimpleAuthProvider';
 import { act } from '@testing-library/react';
 
-// Mock Supabase
-vi.mock('@/lib/supabase', () => ({
-  supabase: {
-    auth: {
-      getUser: vi.fn(() =>
-        Promise.resolve({
-          data: { user: { id: 'test-user-id', email: 'test@example.com' } },
-          error: null,
-        })
-      ),
-      getSession: vi.fn(() =>
-        Promise.resolve({
-          data: {
-            session: {
-              user: { id: 'test-user-id', email: 'test@example.com' },
-            },
-          },
-          error: null,
-        })
-      ),
-      onAuthStateChange: vi.fn(() => ({
-        data: { subscription: { unsubscribe: vi.fn() } },
-      })),
-      signOut: vi.fn(),
+// Mock SimpleAuthProvider
+vi.mock('@/contexts/SimpleAuthProvider', () => ({
+  AuthProvider: ({ children }: { children: React.ReactNode }) => children,
+  useAuth: vi.fn(() => ({
+    user: { id: 'test-user-id', email: 'test@example.com' },
+    profile: {
+      id: 'test-user-id',
+      username: 'testuser',
+      full_name: 'Test User',
+      avatar_url: null,
     },
-    from: vi.fn(() => ({
-      select: vi.fn(() => ({
-        eq: vi.fn(() => ({
-          single: vi.fn(() =>
-            Promise.resolve({
-              data: {
-                id: 'test-user-id',
-                username: 'testuser',
-                full_name: 'Test User',
-                avatar_url: null,
-              },
-              error: null,
-            })
-          ),
-        })),
-      })),
-    })),
-    storage: {
-      from: vi.fn(() => ({
-        upload: vi.fn(() => Promise.resolve({ error: null })),
-        getPublicUrl: vi.fn(() => ({
-          data: { publicUrl: 'https://example.com/avatar.jpg' },
-        })),
-      })),
-    },
-  },
+    loading: false,
+    error: null,
+    signOut: vi.fn(),
+    refreshProfile: vi.fn(),
+  })),
 }));
 
 // Mock auth functions

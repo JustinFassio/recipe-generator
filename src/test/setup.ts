@@ -6,10 +6,16 @@ vi.mock('@/lib/supabase', () => ({
   supabase: {
     auth: {
       getUser: vi.fn(),
-      getSession: vi.fn(),
+      getSession: vi.fn(() =>
+        Promise.resolve({
+          data: { session: null },
+          error: null,
+        })
+      ),
       onAuthStateChange: vi.fn(() => ({
         data: { subscription: { unsubscribe: vi.fn() } },
       })),
+      signOut: vi.fn(() => Promise.resolve({ error: null })),
     },
     from: vi.fn(() => ({
       select: vi.fn(() => ({
@@ -98,6 +104,19 @@ vi.mock('react-router-dom', () => ({
 // Mock toast
 vi.mock('@/hooks/use-toast', () => ({
   toast: vi.fn(),
+}));
+
+// Mock SimpleAuthProvider for tests
+vi.mock('@/contexts/SimpleAuthProvider', () => ({
+  AuthProvider: ({ children }: { children: React.ReactNode }) => children,
+  useAuth: vi.fn(() => ({
+    user: null,
+    profile: null,
+    loading: false,
+    error: null,
+    signOut: vi.fn(),
+    refreshProfile: vi.fn(),
+  })),
 }));
 
 // Mock window.matchMedia

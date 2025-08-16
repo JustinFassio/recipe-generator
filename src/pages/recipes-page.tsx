@@ -2,15 +2,16 @@ import { useState, useMemo } from 'react';
 import { createDaisyUIInputClasses } from '@/lib/input-migration';
 import { createDaisyUICardClasses } from '@/lib/card-migration';
 import { createDaisyUISkeletonClasses } from '@/lib/skeleton-migration';
-import { Plus, Search, ChefHat } from 'lucide-react';
+import { Plus, Search, ChefHat, Sparkles } from 'lucide-react';
 import { useRecipes } from '@/hooks/use-recipes';
 import { RecipeCard } from '@/components/recipes/recipe-card';
 import { Button } from '@/components/ui/button';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import type { Recipe } from '@/lib/supabase';
 
 export function RecipesPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { data: recipes = [], isLoading, error } = useRecipes();
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -77,13 +78,26 @@ export function RecipesPage() {
               </p>
             </div>
 
-            <Button
-              className="self-start sm:self-auto"
-              onClick={() => navigate('/add')}
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              Add Recipe
-            </Button>
+            <div className="flex flex-col gap-2 self-start sm:flex-row sm:self-auto">
+              <Button
+                variant={
+                  location.pathname === '/chat-recipe' ? 'default' : 'ghost'
+                }
+                className={
+                  location.pathname === '/chat-recipe'
+                    ? ''
+                    : 'bg-orange-500 text-white hover:bg-orange-600'
+                }
+                onClick={() => navigate('/chat-recipe')}
+              >
+                <Sparkles className="mr-2 h-4 w-4" />
+                AI Recipe Creator
+              </Button>
+              <Button onClick={() => navigate('/add')}>
+                <Plus className="mr-2 h-4 w-4" />
+                Add Recipe
+              </Button>
+            </div>
           </div>
 
           <div className="mt-6">
