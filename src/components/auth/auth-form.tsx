@@ -22,56 +22,7 @@ export function AuthForm() {
     const fetchRecipes = async () => {
       try {
         setRecipesLoading(true);
-        console.log('🔍 Fetching recipes with images...');
-        console.log('🔗 Supabase URL:', import.meta.env.VITE_SUPABASE_URL);
-        console.log(
-          '🔑 Supabase Key:',
-          import.meta.env.VITE_SUPABASE_ANON_KEY ? 'SET' : 'MISSING'
-        );
 
-        // Test the connection first
-        const { data: connectionTest, error: connectionError } = await supabase
-          .from('recipes')
-          .select('count')
-          .limit(1);
-
-        console.log('🔌 Connection test:', { connectionTest, connectionError });
-
-        // First, let's test if we can access the recipes table at all
-        const { data: allRecipes, error: allRecipesError } = await supabase
-          .from('recipes')
-          .select('*')
-          .limit(3);
-
-        console.log('🔍 Test query - all recipes:', {
-          allRecipes,
-          allRecipesError,
-        });
-
-        // Test the simple query that should work with the policy
-        const { data: simpleRecipes, error: simpleError } = await supabase
-          .from('recipes')
-          .select('title, image_url')
-          .not('image_url', 'is', null)
-          .limit(3);
-
-        console.log('🔍 Simple query test:', { simpleRecipes, simpleError });
-
-        // Test with a more specific query
-        const { data: specificRecipes, error: specificError } = await supabase
-          .from('recipes')
-          .select('id, title, image_url, user_id')
-          .not('image_url', 'is', null)
-          .not('image_url', 'eq', '')
-          .limit(5);
-
-        console.log('🔍 Specific query test:', {
-          specificRecipes,
-          specificError,
-        });
-
-        // For the auth page showcase, we want to show all recipes with images
-        // not just user-specific ones, so we'll query without RLS restrictions
         const { data, error } = await supabase
           .from('recipes')
           .select('*')
@@ -79,41 +30,14 @@ export function AuthForm() {
           .order('created_at', { ascending: false })
           .limit(5);
 
-        console.log('📊 Database query result:', { data, error });
-        console.log('🔍 Query details:', {
-          table: 'recipes',
-          filter: 'image_url IS NOT NULL',
-          order: 'created_at DESC',
-          limit: 5,
-        });
-
         if (error) {
-          console.error('❌ Error fetching recipes:', error);
-          console.error('❌ Error details:', {
-            message: error.message,
-            details: error.details,
-            hint: error.hint,
-            code: error.code,
-          });
+          console.error('Error fetching recipes:', error);
           setUserRecipes([]);
         } else {
-          console.log('✅ Recipes fetched successfully:', data);
-          console.log('📸 Recipes with images found:', data?.length || 0);
-          if (data && data.length > 0) {
-            data.forEach((recipe, index) => {
-              console.log(`🍳 Recipe ${index + 1}:`, {
-                id: recipe.id,
-                title: recipe.title,
-                image_url: recipe.image_url,
-                user_id: recipe.user_id,
-                created_at: recipe.created_at,
-              });
-            });
-          }
           setUserRecipes(data || []);
         }
       } catch (error) {
-        console.error('❌ Exception fetching recipes:', error);
+        console.error('Exception fetching recipes:', error);
         setUserRecipes([]);
       } finally {
         setRecipesLoading(false);
@@ -125,16 +49,9 @@ export function AuthForm() {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('🔍 Sign Up attempt:', {
-      email,
-      password,
-      acceptTerms,
-      subscribeEmails,
-    });
     setLoading(true);
 
     if (!acceptTerms) {
-      console.log('❌ Terms not accepted');
       toast({
         title: 'Error',
         description: 'Please accept the terms and conditions.',
@@ -144,21 +61,19 @@ export function AuthForm() {
       return;
     }
 
-    console.log('✅ Terms accepted, proceeding with signup...');
     const { error } = await supabase.auth.signUp({
       email,
       password,
     });
 
     if (error) {
-      console.error('❌ Signup error:', error);
+      console.error('Signup error:', error);
       toast({
         title: 'Error',
         description: error.message,
         variant: 'destructive',
       });
     } else {
-      console.log('✅ Signup successful');
       toast({
         title: 'Success',
         description:
@@ -443,18 +358,9 @@ export function AuthForm() {
                       src={recipe.image_url!}
                       className="rounded-box"
                       alt={recipe.title}
-                      onLoad={() =>
-                        console.log(
-                          `✅ Image loaded successfully: ${recipe.title}`
-                        )
-                      }
                       onError={(e) => {
-                        console.error(
-                          `❌ Image failed to load: ${recipe.title}`,
-                          recipe.image_url
-                        );
                         const target = e.target as HTMLImageElement;
-                        console.error('Failed image element:', target);
+                        target.style.display = 'none';
                       }}
                     />
                   ))}
