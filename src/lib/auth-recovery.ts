@@ -8,6 +8,41 @@ import { supabase } from './supabase';
  */
 
 /**
+ * Generate a unique username for a user
+ * Ensures uniqueness by checking against existing usernames
+ */
+async function generateUniqueUsername(userId: string): Promise<string> {
+  const baseUsername = `user_${userId.substring(0, 8)}`;
+
+  // Check if the base username already exists
+  const { data: existingUser } = await supabase
+    .from('profiles')
+    .select('username')
+    .eq('username', baseUsername)
+    .single();
+
+  if (!existingUser) {
+    return baseUsername;
+  }
+
+  // If base username exists, try with more characters from the ID
+  const extendedUsername = `user_${userId.substring(0, 12)}`;
+  const { data: existingExtended } = await supabase
+    .from('profiles')
+    .select('username')
+    .eq('username', extendedUsername)
+    .single();
+
+  if (!existingExtended) {
+    return extendedUsername;
+  }
+
+  // If still exists, use the full ID with a timestamp suffix
+  const timestamp = Date.now().toString(36);
+  return `user_${userId.substring(0, 6)}_${timestamp}`;
+}
+
+/**
  * Clear all auth data and force a fresh sign-in
  * This is useful when users are stuck in a loading state
  * Uses Supabase's built-in signOut() to properly clear all session data
@@ -89,11 +124,14 @@ export async function ensureUserProfile(): Promise<{
       return { success: true };
     }
 
+    // Generate a unique username for the user
+    const username = await generateUniqueUsername(user.id);
+
     // Create profile
     const { error: profileError } = await supabase.from('profiles').insert({
       id: user.id,
       full_name: user.user_metadata?.full_name || '',
-      username: `user_${user.id.substring(0, 8)}`,
+      username,
     });
 
     if (profileError) {
