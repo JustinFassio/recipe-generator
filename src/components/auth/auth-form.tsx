@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { signUp, signIn, signInWithMagicLink, resetPassword } from '@/lib/auth';
+import { useAuth } from '@/contexts/DebugAuthProvider';
 
-import { User, Lock, Plus } from 'lucide-react';
+import { User, Lock, Plus, Mail, UserPlus } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Divider } from '@/components/ui/divider';
@@ -9,14 +11,23 @@ import { AppTitle } from '@/components/ui/app-title';
 import type { Recipe } from '@/lib/supabase';
 
 export function AuthForm() {
+  const { user } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [subscribeEmails, setSubscribeEmails] = useState(false);
-  const [activeTab, setActiveTab] = useState<'signin' | 'signup'>('signin');
+  const [activeTab, setActiveTab] = useState<'signin' | 'signup' | 'magic-link' | 'reset'>('signin');
   const [userRecipes, setUserRecipes] = useState<Recipe[]>([]);
   const [recipesLoading, setRecipesLoading] = useState(true);
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (user) {
+      window.location.href = '/recipes';
+    }
+  }, [user]);
 
   // Fetch recipes with images from the database
   useEffect(() => {
@@ -62,12 +73,9 @@ export function AuthForm() {
       return;
     }
 
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
+    const { success, error } = await signUp(email, password, fullName);
 
-    if (error) {
+    if (!success && error) {
       console.error('Signup error:', error);
       toast({
         title: 'Error',
@@ -80,6 +88,12 @@ export function AuthForm() {
         description:
           'Account created successfully! Please check your email for verification.',
       });
+      // Clear form
+      setEmail('');
+      setPassword('');
+      setFullName('');
+      setAcceptTerms(false);
+      setSubscribeEmails(false);
     }
 
     setLoading(false);
@@ -89,17 +103,64 @@ export function AuthForm() {
     e.preventDefault();
     setLoading(true);
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    const { success, error } = await signIn(email, password);
 
-    if (error) {
+    if (!success && error) {
       toast({
         title: 'Error',
         description: error.message,
         variant: 'destructive',
       });
+    } else {
+      toast({
+        title: 'Success',
+        description: 'Signed in successfully!',
+      });
+    }
+
+    setLoading(false);
+  };
+
+  const handleMagicLink = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    const { success, error } = await signInWithMagicLink(email);
+
+    if (!success && error) {
+      toast({
+        title: 'Error',
+        description: error.message,
+        variant: 'destructive',
+      });
+    } else {
+      toast({
+        title: 'Success',
+        description: 'Check your email for a magic link to sign in!',
+      });
+    }
+
+    setLoading(false);
+  };
+
+  const handlePasswordReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    const { success, error } = await resetPassword(email);
+
+    if (!success && error) {
+      toast({
+        title: 'Error',
+        description: error.message,
+        variant: 'destructive',
+      });
+    } else {
+      toast({
+        title: 'Success',
+        description: 'Check your email for password reset instructions!',
+      });
+      setActiveTab('signin');
     }
 
     setLoading(false);
@@ -148,12 +209,16 @@ export function AuthForm() {
                 Chef Hat Icon
               </div>
               <h3 className="text-2xl font-bold text-gray-900">
-                {activeTab === 'signin' ? 'Sign In' : 'Create new account'}
+                {activeTab === 'signin' && 'Sign In'}
+                {activeTab === 'signup' && 'Create new account'}
+                {activeTab === 'magic-link' && 'Magic Link Sign In'}
+                {activeTab === 'reset' && 'Reset Password'}
               </h3>
               <p className="mt-2 text-sm text-gray-600">
-                {activeTab === 'signin'
-                  ? 'Welcome back to your digital cookbook'
-                  : 'Registration is free and only takes a minute'}
+                {activeTab === 'signin' && 'Welcome back to your digital cookbook'}
+                {activeTab === 'signup' && 'Registration is free and only takes a minute'}
+                {activeTab === 'magic-link' && 'We\'ll send you a magic link to sign in'}
+                {activeTab === 'reset' && 'Enter your email to reset your password'}
               </p>
               <span className="sr-only">
                 Your digital cookbook for collecting and organizing recipes
@@ -215,6 +280,24 @@ export function AuthForm() {
             {/* Sign Up Form */}
             {activeTab === 'signup' && (
               <form onSubmit={handleSignUp} className="space-y-4">
+                <div className="form-control">
+                  <label className="label" htmlFor="signup-fullname">
+                    <span className="label-text text-gray-700">Full Name</span>
+                  </label>
+                  <div className="relative">
+                    <UserPlus className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
+                    <input
+                      id="signup-fullname"
+                      type="text"
+                      placeholder="Your full name"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      className="input-bordered input w-full border-gray-300 bg-white pl-10 text-gray-900 focus:border-green-500"
+                      required
+                    />
+                  </div>
+                </div>
+
                 <div className="form-control">
                   <label className="label" htmlFor="signup-email">
                     <span className="label-text text-gray-700">Email</span>
@@ -312,18 +395,121 @@ export function AuthForm() {
               </form>
             )}
 
-            {/* Bottom Link */}
-            <div className="mt-4 text-center">
-              <a
-                href="#"
-                className="link link-hover text-sm text-green-600 hover:text-green-700"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setActiveTab(activeTab === 'signin' ? 'signup' : 'signin');
-                }}
-              >
-                {activeTab === 'signin' ? 'Or sign up' : 'Or sign in'}
-              </a>
+            {/* Magic Link Form */}
+            {activeTab === 'magic-link' && (
+              <form onSubmit={handleMagicLink} className="space-y-4">
+                <div className="form-control">
+                  <label className="label" htmlFor="magic-email">
+                    <span className="label-text text-gray-700">Email</span>
+                  </label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
+                    <input
+                      id="magic-email"
+                      type="email"
+                      placeholder="Email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="input-bordered input w-full border-gray-300 bg-white pl-10 text-gray-900 focus:border-green-500"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="form-control mt-6">
+                  <button
+                    type="submit"
+                    className="btn btn-primary w-full border-none bg-green-600 text-white hover:bg-green-700"
+                    disabled={loading}
+                  >
+                    {loading ? 'Sending...' : 'Send Magic Link'}
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {/* Password Reset Form */}
+            {activeTab === 'reset' && (
+              <form onSubmit={handlePasswordReset} className="space-y-4">
+                <div className="form-control">
+                  <label className="label" htmlFor="reset-email">
+                    <span className="label-text text-gray-700">Email</span>
+                  </label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
+                    <input
+                      id="reset-email"
+                      type="email"
+                      placeholder="Email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="input-bordered input w-full border-gray-300 bg-white pl-10 text-gray-900 focus:border-green-500"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="form-control mt-6">
+                  <button
+                    type="submit"
+                    className="btn btn-primary w-full border-none bg-green-600 text-white hover:bg-green-700"
+                    disabled={loading}
+                  >
+                    {loading ? 'Sending...' : 'Send Reset Link'}
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {/* Bottom Navigation */}
+            <div className="mt-4 text-center space-y-2">
+              {activeTab === 'signin' && (
+                <>
+                  <div className="flex gap-2 justify-center text-sm">
+                    <button
+                      type="button"
+                      className="link link-hover text-green-600 hover:text-green-700"
+                      onClick={() => setActiveTab('signup')}
+                    >
+                      Create account
+                    </button>
+                    <span className="text-gray-400">•</span>
+                    <button
+                      type="button"
+                      className="link link-hover text-green-600 hover:text-green-700"
+                      onClick={() => setActiveTab('magic-link')}
+                    >
+                      Magic link
+                    </button>
+                    <span className="text-gray-400">•</span>
+                    <button
+                      type="button"
+                      className="link link-hover text-green-600 hover:text-green-700"
+                      onClick={() => setActiveTab('reset')}
+                    >
+                      Reset password
+                    </button>
+                  </div>
+                </>
+              )}
+              {activeTab === 'signup' && (
+                <button
+                  type="button"
+                  className="link link-hover text-sm text-green-600 hover:text-green-700"
+                  onClick={() => setActiveTab('signin')}
+                >
+                  Already have an account? Sign in
+                </button>
+              )}
+              {(activeTab === 'magic-link' || activeTab === 'reset') && (
+                <button
+                  type="button"
+                  className="link link-hover text-sm text-green-600 hover:text-green-700"
+                  onClick={() => setActiveTab('signin')}
+                >
+                  Back to sign in
+                </button>
+              )}
             </div>
           </div>
         </div>

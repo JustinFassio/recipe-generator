@@ -41,8 +41,15 @@ if (
   );
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true,
+  },
+});
 
+// Type definitions
 export type Recipe = {
   id: string;
   title: string;
@@ -53,4 +60,29 @@ export type Recipe = {
   user_id: string;
   created_at: string;
   updated_at: string;
+};
+
+export type Profile = {
+  id: string;
+  username: string | null;
+  full_name: string | null;
+  avatar_url: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type Username = {
+  username: string;
+  user_id: string;
+  created_at: string;
+};
+
+export type AccountEvent = {
+  id: string;
+  user_id: string;
+  event_type: 'profile_created' | 'username_claimed' | 'username_changed' | 'profile_updated' | 'avatar_updated' | 'email_changed' | 'password_changed';
+  metadata: Record<string, any>;
+  ip_address: string | null;
+  user_agent: string | null;
+  created_at: string;
 };
