@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase, Profile } from '@/lib/supabase';
+import { clearAuthTokens } from '@/lib/auth-utils';
 
 interface SimpleAuthContextType {
   user: User | null;
@@ -18,7 +19,7 @@ const SimpleAuthContext = createContext<SimpleAuthContextType | undefined>(
 export function useAuth(): SimpleAuthContextType {
   const context = useContext(SimpleAuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within a SimpleAuthProvider');
+    throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 }
@@ -76,10 +77,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         if (error) {
           console.error('Session error:', error);
-          // Clear invalid session
-          await supabase.auth.signOut();
-          localStorage.clear();
-          sessionStorage.clear();
+          // Clear invalid session using existing utility
+          await clearAuthTokens();
         }
 
         if (mounted) {
@@ -94,10 +93,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       } catch (error) {
         console.error('Auth init error:', error);
-        // Clear everything on any auth error
-        await supabase.auth.signOut();
-        localStorage.clear();
-        sessionStorage.clear();
+        // Clear auth-related data on any auth error using existing utility
+        await clearAuthTokens();
 
         if (mounted) {
           setUser(null);

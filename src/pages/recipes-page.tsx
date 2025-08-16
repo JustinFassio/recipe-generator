@@ -93,7 +93,7 @@ export function RecipesPage() {
                 <Sparkles className="mr-2 h-4 w-4" />
                 AI Recipe Creator
               </Button>
-              <Button className="" onClick={() => navigate('/add')}>
+              <Button onClick={() => navigate('/add')}>
                 <Plus className="mr-2 h-4 w-4" />
                 Add Recipe
               </Button>
