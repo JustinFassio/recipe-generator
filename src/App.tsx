@@ -11,7 +11,7 @@ import { ChatRecipePage } from '@/pages/chat-recipe-page';
 import ProfilePage from '@/pages/profile-page';
 import AuthCallbackPage from '@/pages/auth-callback-page';
 import { AuthForm } from '@/components/auth/auth-form';
-import { ThemeProvider } from '@/components/ui/theme-provider';
+
 
 import { Toaster } from '@/components/ui/toaster';
 
@@ -26,19 +26,6 @@ const queryClient = new QueryClient({
 
 function AppContent() {
   return (
-<<<<<<< Updated upstream
-    <div className="min-h-screen bg-white">
-      <Header />
-      <main>
-        <Routes>
-          <Route path="/" element={<RecipesPage />} />
-          <Route path="/add" element={<AddRecipePage />} />
-          <Route path="/chat-recipe" element={<ChatRecipePage />} />
-          <Route path="/recipe/:id" element={<RecipeViewPage />} />
-        </Routes>
-      </main>
-    </div>
-=======
     <Routes>
       {/* Public routes - redirect to /recipes if authenticated */}
       <Route 
@@ -130,32 +117,19 @@ function AppContent() {
       <Route path="/" element={<Navigate to="/recipes" replace />} />
       <Route path="*" element={<Navigate to="/recipes" replace />} />
     </Routes>
->>>>>>> Stashed changes
   );
 }
 
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-<<<<<<< Updated upstream
       <BrowserRouter>
-        <AuthWrapper>
+        <AuthProvider>
           <AppContent />
-        </AuthWrapper>
+        </AuthProvider>
         <Toaster />
       </BrowserRouter>
       <ReactQueryDevtools initialIsOpen={false} />
-=======
-      <ThemeProvider>
-        <BrowserRouter>
-          <AuthProvider>
-            <AppContent />
-          </AuthProvider>
-          <Toaster />
-        </BrowserRouter>
-        <ReactQueryDevtools initialIsOpen={false} />
-      </ThemeProvider>
->>>>>>> Stashed changes
     </QueryClientProvider>
   );
 }
