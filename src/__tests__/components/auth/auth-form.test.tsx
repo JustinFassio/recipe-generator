@@ -4,6 +4,19 @@ import { describe, it, expect, vi } from 'vitest';
 import { AuthForm } from '@/components/auth/auth-form';
 import { AuthProvider } from '@/contexts/SimpleAuthProvider';
 
+// Mock SimpleAuthProvider
+vi.mock('@/contexts/SimpleAuthProvider', () => ({
+  AuthProvider: ({ children }: { children: React.ReactNode }) => children,
+  useAuth: vi.fn(() => ({
+    user: null,
+    profile: null,
+    loading: false,
+    error: null,
+    signOut: vi.fn(),
+    refreshProfile: vi.fn(),
+  })),
+}));
+
 // Test wrapper to provide auth context
 const renderWithAuth = (component: React.ReactElement) => {
   return render(<AuthProvider>{component}</AuthProvider>);

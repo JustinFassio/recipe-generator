@@ -4,33 +4,17 @@ import { AuthForm } from '@/components/auth/auth-form';
 import { AuthProvider } from '@/contexts/SimpleAuthProvider';
 import { act } from '@testing-library/react';
 
-// Mock Supabase
-vi.mock('@/lib/supabase', () => ({
-  supabase: {
-    auth: {
-      signUp: vi.fn(),
-      signInWithPassword: vi.fn(),
-      getSession: vi.fn(() =>
-        Promise.resolve({ data: { session: null }, error: null })
-      ),
-      onAuthStateChange: vi.fn(() => ({
-        data: { subscription: { unsubscribe: vi.fn() } },
-      })),
-      signOut: vi.fn(),
-    },
-    from: vi.fn(() => ({
-      select: vi.fn(() => ({
-        not: vi.fn(() => ({
-          order: vi.fn(() => ({
-            limit: vi.fn(() => Promise.resolve({ data: [], error: null })),
-          })),
-        })),
-      })),
-      eq: vi.fn(() => ({
-        single: vi.fn(() => Promise.resolve({ data: null, error: null })),
-      })),
-    })),
-  },
+// Mock SimpleAuthProvider
+vi.mock('@/contexts/SimpleAuthProvider', () => ({
+  AuthProvider: ({ children }: { children: React.ReactNode }) => children,
+  useAuth: vi.fn(() => ({
+    user: null,
+    profile: null,
+    loading: false,
+    error: null,
+    signOut: vi.fn(),
+    refreshProfile: vi.fn(),
+  })),
 }));
 
 // Mock auth functions
