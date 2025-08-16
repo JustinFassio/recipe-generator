@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { signUp, signIn, signInWithMagicLink, resetPassword } from '@/lib/auth';
-import { useAuth } from '@/contexts/DebugAuthProvider';
+import { useAuth } from '@/contexts/SimpleAuthProvider';
 
 import { User, Lock, Plus, Mail, UserPlus } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';

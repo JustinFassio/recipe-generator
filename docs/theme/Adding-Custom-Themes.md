@@ -14,12 +14,26 @@ daisyui: {
   themes: [
     {
       caramellatte: {
-        primary: '#d97706',
-        secondary: '#92400e',
-        accent: '#f59e0b',
-        neutral: '#3d2817',
-        'base-100': '#fef7ed',
-        // ... other colors
+        primary: '#3d2817',      // Dark brown (was black)
+        secondary: '#6b4423',    // Medium brown
+        accent: '#8b5a2b',       // Lighter brown
+        neutral: '#5d4037',      // Rich brown
+        'base-100': '#fef7ed',   // Cream background
+        'base-200': '#f5e6d3',   // Medium cream
+        'base-300': '#e7d5c4',   // Light cream
+        'base-content': '#3d2817', // Dark brown text
+        'primary-content': '#ffffff', // White text on primary
+        'secondary-content': '#e7d5c4', // Light text on secondary
+        'accent-content': '#e7d5c4', // Light text on accent
+        'neutral-content': '#fef7ed', // Light text on neutral
+        info: '#3abff8',
+        'info-content': '#e7d5c4',
+        success: '#36d399',
+        'success-content': '#e7d5c4',
+        warning: '#fbbd23',
+        'warning-content': '#3d2817',
+        error: '#f87272',
+        'error-content': '#3d2817',
       },
     },
   ];
@@ -52,15 +66,26 @@ daisyui: {
     {
       // Your existing themes...
       caramellatte: {
-        primary: '#d97706',      // Orange
-        secondary: '#92400e',    // Brown
-        accent: '#f59e0b',       // Amber
-        neutral: '#3d2817',      // Dark brown
-        'base-100': '#fef7ed',   // Cream
+        primary: '#3d2817',      // Dark brown (was black)
+        secondary: '#6b4423',    // Medium brown
+        accent: '#8b5a2b',       // Lighter brown
+        neutral: '#5d4037',      // Rich brown
+        'base-100': '#fef7ed',   // Cream background
+        'base-200': '#f5e6d3',   // Medium cream
+        'base-300': '#e7d5c4',   // Light cream
+        'base-content': '#3d2817', // Dark brown text
+        'primary-content': '#ffffff', // White text on primary
+        'secondary-content': '#e7d5c4', // Light text on secondary
+        'accent-content': '#e7d5c4', // Light text on accent
+        'neutral-content': '#fef7ed', // Light text on neutral
         info: '#3abff8',         // Blue
+        'info-content': '#e7d5c4',
         success: '#36d399',      // Green
+        'success-content': '#e7d5c4',
         warning: '#fbbd23',      // Yellow
+        'warning-content': '#3d2817',
         error: '#f87272',        // Red
+        'error-content': '#3d2817',
       },
     },
     // Built-in themes...
@@ -175,19 +200,30 @@ caramellatte: {
 
 ### Coffee & Latte Themes
 
-**Caramellatte** (Already added):
+**Caramellatte** (Current theme):
 
 ```javascript
 caramellatte: {
-  primary: '#d97706',      // Caramel orange
-  secondary: '#92400e',    // Rich brown
-  accent: '#f59e0b',       // Golden amber
-  neutral: '#3d2817',      // Dark brown
-  'base-100': '#fef7ed',   // Cream
+  primary: '#3d2817',      // Dark brown (was black)
+  secondary: '#6b4423',    // Medium brown
+  accent: '#8b5a2b',       // Lighter brown
+  neutral: '#5d4037',      // Rich brown
+  'base-100': '#fef7ed',   // Cream background
+  'base-200': '#f5e6d3',   // Medium cream
+  'base-300': '#e7d5c4',   // Light cream
+  'base-content': '#3d2817', // Dark brown text
+  'primary-content': '#ffffff', // White text on primary
+  'secondary-content': '#e7d5c4', // Light text on secondary
+  'accent-content': '#e7d5c4', // Light text on accent
+  'neutral-content': '#fef7ed', // Light text on neutral
   info: '#3abff8',
+  'info-content': '#e7d5c4',
   success: '#36d399',
+  'success-content': '#e7d5c4',
   warning: '#fbbd23',
+  'warning-content': '#3d2817',
   error: '#f87272',
+  'error-content': '#3d2817',
 }
 ```
 
@@ -300,7 +336,10 @@ console.log(document.documentElement.getAttribute('data-theme'));
 1. Verify hex color format: `#RRGGBB`
 2. Check for CSS specificity conflicts
 3. Ensure DaisyUI is properly configured
-4. Rebuild the project: `npm run build`
+4. **Check for conflicting CSS custom properties** in `src/index.css`
+5. Rebuild the project: `npm run build`
+
+**Important**: If buttons appear black despite updating the DaisyUI theme, check that the CSS custom properties in `src/index.css` match your theme colors. The CSS variables can override the DaisyUI theme system.
 
 ### Build Errors
 

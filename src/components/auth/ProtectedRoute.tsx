@@ -1,5 +1,5 @@
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/DebugAuthProvider';
+import { useAuth } from '@/contexts/SimpleAuthProvider';
 import { clearAuthAndReload, recoverAuth } from '@/lib/auth-recovery';
 import { useState, useEffect } from 'react';
 

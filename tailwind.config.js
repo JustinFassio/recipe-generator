@@ -85,10 +85,10 @@ export default {
     themes: [
       {
         caramellatte: {
-          primary: '#000000',
-          secondary: '#3d2817',
-          accent: '#6b4423',
-          neutral: '#8b5a2b',
+          primary: '#3d2817',
+          secondary: '#6b4423',
+          accent: '#8b5a2b',
+          neutral: '#5d4037',
           'base-100': '#fef7ed',
           'base-200': '#f5e6d3',
           'base-300': '#e7d5c4',

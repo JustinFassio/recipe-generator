@@ -10,7 +10,7 @@ This guide explains the simplified theme setup for the Recipe Generator project,
 
 The project now uses only the **Caramellatte** theme, which provides:
 
-- **Warm coffee colors**: Caramel orange, rich browns, golden amber
+- **Warm brown colors**: Rich dark browns, medium browns, and golden browns
 - **Light cream background**: `#fef7ed` for a warm, inviting feel
 - **Dark brown text**: `#3d2817` for excellent readability
 - **Consistent branding**: No theme switching, just one beautiful theme
@@ -19,26 +19,26 @@ The project now uses only the **Caramellatte** theme, which provides:
 
 ```javascript
 caramellatte: {
-  primary: '#d97706',      // Caramel orange
-  secondary: '#92400e',    // Rich brown
-  accent: '#f59e0b',       // Golden amber
-  neutral: '#3d2817',      // Dark brown
+  primary: '#3d2817',      // Dark brown (was black)
+  secondary: '#6b4423',    // Medium brown
+  accent: '#8b5a2b',       // Lighter brown
+  neutral: '#5d4037',      // Rich brown
   'base-100': '#fef7ed',   // Light cream background
   'base-200': '#f5e6d3',   // Medium cream
   'base-300': '#e7d5c4',   // Light cream
   'base-content': '#3d2817', // Dark brown text
-  'primary-content': '#ffffff',
-  'secondary-content': '#ffffff',
-  'accent-content': '#3d2817',
-  'neutral-content': '#fef7ed',
+  'primary-content': '#ffffff', // White text on primary
+  'secondary-content': '#e7d5c4', // Light text on secondary
+  'accent-content': '#e7d5c4', // Light text on accent
+  'neutral-content': '#fef7ed', // Light text on neutral
   info: '#3abff8',
-  'info-content': '#3d2817',
+  'info-content': '#e7d5c4',
   success: '#36d399',
-  'success-content': '#3d2817',
+  'success-content': '#e7d5c4',
   warning: '#fbbd23',
   'warning-content': '#3d2817',
   error: '#f87272',
-  'error-content': '#ffffff',
+  'error-content': '#3d2817',
 }
 ```
 
@@ -155,7 +155,10 @@ caramellatte: {
 1. Verify hex color format: `#RRGGBB`
 2. Check for CSS specificity conflicts
 3. Ensure DaisyUI is properly configured
-4. Rebuild the project: `npm run build`
+4. **Check for conflicting CSS custom properties** in `src/index.css`
+5. Rebuild the project: `npm run build`
+
+**Note**: If buttons appear black despite updating the DaisyUI theme, check that the CSS custom properties in `src/index.css` match your theme colors. The CSS variables can override the DaisyUI theme system.
 
 ### Build Errors
 

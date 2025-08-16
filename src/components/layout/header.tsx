@@ -1,5 +1,5 @@
 import { LogOut, Menu, X, User, Settings } from 'lucide-react';
-import { useAuth } from '@/contexts/DebugAuthProvider';
+import { useAuth } from '@/contexts/SimpleAuthProvider';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { AccessibilityProvider } from '@/components/ui/accessibility-provider';
 import { AppTitle } from '@/components/ui/app-title';
@@ -48,19 +48,7 @@ export function Header() {
             >
               Recipes
             </Button>
-            <Button
-              variant={
-                location.pathname === '/chat-recipe' ? 'default' : 'ghost'
-              }
-              className={
-                location.pathname === '/chat-recipe'
-                  ? ''
-                  : 'bg-orange-500 text-white hover:bg-orange-600'
-              }
-              onClick={() => navigate('/chat-recipe')}
-            >
-              AI Recipe Creator
-            </Button>
+
 
             <AccessibilityProvider />
 
@@ -181,22 +169,7 @@ export function Header() {
             >
               Recipes
             </Button>
-            <Button
-              variant={
-                location.pathname === '/chat-recipe' ? 'default' : 'ghost'
-              }
-              className={`w-full justify-start ${
-                location.pathname === '/chat-recipe'
-                  ? ''
-                  : 'bg-orange-500 text-white hover:bg-orange-600'
-              }`}
-              onClick={() => {
-                navigate('/chat-recipe');
-                closeMobileMenu();
-              }}
-            >
-              AI Recipe Creator
-            </Button>
+
             <Button
               variant="ghost"
               onClick={() => {
