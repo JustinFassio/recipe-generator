@@ -27,7 +27,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
   const signOut = async (): Promise<void> => {
     try {
       await supabase.auth.signOut();
@@ -39,39 +38,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Function to fetch user profile
-  const fetchProfile = async (userId: string): Promise<Profile | null> => {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('id, username, full_name, avatar_url, created_at, updated_at')
-        .eq('id', userId)
-        .single();
-
-      if (error) {
-        // If the profiles table doesn't exist yet (migrations not run), fail gracefully
-        if (error.code === '42P01') {
-          console.warn(
-            'Profiles table does not exist yet. Please run database migrations.'
-          );
-          return null;
-        }
-        console.error('Error fetching profile:', error);
-        return null;
-      }
-
-      return data;
-    } catch (error) {
-      console.error('Error in fetchProfile:', error);
-      return null;
-    }
-  };
-
   const refreshProfile = async (): Promise<void> => {
     if (!user) return;
 
-    const profileData = await fetchProfile(user.id);
-    setProfile(profileData);
+    try {
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      if (profileError) {
+        console.error('Profile refresh error:', profileError);
+        setError(`Profile error: ${profileError.message}`);
+      } else {
+        console.log('Profile refreshed:', profileData);
+        setProfile(profileData);
+        setError(null);
+      }
+    } catch (error) {
+      console.error('Error refreshing profile:', error);
+    }
   };
 
   useEffect(() => {
@@ -95,13 +82,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           if (session?.user && !error) {
             setUser(session.user);
             console.log('✅ User found:', session.user.email);
-
-            // Fetch profile for the existing user
-            const profileData = await fetchProfile(session.user.id);
-            setProfile(profileData);
           } else {
             setUser(null);
-            setProfile(null);
             console.log('❌ No user session or session invalid');
           }
           setLoading(false);
@@ -124,17 +106,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
       console.log('🔄 Auth event:', event);
       if (!mounted) return;
 
       if (session?.user) {
         setUser(session.user);
         console.log('✅ User signed in:', session.user.email);
-
-        // Fetch profile for the signed-in user
-        const profileData = await fetchProfile(session.user.id);
-        setProfile(profileData);
       } else {
         setUser(null);
         setProfile(null);
