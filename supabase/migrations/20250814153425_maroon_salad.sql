@@ -44,6 +44,13 @@ CREATE POLICY "Users can view their own recipes"
   TO authenticated
   USING (auth.uid() = user_id);
 
+-- Public policy for viewing recipes with images (for auth page showcase)
+CREATE POLICY "Anyone can view recipes with images"
+  ON recipes
+  FOR SELECT
+  TO public
+  USING (image_url IS NOT NULL);
+
 CREATE POLICY "Users can create their own recipes"
   ON recipes
   FOR INSERT
