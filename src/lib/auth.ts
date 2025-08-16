@@ -218,8 +218,10 @@ export async function updateProfile(
   updates: Partial<Pick<Profile, 'full_name' | 'avatar_url'>>
 ): Promise<{ success: boolean; error?: AuthError; profile?: Profile }> {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
-    
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
     if (!user) {
       return {
         success: false,
@@ -273,7 +275,8 @@ export async function checkUsernameAvailability(
       return {
         available: false,
         error: {
-          message: 'Username must be 3-24 characters long and contain only lowercase letters, numbers, and underscores',
+          message:
+            'Username must be 3-24 characters long and contain only lowercase letters, numbers, and underscores',
           code: 'INVALID_FORMAT',
         },
       };
@@ -301,7 +304,8 @@ export async function checkUsernameAvailability(
     return {
       available: false,
       error: {
-        message: 'An unexpected error occurred while checking username availability',
+        message:
+          'An unexpected error occurred while checking username availability',
         details: error instanceof Error ? error.message : 'Unknown error',
       },
     };
@@ -313,8 +317,10 @@ export async function claimUsername(
   username: string
 ): Promise<{ success: boolean; error?: AuthError; profile?: Profile }> {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
-    
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
     if (!user) {
       return {
         success: false,
@@ -330,7 +336,8 @@ export async function claimUsername(
       return {
         success: false,
         error: {
-          message: 'Username must be 3-24 characters long and contain only lowercase letters, numbers, and underscores',
+          message:
+            'Username must be 3-24 characters long and contain only lowercase letters, numbers, and underscores',
           code: 'INVALID_FORMAT',
         },
       };
@@ -405,8 +412,10 @@ export async function uploadAvatar(
   file: File
 ): Promise<{ success: boolean; error?: AuthError; avatarUrl?: string }> {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
-    
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
     if (!user) {
       return {
         success: false,
@@ -463,9 +472,9 @@ export async function uploadAvatar(
     }
 
     // Get public URL
-    const { data: { publicUrl } } = supabase.storage
-      .from('avatars')
-      .getPublicUrl(fileName);
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from('avatars').getPublicUrl(fileName);
 
     // Update profile with new avatar URL
     const { error: updateError } = await supabase

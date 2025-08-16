@@ -28,27 +28,27 @@ function AppContent() {
   return (
     <Routes>
       {/* Public routes - redirect to /recipes if authenticated */}
-      <Route 
-        path="/auth/signin" 
+      <Route
+        path="/auth/signin"
         element={
           <PublicRoute>
             <AuthForm />
           </PublicRoute>
-        } 
+        }
       />
-      <Route 
-        path="/auth/signup" 
+      <Route
+        path="/auth/signup"
         element={
           <PublicRoute>
             <AuthForm />
           </PublicRoute>
-        } 
+        }
       />
       <Route path="/auth/callback" element={<AuthCallbackPage />} />
 
       {/* Protected routes - require authentication */}
-      <Route 
-        path="/recipes" 
+      <Route
+        path="/recipes"
         element={
           <ProtectedRoute>
             <div className="min-h-screen bg-base-100">
@@ -58,10 +58,10 @@ function AppContent() {
               </main>
             </div>
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/add" 
+      <Route
+        path="/add"
         element={
           <ProtectedRoute>
             <div className="min-h-screen bg-base-100">
@@ -71,10 +71,10 @@ function AppContent() {
               </main>
             </div>
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/chat-recipe" 
+      <Route
+        path="/chat-recipe"
         element={
           <ProtectedRoute>
             <div className="min-h-screen bg-base-100">
@@ -84,10 +84,10 @@ function AppContent() {
               </main>
             </div>
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/recipe/:id" 
+      <Route
+        path="/recipe/:id"
         element={
           <ProtectedRoute>
             <div className="min-h-screen bg-base-100">
@@ -97,10 +97,10 @@ function AppContent() {
               </main>
             </div>
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/profile" 
+      <Route
+        path="/profile"
         element={
           <ProtectedRoute>
             <div className="min-h-screen bg-base-100">
@@ -110,7 +110,7 @@ function AppContent() {
               </main>
             </div>
           </ProtectedRoute>
-        } 
+        }
       />
 
       {/* Default redirects */}

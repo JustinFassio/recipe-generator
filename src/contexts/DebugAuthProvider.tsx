@@ -12,7 +12,9 @@ interface DebugAuthContextType {
   refreshProfile: () => Promise<void>;
 }
 
-const DebugAuthContext = createContext<DebugAuthContextType | undefined>(undefined);
+const DebugAuthContext = createContext<DebugAuthContextType | undefined>(
+  undefined
+);
 
 export function useAuth(): DebugAuthContextType {
   const context = useContext(DebugAuthContext);
@@ -28,11 +30,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  console.log('🔍 DebugAuthProvider: Current state:', { 
-    userEmail: user?.email || 'none', 
+  console.log('🔍 DebugAuthProvider: Current state:', {
+    userEmail: user?.email || 'none',
     profileUsername: profile?.username || 'none',
-    loading, 
-    error
+    loading,
+    error,
   });
 
   const signOut = async (): Promise<void> => {
@@ -45,7 +47,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const refreshProfile = async (): Promise<void> => {
     if (!user) return;
-    
+
     try {
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
@@ -72,8 +74,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const initializeAuth = async (): Promise<void> => {
       try {
         console.log('🔍 Getting initial session...');
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
+        const {
+          data: { session },
+          error,
+        } = await supabase.auth.getSession();
+
         if (error) {
           console.error('🔍 Session error:', error);
           setError(`Session error: ${error.message}`);
@@ -83,7 +88,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           return;
         }
 
-        console.log('🔍 Session result:', { hasSession: !!session, userEmail: session?.user?.email });
+        console.log('🔍 Session result:', {
+          hasSession: !!session,
+          userEmail: session?.user?.email,
+        });
 
         if (session?.user) {
           console.log('🔍 Fetching user profile...');
@@ -112,7 +120,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       } catch (error) {
         console.error('🔍 Error initializing auth:', error);
-        setError(`Init error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        setError(
+          `Init error: ${error instanceof Error ? error.message : 'Unknown error'}`
+        );
         if (mounted) {
           setLoading(false);
         }
@@ -121,34 +131,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     initializeAuth();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('🔍 Auth state change:', event, session?.user?.email);
-        if (!mounted) return;
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('🔍 Auth state change:', event, session?.user?.email);
+      if (!mounted) return;
 
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          console.log('🔍 Auth state change: Fetching profile...');
-          const { data: profileData, error: profileError } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', session.user.id)
-            .single();
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        console.log('🔍 Auth state change: Fetching profile...');
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', session.user.id)
+          .single();
 
-          if (profileError) {
-            console.error('🔍 Auth state change: Profile fetch error:', profileError);
-            setError(`Profile error: ${profileError.message}`);
-          } else {
-            console.log('🔍 Auth state change: Profile fetched:', profileData);
-            setProfile(profileData);
-          }
+        if (profileError) {
+          console.error(
+            '🔍 Auth state change: Profile fetch error:',
+            profileError
+          );
+          setError(`Profile error: ${profileError.message}`);
         } else {
-          setProfile(null);
+          console.log('🔍 Auth state change: Profile fetched:', profileData);
+          setProfile(profileData);
         }
-        setLoading(false);
-        setError(null);
+      } else {
+        setProfile(null);
       }
-    );
+      setLoading(false);
+      setError(null);
+    });
 
     return () => {
       mounted = false;

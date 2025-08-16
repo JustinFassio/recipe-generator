@@ -61,40 +61,59 @@ export function Header() {
             >
               AI Recipe Creator
             </Button>
-            
+
             <AccessibilityProvider />
-            
+
             {/* User Profile Dropdown */}
             <div className="dropdown dropdown-end">
-              <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
-                <div className="w-8 h-8 rounded-full">
+              <div
+                tabIndex={0}
+                role="button"
+                className="btn btn-ghost btn-circle avatar"
+              >
+                <div className="h-8 w-8 rounded-full">
                   {profile?.avatar_url ? (
-                    <img src={profile.avatar_url} alt="Profile" className="rounded-full" />
+                    <img
+                      src={profile.avatar_url}
+                      alt="Profile"
+                      className="rounded-full"
+                    />
                   ) : (
-                    <div className="bg-primary/20 flex items-center justify-center w-full h-full rounded-full">
-                      <User className="w-4 h-4 text-primary" />
+                    <div className="flex h-full w-full items-center justify-center rounded-full bg-primary/20">
+                      <User className="h-4 w-4 text-primary" />
                     </div>
                   )}
                 </div>
               </div>
-              <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52 border">
+              <ul
+                tabIndex={0}
+                className="menu dropdown-content menu-sm z-[1] mt-3 w-52 rounded-box border bg-base-100 p-2 shadow"
+              >
                 <li className="menu-title">
                   <span className="text-xs">
                     {profile?.full_name || user?.email || 'User'}
                     {profile?.username && (
-                      <span className="text-base-content/60">@{profile.username}</span>
+                      <span className="text-base-content/60">
+                        @{profile.username}
+                      </span>
                     )}
                   </span>
                 </li>
                 <li>
-                  <button onClick={() => navigate('/profile')} className="flex items-center">
-                    <Settings className="w-4 h-4 mr-2" />
+                  <button
+                    onClick={() => navigate('/profile')}
+                    className="flex items-center"
+                  >
+                    <Settings className="mr-2 h-4 w-4" />
                     Account Settings
                   </button>
                 </li>
                 <li>
-                  <button onClick={handleSignOut} className="flex items-center text-error">
-                    <LogOut className="w-4 h-4 mr-2" />
+                  <button
+                    onClick={handleSignOut}
+                    className="flex items-center text-error"
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
                     Sign Out
                   </button>
                 </li>
@@ -126,20 +145,28 @@ export function Header() {
         <div className="fixed inset-0 top-16 z-50 border-b border-gray-200 bg-base-100 shadow-lg md:hidden">
           <nav className="flex flex-col space-y-2 p-4">
             {/* User Info */}
-            <div className="flex items-center space-x-3 p-2 border-b border-base-200 mb-2">
-              <div className="w-10 h-10 rounded-full">
+            <div className="mb-2 flex items-center space-x-3 border-b border-base-200 p-2">
+              <div className="h-10 w-10 rounded-full">
                 {profile?.avatar_url ? (
-                  <img src={profile.avatar_url} alt="Profile" className="rounded-full w-full h-full object-cover" />
+                  <img
+                    src={profile.avatar_url}
+                    alt="Profile"
+                    className="h-full w-full rounded-full object-cover"
+                  />
                 ) : (
-                  <div className="bg-primary/20 flex items-center justify-center w-full h-full rounded-full">
-                    <User className="w-5 h-5 text-primary" />
+                  <div className="flex h-full w-full items-center justify-center rounded-full bg-primary/20">
+                    <User className="h-5 w-5 text-primary" />
                   </div>
                 )}
               </div>
               <div className="flex flex-col">
-                <span className="text-sm font-medium">{profile?.full_name || user?.email || 'User'}</span>
+                <span className="text-sm font-medium">
+                  {profile?.full_name || user?.email || 'User'}
+                </span>
                 {profile?.username && (
-                  <span className="text-xs text-base-content/60">@{profile.username}</span>
+                  <span className="text-base-content/60 text-xs">
+                    @{profile.username}
+                  </span>
                 )}
               </div>
             </div>
@@ -188,7 +215,7 @@ export function Header() {
                 handleSignOut();
                 closeMobileMenu();
               }}
-              className="w-full justify-start text-error border-error hover:bg-error hover:text-error-content"
+              className="w-full justify-start border-error text-error hover:bg-error hover:text-error-content"
             >
               <LogOut className="mr-2 h-4 w-4" />
               Sign Out

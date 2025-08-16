@@ -43,7 +43,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (error) {
         // If the profiles table doesn't exist yet (migrations not run), fail gracefully
         if (error.code === '42P01') {
-          console.warn('Profiles table does not exist yet. Please run database migrations.');
+          console.warn(
+            'Profiles table does not exist yet. Please run database migrations.'
+          );
           return null;
         }
         console.error('Error fetching profile:', error);
@@ -89,12 +91,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Get initial session
     const initializeAuth = async (): Promise<void> => {
       try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
+        const {
+          data: { session },
+          error,
+        } = await supabase.auth.getSession();
+
         if (error) {
           console.error('Error getting session:', error);
           // If there's a session error, clear any stale tokens
-          if (error.message?.includes('Invalid Refresh Token') || error.message?.includes('Refresh Token Not Found')) {
+          if (
+            error.message?.includes('Invalid Refresh Token') ||
+            error.message?.includes('Refresh Token Not Found')
+          ) {
             console.log('🔄 Clearing stale tokens due to refresh token error');
             await supabase.auth.signOut();
           }
@@ -129,39 +137,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     initializeAuth();
 
     // Set up auth state change listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (!mounted) return;
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (!mounted) return;
 
-        // Handle token refresh errors
-        if (event === 'TOKEN_REFRESHED' && !session) {
-          console.warn('Token refresh failed, clearing auth state');
-          setSession(null);
-          setUser(null);
-          setProfile(null);
-          setLoading(false);
-          return;
-        }
-
-        setSession(session);
-        setUser(session?.user ?? null);
-
-        // Handle profile data based on auth event
-        if (session?.user) {
-          // User signed in - fetch their profile
-          const profileData = await fetchProfile(session.user.id);
-          if (mounted) {
-            setProfile(profileData);
-          }
-        } else {
-          // User signed out - clear profile
-          setProfile(null);
-        }
-
-        // Auth is no longer loading after first state change
+      // Handle token refresh errors
+      if (event === 'TOKEN_REFRESHED' && !session) {
+        console.warn('Token refresh failed, clearing auth state');
+        setSession(null);
+        setUser(null);
+        setProfile(null);
         setLoading(false);
+        return;
       }
-    );
+
+      setSession(session);
+      setUser(session?.user ?? null);
+
+      // Handle profile data based on auth event
+      if (session?.user) {
+        // User signed in - fetch their profile
+        const profileData = await fetchProfile(session.user.id);
+        if (mounted) {
+          setProfile(profileData);
+        }
+      } else {
+        // User signed out - clear profile
+        setProfile(null);
+      }
+
+      // Auth is no longer loading after first state change
+      setLoading(false);
+    });
 
     // Cleanup function
     return () => {

@@ -7,7 +7,9 @@ export default function AuthCallbackPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
-  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
+  const [status, setStatus] = useState<'loading' | 'success' | 'error'>(
+    'loading'
+  );
   const [message, setMessage] = useState('Processing authentication...');
 
   useEffect(() => {
@@ -20,7 +22,7 @@ export default function AuthCallbackPage() {
           console.error('Auth callback error:', error);
           setStatus('error');
           setMessage(error.message || 'Authentication failed');
-          
+
           // Redirect to sign in page after a delay
           setTimeout(() => {
             navigate('/auth/signin', { replace: true });
@@ -31,10 +33,10 @@ export default function AuthCallbackPage() {
         if (data.session) {
           setStatus('success');
           setMessage('Authentication successful! Redirecting...');
-          
+
           // Check if there's a redirect URL in the state
           const from = searchParams.get('from') || '/recipes';
-          
+
           // Redirect after a short delay
           setTimeout(() => {
             navigate(from, { replace: true });
@@ -42,7 +44,7 @@ export default function AuthCallbackPage() {
         } else {
           setStatus('error');
           setMessage('No session found');
-          
+
           setTimeout(() => {
             navigate('/auth/signin', { replace: true });
           }, 3000);
@@ -51,7 +53,7 @@ export default function AuthCallbackPage() {
         console.error('Callback handling error:', error);
         setStatus('error');
         setMessage('An unexpected error occurred');
-        
+
         setTimeout(() => {
           navigate('/auth/signin', { replace: true });
         }, 3000);
@@ -70,12 +72,12 @@ export default function AuthCallbackPage() {
   }, [user, status, navigate, searchParams]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-base-100">
+    <div className="flex min-h-screen items-center justify-center bg-base-100">
       <div className="card w-96 bg-base-200 shadow-xl">
         <div className="card-body text-center">
           {status === 'loading' && (
             <>
-              <div className="loading loading-spinner loading-lg text-primary mb-4"></div>
+              <div className="loading loading-spinner loading-lg mb-4 text-primary"></div>
               <h2 className="card-title justify-center">Authenticating</h2>
               <p className="text-base-content/60">{message}</p>
             </>
@@ -83,19 +85,21 @@ export default function AuthCallbackPage() {
 
           {status === 'success' && (
             <>
-              <div className="text-6xl mb-4">✅</div>
-              <h2 className="card-title justify-center text-success">Success!</h2>
+              <div className="mb-4 text-6xl">✅</div>
+              <h2 className="card-title justify-center text-success">
+                Success!
+              </h2>
               <p className="text-base-content/60">{message}</p>
             </>
           )}
 
           {status === 'error' && (
             <>
-              <div className="text-6xl mb-4">❌</div>
+              <div className="mb-4 text-6xl">❌</div>
               <h2 className="card-title justify-center text-error">Error</h2>
               <p className="text-base-content/60">{message}</p>
-              <div className="card-actions justify-center mt-4">
-                <button 
+              <div className="card-actions mt-4 justify-center">
+                <button
                   className="btn btn-primary"
                   onClick={() => navigate('/auth/signin', { replace: true })}
                 >

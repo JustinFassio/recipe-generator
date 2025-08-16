@@ -18,7 +18,9 @@ export function AuthForm() {
   const [loading, setLoading] = useState(false);
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [subscribeEmails, setSubscribeEmails] = useState(false);
-  const [activeTab, setActiveTab] = useState<'signin' | 'signup' | 'magic-link' | 'reset'>('signin');
+  const [activeTab, setActiveTab] = useState<
+    'signin' | 'signup' | 'magic-link' | 'reset'
+  >('signin');
   const [userRecipes, setUserRecipes] = useState<Recipe[]>([]);
   const [recipesLoading, setRecipesLoading] = useState(true);
 
@@ -215,10 +217,14 @@ export function AuthForm() {
                 {activeTab === 'reset' && 'Reset Password'}
               </h3>
               <p className="mt-2 text-sm text-gray-600">
-                {activeTab === 'signin' && 'Welcome back to your digital cookbook'}
-                {activeTab === 'signup' && 'Registration is free and only takes a minute'}
-                {activeTab === 'magic-link' && 'We\'ll send you a magic link to sign in'}
-                {activeTab === 'reset' && 'Enter your email to reset your password'}
+                {activeTab === 'signin' &&
+                  'Welcome back to your digital cookbook'}
+                {activeTab === 'signup' &&
+                  'Registration is free and only takes a minute'}
+                {activeTab === 'magic-link' &&
+                  "We'll send you a magic link to sign in"}
+                {activeTab === 'reset' &&
+                  'Enter your email to reset your password'}
               </p>
               <span className="sr-only">
                 Your digital cookbook for collecting and organizing recipes
@@ -462,10 +468,10 @@ export function AuthForm() {
             )}
 
             {/* Bottom Navigation */}
-            <div className="mt-4 text-center space-y-2">
+            <div className="mt-4 space-y-2 text-center">
               {activeTab === 'signin' && (
                 <>
-                  <div className="flex gap-2 justify-center text-sm">
+                  <div className="flex justify-center gap-2 text-sm">
                     <button
                       type="button"
                       className="link link-hover text-green-600 hover:text-green-700"

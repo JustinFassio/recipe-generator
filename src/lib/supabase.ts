@@ -80,7 +80,14 @@ export type Username = {
 export type AccountEvent = {
   id: string;
   user_id: string;
-  event_type: 'profile_created' | 'username_claimed' | 'username_changed' | 'profile_updated' | 'avatar_updated' | 'email_changed' | 'password_changed';
+  event_type:
+    | 'profile_created'
+    | 'username_claimed'
+    | 'username_changed'
+    | 'profile_updated'
+    | 'avatar_updated'
+    | 'email_changed'
+    | 'password_changed';
   metadata: Record<string, unknown>;
   ip_address: string | null;
   user_agent: string | null;

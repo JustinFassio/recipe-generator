@@ -1,24 +1,24 @@
 import { useState, useRef } from 'react';
 import { useAuth } from '@/contexts/DebugAuthProvider';
-import { 
-  updateProfile, 
-  updateEmail, 
-  updatePassword, 
-  claimUsername, 
+import {
+  updateProfile,
+  updateEmail,
+  updatePassword,
+  claimUsername,
   checkUsernameAvailability,
-  uploadAvatar 
+  uploadAvatar,
 } from '@/lib/auth';
 import { toast } from '@/hooks/use-toast';
-import { 
-  User, 
-  Mail, 
-  Lock, 
-  Camera, 
-  Check, 
-  X, 
+import {
+  User,
+  Mail,
+  Lock,
+  Camera,
+  Check,
+  X,
   Loader2,
   UserCheck,
-  AtSign
+  AtSign,
 } from 'lucide-react';
 
 export default function ProfilePage() {
@@ -30,7 +30,9 @@ export default function ProfilePage() {
   // Profile form state
   const [fullName, setFullName] = useState(profile?.full_name || '');
   const [username, setUsername] = useState('');
-  const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
+  const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(
+    null
+  );
   const [usernameChecking, setUsernameChecking] = useState(false);
 
   // Email/Password form state
@@ -44,7 +46,7 @@ export default function ProfilePage() {
 
   if (!user || !profile) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center">
         <div className="loading loading-spinner loading-lg text-primary"></div>
       </div>
     );
@@ -58,7 +60,7 @@ export default function ProfilePage() {
 
     setUsernameChecking(true);
     const { available, error } = await checkUsernameAvailability(usernameValue);
-    
+
     if (error) {
       toast({
         title: 'Error',
@@ -69,14 +71,14 @@ export default function ProfilePage() {
     } else {
       setUsernameAvailable(available);
     }
-    
+
     setUsernameChecking(false);
   };
 
   const handleUsernameChange = (value: string) => {
     const cleanValue = value.toLowerCase().replace(/[^a-z0-9_]/g, '');
     setUsername(cleanValue);
-    
+
     // Debounce the availability check
     const timeoutId = setTimeout(() => {
       handleUsernameCheck(cleanValue);
@@ -91,9 +93,10 @@ export default function ProfilePage() {
 
     try {
       // Update profile info
-      const { success: profileSuccess, error: profileError } = await updateProfile({
-        full_name: fullName,
-      });
+      const { success: profileSuccess, error: profileError } =
+        await updateProfile({
+          full_name: fullName,
+        });
 
       if (!profileSuccess && profileError) {
         throw new Error(profileError.message);
@@ -101,15 +104,16 @@ export default function ProfilePage() {
 
       // Claim username if provided and available
       if (username && username !== profile.username && usernameAvailable) {
-        const { success: usernameSuccess, error: usernameError } = await claimUsername(username);
-        
+        const { success: usernameSuccess, error: usernameError } =
+          await claimUsername(username);
+
         if (!usernameSuccess && usernameError) {
           throw new Error(usernameError.message);
         }
       }
 
       await refreshProfile();
-      
+
       toast({
         title: 'Success',
         description: 'Profile updated successfully!',
@@ -119,7 +123,8 @@ export default function ProfilePage() {
     } catch (error) {
       toast({
         title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to update profile',
+        description:
+          error instanceof Error ? error.message : 'Failed to update profile',
         variant: 'destructive',
       });
     } finally {
@@ -153,7 +158,7 @@ export default function ProfilePage() {
 
   const handlePasswordUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (newPassword !== confirmPassword) {
       toast({
         title: 'Error',
@@ -215,7 +220,7 @@ export default function ProfilePage() {
     }
 
     setAvatarLoading(false);
-    
+
     // Reset file input
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
@@ -224,15 +229,19 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-base-100">
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="container mx-auto max-w-4xl px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-base-content">Account Settings</h1>
-          <p className="text-base-content/60 mt-2">Manage your profile and account preferences</p>
+          <h1 className="text-3xl font-bold text-base-content">
+            Account Settings
+          </h1>
+          <p className="text-base-content/60 mt-2">
+            Manage your profile and account preferences
+          </p>
         </div>
 
         {/* Tabs */}
-        <div className="tabs tabs-boxed mb-8 w-fit">
+        <div className="tabs-boxed tabs mb-8 w-fit">
           <button
             className={`tab ${activeTab === 'profile' ? 'tab-active' : ''}`}
             onClick={() => setActiveTab('profile')}
@@ -249,30 +258,30 @@ export default function ProfilePage() {
 
         {/* Profile Tab */}
         {activeTab === 'profile' && (
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid gap-8 md:grid-cols-2">
             {/* Avatar Section */}
             <div className="card bg-base-200 shadow-lg">
               <div className="card-body">
                 <h2 className="card-title">Profile Picture</h2>
-                
+
                 <div className="flex flex-col items-center space-y-4">
                   <div className="avatar">
-                    <div className="w-24 h-24 rounded-full">
+                    <div className="h-24 w-24 rounded-full">
                       {profile.avatar_url ? (
                         <img src={profile.avatar_url} alt="Profile" />
                       ) : (
-                        <div className="bg-primary/20 flex items-center justify-center">
-                          <User className="w-12 h-12 text-primary" />
+                        <div className="flex items-center justify-center bg-primary/20">
+                          <User className="h-12 w-12 text-primary" />
                         </div>
                       )}
                       {avatarLoading && (
-                        <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center">
-                          <Loader2 className="w-6 h-6 text-white animate-spin" />
+                        <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/50">
+                          <Loader2 className="h-6 w-6 animate-spin text-white" />
                         </div>
                       )}
                     </div>
                   </div>
-                  
+
                   <input
                     ref={fileInputRef}
                     type="file"
@@ -280,14 +289,14 @@ export default function ProfilePage() {
                     onChange={handleAvatarUpload}
                     className="hidden"
                   />
-                  
+
                   <button
                     type="button"
                     className="btn btn-outline btn-sm"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={avatarLoading}
                   >
-                    <Camera className="w-4 h-4 mr-2" />
+                    <Camera className="mr-2 h-4 w-4" />
                     {avatarLoading ? 'Uploading...' : 'Change Photo'}
                   </button>
                 </div>
@@ -298,7 +307,7 @@ export default function ProfilePage() {
             <div className="card bg-base-200 shadow-lg">
               <div className="card-body">
                 <h2 className="card-title">Profile Information</h2>
-                
+
                 <form onSubmit={handleProfileUpdate} className="space-y-4">
                   {/* Full Name */}
                   <div className="form-control">
@@ -306,10 +315,10 @@ export default function ProfilePage() {
                       <span className="label-text">Full Name</span>
                     </label>
                     <div className="relative">
-                      <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-base-content/40" />
+                      <User className="text-base-content/40 absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform" />
                       <input
                         type="text"
-                        className="input input-bordered pl-10 w-full"
+                        className="input-bordered input w-full pl-10"
                         value={fullName}
                         onChange={(e) => setFullName(e.target.value)}
                         placeholder="Your full name"
@@ -324,10 +333,10 @@ export default function ProfilePage() {
                         <span className="label-text">Current Username</span>
                       </label>
                       <div className="relative">
-                        <AtSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-base-content/40" />
+                        <AtSign className="text-base-content/40 absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform" />
                         <input
                           type="text"
-                          className="input input-bordered pl-10 w-full"
+                          className="input-bordered input w-full pl-10"
                           value={profile.username}
                           disabled
                         />
@@ -339,16 +348,21 @@ export default function ProfilePage() {
                   <div className="form-control">
                     <label className="label">
                       <span className="label-text">
-                        {profile.username ? 'Change Username' : 'Claim Username'}
+                        {profile.username
+                          ? 'Change Username'
+                          : 'Claim Username'}
                       </span>
                     </label>
                     <div className="relative">
-                      <AtSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-base-content/40" />
+                      <AtSign className="text-base-content/40 absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform" />
                       <input
                         type="text"
-                        className={`input input-bordered pl-10 pr-10 w-full ${
-                          username && usernameAvailable === true ? 'input-success' :
-                          username && usernameAvailable === false ? 'input-error' : ''
+                        className={`input-bordered input w-full pl-10 pr-10 ${
+                          username && usernameAvailable === true
+                            ? 'input-success'
+                            : username && usernameAvailable === false
+                              ? 'input-error'
+                              : ''
                         }`}
                         value={username}
                         onChange={(e) => handleUsernameChange(e.target.value)}
@@ -357,19 +371,20 @@ export default function ProfilePage() {
                         minLength={3}
                         maxLength={24}
                       />
-                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2 transform">
                         {usernameChecking ? (
-                          <Loader2 className="w-4 h-4 animate-spin text-base-content/40" />
+                          <Loader2 className="text-base-content/40 h-4 w-4 animate-spin" />
                         ) : username && usernameAvailable === true ? (
-                          <Check className="w-4 h-4 text-success" />
+                          <Check className="h-4 w-4 text-success" />
                         ) : username && usernameAvailable === false ? (
-                          <X className="w-4 h-4 text-error" />
+                          <X className="h-4 w-4 text-error" />
                         ) : null}
                       </div>
                     </div>
                     <label className="label">
                       <span className="label-text-alt text-base-content/60">
-                        3-24 characters, lowercase letters, numbers, and underscores only
+                        3-24 characters, lowercase letters, numbers, and
+                        underscores only
                       </span>
                     </label>
                     {username && usernameAvailable === false && (
@@ -384,16 +399,18 @@ export default function ProfilePage() {
                   <button
                     type="submit"
                     className="btn btn-primary w-full"
-                    disabled={loading || (!!username && usernameAvailable !== true)}
+                    disabled={
+                      loading || (!!username && usernameAvailable !== true)
+                    }
                   >
                     {loading ? (
                       <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         Updating...
                       </>
                     ) : (
                       <>
-                        <UserCheck className="w-4 h-4 mr-2" />
+                        <UserCheck className="mr-2 h-4 w-4" />
                         Update Profile
                       </>
                     )}
@@ -406,22 +423,22 @@ export default function ProfilePage() {
 
         {/* Account Tab */}
         {activeTab === 'account' && (
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid gap-8 md:grid-cols-2">
             {/* Email Section */}
             <div className="card bg-base-200 shadow-lg">
               <div className="card-body">
                 <h2 className="card-title">Email Address</h2>
-                
+
                 <div className="space-y-4">
                   <div className="form-control">
                     <label className="label">
                       <span className="label-text">Current Email</span>
                     </label>
                     <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-base-content/40" />
+                      <Mail className="text-base-content/40 absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform" />
                       <input
                         type="email"
-                        className="input input-bordered pl-10 w-full"
+                        className="input-bordered input w-full pl-10"
                         value={currentEmail}
                         disabled
                       />
@@ -434,10 +451,10 @@ export default function ProfilePage() {
                         <span className="label-text">New Email</span>
                       </label>
                       <div className="relative">
-                        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-base-content/40" />
+                        <Mail className="text-base-content/40 absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform" />
                         <input
                           type="email"
-                          className="input input-bordered pl-10 w-full"
+                          className="input-bordered input w-full pl-10"
                           value={newEmail}
                           onChange={(e) => setNewEmail(e.target.value)}
                           placeholder="Enter new email"
@@ -452,12 +469,12 @@ export default function ProfilePage() {
                     >
                       {loading ? (
                         <>
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                           Updating...
                         </>
                       ) : (
                         <>
-                          <Mail className="w-4 h-4 mr-2" />
+                          <Mail className="mr-2 h-4 w-4" />
                           Update Email
                         </>
                       )}
@@ -471,17 +488,17 @@ export default function ProfilePage() {
             <div className="card bg-base-200 shadow-lg">
               <div className="card-body">
                 <h2 className="card-title">Password</h2>
-                
+
                 <form onSubmit={handlePasswordUpdate} className="space-y-4">
                   <div className="form-control">
                     <label className="label">
                       <span className="label-text">New Password</span>
                     </label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-base-content/40" />
+                      <Lock className="text-base-content/40 absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform" />
                       <input
                         type="password"
-                        className="input input-bordered pl-10 w-full"
+                        className="input-bordered input w-full pl-10"
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
                         placeholder="Enter new password"
@@ -495,10 +512,10 @@ export default function ProfilePage() {
                       <span className="label-text">Confirm Password</span>
                     </label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-base-content/40" />
+                      <Lock className="text-base-content/40 absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform" />
                       <input
                         type="password"
-                        className="input input-bordered pl-10 w-full"
+                        className="input-bordered input w-full pl-10"
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         placeholder="Confirm new password"
@@ -515,16 +532,21 @@ export default function ProfilePage() {
                   <button
                     type="submit"
                     className="btn btn-primary w-full"
-                    disabled={loading || !newPassword || !confirmPassword || newPassword !== confirmPassword}
+                    disabled={
+                      loading ||
+                      !newPassword ||
+                      !confirmPassword ||
+                      newPassword !== confirmPassword
+                    }
                   >
                     {loading ? (
                       <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         Updating...
                       </>
                     ) : (
                       <>
-                        <Lock className="w-4 h-4 mr-2" />
+                        <Lock className="mr-2 h-4 w-4" />
                         Update Password
                       </>
                     )}

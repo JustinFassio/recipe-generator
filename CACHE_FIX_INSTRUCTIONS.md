@@ -10,6 +10,7 @@ The AuthWrapper error is caused by browser/dev server caching. Follow these step
 ```
 
 **Or manually:**
+
 ```bash
 # Kill all dev servers
 pkill -f "vite\|dev"
@@ -43,6 +44,7 @@ npm run dev
 ## Step 4: Verify Success
 
 You should see these console messages:
+
 ```
 🚀 New App component loaded - no AuthWrapper references!
 🔐 AuthProvider initialized - replacing old AuthWrapper
@@ -71,6 +73,7 @@ npm run dev
 ## Step 6: Browser Incognito Mode
 
 If cache clearing doesn't work:
+
 1. Open **Incognito/Private browsing window**
 2. Go to `http://localhost:5174`
 3. This bypasses all cache
@@ -78,6 +81,7 @@ If cache clearing doesn't work:
 ## Expected Behavior After Fix
 
 ✅ **Success indicators:**
+
 - Console shows: "🚀 New App component loaded"
 - Console shows: "🔐 AuthProvider initialized"
 - Page redirects to `/auth/signin`
@@ -85,6 +89,7 @@ If cache clearing doesn't work:
 - Profile fetching works (may show migration warning initially)
 
 ❌ **If still failing:**
+
 - Check if multiple dev servers are running: `ps aux | grep vite`
 - Verify App.tsx has the debug console.log
 - Try different browser entirely
@@ -94,6 +99,7 @@ If cache clearing doesn't work:
 
 Visit: http://localhost:54323 (Supabase Studio)
 Verify these tables exist:
+
 - `profiles`
 - `usernames`
 - `account_events`
