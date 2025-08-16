@@ -1,7 +1,7 @@
 import { LogOut, Menu, X, User, Settings } from 'lucide-react';
 import { useAuth } from '@/contexts/DebugAuthProvider';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { AccessibilityProvider } from '@/components/ui/accessibility-provider';
 import { AppTitle } from '@/components/ui/app-title';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
@@ -62,7 +62,7 @@ export function Header() {
               AI Recipe Creator
             </Button>
             
-            <ThemeToggle />
+            <AccessibilityProvider />
             
             {/* User Profile Dropdown */}
             <div className="dropdown dropdown-end">
@@ -104,7 +104,7 @@ export function Header() {
 
           {/* Mobile Navigation */}
           <div className="flex items-center space-x-2 md:hidden">
-            <ThemeToggle />
+            <AccessibilityProvider />
             <Button
               variant="ghost"
               size="sm"

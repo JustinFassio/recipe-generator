@@ -34,7 +34,7 @@ export default function ProfilePage() {
   const [usernameChecking, setUsernameChecking] = useState(false);
 
   // Email/Password form state
-  const [currentEmail, setCurrentEmail] = useState(user?.email || '');
+  const [currentEmail] = useState(user?.email || '');
   const [newEmail, setNewEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -198,7 +198,7 @@ export default function ProfilePage() {
     if (!file) return;
 
     setAvatarLoading(true);
-    const { success, error, avatarUrl } = await uploadAvatar(file);
+    const { success, error } = await uploadAvatar(file);
 
     if (!success && error) {
       toast({
@@ -384,7 +384,7 @@ export default function ProfilePage() {
                   <button
                     type="submit"
                     className="btn btn-primary w-full"
-                    disabled={loading || (username && usernameAvailable !== true)}
+                    disabled={loading || (!!username && usernameAvailable !== true)}
                   >
                     {loading ? (
                       <>

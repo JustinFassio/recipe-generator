@@ -10,11 +10,7 @@ interface SetUsernameRequest {
   username: string;
 }
 
-interface SetUsernameResponse {
-  success: boolean;
-  username?: string;
-  error?: string;
-}
+// Removed unused interface - response is handled inline
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -118,7 +114,7 @@ serve(async (req) => {
     }
 
     // Use a transaction to atomically claim the username
-    const { data, error } = await supabaseAdmin.rpc('claim_username_atomic', {
+    const { error } = await supabaseAdmin.rpc('claim_username_atomic', {
       p_user_id: user.id,
       p_username: cleanUsername
     })

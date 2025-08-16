@@ -14,7 +14,7 @@ export async function signUp(
   fullName: string
 ): Promise<{ success: boolean; error?: AuthError }> {
   try {
-    const { data, error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -54,7 +54,7 @@ export async function signIn(
   password: string
 ): Promise<{ success: boolean; error?: AuthError }> {
   try {
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
@@ -87,7 +87,7 @@ export async function signInWithMagicLink(
   email: string
 ): Promise<{ success: boolean; error?: AuthError }> {
   try {
-    const { data, error } = await supabase.auth.signInWithOtp({
+    const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
         emailRedirectTo: `${window.location.origin}/auth/callback`,
@@ -122,7 +122,7 @@ export async function resetPassword(
   email: string
 ): Promise<{ success: boolean; error?: AuthError }> {
   try {
-    const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/auth/reset-password`,
     });
 
@@ -154,7 +154,7 @@ export async function updateEmail(
   newEmail: string
 ): Promise<{ success: boolean; error?: AuthError }> {
   try {
-    const { data, error } = await supabase.auth.updateUser({
+    const { error } = await supabase.auth.updateUser({
       email: newEmail,
     });
 
@@ -186,7 +186,7 @@ export async function updatePassword(
   newPassword: string
 ): Promise<{ success: boolean; error?: AuthError }> {
   try {
-    const { data, error } = await supabase.auth.updateUser({
+    const { error } = await supabase.auth.updateUser({
       password: newPassword,
     });
 
@@ -337,7 +337,7 @@ export async function claimUsername(
     }
 
     // Use the database function for atomic username claiming
-    const { data, error } = await supabase.rpc('claim_username_atomic', {
+    const { error } = await supabase.rpc('claim_username_atomic', {
       p_user_id: user.id,
       p_username: username.toLowerCase(),
     });
@@ -445,7 +445,7 @@ export async function uploadAvatar(
     const fileName = `${user.id}/avatar.${fileExt}`;
 
     // Upload to storage
-    const { data, error } = await supabase.storage
+    const { error } = await supabase.storage
       .from('avatars')
       .upload(fileName, file, {
         upsert: true,
@@ -468,7 +468,7 @@ export async function uploadAvatar(
       .getPublicUrl(fileName);
 
     // Update profile with new avatar URL
-    const { data: profile, error: updateError } = await supabase
+    const { error: updateError } = await supabase
       .from('profiles')
       .update({ avatar_url: publicUrl })
       .eq('id', user.id)

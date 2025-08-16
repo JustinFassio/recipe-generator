@@ -11,7 +11,7 @@ import { ChatRecipePage } from '@/pages/chat-recipe-page';
 import ProfilePage from '@/pages/profile-page';
 import AuthCallbackPage from '@/pages/auth-callback-page';
 import { AuthForm } from '@/components/auth/auth-form';
-
+import { ThemeProvider } from '@/components/ui/theme-provider';
 
 import { Toaster } from '@/components/ui/toaster';
 
@@ -123,13 +123,15 @@ function AppContent() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <AuthProvider>
-          <AppContent />
-        </AuthProvider>
-        <Toaster />
-      </BrowserRouter>
-      <ReactQueryDevtools initialIsOpen={false} />
+      <ThemeProvider>
+        <BrowserRouter>
+          <AuthProvider>
+            <AppContent />
+          </AuthProvider>
+          <Toaster />
+        </BrowserRouter>
+        <ReactQueryDevtools initialIsOpen={false} />
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

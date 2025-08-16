@@ -56,13 +56,15 @@ export async function validateSession() {
 /**
  * Handle authentication errors gracefully
  */
-export function handleAuthError(error: any) {
+export function handleAuthError(error: unknown) {
   console.error('Auth error:', error);
   
+  const errorMessage = error instanceof Error ? error.message : String(error);
+  
   // Common refresh token errors
-  if (error.message?.includes('Invalid Refresh Token') || 
-      error.message?.includes('Refresh Token Not Found') ||
-      error.message?.includes('refresh_token_not_found')) {
+  if (errorMessage.includes('Invalid Refresh Token') || 
+      errorMessage.includes('Refresh Token Not Found') ||
+      errorMessage.includes('refresh_token_not_found')) {
     console.log('🔄 Detected refresh token error, clearing tokens');
     clearAuthTokens();
     return {
@@ -72,8 +74,8 @@ export function handleAuthError(error: any) {
   }
   
   // Network errors
-  if (error.message?.includes('Failed to fetch') || 
-      error.message?.includes('Network error')) {
+  if (errorMessage.includes('Failed to fetch') || 
+      errorMessage.includes('Network error')) {
     return {
       shouldClearTokens: false,
       message: 'Network connection error. Please check your internet connection.'
@@ -82,6 +84,6 @@ export function handleAuthError(error: any) {
   
   return {
     shouldClearTokens: false,
-    message: error.message || 'An authentication error occurred.'
+    message: errorMessage || 'An authentication error occurred.'
   };
 }
