@@ -41,6 +41,11 @@ ON CONFLICT (username) DO NOTHING;
 -- This removes any refresh tokens that might be causing authentication issues
 -- Note: This will force users to sign in again, but it's better than being stuck
 -- The auth.refresh_tokens table doesn't have an expires_at column, so we'll just clear old tokens
+
+-- Count tokens before deletion for logging
+-- (tokens_cleared already logged before deletion)
+
+-- Now delete the old tokens
 DELETE FROM auth.refresh_tokens 
 WHERE created_at < (now() - interval '30 days');
 
