@@ -14,7 +14,7 @@ export function AppTitle({ className = '', size = 'md' }: AppTitleProps) {
     <h1
       className={`bg-gradient-to-r from-green-600 via-green-500 to-yellow-500 bg-clip-text font-bold text-transparent ${sizeClasses[size]} ${className}`}
     >
-      Mom's Recipe Generator
+      Family Recipe Generator
     </h1>
   );
 }

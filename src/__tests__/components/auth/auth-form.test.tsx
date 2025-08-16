@@ -2,6 +2,12 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { AuthForm } from '@/components/auth/auth-form';
+import { AuthProvider } from '@/contexts/DebugAuthProvider';
+
+// Test wrapper to provide auth context
+const renderWithAuth = (component: React.ReactElement) => {
+  return render(<AuthProvider>{component}</AuthProvider>);
+};
 
 // Mock the supabase client
 vi.mock('@/lib/supabase', () => ({
@@ -9,6 +15,13 @@ vi.mock('@/lib/supabase', () => ({
     auth: {
       signUp: vi.fn(),
       signInWithPassword: vi.fn(),
+      getSession: vi.fn(() =>
+        Promise.resolve({ data: { session: null }, error: null })
+      ),
+      onAuthStateChange: vi.fn(() => ({
+        data: { subscription: { unsubscribe: vi.fn() } },
+      })),
+      signOut: vi.fn(),
     },
     from: vi.fn(() => ({
       select: vi.fn(() => ({
@@ -17,6 +30,9 @@ vi.mock('@/lib/supabase', () => ({
             limit: vi.fn(() => Promise.resolve({ data: [], error: null })),
           })),
         })),
+      })),
+      eq: vi.fn(() => ({
+        single: vi.fn(() => Promise.resolve({ data: null, error: null })),
       })),
     })),
   },
@@ -30,48 +46,54 @@ vi.mock('@/hooks/use-toast', () => ({
 describe('AuthForm', () => {
   describe('Initial Render', () => {
     it('should render the auth form with title', () => {
-      render(<AuthForm />);
-      expect(screen.getByText("Mom's Recipe Generator")).toBeInTheDocument();
+      renderWithAuth(<AuthForm />);
+      expect(screen.getByText('Family Recipe Generator')).toBeInTheDocument();
     });
 
     it('should render sign in form by default', () => {
-      render(<AuthForm />);
+      renderWithAuth(<AuthForm />);
 
       expect(
         screen.getByRole('heading', { name: /sign in/i })
       ).toBeInTheDocument();
       expect(
-        screen.getByText('Welcome back to your digital cookbook')
+        screen.getByText('Welcome back to your family cookbook')
       ).toBeInTheDocument();
       expect(
         screen.getByRole('button', { name: /sign in/i })
       ).toBeInTheDocument();
     });
 
-    it('should render link for switching to sign up', () => {
-      render(<AuthForm />);
+    it('should render button for switching to sign up', () => {
+      renderWithAuth(<AuthForm />);
 
-      const signUpLink = screen.getByRole('link', { name: /or sign up/i });
-      expect(signUpLink).toBeInTheDocument();
+      const signUpButton = screen.getByRole('button', {
+        name: /create account/i,
+      });
+      expect(signUpButton).toBeInTheDocument();
     });
 
     it('should render the recipe showcase section', () => {
-      render(<AuthForm />);
+      renderWithAuth(<AuthForm />);
 
       expect(screen.getByText('Discover Amazing Recipes')).toBeInTheDocument();
       expect(
-        screen.getByText('Join our community of passionate home chefs')
+        screen.getByText(
+          'Add or recreate your favorite family and healthy recipes with family and friends'
+        )
       ).toBeInTheDocument();
     });
   });
 
   describe('Form Switching', () => {
-    it('should switch to sign up form when link is clicked', () => {
-      render(<AuthForm />);
+    it('should switch to sign up form when button is clicked', () => {
+      renderWithAuth(<AuthForm />);
 
-      // Click the sign up link
-      const signUpLink = screen.getByRole('link', { name: /or sign up/i });
-      fireEvent.click(signUpLink);
+      // Click the sign up button
+      const signUpButton = screen.getByRole('button', {
+        name: /create account/i,
+      });
+      fireEvent.click(signUpButton);
 
       // Check that sign up form is now visible
       expect(screen.getByText('Create new account')).toBeInTheDocument();
@@ -83,23 +105,27 @@ describe('AuthForm', () => {
       ).toBeInTheDocument();
     });
 
-    it('should switch back to sign in form when link is clicked', () => {
-      render(<AuthForm />);
+    it('should switch back to sign in form when button is clicked', () => {
+      renderWithAuth(<AuthForm />);
 
       // First switch to sign up
-      const signUpLink = screen.getByRole('link', { name: /or sign up/i });
-      fireEvent.click(signUpLink);
+      const signUpButton = screen.getByRole('button', {
+        name: /create account/i,
+      });
+      fireEvent.click(signUpButton);
 
       // Then switch back to sign in
-      const signInLink = screen.getByRole('link', { name: /or sign in/i });
-      fireEvent.click(signInLink);
+      const signInButton = screen.getByRole('button', {
+        name: /already have an account\? sign in/i,
+      });
+      fireEvent.click(signInButton);
 
       // Check that sign in form is now visible
       expect(
         screen.getByRole('heading', { name: /sign in/i })
       ).toBeInTheDocument();
       expect(
-        screen.getByText('Welcome back to your digital cookbook')
+        screen.getByText('Welcome back to your family cookbook')
       ).toBeInTheDocument();
       expect(
         screen.getByRole('button', { name: /sign in/i })
@@ -109,7 +135,7 @@ describe('AuthForm', () => {
 
   describe('Form Validation', () => {
     it('should require email and password fields', () => {
-      render(<AuthForm />);
+      renderWithAuth(<AuthForm />);
 
       const emailInput = screen.getByLabelText(/email/i);
       const passwordInput = screen.getByLabelText(/password/i);
@@ -119,7 +145,7 @@ describe('AuthForm', () => {
     });
 
     it('should have proper input types', () => {
-      render(<AuthForm />);
+      renderWithAuth(<AuthForm />);
 
       const emailInput = screen.getByLabelText(/email/i);
       const passwordInput = screen.getByLabelText(/password/i);
@@ -129,14 +155,16 @@ describe('AuthForm', () => {
     });
 
     it('should have proper autocomplete attributes', () => {
-      render(<AuthForm />);
+      renderWithAuth(<AuthForm />);
 
       const passwordInput = screen.getByLabelText(/password/i);
       expect(passwordInput).toHaveAttribute('autocomplete', 'current-password');
 
-      // Switch to sign up form using the link
-      const signUpLink = screen.getByRole('link', { name: /or sign up/i });
-      fireEvent.click(signUpLink);
+      // Switch to sign up form using the button
+      const signUpButton = screen.getByRole('button', {
+        name: /create account/i,
+      });
+      fireEvent.click(signUpButton);
 
       const signUpPasswordInput = screen
         .getAllByLabelText(/password/i)
@@ -150,7 +178,7 @@ describe('AuthForm', () => {
 
   describe('UI Elements', () => {
     it('should render the app title and description', () => {
-      render(<AuthForm />);
+      renderWithAuth(<AuthForm />);
 
       expect(screen.getByText('Recipe Generator')).toBeInTheDocument();
       expect(
@@ -161,7 +189,7 @@ describe('AuthForm', () => {
     });
 
     it('should render the chef hat icon', () => {
-      render(<AuthForm />);
+      renderWithAuth(<AuthForm />);
 
       const chefHatIcon = screen.getByTestId('chef-hat-icon');
       expect(chefHatIcon).toBeInTheDocument();

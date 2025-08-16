@@ -218,7 +218,7 @@ export function AuthForm() {
               </h3>
               <p className="mt-2 text-sm text-gray-600">
                 {activeTab === 'signin' &&
-                  'Welcome back to your digital cookbook'}
+                  'Welcome back to your family cookbook'}
                 {activeTab === 'signup' &&
                   'Registration is free and only takes a minute'}
                 {activeTab === 'magic-link' &&
@@ -532,7 +532,8 @@ export function AuthForm() {
               Discover Amazing Recipes
             </h3>
             <p className="mb-6 text-sm text-gray-600">
-              Join our community of passionate home chefs
+              Add or recreate your favorite family and healthy recipes with
+              family and friends
             </p>
 
             {recipesLoading ? (
