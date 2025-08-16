@@ -10,7 +10,7 @@ const Divider = React.forwardRef<HTMLDivElement, DividerProps>(
   ({ className, orientation = 'horizontal', children, ...props }, ref) => {
     const baseClasses = 'divider';
     const orientationClasses =
-      orientation === 'vertical' ? 'divider-horizontal' : '';
+      orientation === 'vertical' ? 'divider-vertical' : 'divider-horizontal';
 
     return (
       <div
