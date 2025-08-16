@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/contexts/DebugAuthProvider';
 import {
   updateProfile,
@@ -26,6 +26,16 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(false);
   const [avatarLoading, setAvatarLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const usernameTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (usernameTimeoutRef.current) {
+        clearTimeout(usernameTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Profile form state
   const [fullName, setFullName] = useState(profile?.full_name || '');
@@ -79,12 +89,15 @@ export default function ProfilePage() {
     const cleanValue = value.toLowerCase().replace(/[^a-z0-9_]/g, '');
     setUsername(cleanValue);
 
+    // Clear previous timeout
+    if (usernameTimeoutRef.current) {
+      clearTimeout(usernameTimeoutRef.current);
+    }
+
     // Debounce the availability check
-    const timeoutId = setTimeout(() => {
+    usernameTimeoutRef.current = setTimeout(() => {
       handleUsernameCheck(cleanValue);
     }, 500);
-
-    return () => clearTimeout(timeoutId);
   };
 
   const handleProfileUpdate = async (e: React.FormEvent) => {

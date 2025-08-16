@@ -11,8 +11,6 @@ interface SetUsernameRequest {
   username: string;
 }
 
-// Removed unused interface - response is handled inline
-
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {

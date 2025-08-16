@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { signUp, signIn, signInWithMagicLink, resetPassword } from '@/lib/auth';
 import { useAuth } from '@/contexts/DebugAuthProvider';
@@ -12,6 +13,7 @@ import type { Recipe } from '@/lib/supabase';
 
 export function AuthForm() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
@@ -27,9 +29,9 @@ export function AuthForm() {
   // Redirect if already authenticated
   useEffect(() => {
     if (user) {
-      window.location.href = '/recipes';
+      navigate('/recipes', { replace: true });
     }
-  }, [user]);
+  }, [user, navigate]);
 
   // Fetch recipes with images from the database
   useEffect(() => {
