@@ -134,8 +134,16 @@ export function ChatHeader({
 
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
-        <div className="absolute left-0 right-0 top-full z-50 border-b border-gray-200 bg-base-100 shadow-lg md:hidden">
-          <div className="flex flex-col space-y-2 p-4">
+        <div
+          className="absolute left-0 right-0 top-full z-50 border-b border-gray-200 bg-base-100 shadow-lg md:hidden"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Mobile menu"
+        >
+          <nav className="flex flex-col space-y-2 p-4">
+            <h2 id="mobile-menu-title" className="sr-only">
+              Chat Actions Menu
+            </h2>
             {generatedRecipe ? (
               <Button
                 onClick={() => {
@@ -180,7 +188,7 @@ export function ChatHeader({
             >
               Change Assistant
             </Button>
-          </div>
+          </nav>
         </div>
       )}
     </div>

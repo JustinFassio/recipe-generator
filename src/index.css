@@ -68,10 +68,7 @@ h1 {
     --color-error-content: #3d2817;
   }
 
-  /* Ensure the theme is applied to the document root */
-  html {
-    data-theme: caramellatte;
-  }
+  /* Theme is applied via JavaScript in ThemeProvider */
 
   /* Force apply the theme to all elements */
   * {
