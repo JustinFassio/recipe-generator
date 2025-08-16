@@ -1,4 +1,4 @@
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/DebugAuthProvider';
 import { clearAuthAndReload, recoverAuth } from '@/lib/auth-recovery';
 import { useState, useEffect } from 'react';
@@ -16,6 +16,7 @@ export function ProtectedRoute({
 }: ProtectedRouteProps) {
   const { user, loading, error } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const [recoveryAttempted, setRecoveryAttempted] = useState(false);
   const [recoveryLoading, setRecoveryLoading] = useState(false);
 
@@ -69,7 +70,8 @@ export function ProtectedRoute({
         const result = await recoverAuth();
         if (result.success) {
           console.log('🔧 Auth recovery successful:', result.method);
-          window.location.reload();
+          // Instead of reloading, navigate to the current path to re-trigger auth check
+          navigate(location.pathname, { replace: true });
         } else {
           console.log('🔧 Auth recovery failed:', result.error);
           // If recovery fails, clear auth and reload
