@@ -7,6 +7,7 @@ import { RecipesPage } from '@/pages/recipes-page';
 import { AddRecipePage } from '@/pages/add-recipe-page';
 import { RecipeViewPage } from '@/pages/recipe-view-page';
 import { ChatRecipePage } from '@/pages/chat-recipe-page';
+import { ThemeProvider } from '@/components/ui/theme-provider';
 
 import { Toaster } from '@/components/ui/toaster';
 
@@ -21,7 +22,7 @@ const queryClient = new QueryClient({
 
 function AppContent() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-base-100">
       <Header />
       <main>
         <Routes>
@@ -38,13 +39,15 @@ function AppContent() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <AuthWrapper>
-          <AppContent />
-        </AuthWrapper>
-        <Toaster />
-      </BrowserRouter>
-      <ReactQueryDevtools initialIsOpen={false} />
+      <ThemeProvider>
+        <BrowserRouter>
+          <AuthWrapper>
+            <AppContent />
+          </AuthWrapper>
+          <Toaster />
+        </BrowserRouter>
+        <ReactQueryDevtools initialIsOpen={false} />
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

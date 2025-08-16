@@ -3,7 +3,6 @@ import { useForm, useFieldArray } from 'react-hook-form';
 import type { FieldArrayPath } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { createDaisyUIInputClasses } from '@/lib/input-migration';
-import { createDaisyUITextareaClasses } from '@/lib/textarea-migration';
 import {
   createDaisyUICardClasses,
   createDaisyUICardTitleClasses,
@@ -18,6 +17,7 @@ import {
 import { useLocation } from 'react-router-dom';
 import { X, Upload, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 
 import type { Recipe } from '@/lib/supabase';
 
@@ -278,15 +278,13 @@ export function RecipeForm({
       <div className={createDaisyUICardClasses('bordered')}>
         <div className="card-body">
           <h3 className={createDaisyUICardTitleClasses()}>Instructions *</h3>
-          <textarea
+          <Textarea
             {...register('instructions')}
             placeholder="Enter cooking instructions..."
             rows={6}
-            className={createDaisyUITextareaClasses(
-              'default',
-              'md',
-              'resize-none'
-            )}
+            variant="default"
+            size="md"
+            className="w-full resize-none"
           />
           {errors.instructions && (
             <p className="mt-1 text-sm text-red-500">
@@ -299,15 +297,13 @@ export function RecipeForm({
       <div className={createDaisyUICardClasses('bordered')}>
         <div className="card-body">
           <h3 className={createDaisyUICardTitleClasses()}>Notes</h3>
-          <textarea
+          <Textarea
             {...register('notes')}
             placeholder="Additional notes, tips, or variations..."
             rows={3}
-            className={createDaisyUITextareaClasses(
-              'default',
-              'md',
-              'resize-none'
-            )}
+            variant="default"
+            size="md"
+            className="w-full resize-none"
           />
         </div>
       </div>

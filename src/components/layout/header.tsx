@@ -1,7 +1,6 @@
 import { LogOut, Menu, X } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { AppTitle } from '@/components/ui/app-title';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
@@ -55,7 +54,6 @@ export function Header() {
             >
               AI Recipe Creator
             </Button>
-            <ThemeToggle />
             <Button
               variant="outline"
               size="sm"
@@ -69,7 +67,6 @@ export function Header() {
 
           {/* Mobile Navigation */}
           <div className="flex items-center space-x-2 md:hidden">
-            <ThemeToggle />
             <Button
               variant="ghost"
               size="sm"

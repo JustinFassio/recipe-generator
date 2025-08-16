@@ -1,7 +1,3 @@
-import {
-  createDaisyUIAvatarClasses,
-  createDaisyUIAvatarPlaceholderClasses,
-} from '@/lib/avatar-migration';
 import { Save, ChefHat, Heart, Home, Bot, Brain, Menu, X } from 'lucide-react';
 import { RECIPE_BOT_PERSONAS, type PersonaType } from '@/lib/openai';
 import { Button } from '@/components/ui/button';
@@ -64,15 +60,12 @@ export function ChatHeader({
 
   return (
     <div className="relative">
-      <div className="flex items-center justify-between rounded-t-lg border-b bg-white p-4">
+      <div className="flex items-center justify-between rounded-t-lg border-b bg-base-100 p-4">
         <div className="flex items-center space-x-3">
           <div
-            className={createDaisyUIAvatarClasses(
-              'md',
-              `h-10 w-10 ${getPersonaColor(selectedPersona)}`
-            )}
+            className={`flex h-10 w-10 items-center justify-center rounded-full border-2 border-white shadow-sm ${getPersonaColor(selectedPersona)}`}
           >
-            <div className={createDaisyUIAvatarPlaceholderClasses()}>
+            <div className="flex items-center justify-center">
               {getPersonaIcon(selectedPersona)}
             </div>
           </div>
@@ -141,7 +134,7 @@ export function ChatHeader({
 
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
-        <div className="absolute left-0 right-0 top-full z-50 border-b border-gray-200 bg-white shadow-lg md:hidden">
+        <div className="absolute left-0 right-0 top-full z-50 border-b border-gray-200 bg-base-100 shadow-lg md:hidden">
           <div className="flex flex-col space-y-2 p-4">
             {generatedRecipe ? (
               <Button

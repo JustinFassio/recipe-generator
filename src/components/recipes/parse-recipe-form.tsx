@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { createDaisyUITextareaClasses } from '@/lib/textarea-migration';
 import { createDaisyUILabelClasses } from '@/lib/label-migration';
 import {
   createDaisyUICardClasses,
@@ -13,6 +12,7 @@ import {
 } from '@/lib/alert-migration';
 import { Loader2, Wand2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 import {
   parseRecipeSchema,
   type ParseRecipeFormData,
@@ -135,16 +135,14 @@ Makes about 48 cookies. Store in airtight container.`;
               </div>
             )}
 
-            <textarea
+            <Textarea
               id="recipeText"
               {...register('recipeText')}
               placeholder="Paste your recipe here (Markdown, JSON, or plain text)..."
               rows={8}
-              className={createDaisyUITextareaClasses(
-                'default',
-                'md',
-                'resize-none font-mono text-sm'
-              )}
+              variant="default"
+              size="md"
+              className="w-full resize-none font-mono text-sm"
             />
             {errors.recipeText && (
               <p className="mt-1 text-sm text-red-500">
