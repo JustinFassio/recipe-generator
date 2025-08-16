@@ -83,28 +83,30 @@ export const FONT_SIZE_CLASSES = {
 /**
  * Future implementation for older adults (60+)
  * Apply font size settings across the application
- * 
+ *
  * @param fontSize - The font size to apply
  */
 export function applyFontSize(fontSize: FontSize): void {
   // TODO: Implement font size application
   // This will be used by AccessibilityProvider in the future
-  
+
   // Store preference
   localStorage.setItem('font-size', fontSize);
-  
+
   // Apply CSS classes or CSS custom properties
   // document.documentElement.style.setProperty('--base-font-size', getFontSizeValue(fontSize));
-  
+
   console.log(`Font size preference saved: ${fontSize}`);
 }
 
 /**
  * Get the stored font size preference
- * 
+ *
  * @returns The stored font size or default 'medium'
  */
 export function getStoredFontSize(): FontSize {
   const stored = localStorage.getItem('font-size') as FontSize;
-  return stored && Object.keys(FONT_SIZE_CLASSES).includes(stored) ? stored : 'medium';
+  return stored && Object.keys(FONT_SIZE_CLASSES).includes(stored)
+    ? stored
+    : 'medium';
 }
