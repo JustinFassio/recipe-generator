@@ -93,11 +93,11 @@ daisyui: {
 
 ### Automatic Theme Application
 
-The theme is automatically applied via the `ThemeToggle` component:
+The theme is automatically applied via the `AccessibilityProvider` component:
 
 ```javascript
-// src/components/ui/theme-toggle.tsx
-export function ThemeToggle() {
+// src/components/ui/accessibility-provider.tsx
+export function AccessibilityProvider() {
   useEffect(() => {
     // Always set to caramellatte theme
     document.documentElement.setAttribute('data-theme', 'caramellatte');
