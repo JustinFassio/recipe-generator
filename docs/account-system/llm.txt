@@ -1,0 +1,210 @@
+# Account System Implementation Guide for AI Agents
+
+## Overview
+This directory contains the phased implementation plan for expanding the Recipe Generator's user account system to support comprehensive personalization, safety, and AI integration. The system is designed to collect essential user data while respecting privacy and maintaining the existing clean architecture.
+
+## Implementation Philosophy
+- **Safety First**: Allergies and health restrictions are non-negotiable
+- **Progressive Enhancement**: Start simple, add complexity based on user engagement
+- **Privacy by Design**: Collect minimum necessary data with clear consent
+- **Backward Compatibility**: Existing users continue working seamlessly
+- **AI-Ready**: All data structures designed for intelligent recipe personalization
+
+## Phase Structure
+
+### Phase 1: Database Schema Expansion
+**File**: `phase-1-database-schema-expansion.md`
+**Goal**: Extend existing user system with essential personalization data
+**Key Components**:
+- Extend `profiles` table with basic preferences (region, units, time_per_meal, skill_level, budget)
+- Create `user_safety` table for allergies, intolerances, dietary patterns
+- Create `user_health` table for health concerns, medications, nutritional targets
+- Create `user_preferences` table for cultural preferences, equipment, cuisines
+- Create `household_members` table for family member management
+- Implement RLS policies for data security
+
+**Implementation Notes**:
+- Use `ALTER TABLE` statements to extend existing tables
+- Maintain backward compatibility with current users
+- Follow existing naming conventions and patterns
+- Add appropriate constraints and validation
+
+### Phase 2: Profile Onboarding Flow
+**File**: `phase-2-profile-onboarding-flow.md`
+**Goal**: Progressive, user-friendly data collection system
+**Key Components**:
+- Two-tier onboarding: Minimal (60-90s) and Advanced (5min)
+- Safety-first data collection (allergies, dietary restrictions)
+- Skip-friendly design with clear value propositions
+- Mobile-optimized, touch-friendly interface
+- Progress persistence and validation
+
+**Implementation Notes**:
+- Create reusable onboarding components
+- Implement progressive saving to localStorage
+- Add comprehensive validation with clear error messages
+- Ensure accessibility compliance (WCAG 2.2 AA)
+
+### Phase 3: UI/UX Implementation
+**File**: `phase-3-ui-ux-implementation.md`
+**Goal**: Comprehensive settings and profile management interface
+**Key Components**:
+- Account settings page with logical section grouping
+- Safety-first visual design with prominent warnings
+- Profile templates for quick setup (kid-friendly, pregnancy-aware, etc.)
+- Privacy controls and data management
+- Mobile-responsive design with accessibility features
+
+**Implementation Notes**:
+- Use existing UI component library (`@/components/ui/`)
+- Implement keyboard navigation and screen reader support
+- Add data export/import functionality
+- Create reusable form components for consistency
+
+### Phase 4: AI System Integration
+**File**: `phase-4-integration-with-ai-system.md`
+**Goal**: Intelligent recipe personalization using collected user data
+**Key Components**:
+- User preference to AI prompt conversion
+- Safety guardrails with allergy blocking and health warnings
+- Household member constraint validation
+- Cultural and traditional medicine integration
+- Recipe filtering and ranking system
+- Performance optimization with caching
+
+**Implementation Notes**:
+- Implement safety-first filtering (zero tolerance for allergens)
+- Create efficient data caching strategies
+- Add comprehensive error handling and fallbacks
+- Ensure all AI prompts include user context
+
+## Technical Architecture
+
+### Database Design Principles
+- **Minimal Complexity**: Only essential fields, no over-engineering
+- **Simple Relationships**: One-to-one for core data, one-to-many for household
+- **Consistent Patterns**: Follow existing table structure and naming
+- **Safety First**: Allergies and health data get priority in schema design
+
+### Frontend Architecture
+- **Component-Based**: Reusable, atomic components
+- **Context-Driven**: Use React Context for state management
+- **Progressive Enhancement**: Core functionality works without JavaScript
+- **Accessibility-First**: WCAG 2.2 AA compliance from the start
+
+### AI Integration Strategy
+- **Safety Guardrails**: Non-negotiable allergy filtering
+- **Intelligent Personalization**: Use all available data for relevance
+- **Cultural Sensitivity**: Respect dietary and cultural preferences
+- **Performance Optimization**: Efficient data processing and caching
+
+## Implementation Guidelines for AI Agents
+
+### When Working on This System:
+
+1. **Always Check Existing Architecture**:
+   - Review current `src/contexts/AuthProvider.tsx` for auth patterns
+   - Check `src/lib/supabase.ts` for database patterns
+   - Follow existing component structure in `src/components/`
+
+2. **Safety is Paramount**:
+   - Never compromise on allergy filtering
+   - Always validate user data before AI integration
+   - Implement comprehensive error handling
+
+3. **Progressive Enhancement**:
+   - Start with minimal viable features
+   - Add complexity based on user engagement
+   - Maintain backward compatibility
+
+4. **Privacy by Design**:
+   - Collect only necessary data
+   - Provide clear consent mechanisms
+   - Implement data export/deletion capabilities
+
+5. **Testing Requirements**:
+   - Unit tests for all new components
+   - Integration tests for data flow
+   - Accessibility testing for UI components
+   - Safety validation testing
+
+### Code Quality Standards:
+
+- **TypeScript**: Strict typing for all new code
+- **ESLint/Prettier**: Follow existing formatting rules
+- **Component Structure**: Use existing patterns from `src/components/ui/`
+- **Error Handling**: Comprehensive error boundaries and user feedback
+- **Documentation**: Clear JSDoc comments for all functions
+
+### Database Migration Guidelines:
+
+- **Backward Compatibility**: Never break existing functionality
+- **Rollback Strategy**: Always provide rollback migrations
+- **Data Validation**: Add constraints and validation at database level
+- **Performance**: Consider indexing for frequently queried fields
+
+## Success Metrics
+
+### Phase 1 (Database):
+- Migration success rate: 100%
+- Zero data loss for existing users
+- All RLS policies working correctly
+
+### Phase 2 (Onboarding):
+- Minimal onboarding completion: Target 85%
+- Advanced onboarding completion: Target 60%
+- Time to complete minimal: Target <90 seconds
+
+### Phase 3 (UI/UX):
+- Settings page usability score: Target >90%
+- Mobile responsiveness: Target 100%
+- Accessibility compliance: WCAG 2.2 AA
+
+### Phase 4 (AI Integration):
+- Zero allergy incidents
+- Recipe relevance scores: Target >85%
+- AI response time: Target <5 seconds
+
+## Risk Mitigation
+
+### Technical Risks:
+- **Data Migration**: Test thoroughly in staging environment
+- **Performance**: Implement caching and optimization strategies
+- **Security**: Regular security audits of RLS policies
+
+### User Experience Risks:
+- **Onboarding Abandonment**: Provide clear value propositions
+- **Privacy Concerns**: Transparent data usage and control
+- **Complexity**: Progressive disclosure and skip options
+
+### AI Integration Risks:
+- **Safety Violations**: Multiple validation layers
+- **Performance**: Efficient caching and batch processing
+- **Accuracy**: Comprehensive testing and validation
+
+## Next Steps for AI Agents
+
+1. **Start with Phase 1**: Implement database schema expansion
+2. **Test Thoroughly**: Ensure backward compatibility
+3. **Implement Phase 2**: Create onboarding flow
+4. **Build Phase 3**: Develop UI/UX components
+5. **Integrate Phase 4**: Connect with AI system
+6. **Monitor and Iterate**: Track success metrics and improve
+
+## Resources
+
+- **Current Auth System**: `src/contexts/AuthProvider.tsx`
+- **Database Patterns**: `src/lib/supabase.ts`
+- **UI Components**: `src/components/ui/`
+- **Testing Setup**: `src/test/setup.ts`
+- **Documentation**: `docs/workflows/` and `docs/quality-assurance/`
+
+## Contact and Support
+
+For questions about this implementation plan:
+- Review the detailed phase documents in this directory
+- Check existing codebase patterns and architecture
+- Follow the established coding standards and testing requirements
+- Prioritize safety and user privacy in all implementations
+
+This account system expansion will transform the Recipe Generator from a basic recipe tool into a comprehensive, personalized, and safe cooking assistant that respects user preferences, cultural backgrounds, and health needs while maintaining the clean, maintainable architecture of the existing codebase.

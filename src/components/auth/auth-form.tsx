@@ -80,7 +80,11 @@ export function AuthForm() {
     const { success, error } = await signUp(email, password, fullName);
 
     if (!success && error) {
-      console.error('Signup error:', error);
+      console.error('Signup error details:', {
+        message: error.message,
+        code: error.code,
+        details: error.details,
+      });
       toast({
         title: 'Error',
         description: error.message,

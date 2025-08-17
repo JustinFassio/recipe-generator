@@ -41,6 +41,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Function to fetch user profile
   const fetchProfile = async (userId: string): Promise<Profile | null> => {
+    console.log('🔍 fetchProfile called with userId:', userId);
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -56,13 +57,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           );
           return null;
         }
-        console.error('Error fetching profile:', error);
+        console.error('❌ Error fetching profile:', error);
         return null;
       }
 
+      console.log('✅ Profile fetched successfully:', data);
       return data;
     } catch (error) {
-      console.error('Error in fetchProfile:', error);
+      console.error('❌ Error in fetchProfile:', error);
       return null;
     }
   };
@@ -97,7 +99,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             console.log('✅ User found:', session.user.email);
 
             // Fetch profile for the existing user
+            console.log(
+              '🔍 Fetching profile for existing user:',
+              session.user.id
+            );
             const profileData = await fetchProfile(session.user.id);
+            console.log('📋 Profile data received:', profileData);
             setProfile(profileData);
           } else {
             setUser(null);
@@ -133,7 +140,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log('✅ User signed in:', session.user.email);
 
         // Fetch profile for the signed-in user
+        console.log('🔍 Fetching profile for user:', session.user.id);
         const profileData = await fetchProfile(session.user.id);
+        console.log('📋 Profile data received:', profileData);
         setProfile(profileData);
       } else {
         setUser(null);
