@@ -174,7 +174,6 @@ export default function ProfilePage() {
       const { success: profileSuccess, error: profileError } =
         await updateProfile({
           full_name: fullName,
-          bio: bio || null,
           region: region || null,
           language,
           units,
@@ -387,6 +386,81 @@ export default function ProfilePage() {
               </div>
             </div>
 
+            {/* Bio Section */}
+            <div className="card bg-base-200 shadow-lg">
+              <div className="card-body">
+                <h2 className="card-title">About Me</h2>
+                <div className="form-control">
+                  <label className="label">
+                    <span className="label-text">Bio</span>
+                    <span className="label-text-alt">{bio.length}/500</span>
+                  </label>
+                  <textarea
+                    className="textarea-bordered textarea w-full"
+                    value={bio}
+                    onChange={(e) => setBio(e.target.value)}
+                    placeholder="Tell us a bit about yourself, your cooking interests, or dietary preferences..."
+                    rows={4}
+                    maxLength={500}
+                  />
+                  <label className="label">
+                    <span className="label-text-alt text-base-content/60">
+                      Share your cooking style, favorite cuisines, or any other
+                      details that help personalize your recipe recommendations.
+                    </span>
+                  </label>
+                </div>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      setLoading(true);
+                      const { success: profileSuccess, error: profileError } =
+                        await updateProfile({
+                          bio: bio || null,
+                        });
+
+                      if (!profileSuccess && profileError) {
+                        throw new Error(profileError.message);
+                      }
+
+                      await refreshProfile();
+
+                      toast({
+                        title: 'Success',
+                        description: 'Bio updated successfully!',
+                      });
+                    } catch (error) {
+                      toast({
+                        title: 'Error',
+                        description:
+                          error instanceof Error
+                            ? error.message
+                            : 'Failed to update bio',
+                        variant: 'destructive',
+                      });
+                    } finally {
+                      setLoading(false);
+                    }
+                  }}
+                  className="btn btn-primary w-full"
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <User className="mr-2 h-4 w-4" />
+                      Save Bio
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+
             {/* Profile Form */}
             <div className="card bg-base-200 shadow-lg">
               <div className="card-body">
@@ -408,22 +482,6 @@ export default function ProfilePage() {
                         placeholder="Your full name"
                       />
                     </div>
-                  </div>
-
-                  {/* Bio */}
-                  <div className="form-control">
-                    <label className="label">
-                      <span className="label-text">Bio</span>
-                      <span className="label-text-alt">{bio.length}/500</span>
-                    </label>
-                    <textarea
-                      className="textarea-bordered textarea w-full"
-                      value={bio}
-                      onChange={(e) => setBio(e.target.value)}
-                      placeholder="Tell us a bit about yourself, your cooking interests, or dietary preferences..."
-                      rows={3}
-                      maxLength={500}
-                    />
                   </div>
 
                   {/* Current Username */}
