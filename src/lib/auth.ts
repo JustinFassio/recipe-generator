@@ -396,7 +396,9 @@ export async function claimUsername(
     // Fetch the updated profile
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('id, username, full_name, avatar_url, created_at, updated_at')
+      .select(
+        'id, username, full_name, avatar_url, bio, region, language, units, time_per_meal, skill_level, created_at, updated_at'
+      )
       .eq('id', user.id)
       .single();
 
