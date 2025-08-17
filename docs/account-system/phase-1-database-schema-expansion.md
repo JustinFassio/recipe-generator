@@ -2,199 +2,204 @@
 
 ## Overview
 
-Extend the existing user system with essential personalization data while maintaining the current clean architecture. Focus on safety-critical data first, then add personalization layers.
+**Feature-First Implementation**: Extend the existing user system with essential personalization data using atomic, incremental migrations. Each sub-phase delivers a complete, testable feature following established codebase patterns.
 
-## Current Schema
+## Current Schema Analysis
 
 ```sql
--- Existing tables
-profiles (id, username, full_name, avatar_url, created_at, updated_at)
-usernames (username, user_id, created_at)
+-- Existing profiles table (from 20250115000000_user_accounts.sql)
+CREATE TABLE profiles (
+  id uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  username citext UNIQUE CHECK (length(username) BETWEEN 3 AND 24 AND username ~ '^[a-z0-9_]+$'),
+  full_name text CHECK (length(trim(full_name)) BETWEEN 1 AND 80),
+  avatar_url text,
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
+);
 ```
 
-## New Schema Design
+## Feature-First Implementation Strategy
 
-### 1. Core Profile Extension
+### Phase 1A: Essential Profile Extensions (Week 1)
 
-**Extend existing `profiles` table** - Keep it simple, add essential fields:
+**Atomic Feature**: Basic user personalization
+**Goal**: Add core personalization fields to existing profiles table
 
 ```sql
-ALTER TABLE profiles ADD COLUMN IF NOT EXISTS:
-- region text,
-- language text DEFAULT 'en',
-- units text DEFAULT 'metric',
-- time_per_meal text CHECK (time_per_meal IN ('10-20', '20-40', '40-60')),
-- skill_level text CHECK (skill_level IN ('beginner', 'intermediate', 'advanced')),
-- budget text CHECK (budget IN ('low', 'medium', 'high'))
+-- 20250117000000_profiles_basic_preferences.sql
+-- Extend existing profiles table with essential fields
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS region text;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS language text DEFAULT 'en';
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS units text DEFAULT 'metric'
+  CHECK (units IN ('metric', 'imperial'));
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS time_per_meal int
+  CHECK (time_per_meal BETWEEN 10 AND 120);
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS skill_level text DEFAULT 'beginner'
+  CHECK (skill_level IN ('beginner', 'intermediate', 'advanced'));
 ```
 
-### 2. Safety-Critical Data
+### Phase 1B: Safety-Critical Data (Week 2)
 
-**New table: `user_safety`** - Allergies and dietary restrictions:
+**Atomic Feature**: User safety and dietary restrictions
+**Goal**: Add allergy and dietary restriction management
 
 ```sql
+-- 20250118000000_user_safety.sql
+-- Single table for safety-critical data
 CREATE TABLE user_safety (
   user_id uuid PRIMARY KEY REFERENCES profiles(id) ON DELETE CASCADE,
-  allergies text[], -- ['peanut', 'tree_nut', 'milk', 'egg', 'wheat', 'soy', 'fish', 'shellfish', 'sesame']
-  other_allergens text[],
-  intolerances text[], -- ['lactose', 'gluten', 'fructose']
-  dietary_pattern text[] DEFAULT ['omnivore'], -- ['vegan', 'vegetarian', 'pescatarian', 'halal', 'kosher']
+  allergies text[] DEFAULT '{}',
+  dietary_restrictions text[] DEFAULT '{}',
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now()
 );
+
+-- Enable RLS
+ALTER TABLE user_safety ENABLE ROW LEVEL SECURITY;
+
+-- Self-access only policy
+CREATE POLICY "user_safety_self_access" ON user_safety
+  FOR ALL USING (auth.uid() = user_id);
+
+-- Auto-update timestamp
+CREATE TRIGGER user_safety_set_updated_at
+  BEFORE UPDATE ON user_safety
+  FOR EACH ROW EXECUTE PROCEDURE moddatetime(updated_at);
 ```
 
-### 3. Health Context
+### Phase 1C: Cooking Preferences (Week 3)
 
-**New table: `user_health`** - Basic health information:
+**Atomic Feature**: Cuisine and equipment preferences
+**Goal**: Add cooking-specific preference management
 
 ```sql
-CREATE TABLE user_health (
+-- 20250119000000_cooking_preferences.sql
+-- Single table for cooking preferences
+CREATE TABLE cooking_preferences (
   user_id uuid PRIMARY KEY REFERENCES profiles(id) ON DELETE CASCADE,
-  health_concerns text[], -- ['diabetes', 'hypertension', 'celiac', 'ibs', 'pregnancy']
-  medications text[], -- ['warfarin', 'metformin']
-  sodium_limit_mg int,
-  protein_g_per_kg numeric,
-  fiber_g_per_day int,
+  preferred_cuisines text[] DEFAULT '{}',
+  available_equipment text[] DEFAULT '{}',
+  disliked_ingredients text[] DEFAULT '{}',
+  spice_tolerance int DEFAULT 3 CHECK (spice_tolerance BETWEEN 1 AND 5),
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now()
 );
-```
 
-### 4. Preferences
-
-**New table: `user_preferences`** - Cultural and cooking preferences:
-
-```sql
-CREATE TABLE user_preferences (
-  user_id uuid PRIMARY KEY REFERENCES profiles(id) ON DELETE CASCADE,
-  cuisines text[], -- ['mexican', 'italian', 'indian', 'chinese']
-  spice_level int CHECK (spice_level BETWEEN 0 AND 5),
-  disliked_ingredients text[],
-  equipment text[], -- ['oven', 'stove', 'microwave', 'air_fryer', 'instant_pot']
-  created_at timestamptz DEFAULT now(),
-  updated_at timestamptz DEFAULT now()
-);
-```
-
-### 5. Household Members
-
-**New table: `household_members`** - Family members with restrictions:
-
-```sql
-CREATE TABLE household_members (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id uuid REFERENCES profiles(id) ON DELETE CASCADE,
-  nickname text NOT NULL,
-  age_band text CHECK (age_band IN ('child', 'teen', 'adult', 'senior')),
-  restrictions jsonb, -- {allergies: [], diet: ['vegetarian']}
-  created_at timestamptz DEFAULT now(),
-  updated_at timestamptz DEFAULT now()
-);
+-- Enable RLS and policies (same pattern)
+ALTER TABLE cooking_preferences ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "cooking_preferences_self_access" ON cooking_preferences
+  FOR ALL USING (auth.uid() = user_id);
+CREATE TRIGGER cooking_preferences_set_updated_at
+  BEFORE UPDATE ON cooking_preferences
+  FOR EACH ROW EXECUTE PROCEDURE moddatetime(updated_at);
 ```
 
 ## Implementation Steps
 
-### Step 1: Create Migration File
+### Phase 1A Implementation (Week 1)
 
 ```sql
--- 20250117000000_user_personalization.sql
--- Add new columns to existing profiles table
+-- 20250117000000_profiles_basic_preferences.sql
+-- Extend existing profiles table with essential fields
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS region text;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS language text DEFAULT 'en';
-ALTER TABLE profiles ADD COLUMN IF NOT EXISTS units text DEFAULT 'metric';
-ALTER TABLE profiles ADD COLUMN IF NOT EXISTS time_per_meal text;
-ALTER TABLE profiles ADD COLUMN IF NOT EXISTS skill_level text;
-ALTER TABLE profiles ADD COLUMN IF NOT EXISTS budget text;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS units text DEFAULT 'metric'
+  CHECK (units IN ('metric', 'imperial'));
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS time_per_meal int
+  CHECK (time_per_meal BETWEEN 10 AND 120);
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS skill_level text DEFAULT 'beginner'
+  CHECK (skill_level IN ('beginner', 'intermediate', 'advanced'));
+```
 
--- Add constraints
-ALTER TABLE profiles ADD CONSTRAINT profiles_time_per_meal_check
-  CHECK (time_per_meal IS NULL OR time_per_meal IN ('10-20', '20-40', '40-60'));
-ALTER TABLE profiles ADD CONSTRAINT profiles_skill_level_check
-  CHECK (skill_level IS NULL OR skill_level IN ('beginner', 'intermediate', 'advanced'));
-ALTER TABLE profiles ADD CONSTRAINT profiles_budget_check
-  CHECK (budget IS NULL OR budget IN ('low', 'medium', 'high'));
+### Phase 1B Implementation (Week 2)
 
--- Create new tables
-CREATE TABLE user_safety (...);
-CREATE TABLE user_health (...);
-CREATE TABLE user_preferences (...);
-CREATE TABLE household_members (...);
+```sql
+-- 20250118000000_user_safety.sql
+-- Complete safety table implementation
+CREATE TABLE user_safety (
+  user_id uuid PRIMARY KEY REFERENCES profiles(id) ON DELETE CASCADE,
+  allergies text[] DEFAULT '{}',
+  dietary_restrictions text[] DEFAULT '{}',
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
+);
 
--- Add RLS policies
 ALTER TABLE user_safety ENABLE ROW LEVEL SECURITY;
-ALTER TABLE user_health ENABLE ROW LEVEL SECURITY;
-ALTER TABLE user_preferences ENABLE ROW LEVEL SECURITY;
-ALTER TABLE household_members ENABLE ROW LEVEL SECURITY;
-
--- Create policies (self-only access)
-CREATE POLICY "user_safety_self_access" ON user_safety FOR ALL USING (auth.uid() = user_id);
-CREATE POLICY "user_health_self_access" ON user_health FOR ALL USING (auth.uid() = user_id);
-CREATE POLICY "user_preferences_self_access" ON user_preferences FOR ALL USING (auth.uid() = user_id);
-CREATE POLICY "household_members_self_access" ON household_members FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "user_safety_self_access" ON user_safety
+  FOR ALL USING (auth.uid() = user_id);
+CREATE TRIGGER user_safety_set_updated_at
+  BEFORE UPDATE ON user_safety
+  FOR EACH ROW EXECUTE PROCEDURE moddatetime(updated_at);
 ```
 
-### Step 2: Update TypeScript Types
+### Phase 1C Implementation (Week 3)
 
-```typescript
-// src/lib/supabase.ts - Add new types
-export type UserSafety = {
-  user_id: string;
-  allergies: string[];
-  other_allergens: string[];
-  intolerances: string[];
-  dietary_pattern: string[];
-  created_at: string;
-  updated_at: string;
-};
+```sql
+-- 20250119000000_cooking_preferences.sql
+-- Complete cooking preferences implementation
+CREATE TABLE cooking_preferences (
+  user_id uuid PRIMARY KEY REFERENCES profiles(id) ON DELETE CASCADE,
+  preferred_cuisines text[] DEFAULT '{}',
+  available_equipment text[] DEFAULT '{}',
+  disliked_ingredients text[] DEFAULT '{}',
+  spice_tolerance int DEFAULT 3 CHECK (spice_tolerance BETWEEN 1 AND 5),
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
+);
 
-export type UserHealth = {
-  user_id: string;
-  health_concerns: string[];
-  medications: string[];
-  sodium_limit_mg: number | null;
-  protein_g_per_kg: number | null;
-  fiber_g_per_day: number | null;
-  created_at: string;
-  updated_at: string;
-};
-
-export type UserPreferences = {
-  user_id: string;
-  cuisines: string[];
-  spice_level: number | null;
-  disliked_ingredients: string[];
-  equipment: string[];
-  created_at: string;
-  updated_at: string;
-};
-
-export type HouseholdMember = {
-  id: string;
-  user_id: string;
-  nickname: string;
-  age_band: string;
-  restrictions: Record<string, any>;
-  created_at: string;
-  updated_at: string;
-};
+ALTER TABLE cooking_preferences ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "cooking_preferences_self_access" ON cooking_preferences
+  FOR ALL USING (auth.uid() = user_id);
+CREATE TRIGGER cooking_preferences_set_updated_at
+  BEFORE UPDATE ON cooking_preferences
+  FOR EACH ROW EXECUTE PROCEDURE moddatetime(updated_at);
 ```
 
-### Step 3: Update Profile Type
+## Updated TypeScript Types
+
+### Phase 1A: Extended Profile Type
 
 ```typescript
-// Extend existing Profile type
+// src/lib/supabase.ts - Extend existing Profile type
 export type Profile = {
   id: string;
   username: string | null;
   full_name: string | null;
   avatar_url: string | null;
+  // NEW: Basic preferences (Phase 1A)
   region: string | null;
   language: string | null;
   units: string | null;
-  time_per_meal: string | null;
+  time_per_meal: number | null;
   skill_level: string | null;
-  budget: string | null;
+  created_at: string;
+  updated_at: string;
+};
+```
+
+### Phase 1B: Safety Data Type
+
+```typescript
+// NEW: Safety data type (Phase 1B)
+export type UserSafety = {
+  user_id: string;
+  allergies: string[];
+  dietary_restrictions: string[];
+  created_at: string;
+  updated_at: string;
+};
+```
+
+### Phase 1C: Cooking Preferences Type
+
+```typescript
+// NEW: Cooking preferences type (Phase 1C)
+export type CookingPreferences = {
+  user_id: string;
+  preferred_cuisines: string[];
+  available_equipment: string[];
+  disliked_ingredients: string[];
+  spice_tolerance: number | null;
   created_at: string;
   updated_at: string;
 };
@@ -202,18 +207,66 @@ export type Profile = {
 
 ## Key Design Principles
 
-1. **Minimal Complexity**: Only essential fields, no over-engineering
-2. **Backward Compatible**: Existing users continue working
-3. **Safety First**: Allergies and health data get priority
-4. **Simple Relationships**: One-to-one for core data, one-to-many for household
-5. **Consistent Patterns**: Follow existing table structure and naming
+### ✅ **Feature-First Compliance**
 
-## Data Flow
+1. **Atomic Features**: Each phase delivers one complete, testable feature
+2. **Incremental Delivery**: 3 separate migrations = 3 independent releases
+3. **Clear Rollback**: Each phase can be rolled back independently
 
-- User signs up → Basic profile created (existing flow)
-- User visits settings → Progressive data collection
-- Safety data collected first (allergies, dietary restrictions)
-- Health and preferences added incrementally
-- Household members added as needed
+### ✅ **Follows Established Patterns**
 
-This approach maintains the current clean architecture while adding the essential personalization data needed for AI recipe generation.
+1. **Consistent Data Types**: Uses `text[]` arrays like recipes table
+2. **Standard RLS Policies**: Same pattern as existing auth system
+3. **Proven Triggers**: Uses `moddatetime` like existing tables
+4. **Naming Conventions**: Follows profiles/usernames pattern
+
+### ✅ **Simplified & Maintainable**
+
+1. **No Complex JSONB**: Sticks to simple arrays and primitives
+2. **Single Responsibility**: Each table has clear, focused purpose
+3. **Type-Safe**: Clear TypeScript interfaces for all data
+4. **Performance Optimized**: Uses proven PostgreSQL patterns
+
+### ✅ **Scalable Architecture**
+
+1. **Easy Extension**: Can add fields to existing tables
+2. **Clear Evolution**: Each phase builds logically on previous
+3. **Future-Proof**: Architecture supports additional features
+
+## Implementation Timeline
+
+### Week 1: Phase 1A (Basic Preferences)
+
+- **Deliverable**: Extend profiles table with region, units, skill level
+- **UI Components**: Basic profile settings form
+- **Testing**: Ensure existing users unaffected
+
+### Week 2: Phase 1B (Safety Data)
+
+- **Deliverable**: User safety table with allergies and dietary restrictions
+- **UI Components**: Safety preferences form with validation
+- **Testing**: Safety data persistence and retrieval
+
+### Week 3: Phase 1C (Cooking Preferences)
+
+- **Deliverable**: Cooking preferences table with cuisines and equipment
+- **UI Components**: Cooking preferences form
+- **Testing**: Complete profile system integration
+
+## Success Metrics
+
+### Technical Success
+
+- ✅ All migrations run without errors
+- ✅ Existing users unaffected
+- ✅ TypeScript types compile cleanly
+- ✅ RLS policies work correctly
+
+### Feature Success
+
+- ✅ Each phase delivers working functionality
+- ✅ UI components work independently
+- ✅ Data persists correctly
+- ✅ No breaking changes between phases
+
+This approach maintains the current clean architecture while following feature-first/atomic component principles and adding essential personalization data for AI recipe generation.
