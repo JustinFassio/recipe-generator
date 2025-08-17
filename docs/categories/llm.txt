@@ -1,0 +1,496 @@
+# Recipe Categories Feature - AI Coding Agent Reference
+
+## FEATURE OVERVIEW
+
+The Recipe Categories feature enables recipe organization through a flexible, namespaced tagging system. Categories follow the format "Namespace: Value" (e.g., "Course: Main", "Cuisine: Italian") and are stored as string arrays in the database.
+
+### Core Architecture
+- **Database**: PostgreSQL `text[]` column with GIN index for performance
+- **Parsing**: Multi-format JSON parsing with normalization utilities
+- **AI Integration**: Enhanced persona prompts with category suggestions
+- **UI**: Atomic DaisyUI components for display, input, and filtering
+- **Taxonomy**: Comprehensive canonical categories with admin management
+
+## IMPLEMENTATION STATUS
+
+Current Status: 📋 **PLANNING PHASE** - Documentation complete, implementation not started
+
+### Phase Progress
+- ✅ Phase 1: Core Data Layer (documented, not implemented)
+- ✅ Phase 2: Parsing Infrastructure (documented, not implemented) 
+- ✅ Phase 3: AI Integration (documented, not implemented)
+- ✅ Phase 4: UI Components (documented, not implemented)
+- ✅ Phase 5: Integration Points (documented, not implemented)
+- ✅ Phase 6: Canonical Categories (documented, not implemented)
+
+## CRITICAL CODE PATTERNS
+
+### Database Schema
+```sql
+-- Add categories column to recipes table
+ALTER TABLE recipes 
+ADD COLUMN IF NOT EXISTS categories text[] DEFAULT '{}';
+
+-- Add GIN index for performance
+CREATE INDEX IF NOT EXISTS idx_recipes_categories 
+ON recipes USING GIN (categories);
+```
+
+### Type Definitions
+```typescript
+// Core types (src/lib/schemas.ts)
+export const recipeSchema = z.object({
+  title: z.string().min(1, 'Title is required'),
+  ingredients: z.array(z.string().min(1)).min(1),
+  instructions: z.string().min(1),
+  notes: z.string().optional().default(''),
+  image_url: z.string().optional(),
+  categories: z.array(z.string().min(1)).optional().default([]) // NEW
+});
+
+// Database type (src/lib/supabase.ts)
+export type Recipe = {
+  id: string;
+  title: string;
+  ingredients: string[];
+  instructions: string;
+  notes: string;
+  image_url: string | null;
+  categories: string[]; // NEW
+  user_id: string;
+  created_at: string;
+  updated_at: string;
+};
+```
+
+### Category Parsing (src/lib/category-parsing.ts)
+```typescript
+// Main normalization function - handles all input formats
+export function normalizeCategories(input: CategoryInput): string[] {
+  if (!input) return [];
+  
+  // Array of strings (most common)
+  if (Array.isArray(input)) {
+    return input
+      .filter(item => typeof item === 'string' && item.trim())
+      .map(item => normalizeCategory(item.trim()))
+      .filter(Boolean);
+  }
+  
+  // Single string
+  if (typeof input === 'string') {
+    const trimmed = input.trim();
+    return trimmed ? [normalizeCategory(trimmed)] : [];
+  }
+  
+  // Object format { namespace: [values] }
+  if (typeof input === 'object' && input !== null) {
+    return normalizeObjectCategories(input);
+  }
+  
+  return [];
+}
+
+// Convert to title case with special handling
+function toTitleCase(str: string): string {
+  return str
+    .replace(/[_-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/\b\w/g, char => char.toUpperCase());
+}
+```
+
+### AI Integration Updates (src/lib/openai.ts)
+```typescript
+// Enhanced category instruction for all personas
+const CATEGORY_INSTRUCTION = `
+When providing recipes, include relevant categories using this format:
+"categories": ["Namespace: Value", "Namespace: Value"]
+
+Use these namespaces when appropriate:
+- Course: Appetizer, Main, Side, Dessert, Breakfast, Brunch, Snack
+- Dish Type: Soup, Salad, Sandwich, Curry, Stir-Fry, Stew, Pasta, Bowl, Casserole
+- Component: Sauce, Dressing, Marinade, Spice Blend, Rub, Stock/Broth
+- Technique: Bake, Roast, Grill, Sauté, Steam, Air Fryer, Instant Pot, No-Cook
+- Collection: Anti-Inflammatory, Low-FODMAP, High-Protein, Gluten-Free, Kid-Friendly
+- Cuisine: Italian, Mexican, Indian, Thai, Japanese, Mediterranean, etc.
+- Beverage: Cocktail, Mocktail, Smoothie, Juice, Tea, Coffee
+- Occasion: Weeknight, Meal Prep, Holiday, Party, Picnic
+
+Examples: ["Course: Main", "Cuisine: Italian", "Technique: Bake", "Collection: High-Protein"]
+`;
+
+// Update persona system prompts
+export const RECIPE_BOT_PERSONAS: Record<string, PersonaConfig> = {
+  chef: {
+    name: 'Chef Marco',
+    systemPrompt: `[existing prompt] ${CATEGORY_INSTRUCTION}`,
+  },
+  // ... other personas
+};
+```
+
+## ATOMIC UI COMPONENTS
+
+### CategoryChip (src/components/ui/category-chip.tsx)
+Base component for displaying individual categories with variants:
+- `default` - Static display
+- `clickable` - Interactive with hover states  
+- `selected` - Active/selected state
+- `removable` - With remove button
+
+```typescript
+export interface CategoryChipProps {
+  category: string;
+  variant?: 'default' | 'clickable' | 'selected' | 'removable';
+  size?: 'sm' | 'md' | 'lg';
+  onClick?: (category: string) => void;
+  onRemove?: (category: string) => void;
+  className?: string;
+  disabled?: boolean;
+}
+```
+
+### CategoryInput (src/components/ui/category-input.tsx)
+Form input component with autocomplete and suggestions:
+- Dropdown with canonical categories
+- Custom category support
+- Duplicate prevention
+- Maximum category limits
+- Keyboard navigation
+
+### CategoryDisplay (src/components/recipes/category-display.tsx)
+Recipe view component for showing category lists:
+- Compact and full variants
+- Maximum visible limits with "show more"
+- Sorted display by namespace priority
+- Optional click handlers for filtering
+
+### CategoryFilter (src/components/ui/category-filter.tsx)
+Advanced filtering interface:
+- Grouped by namespace
+- Search functionality
+- Multi-select with active filter display
+- Clear all functionality
+
+## INTEGRATION POINTS
+
+### Recipe View (src/components/recipes/recipe-view.tsx)
+```typescript
+// Add after recipe title
+<CategoryDisplay 
+  categories={recipe.categories || []}
+  className="mb-4"
+  maxVisible={6}
+  onCategoryClick={(category) => {
+    // Optional: Navigate to filtered recipe list
+    console.log('Filter by category:', category);
+  }}
+/>
+```
+
+### Recipe Form (src/components/recipes/recipe-form.tsx)
+```typescript
+// Add to form fields
+<FormField
+  control={form.control}
+  name="categories"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>Categories</FormLabel>
+      <FormControl>
+        <CategoryInput
+          value={field.value}
+          onChange={field.onChange}
+          suggestions={categorySuggestions}
+          placeholder="Add categories to help organize your recipe..."
+          maxCategories={6}
+        />
+      </FormControl>
+    </FormItem>
+  )}
+/>
+```
+
+### Recipe Card (src/components/recipes/recipe-card.tsx)
+```typescript
+// Add compact category display
+<CategoryDisplayCompact
+  categories={recipe.categories || []}
+  maxVisible={3}
+  className="mb-2"
+/>
+```
+
+### Recipes Page (src/pages/recipes-page.tsx)
+```typescript
+// Add category filtering state
+const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+
+// Filter recipes by categories
+const filteredRecipes = useMemo(() => {
+  return recipes.filter(recipe => {
+    const matchesCategories = selectedCategories.length === 0 ||
+      selectedCategories.every(category => 
+        recipe.categories?.includes(category)
+      );
+    return matchesCategories;
+  });
+}, [recipes, selectedCategories]);
+
+// Add category filter component
+<CategoryFilter
+  selectedCategories={selectedCategories}
+  onCategoriesChange={setSelectedCategories}
+/>
+```
+
+## CANONICAL CATEGORIES
+
+### Complete Taxonomy (src/lib/categories.ts)
+```typescript
+export const CATEGORY_DEFINITIONS: Record<string, CategoryDefinition> = {
+  course: {
+    namespace: 'Course',
+    values: ['Appetizer', 'Main', 'Side', 'Dessert', 'Breakfast', 'Brunch', 'Snack', 'Beverage'],
+    priority: 1,
+    isRequired: true,
+    maxSelection: 2
+  },
+  dishType: {
+    namespace: 'Dish Type', 
+    values: ['Soup', 'Salad', 'Sandwich', 'Curry', 'Stir-Fry', 'Stew', 'Pasta', 'Bowl', 'Casserole'],
+    priority: 2,
+    allowCustom: true,
+    maxSelection: 2
+  },
+  // ... 8 more namespaces with 80+ total categories
+};
+
+// Flat array of all canonical categories
+export const CANONICAL_CATEGORIES: string[] = Object.values(CATEGORY_DEFINITIONS)
+  .flatMap(def => def.values.map(value => `${def.namespace}: ${value}`));
+```
+
+### Priority Order
+1. **Course** (required) - Appetizer, Main, Side, Dessert, etc.
+2. **Dish Type** - Soup, Salad, Pasta, Bowl, etc.
+3. **Component** - Sauce, Spice Blend, Marinade, etc.
+4. **Technique** - Bake, Sauté, Grill, No-Cook, etc.
+5. **Collection** - Anti-Inflammatory, Kid-Friendly, Quick, etc.
+6. **Cuisine** - Italian, Mexican, Thai, Mediterranean, etc.
+7. **Beverage** - Cocktail, Smoothie, Tea, Coffee, etc.
+8. **Occasion** - Weeknight, Holiday, Party, Meal Prep, etc.
+9. **Season** - Spring, Summer, Fall, Winter, Year-Round
+10. **Difficulty** - Beginner, Intermediate, Advanced, Expert
+
+## DATABASE QUERIES
+
+### Category Filtering
+```sql
+-- Find recipes with specific categories
+SELECT * FROM recipes 
+WHERE categories @> ARRAY['Course: Main', 'Cuisine: Italian'];
+
+-- Find recipes with any of these categories
+SELECT * FROM recipes 
+WHERE categories && ARRAY['Course: Main', 'Course: Appetizer'];
+
+-- Count recipes by category
+SELECT 
+  unnest(categories) as category,
+  COUNT(*) as recipe_count
+FROM recipes 
+GROUP BY category 
+ORDER BY recipe_count DESC;
+```
+
+### Performance Considerations
+- GIN index on categories column for fast array operations
+- Limit category arrays to 6-8 items per recipe
+- Use `@>` (contains) and `&&` (overlaps) operators for efficient filtering
+- Consider materialized views for complex category analytics
+
+## API UPDATES
+
+### Recipe Parsing (src/lib/api.ts)
+```typescript
+// Update parseRecipeFromText to handle categories
+export async function parseRecipeFromText(text: string): Promise<{
+  title: string;
+  ingredients: string[];
+  instructions: string;
+  notes: string;
+  categories: string[]; // NEW FIELD
+}> {
+  // ... existing parsing logic
+  
+  // NEW: Process categories from multiple possible sources
+  const rawCategories = parsed.categories || 
+                       parsed.category || 
+                       parsed.tags || 
+                       parsed.labels ||
+                       null;
+
+  const normalizedCategories = normalizeCategories(rawCategories);
+  const uniqueCategories = uniqueValidCategories(normalizedCategories);
+  const sortedCategories = sortCategories(uniqueCategories);
+
+  return {
+    title,
+    ingredients,
+    instructions, 
+    notes,
+    categories: sortedCategories // NEW
+  };
+}
+```
+
+### Recipe Hooks (src/hooks/use-recipes.ts)
+```typescript
+// Add category filtering to useRecipes hook
+interface RecipeQueryOptions {
+  searchTerm?: string;
+  categories?: string[];
+  limit?: number;
+  offset?: number;
+}
+
+export function useRecipes(options?: RecipeQueryOptions) {
+  return useQuery({
+    queryKey: ['recipes', options],
+    queryFn: async () => {
+      let query = supabase
+        .from('recipes')
+        .select('*')
+        .eq('user_id', user?.id);
+
+      // Apply category filter
+      if (options?.categories && options.categories.length > 0) {
+        query = query.contains('categories', options.categories);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+      return data as Recipe[];
+    },
+  });
+}
+```
+
+## TESTING STRATEGY
+
+### Unit Tests
+- Category parsing utilities (all input formats)
+- Category validation and normalization
+- UI component rendering and interactions
+- Database type definitions
+
+### Integration Tests
+- Recipe parsing with categories end-to-end
+- Form submission with categories
+- Category filtering on recipes page
+- AI persona category suggestions
+
+### E2E Tests
+- Complete recipe creation workflow with categories
+- Category-based recipe discovery
+- Category management admin interface
+
+## COMMON PATTERNS
+
+### Adding Categories to Existing Recipe
+```typescript
+const updatedRecipe = {
+  ...existingRecipe,
+  categories: [...(existingRecipe.categories || []), 'Course: Main']
+};
+```
+
+### Filtering Recipes by Categories
+```typescript
+const filteredRecipes = recipes.filter(recipe => 
+  selectedCategories.every(category => 
+    recipe.categories?.includes(category)
+  )
+);
+```
+
+### Category Suggestion Logic
+```typescript
+// Content-based suggestions
+const suggestions = suggestCategoriesFromContent(
+  recipe.title,
+  recipe.ingredients, 
+  recipe.instructions
+);
+
+// Persona-based suggestions
+const personaSuggestions = suggestCategoriesByPersona('chef');
+
+// Combined and validated
+const finalCategories = validateAndEnhanceCategories(
+  aiCategories,
+  recipeContent,
+  persona
+);
+```
+
+## ERROR HANDLING
+
+### Graceful Degradation
+- Invalid category data → empty array
+- Malformed categories → filter out invalid entries  
+- Parsing errors → log warning, continue processing
+- Missing categories → show empty state, allow adding
+
+### Validation Patterns
+```typescript
+// Always validate categories before saving
+const validCategories = categories
+  .filter(validateCategory)
+  .filter(isCanonicalCategory)
+  .slice(0, MAX_CATEGORIES);
+```
+
+## PERFORMANCE NOTES
+
+- Category parsing adds ~5-10ms per recipe
+- GIN index enables fast category filtering queries
+- Category suggestions cached for 5 minutes
+- Limit visible categories in UI to prevent layout issues
+- Use React.memo for category components to prevent re-renders
+
+## MIGRATION STRATEGY
+
+1. **Phase 1**: Add database column with default empty array
+2. **Phase 2**: Update parsing to include categories (backward compatible)
+3. **Phase 3**: Enhance AI personas with category instructions
+4. **Phase 4**: Add UI components (progressive enhancement)
+5. **Phase 5**: Integrate throughout application
+6. **Phase 6**: Add admin management and analytics
+
+Each phase maintains backward compatibility with existing recipes.
+
+## RELATED FILES
+
+### Core Implementation
+- `docs/categories/phase-*.md` - Detailed implementation plans
+- `src/lib/category-parsing.ts` - Category normalization utilities
+- `src/lib/categories.ts` - Canonical category definitions
+- `src/components/ui/category-*.tsx` - Atomic UI components
+
+### Integration Points  
+- `src/components/recipes/recipe-view.tsx` - Recipe display
+- `src/components/recipes/recipe-form.tsx` - Recipe creation/editing
+- `src/pages/recipes-page.tsx` - Recipe listing and filtering
+- `src/lib/openai.ts` - AI persona enhancements
+- `src/lib/api.ts` - Recipe parsing logic
+
+### Database
+- `supabase/migrations/YYYYMMDD_add_recipe_categories.sql` - Schema migration
+- `src/lib/supabase.ts` - Database type definitions
+- `src/hooks/use-recipes.ts` - Recipe query hooks
+
+This llm.txt provides comprehensive context for implementing the Recipe Categories feature following the documented feature-first/atomic component architecture.

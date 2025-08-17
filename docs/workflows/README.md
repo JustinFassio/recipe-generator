@@ -8,6 +8,7 @@ This directory contains comprehensive documentation for all workflows in the Rec
 
 - **[AI Recipe Creation Workflow](ai-recipe-creation-workflow.md)** - Complete flow from persona selection to recipe saving
 - **[Recipe Save Flow](recipe-save-flow.md)** - Technical details of the recipe parsing and saving process
+- **[JSON Template Parsing Workflow](json-template-parsing-workflow.md)** - Complete guide to JSON template system for recipe parsing
 - **[Troubleshooting Guide](troubleshooting.md)** - Common issues and solutions
 
 ### **UI & Styling Workflows**
@@ -33,6 +34,7 @@ This directory contains comprehensive documentation for all workflows in the Rec
 ### **For Developers**
 
 - Review [Recipe Save Flow](recipe-save-flow.md) for technical implementation details
+- Check [JSON Template Parsing Workflow](json-template-parsing-workflow.md) for recipe data structure and parsing logic
 - Check [OpenAI Integration Flow](openai-integration-flow.md) for API integration patterns
 - Use [State Management Flow](state-management-flow.md) for component architecture
 
@@ -58,8 +60,9 @@ This directory contains comprehensive documentation for all workflows in the Rec
 
 1. **Read the main workflow**: [AI Recipe Creation Workflow](ai-recipe-creation-workflow.md)
 2. **Understand the save process**: [Recipe Save Flow](recipe-save-flow.md)
-3. **Check troubleshooting**: [Troubleshooting Guide](troubleshooting.md)
-4. **Learn UI components**: [DaisyUI Integration Guide](daisyui-integration-guide.md)
+3. **Learn about JSON templates**: [JSON Template Parsing Workflow](json-template-parsing-workflow.md)
+4. **Check troubleshooting**: [Troubleshooting Guide](troubleshooting.md)
+5. **Learn UI components**: [DaisyUI Integration Guide](daisyui-integration-guide.md)
 
 ---
 
