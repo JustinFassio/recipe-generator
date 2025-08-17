@@ -33,7 +33,12 @@ export async function getUserSafety(
 
 export async function updateUserSafety(
   userId: string,
-  safetyData: Partial<Pick<UserSafety, 'allergies' | 'dietary_restrictions'>>
+  safetyData: Partial<
+    Pick<
+      UserSafety,
+      'allergies' | 'dietary_restrictions' | 'medical_conditions'
+    >
+  >
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const { error } = await supabase.from('user_safety').upsert(

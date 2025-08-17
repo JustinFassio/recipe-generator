@@ -220,6 +220,7 @@ export async function updateProfile(
       Profile,
       | 'full_name'
       | 'avatar_url'
+      | 'bio'
       | 'region'
       | 'language'
       | 'units'

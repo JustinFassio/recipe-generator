@@ -67,6 +67,7 @@ export type Profile = {
   username: string | null;
   full_name: string | null;
   avatar_url: string | null;
+  bio: string | null;
   // Phase 1A: Basic preferences
   region: string | null;
   language: string | null;
@@ -88,6 +89,7 @@ export type UserSafety = {
   user_id: string;
   allergies: string[];
   dietary_restrictions: string[];
+  medical_conditions: string[];
   created_at: string;
   updated_at: string;
 };

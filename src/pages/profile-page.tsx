@@ -64,6 +64,7 @@ export default function ProfilePage() {
         if (safetyData) {
           setAllergies(safetyData.allergies);
           setDietaryRestrictions(safetyData.dietary_restrictions);
+          setMedicalConditions(safetyData.medical_conditions);
         }
 
         if (cookingData) {
@@ -82,6 +83,7 @@ export default function ProfilePage() {
 
   // Profile form state
   const [fullName, setFullName] = useState(profile?.full_name || '');
+  const [bio, setBio] = useState(profile?.bio || '');
   const [username, setUsername] = useState('');
   const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(
     null
@@ -109,6 +111,7 @@ export default function ProfilePage() {
   // Phase 1B: Safety data state
   const [allergies, setAllergies] = useState<string[]>([]);
   const [dietaryRestrictions, setDietaryRestrictions] = useState<string[]>([]);
+  const [medicalConditions, setMedicalConditions] = useState<string[]>([]);
 
   // Phase 1C: Cooking preferences state
   const [preferredCuisines, setPreferredCuisines] = useState<string[]>([]);
@@ -171,6 +174,7 @@ export default function ProfilePage() {
       const { success: profileSuccess, error: profileError } =
         await updateProfile({
           full_name: fullName,
+          bio: bio || null,
           region: region || null,
           language,
           units,
@@ -406,6 +410,22 @@ export default function ProfilePage() {
                     </div>
                   </div>
 
+                  {/* Bio */}
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text">Bio</span>
+                      <span className="label-text-alt">{bio.length}/500</span>
+                    </label>
+                    <textarea
+                      className="textarea-bordered textarea w-full"
+                      value={bio}
+                      onChange={(e) => setBio(e.target.value)}
+                      placeholder="Tell us a bit about yourself, your cooking interests, or dietary preferences..."
+                      rows={3}
+                      maxLength={500}
+                    />
+                  </div>
+
                   {/* Current Username */}
                   {profile.username && (
                     <div className="form-control">
@@ -621,6 +641,67 @@ export default function ProfilePage() {
                 </p>
 
                 <div className="space-y-4">
+                  {/* Medical Conditions */}
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text font-medium">
+                        Medical Conditions
+                      </span>
+                      <span className="label-text-alt text-info">
+                        Help us recommend foods that support your health
+                      </span>
+                    </label>
+                    <div className="mb-2 flex flex-wrap gap-2">
+                      {[
+                        'diabetes',
+                        'hypertension',
+                        'heart disease',
+                        'high cholesterol',
+                        'kidney disease',
+                        'liver disease',
+                        'thyroid issues',
+                        'arthritis',
+                        'osteoporosis',
+                        'acid reflux',
+                      ].map((condition) => (
+                        <button
+                          key={condition}
+                          type="button"
+                          onClick={() => {
+                            if (medicalConditions.includes(condition)) {
+                              setMedicalConditions(
+                                medicalConditions.filter((c) => c !== condition)
+                              );
+                            } else {
+                              setMedicalConditions([
+                                ...medicalConditions,
+                                condition,
+                              ]);
+                            }
+                          }}
+                          className={`btn btn-sm ${medicalConditions.includes(condition) ? 'btn-info' : 'btn-outline'}`}
+                        >
+                          {condition}
+                        </button>
+                      ))}
+                    </div>
+                    <input
+                      type="text"
+                      className="input-bordered input w-full"
+                      placeholder="Other conditions (press Enter to add)"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          const value = e.currentTarget.value.trim();
+                          if (value && !medicalConditions.includes(value)) {
+                            setMedicalConditions([...medicalConditions, value]);
+                            e.currentTarget.value = '';
+                          }
+                        }
+                      }}
+                    />
+                  </div>
+
                   {/* Allergies */}
                   <div className="form-control">
                     <label className="label">
@@ -728,6 +809,7 @@ export default function ProfilePage() {
                         const result = await updateUserSafety(user.id, {
                           allergies,
                           dietary_restrictions: dietaryRestrictions,
+                          medical_conditions: medicalConditions,
                         });
 
                         if (result.success) {
