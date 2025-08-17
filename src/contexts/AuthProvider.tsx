@@ -84,6 +84,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             console.log('✅ User found:', session.user.email);
           } else {
             setUser(null);
+            setProfile(null);
             console.log('❌ No user session or session invalid');
           }
           setLoading(false);
@@ -95,6 +96,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         if (mounted) {
           setUser(null);
+          setProfile(null);
           setError(null); // Don't show error, just clear everything
           setLoading(false);
         }
