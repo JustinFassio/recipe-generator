@@ -215,7 +215,18 @@ export async function updatePassword(
 
 // Update user profile
 export async function updateProfile(
-  updates: Partial<Pick<Profile, 'full_name' | 'avatar_url'>>
+  updates: Partial<
+    Pick<
+      Profile,
+      | 'full_name'
+      | 'avatar_url'
+      | 'region'
+      | 'language'
+      | 'units'
+      | 'time_per_meal'
+      | 'skill_level'
+    >
+  >
 ): Promise<{ success: boolean; error?: AuthError; profile?: Profile }> {
   try {
     const {

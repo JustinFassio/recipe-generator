@@ -10,6 +10,12 @@ import {
 } from '@/lib/auth';
 import { toast } from '@/hooks/use-toast';
 import {
+  getUserSafety,
+  updateUserSafety,
+  getCookingPreferences,
+  updateCookingPreferences,
+} from '@/lib/user-preferences';
+import {
   User,
   Mail,
   Lock,
@@ -19,6 +25,13 @@ import {
   Loader2,
   UserCheck,
   AtSign,
+  MapPin,
+  Globe,
+  Ruler,
+  Clock,
+  GraduationCap,
+  Shield,
+  ChefHat,
 } from 'lucide-react';
 
 export default function ProfilePage() {
@@ -37,6 +50,36 @@ export default function ProfilePage() {
     };
   }, []);
 
+  // Load user preferences data
+  useEffect(() => {
+    const loadUserPreferences = async () => {
+      if (!user?.id) return;
+
+      try {
+        const [safetyData, cookingData] = await Promise.all([
+          getUserSafety(user.id),
+          getCookingPreferences(user.id),
+        ]);
+
+        if (safetyData) {
+          setAllergies(safetyData.allergies);
+          setDietaryRestrictions(safetyData.dietary_restrictions);
+        }
+
+        if (cookingData) {
+          setPreferredCuisines(cookingData.preferred_cuisines);
+          setAvailableEquipment(cookingData.available_equipment);
+          setDislikedIngredients(cookingData.disliked_ingredients);
+          setSpiceTolerance(cookingData.spice_tolerance || 3);
+        }
+      } catch (error) {
+        console.error('Error loading user preferences:', error);
+      }
+    };
+
+    loadUserPreferences();
+  }, [user?.id]);
+
   // Profile form state
   const [fullName, setFullName] = useState(profile?.full_name || '');
   const [username, setUsername] = useState('');
@@ -53,6 +96,25 @@ export default function ProfilePage() {
 
   // Active tab state
   const [activeTab, setActiveTab] = useState<'profile' | 'account'>('profile');
+
+  // Phase 1A: Basic profile preferences state
+  const [region, setRegion] = useState(profile?.region || '');
+  const [language, setLanguage] = useState(profile?.language || 'en');
+  const [units, setUnits] = useState(profile?.units || 'metric');
+  const [timePerMeal, setTimePerMeal] = useState(profile?.time_per_meal || 30);
+  const [skillLevel, setSkillLevel] = useState(
+    profile?.skill_level || 'beginner'
+  );
+
+  // Phase 1B: Safety data state
+  const [allergies, setAllergies] = useState<string[]>([]);
+  const [dietaryRestrictions, setDietaryRestrictions] = useState<string[]>([]);
+
+  // Phase 1C: Cooking preferences state
+  const [preferredCuisines, setPreferredCuisines] = useState<string[]>([]);
+  const [availableEquipment, setAvailableEquipment] = useState<string[]>([]);
+  const [dislikedIngredients, setDislikedIngredients] = useState<string[]>([]);
+  const [spiceTolerance, setSpiceTolerance] = useState(3);
 
   if (!user || !profile) {
     return (
@@ -109,6 +171,11 @@ export default function ProfilePage() {
       const { success: profileSuccess, error: profileError } =
         await updateProfile({
           full_name: fullName,
+          region: region || null,
+          language,
+          units,
+          time_per_meal: timePerMeal,
+          skill_level: skillLevel,
         });
 
       if (!profileSuccess && profileError) {
@@ -409,6 +476,115 @@ export default function ProfilePage() {
                     )}
                   </div>
 
+                  {/* Phase 1A: Basic Preferences */}
+                  <div className="divider">Preferences</div>
+
+                  {/* Region */}
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text">Region</span>
+                    </label>
+                    <div className="relative">
+                      <MapPin className="text-base-content/40 absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform" />
+                      <input
+                        type="text"
+                        className="input-bordered input w-full pl-10"
+                        value={region}
+                        onChange={(e) => setRegion(e.target.value)}
+                        placeholder="e.g., United States, Canada, UK"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Language */}
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text">Language</span>
+                    </label>
+                    <div className="relative">
+                      <Globe className="text-base-content/40 absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform" />
+                      <select
+                        className="select-bordered select w-full pl-10"
+                        value={language}
+                        onChange={(e) => setLanguage(e.target.value)}
+                      >
+                        <option value="en">English</option>
+                        <option value="es">Spanish</option>
+                        <option value="fr">French</option>
+                        <option value="de">German</option>
+                        <option value="it">Italian</option>
+                        <option value="pt">Portuguese</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Units */}
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text">Measurement Units</span>
+                    </label>
+                    <div className="relative">
+                      <Ruler className="text-base-content/40 absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform" />
+                      <select
+                        className="select-bordered select w-full pl-10"
+                        value={units}
+                        onChange={(e) => setUnits(e.target.value)}
+                      >
+                        <option value="metric">Metric (kg, L, °C)</option>
+                        <option value="imperial">
+                          Imperial (lbs, cups, °F)
+                        </option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Time per Meal */}
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text">Time per Meal</span>
+                      <span className="label-text-alt">
+                        {timePerMeal} minutes
+                      </span>
+                    </label>
+                    <div className="relative">
+                      <Clock className="text-base-content/40 absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform" />
+                      <input
+                        type="range"
+                        min="10"
+                        max="120"
+                        step="5"
+                        className="range range-primary ml-10"
+                        value={timePerMeal}
+                        onChange={(e) => setTimePerMeal(Number(e.target.value))}
+                      />
+                    </div>
+                    <div className="flex w-full justify-between px-2 text-xs">
+                      <span>10 min</span>
+                      <span>30 min</span>
+                      <span>60 min</span>
+                      <span>120 min</span>
+                    </div>
+                  </div>
+
+                  {/* Skill Level */}
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text">Cooking Skill Level</span>
+                    </label>
+                    <div className="relative">
+                      <GraduationCap className="text-base-content/40 absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform" />
+                      <select
+                        className="select-bordered select w-full pl-10"
+                        value={skillLevel}
+                        onChange={(e) => setSkillLevel(e.target.value)}
+                      >
+                        <option value="beginner">Beginner</option>
+                        <option value="intermediate">Intermediate</option>
+                        <option value="advanced">Advanced</option>
+                      </select>
+                    </div>
+                  </div>
+
                   <button
                     type="submit"
                     className="btn btn-primary w-full"
@@ -429,6 +605,399 @@ export default function ProfilePage() {
                     )}
                   </button>
                 </form>
+              </div>
+            </div>
+
+            {/* Phase 1B: Safety & Dietary Section */}
+            <div className="card bg-base-200 shadow-lg">
+              <div className="card-body">
+                <h2 className="card-title flex items-center">
+                  <Shield className="mr-2 h-5 w-5 text-warning" />
+                  Safety & Dietary
+                </h2>
+                <p className="text-base-content/60 mb-4 text-sm">
+                  Help us keep you safe by sharing any allergies or dietary
+                  restrictions.
+                </p>
+
+                <div className="space-y-4">
+                  {/* Allergies */}
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text font-medium">
+                        Food Allergies
+                      </span>
+                      <span className="label-text-alt text-warning">
+                        Critical for safety
+                      </span>
+                    </label>
+                    <div className="mb-2 flex flex-wrap gap-2">
+                      {[
+                        'peanut',
+                        'tree nuts',
+                        'milk',
+                        'eggs',
+                        'wheat',
+                        'soy',
+                        'fish',
+                        'shellfish',
+                        'sesame',
+                      ].map((allergen) => (
+                        <button
+                          key={allergen}
+                          type="button"
+                          onClick={() => {
+                            if (allergies.includes(allergen)) {
+                              setAllergies(
+                                allergies.filter((a) => a !== allergen)
+                              );
+                            } else {
+                              setAllergies([...allergies, allergen]);
+                            }
+                          }}
+                          className={`btn btn-sm ${allergies.includes(allergen) ? 'btn-error' : 'btn-outline'}`}
+                        >
+                          {allergen}
+                        </button>
+                      ))}
+                    </div>
+                    <input
+                      type="text"
+                      className="input-bordered input w-full"
+                      placeholder="Other allergies (comma separated)"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          const value = e.currentTarget.value.trim();
+                          if (value && !allergies.includes(value)) {
+                            setAllergies([...allergies, value]);
+                            e.currentTarget.value = '';
+                          }
+                        }
+                      }}
+                    />
+                  </div>
+
+                  {/* Dietary Restrictions */}
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text font-medium">
+                        Dietary Restrictions
+                      </span>
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {[
+                        'vegan',
+                        'vegetarian',
+                        'pescatarian',
+                        'halal',
+                        'kosher',
+                        'gluten-free',
+                        'dairy-free',
+                      ].map((restriction) => (
+                        <button
+                          key={restriction}
+                          type="button"
+                          onClick={() => {
+                            if (dietaryRestrictions.includes(restriction)) {
+                              setDietaryRestrictions(
+                                dietaryRestrictions.filter(
+                                  (r) => r !== restriction
+                                )
+                              );
+                            } else {
+                              setDietaryRestrictions([
+                                ...dietaryRestrictions,
+                                restriction,
+                              ]);
+                            }
+                          }}
+                          className={`btn btn-sm ${dietaryRestrictions.includes(restriction) ? 'btn-primary' : 'btn-outline'}`}
+                        >
+                          {restriction}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      try {
+                        setLoading(true);
+                        const result = await updateUserSafety(user.id, {
+                          allergies,
+                          dietary_restrictions: dietaryRestrictions,
+                        });
+
+                        if (result.success) {
+                          toast({
+                            title: 'Success',
+                            description:
+                              'Safety preferences updated successfully!',
+                          });
+                        } else {
+                          throw new Error(result.error);
+                        }
+                      } catch (error) {
+                        toast({
+                          title: 'Error',
+                          description:
+                            error instanceof Error
+                              ? error.message
+                              : 'Failed to update safety preferences',
+                          variant: 'destructive',
+                        });
+                      } finally {
+                        setLoading(false);
+                      }
+                    }}
+                    className="btn btn-warning w-full"
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        <Shield className="mr-2 h-4 w-4" />
+                        Save Safety Preferences
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Phase 1C: Cooking Preferences Section */}
+            <div className="card bg-base-200 shadow-lg">
+              <div className="card-body">
+                <h2 className="card-title flex items-center">
+                  <ChefHat className="mr-2 h-5 w-5 text-primary" />
+                  Cooking Preferences
+                </h2>
+                <p className="text-base-content/60 mb-4 text-sm">
+                  Tell us about your cooking style and preferences for better
+                  recipe recommendations.
+                </p>
+
+                <div className="space-y-4">
+                  {/* Preferred Cuisines */}
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text font-medium">
+                        Preferred Cuisines
+                      </span>
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {[
+                        'italian',
+                        'mexican',
+                        'chinese',
+                        'indian',
+                        'thai',
+                        'japanese',
+                        'french',
+                        'mediterranean',
+                        'american',
+                        'korean',
+                      ].map((cuisine) => (
+                        <button
+                          key={cuisine}
+                          type="button"
+                          onClick={() => {
+                            if (preferredCuisines.includes(cuisine)) {
+                              setPreferredCuisines(
+                                preferredCuisines.filter((c) => c !== cuisine)
+                              );
+                            } else {
+                              setPreferredCuisines([
+                                ...preferredCuisines,
+                                cuisine,
+                              ]);
+                            }
+                          }}
+                          className={`btn btn-sm ${preferredCuisines.includes(cuisine) ? 'btn-primary' : 'btn-outline'}`}
+                        >
+                          {cuisine}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Available Equipment */}
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text font-medium">
+                        Available Equipment
+                      </span>
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {[
+                        'oven',
+                        'stove',
+                        'microwave',
+                        'air fryer',
+                        'instant pot',
+                        'slow cooker',
+                        'grill',
+                        'food processor',
+                        'blender',
+                      ].map((equipment) => (
+                        <button
+                          key={equipment}
+                          type="button"
+                          onClick={() => {
+                            if (availableEquipment.includes(equipment)) {
+                              setAvailableEquipment(
+                                availableEquipment.filter(
+                                  (e) => e !== equipment
+                                )
+                              );
+                            } else {
+                              setAvailableEquipment([
+                                ...availableEquipment,
+                                equipment,
+                              ]);
+                            }
+                          }}
+                          className={`btn btn-sm ${availableEquipment.includes(equipment) ? 'btn-secondary' : 'btn-outline'}`}
+                        >
+                          {equipment}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Spice Tolerance */}
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text font-medium">
+                        Spice Tolerance
+                      </span>
+                      <span className="label-text-alt">
+                        Level {spiceTolerance}/5
+                      </span>
+                    </label>
+                    <input
+                      type="range"
+                      min="1"
+                      max="5"
+                      step="1"
+                      className="range range-primary"
+                      value={spiceTolerance}
+                      onChange={(e) =>
+                        setSpiceTolerance(Number(e.target.value))
+                      }
+                    />
+                    <div className="flex w-full justify-between px-2 text-xs">
+                      <span>Mild</span>
+                      <span>Medium</span>
+                      <span>Hot</span>
+                      <span>Very Hot</span>
+                      <span>Extreme</span>
+                    </div>
+                  </div>
+
+                  {/* Disliked Ingredients */}
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text font-medium">
+                        Disliked Ingredients
+                      </span>
+                    </label>
+                    <div className="mb-2 flex flex-wrap gap-1">
+                      {dislikedIngredients.map((ingredient, index) => (
+                        <div key={index} className="badge badge-outline gap-1">
+                          {ingredient}
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setDislikedIngredients(
+                                dislikedIngredients.filter(
+                                  (_, i) => i !== index
+                                )
+                              )
+                            }
+                            className="btn btn-ghost btn-xs btn-circle"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                    <input
+                      type="text"
+                      className="input-bordered input w-full"
+                      placeholder="Add ingredients you dislike (press Enter)"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          const value = e.currentTarget.value.trim();
+                          if (value && !dislikedIngredients.includes(value)) {
+                            setDislikedIngredients([
+                              ...dislikedIngredients,
+                              value,
+                            ]);
+                            e.currentTarget.value = '';
+                          }
+                        }
+                      }}
+                    />
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      try {
+                        setLoading(true);
+                        const result = await updateCookingPreferences(user.id, {
+                          preferred_cuisines: preferredCuisines,
+                          available_equipment: availableEquipment,
+                          disliked_ingredients: dislikedIngredients,
+                          spice_tolerance: spiceTolerance,
+                        });
+
+                        if (result.success) {
+                          toast({
+                            title: 'Success',
+                            description:
+                              'Cooking preferences updated successfully!',
+                          });
+                        } else {
+                          throw new Error(result.error);
+                        }
+                      } catch (error) {
+                        toast({
+                          title: 'Error',
+                          description:
+                            error instanceof Error
+                              ? error.message
+                              : 'Failed to update cooking preferences',
+                          variant: 'destructive',
+                        });
+                      } finally {
+                        setLoading(false);
+                      }
+                    }}
+                    className="btn btn-primary w-full"
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        <ChefHat className="mr-2 h-4 w-4" />
+                        Save Cooking Preferences
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
