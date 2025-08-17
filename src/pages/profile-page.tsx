@@ -311,7 +311,7 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="min-h-screen bg-base-100">
+    <div className="min-h-screen bg-base-100 [&_.label-text-alt]:break-words">
       <div className="container mx-auto max-w-4xl px-4 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -404,7 +404,7 @@ export default function ProfilePage() {
                     maxLength={500}
                   />
                   <label className="label">
-                    <span className="label-text-alt text-base-content/60">
+                    <span className="label-text-alt text-base-content/60 break-words">
                       Share your cooking style, favorite cuisines, or any other
                       details that help personalize your recipe recommendations.
                     </span>
@@ -540,7 +540,7 @@ export default function ProfilePage() {
                       </div>
                     </div>
                     <label className="label">
-                      <span className="label-text-alt text-base-content/60">
+                      <span className="label-text-alt text-base-content/60 break-words">
                         3-24 characters, lowercase letters, numbers, and
                         underscores only
                       </span>
@@ -705,7 +705,7 @@ export default function ProfilePage() {
                       <span className="label-text font-medium">
                         Medical Conditions
                       </span>
-                      <span className="label-text-alt text-info">
+                      <span className="label-text-alt break-words text-info">
                         Help us recommend foods that support your health
                       </span>
                     </label>
@@ -1245,7 +1245,7 @@ export default function ProfilePage() {
                       />
                     </div>
                     <label className="label">
-                      <span className="label-text-alt text-base-content/60">
+                      <span className="label-text-alt text-base-content/60 break-words">
                         Password must be at least 6 characters long
                       </span>
                     </label>
