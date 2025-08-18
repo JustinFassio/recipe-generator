@@ -5,6 +5,12 @@ import { supabase, type UserSafety, type CookingPreferences } from './supabase';
  * Following the Phase 1 atomic feature approach
  */
 
+// Validation constants - match database constraints
+export const MIN_SPICE_TOLERANCE = 1;
+export const MAX_SPICE_TOLERANCE = 5;
+export const MIN_TIME_PER_MEAL = 10;
+export const MAX_TIME_PER_MEAL = 120;
+
 // Phase 1B: User Safety Functions
 export async function getUserSafety(
   userId: string
@@ -121,9 +127,24 @@ export async function updateCookingPreferences(
 }
 
 // Combined function to get all user preference data for AI integration
-export async function getAllUserPreferences(
-  userId: string
-): Promise<{ success: boolean; data?: any; error?: string }> {
+// Type for the profile data selected in getAllUserPreferences
+type ProfilePreferences = {
+  region: string | null;
+  language: string | null;
+  units: string | null;
+  time_per_meal: number | null;
+  skill_level: string | null;
+};
+
+export async function getAllUserPreferences(userId: string): Promise<{
+  success: boolean;
+  data?: {
+    profile: ProfilePreferences | null;
+    safety: UserSafety | null;
+    cooking: CookingPreferences | null;
+  };
+  error?: string;
+}> {
   try {
     const [profile, safety, cooking] = await Promise.all([
       supabase
@@ -159,9 +180,17 @@ export function validateAllergies(allergies: string[]): boolean {
 }
 
 export function validateSpiceTolerance(level: number): boolean {
-  return Number.isInteger(level) && level >= 1 && level <= 5;
+  return (
+    Number.isInteger(level) &&
+    level >= MIN_SPICE_TOLERANCE &&
+    level <= MAX_SPICE_TOLERANCE
+  );
 }
 
 export function validateTimePerMeal(minutes: number): boolean {
-  return Number.isInteger(minutes) && minutes >= 10 && minutes <= 120;
+  return (
+    Number.isInteger(minutes) &&
+    minutes >= MIN_TIME_PER_MEAL &&
+    minutes <= MAX_TIME_PER_MEAL
+  );
 }
