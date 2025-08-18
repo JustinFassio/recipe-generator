@@ -708,16 +708,14 @@ export default function ProfilePage() {
 
                 <div className="space-y-4">
                   {/* Medical Conditions */}
-                  <div className="form-control">
-                    <label className="label">
-                      <span className="label-text font-medium">
-                        Medical Conditions
-                      </span>
-                      <span className="label-text-alt whitespace-normal break-words text-info">
-                        Help us recommend foods that support your health
-                      </span>
-                    </label>
-                    <div className="mb-2 flex flex-wrap gap-2">
+                  <fieldset className="form-control" aria-labelledby="medical-conditions-legend">
+                    <legend id="medical-conditions-legend" className="font-medium mb-2">
+                      Medical Conditions
+                    </legend>
+                    <span className="label-text-alt whitespace-normal break-words text-info mb-2">
+                      Help us recommend foods that support your health
+                    </span>
+                    <div className="mb-2 flex flex-wrap gap-2" role="group" aria-labelledby="medical-conditions-legend">
                       {[
                         'diabetes',
                         'hypertension',
@@ -733,6 +731,8 @@ export default function ProfilePage() {
                         <button
                           key={condition}
                           type="button"
+                          aria-pressed={medicalConditions.includes(condition)}
+                          aria-describedby="medical-conditions-legend"
                           onClick={() => {
                             if (medicalConditions.includes(condition)) {
                               setMedicalConditions(
@@ -755,6 +755,7 @@ export default function ProfilePage() {
                       type="text"
                       className="input-bordered input w-full"
                       placeholder="Other conditions (press Enter to add)"
+                      aria-describedby="medical-conditions-legend"
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') {
                           e.preventDefault();
@@ -766,19 +767,17 @@ export default function ProfilePage() {
                         }
                       }}
                     />
-                  </div>
+                  </fieldset>
 
                   {/* Allergies */}
-                  <div className="form-control">
-                    <label className="label">
-                      <span className="label-text font-medium">
-                        Food Allergies
-                      </span>
-                      <span className="label-text-alt text-warning">
-                        Critical for safety
-                      </span>
-                    </label>
-                    <div className="mb-2 flex flex-wrap gap-2">
+                  <fieldset className="form-control" aria-labelledby="allergies-legend">
+                    <legend id="allergies-legend" className="font-medium mb-2">
+                      Food Allergies
+                    </legend>
+                    <span className="label-text-alt text-warning mb-2">
+                      Critical for safety
+                    </span>
+                    <div className="mb-2 flex flex-wrap gap-2" role="group" aria-labelledby="allergies-legend">
                       {[
                         'peanut',
                         'tree nuts',
@@ -793,6 +792,8 @@ export default function ProfilePage() {
                         <button
                           key={allergen}
                           type="button"
+                          aria-pressed={allergies.includes(allergen)}
+                          aria-describedby="allergies-legend"
                           onClick={() => {
                             if (allergies.includes(allergen)) {
                               setAllergies(
@@ -812,6 +813,7 @@ export default function ProfilePage() {
                       type="text"
                       className="input-bordered input w-full"
                       placeholder="Other allergies (comma separated)"
+                      aria-describedby="allergies-legend"
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') {
                           e.preventDefault();
@@ -823,16 +825,14 @@ export default function ProfilePage() {
                         }
                       }}
                     />
-                  </div>
+                  </fieldset>
 
                   {/* Dietary Restrictions */}
-                  <div className="form-control">
-                    <label className="label">
-                      <span className="label-text font-medium">
-                        Dietary Restrictions
-                      </span>
-                    </label>
-                    <div className="flex flex-wrap gap-2">
+                  <fieldset className="form-control" aria-labelledby="dietary-restrictions-legend">
+                    <legend id="dietary-restrictions-legend" className="font-medium mb-2">
+                      Dietary Restrictions
+                    </legend>
+                    <div className="flex flex-wrap gap-2" role="group" aria-labelledby="dietary-restrictions-legend">
                       {[
                         'vegan',
                         'vegetarian',
@@ -845,6 +845,8 @@ export default function ProfilePage() {
                         <button
                           key={restriction}
                           type="button"
+                          aria-pressed={dietaryRestrictions.includes(restriction)}
+                          aria-describedby="dietary-restrictions-legend"
                           onClick={() => {
                             if (dietaryRestrictions.includes(restriction)) {
                               setDietaryRestrictions(
@@ -865,7 +867,7 @@ export default function ProfilePage() {
                         </button>
                       ))}
                     </div>
-                  </div>
+                  </fieldset>
 
                   <button
                     type="button"
@@ -933,13 +935,11 @@ export default function ProfilePage() {
 
                 <div className="space-y-4">
                   {/* Preferred Cuisines */}
-                  <div className="form-control">
-                    <label className="label">
-                      <span className="label-text font-medium">
-                        Preferred Cuisines
-                      </span>
-                    </label>
-                    <div className="flex flex-wrap gap-2">
+                  <fieldset className="form-control" aria-labelledby="preferred-cuisines-legend">
+                    <legend id="preferred-cuisines-legend" className="font-medium mb-2">
+                      Preferred Cuisines
+                    </legend>
+                    <div className="flex flex-wrap gap-2" role="group" aria-labelledby="preferred-cuisines-legend">
                       {[
                         'italian',
                         'mexican',
@@ -955,6 +955,8 @@ export default function ProfilePage() {
                         <button
                           key={cuisine}
                           type="button"
+                          aria-pressed={preferredCuisines.includes(cuisine)}
+                          aria-describedby="preferred-cuisines-legend"
                           onClick={() => {
                             if (preferredCuisines.includes(cuisine)) {
                               setPreferredCuisines(
@@ -973,16 +975,14 @@ export default function ProfilePage() {
                         </button>
                       ))}
                     </div>
-                  </div>
+                  </fieldset>
 
                   {/* Available Equipment */}
-                  <div className="form-control">
-                    <label className="label">
-                      <span className="label-text font-medium">
-                        Available Equipment
-                      </span>
-                    </label>
-                    <div className="flex flex-wrap gap-2">
+                  <fieldset className="form-control" aria-labelledby="available-equipment-legend">
+                    <legend id="available-equipment-legend" className="font-medium mb-2">
+                      Available Equipment
+                    </legend>
+                    <div className="flex flex-wrap gap-2" role="group" aria-labelledby="available-equipment-legend">
                       {[
                         'oven',
                         'stove',
@@ -997,6 +997,8 @@ export default function ProfilePage() {
                         <button
                           key={equipment}
                           type="button"
+                          aria-pressed={availableEquipment.includes(equipment)}
+                          aria-describedby="available-equipment-legend"
                           onClick={() => {
                             if (availableEquipment.includes(equipment)) {
                               setAvailableEquipment(
@@ -1017,7 +1019,7 @@ export default function ProfilePage() {
                         </button>
                       ))}
                     </div>
-                  </div>
+                  </fieldset>
 
                   {/* Spice Tolerance */}
                   <div className="form-control">
