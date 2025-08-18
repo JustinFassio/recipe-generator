@@ -15,6 +15,7 @@ import {
   getCookingPreferences,
   updateCookingPreferences,
 } from '@/lib/user-preferences';
+import { withTextWrapping, getHelperTextClasses } from '@/lib/text-wrapping-migration';
 import {
   User,
   Mail,
@@ -311,7 +312,7 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="min-h-screen bg-base-100 [&_.label-text-alt]:max-w-full [&_.label-text-alt]:overflow-hidden [&_.label-text-alt]:whitespace-normal [&_.label-text-alt]:break-words [&_.label]:max-w-full">
+    <div className={withTextWrapping()}>
       <div className="container mx-auto max-w-4xl px-4 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -404,7 +405,7 @@ export default function ProfilePage() {
                     maxLength={500}
                   />
                   <label className="label">
-                    <span className="label-text-alt text-base-content/60 whitespace-normal break-words">
+                    <span className={`label-text-alt ${getHelperTextClasses()}`}>
                       Share your cooking style, favorite cuisines, or any other
                       details that help personalize your recipe recommendations.
                     </span>
@@ -540,7 +541,7 @@ export default function ProfilePage() {
                       </div>
                     </div>
                     <label className="label">
-                      <span className="label-text-alt text-base-content/60 whitespace-normal break-words">
+                      <span className={`label-text-alt ${getHelperTextClasses()}`}>
                         3-24 characters, lowercase letters, numbers, and
                         underscores only
                       </span>
@@ -1245,7 +1246,7 @@ export default function ProfilePage() {
                       />
                     </div>
                     <label className="label">
-                      <span className="label-text-alt text-base-content/60 whitespace-normal break-words">
+                      <span className={`label-text-alt ${getHelperTextClasses()}`}>
                         Password must be at least 6 characters long
                       </span>
                     </label>
