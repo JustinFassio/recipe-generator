@@ -27,6 +27,13 @@ export async function getUserSafety(
         // No safety data found - return default
         return null;
       }
+      // If the table doesn't exist yet (migrations not run), fail gracefully
+      if (error.code === '42P01' || error.code === 'PGRST205') {
+        console.warn(
+          'User safety table does not exist yet. Please run database migrations.'
+        );
+        return null;
+      }
       throw error;
     }
 
@@ -55,7 +62,19 @@ export async function updateUserSafety(
       { onConflict: 'user_id' }
     );
 
-    if (error) throw error;
+    if (error) {
+      // If the table doesn't exist yet (migrations not run), fail gracefully
+      if (error.code === '42P01' || error.code === 'PGRST205') {
+        console.warn(
+          'User safety table does not exist yet. Please run database migrations.'
+        );
+        return {
+          success: false,
+          error: 'Database tables not set up yet. Please contact support.',
+        };
+      }
+      throw error;
+    }
 
     return { success: true };
   } catch (error) {
@@ -81,6 +100,13 @@ export async function getCookingPreferences(
     if (error) {
       if (error.code === 'PGRST116') {
         // No cooking preferences found - return default
+        return null;
+      }
+      // If the table doesn't exist yet (migrations not run), fail gracefully
+      if (error.code === '42P01' || error.code === 'PGRST205') {
+        console.warn(
+          'Cooking preferences table does not exist yet. Please run database migrations.'
+        );
         return null;
       }
       throw error;
@@ -114,7 +140,19 @@ export async function updateCookingPreferences(
       { onConflict: 'user_id' }
     );
 
-    if (error) throw error;
+    if (error) {
+      // If the table doesn't exist yet (migrations not run), fail gracefully
+      if (error.code === '42P01' || error.code === 'PGRST205') {
+        console.warn(
+          'Cooking preferences table does not exist yet. Please run database migrations.'
+        );
+        return {
+          success: false,
+          error: 'Database tables not set up yet. Please contact support.',
+        };
+      }
+      throw error;
+    }
 
     return { success: true };
   } catch (error) {

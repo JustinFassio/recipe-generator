@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase, Profile } from '@/lib/supabase';
-import { clearAuthTokens } from '@/lib/auth-utils';
+import { clearAuthTokens, ensureUserProfile } from '@/lib/auth-utils';
 
 interface SimpleAuthContextType {
   user: User | null;
@@ -53,12 +53,62 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (error) {
         // If the profiles table doesn't exist yet (migrations not run), fail gracefully
-        if (error.code === '42P01') {
+        if (error.code === '42P01' || error.code === 'PGRST205') {
           console.warn(
-            'Profiles table does not exist yet. Please run database migrations.'
+            'Profiles table does not exist yet. Please run database migrations. Creating temporary profile...'
           );
-          return null;
+          // Return a temporary profile object to prevent app crashes
+          return {
+            id: userId,
+            username: null,
+            full_name: null,
+            avatar_url: null,
+            bio: null,
+            region: null,
+            language: 'en',
+            units: 'metric',
+            time_per_meal: 30,
+            skill_level: 'beginner',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          };
         }
+
+        // If profile doesn't exist (PGRST116), try to create it
+        if (error.code === 'PGRST116') {
+          console.log('📝 Profile not found, attempting to create one...');
+          const { success, error: createError } = await ensureUserProfile();
+
+          if (success) {
+            console.log('✅ Profile created successfully, fetching again...');
+            // Try to fetch the profile again
+            const { data: newData, error: newError } = await supabase
+              .from('profiles')
+              .select(
+                'id, username, full_name, avatar_url, bio, region, language, units, time_per_meal, skill_level, created_at, updated_at'
+              )
+              .eq('id', userId)
+              .single();
+
+            if (newError) {
+              console.error(
+                '❌ Error fetching newly created profile:',
+                newError
+              );
+              return null;
+            }
+
+            console.log(
+              '✅ Newly created profile fetched successfully:',
+              newData
+            );
+            return newData;
+          } else {
+            console.error('❌ Failed to create profile:', createError);
+            return null;
+          }
+        }
+
         console.error('❌ Error fetching profile:', error);
         return null;
       }
