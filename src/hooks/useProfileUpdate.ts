@@ -7,7 +7,9 @@ import {
 } from '@/lib/user-preferences';
 
 interface UpdateFunction<T> {
-  (data: T): Promise<{ success: boolean; error?: string }>;
+  (
+    data: T
+  ): Promise<{ success: boolean; error?: string | { message: string } }>;
 }
 
 interface UpdateFunctionWithUserId<T> {
@@ -38,7 +40,11 @@ export function useProfileUpdate<T>(
         });
         return { success: true };
       } else {
-        throw new Error(result.error);
+        const errorMessage =
+          typeof result.error === 'string'
+            ? result.error
+            : result.error?.message || options.errorMessage;
+        throw new Error(errorMessage);
       }
     } catch (error) {
       toast({
