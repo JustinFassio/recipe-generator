@@ -121,7 +121,9 @@ export async function updateCookingPreferences(
 }
 
 // Combined function to get all user preference data for AI integration
-export async function getAllUserPreferences(userId: string) {
+export async function getAllUserPreferences(
+  userId: string
+): Promise<{ success: boolean; data?: any; error?: string }> {
   try {
     const [profile, safety, cooking] = await Promise.all([
       supabase
@@ -134,13 +136,19 @@ export async function getAllUserPreferences(userId: string) {
     ]);
 
     return {
-      profile: profile.data,
-      safety,
-      cooking,
+      success: true,
+      data: {
+        profile: profile.data,
+        safety,
+        cooking,
+      },
     };
   } catch (error) {
     console.error('Error fetching all user preferences:', error);
-    return null;
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
   }
 }
 
