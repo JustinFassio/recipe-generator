@@ -215,7 +215,19 @@ export async function updatePassword(
 
 // Update user profile
 export async function updateProfile(
-  updates: Partial<Pick<Profile, 'full_name' | 'avatar_url'>>
+  updates: Partial<
+    Pick<
+      Profile,
+      | 'full_name'
+      | 'avatar_url'
+      | 'bio'
+      | 'region'
+      | 'language'
+      | 'units'
+      | 'time_per_meal'
+      | 'skill_level'
+    >
+  >
 ): Promise<{ success: boolean; error?: AuthError; profile?: Profile }> {
   try {
     const {
@@ -384,7 +396,9 @@ export async function claimUsername(
     // Fetch the updated profile
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('id, username, full_name, avatar_url, created_at, updated_at')
+      .select(
+        'id, username, full_name, avatar_url, bio, region, language, units, time_per_meal, skill_level, created_at, updated_at'
+      )
       .eq('id', user.id)
       .single();
 

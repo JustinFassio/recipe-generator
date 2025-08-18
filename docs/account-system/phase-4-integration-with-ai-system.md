@@ -2,7 +2,7 @@
 
 ## Overview
 
-Integrate the comprehensive user profile data with the AI recipe generation system to provide personalized, safe, and culturally appropriate recipe recommendations. Focus on safety-first filtering, intelligent personalization, and seamless data flow between user preferences and AI prompts.
+**Feature-First Integration**: Integrate the revised Phase 1 user profile data with the AI recipe generation system to provide personalized, safe, and culturally appropriate recipe recommendations. Build atomic integration components that align with the simplified database schema while maintaining safety-first filtering and intelligent personalization.
 
 ## Design Principles
 
@@ -14,33 +14,32 @@ Integrate the comprehensive user profile data with the AI recipe generation syst
 
 ## Data Utilization Strategy
 
-### 1. User Preference Integration
+### 1. Simplified User Preference Integration (Aligned with Phase 1)
 
 ```typescript
 // src/lib/ai/userPreferencesToPrompt.ts
 interface UserPreferencesForAI {
+  // Phase 1A: Basic profile data
+  profile: {
+    region?: string;
+    language?: string;
+    units?: 'metric' | 'imperial';
+    time_per_meal?: number;
+    skill_level?: 'beginner' | 'intermediate' | 'advanced';
+  };
+
+  // Phase 1B: Safety data
   safety: {
     allergies: string[];
-    intolerances: string[];
-    dietary_pattern: string[];
+    dietary_restrictions: string[];
   };
-  preferences: {
-    time_per_meal: string;
-    skill_level: string;
-    budget: string;
-    cuisines: string[];
-    spice_level: number;
-    equipment: string[];
-  };
-  health: {
-    health_concerns: string[];
-    medications: string[];
-    sodium_limit_mg?: number;
-    protein_g_per_kg?: number;
-    fiber_g_per_day?: number;
-  };
-  household: {
-    members: HouseholdMember[];
+
+  // Phase 1C: Cooking preferences
+  cooking: {
+    preferred_cuisines: string[];
+    available_equipment: string[];
+    disliked_ingredients: string[];
+    spice_tolerance?: number;
   };
 }
 
@@ -56,41 +55,49 @@ export const buildUserContextPrompt = (
     );
   }
 
-  if (userData.safety.intolerances.length > 0) {
+  if (userData.safety.dietary_restrictions.length > 0) {
     sections.push(
-      `User has intolerances to: ${userData.safety.intolerances.join(', ')}. Avoid these ingredients.`
+      `Dietary restrictions: ${userData.safety.dietary_restrictions.join(', ')}`
     );
   }
 
-  if (userData.safety.dietary_pattern.length > 0) {
+  // Basic profile preferences
+  if (userData.profile.time_per_meal) {
+    sections.push(`Cooking time: ${userData.profile.time_per_meal} minutes`);
+  }
+
+  if (userData.profile.skill_level) {
+    sections.push(`Skill level: ${userData.profile.skill_level}`);
+  }
+
+  if (userData.profile.units) {
+    sections.push(`Measurement units: ${userData.profile.units}`);
+  }
+
+  if (userData.profile.region) {
+    sections.push(`Region: ${userData.profile.region}`);
+  }
+
+  // Cooking preferences
+  if (userData.cooking.preferred_cuisines.length > 0) {
     sections.push(
-      `Dietary pattern: ${userData.safety.dietary_pattern.join(', ')}`
+      `Preferred cuisines: ${userData.cooking.preferred_cuisines.join(', ')}`
     );
   }
 
-  // Health considerations
-  if (userData.health.health_concerns.length > 0) {
+  if (userData.cooking.spice_tolerance) {
+    sections.push(`Spice tolerance: ${userData.cooking.spice_tolerance}/5`);
+  }
+
+  if (userData.cooking.available_equipment.length > 0) {
     sections.push(
-      `Health considerations: ${userData.health.health_concerns.join(', ')}`
+      `Available equipment: ${userData.cooking.available_equipment.join(', ')}`
     );
   }
 
-  if (userData.health.sodium_limit_mg) {
-    sections.push(`Sodium limit: ${userData.health.sodium_limit_mg}mg per day`);
-  }
-
-  // Preferences
-  sections.push(`Cooking time: ${userData.preferences.time_per_meal} minutes`);
-  sections.push(`Skill level: ${userData.preferences.skill_level}`);
-  sections.push(
-    `Preferred cuisines: ${userData.preferences.cuisines.join(', ')}`
-  );
-  sections.push(`Spice tolerance: ${userData.preferences.spice_level}/5`);
-
-  // Equipment
-  if (userData.preferences.equipment.length > 0) {
+  if (userData.cooking.disliked_ingredients.length > 0) {
     sections.push(
-      `Available equipment: ${userData.preferences.equipment.join(', ')}`
+      `Disliked ingredients: ${userData.cooking.disliked_ingredients.join(', ')}`
     );
   }
 
@@ -105,8 +112,8 @@ export const buildUserContextPrompt = (
 interface SafetyCheck {
   ingredient: string;
   userAllergies: string[];
-  userIntolerances: string[];
-  healthConcerns: string[];
+  userDietaryRestrictions: string[];
+  userDislikedIngredients: string[];
 }
 
 export const checkIngredientSafety = (check: SafetyCheck): SafetyResult => {
@@ -127,28 +134,24 @@ export const checkIngredientSafety = (check: SafetyCheck): SafetyResult => {
     };
   }
 
-  // Check intolerances (warning)
+  // Check dietary restrictions (warning)
   if (
-    check.userIntolerances.some((intolerance) =>
-      check.ingredient.toLowerCase().includes(intolerance.toLowerCase())
+    check.userDietaryRestrictions.some((restriction) =>
+      check.ingredient.toLowerCase().includes(restriction.toLowerCase())
     )
   ) {
-    warnings.push(`Contains ${check.ingredient} which may cause intolerance`);
+    warnings.push(
+      `Contains ${check.ingredient} which conflicts with dietary restrictions`
+    );
   }
 
-  // Check health concerns
+  // Check disliked ingredients (warning)
   if (
-    check.healthConcerns.includes('diabetes') &&
-    check.ingredient.toLowerCase().includes('sugar')
+    check.userDislikedIngredients.some((disliked) =>
+      check.ingredient.toLowerCase().includes(disliked.toLowerCase())
+    )
   ) {
-    warnings.push('High sugar content - consider diabetes management');
-  }
-
-  if (
-    check.healthConcerns.includes('hypertension') &&
-    check.ingredient.toLowerCase().includes('salt')
-  ) {
-    warnings.push('High sodium content - consider blood pressure management');
+    warnings.push(`Contains ${check.ingredient} which you dislike`);
   }
 
   return {
@@ -167,8 +170,8 @@ export const validateRecipeSafety = (
     checkIngredientSafety({
       ingredient,
       userAllergies: userData.safety.allergies,
-      userIntolerances: userData.safety.intolerances,
-      healthConcerns: userData.health.health_concerns,
+      userDietaryRestrictions: userData.safety.dietary_restrictions,
+      userDislikedIngredients: userData.cooking.disliked_ingredients,
     })
   );
 
@@ -184,140 +187,42 @@ export const validateRecipeSafety = (
 };
 ```
 
-### 3. Household Member Constraints
-
-```typescript
-// src/lib/ai/householdConstraints.ts
-interface HouseholdConstraint {
-  member: HouseholdMember;
-  restrictions: {
-    allergies: string[];
-    intolerances: string[];
-    dietary_pattern: string[];
-    age_band: string;
-  };
-}
-
-export const buildHouseholdContext = (household: HouseholdMember[]): string => {
-  if (household.length === 0) return '';
-
-  const constraints = household.map((member) => {
-    const restrictions = member.restrictions;
-    const parts = [];
-
-    if (restrictions.allergies?.length > 0) {
-      parts.push(`allergies: ${restrictions.allergies.join(', ')}`);
-    }
-
-    if (restrictions.dietary_pattern?.length > 0) {
-      parts.push(`diet: ${restrictions.dietary_pattern.join(', ')}`);
-    }
-
-    if (restrictions.age_band === 'child') {
-      parts.push('child-friendly (no alcohol, mild spices, safe portions)');
-    }
-
-    return `${member.nickname} (${restrictions.age_band}): ${parts.join(', ')}`;
-  });
-
-  return `Household members:\n${constraints.join('\n')}`;
-};
-
-export const validateRecipeForHousehold = (
-  recipe: Recipe,
-  household: HouseholdMember[]
-): HouseholdValidationResult => {
-  const memberResults = household.map((member) => {
-    const memberConstraints = {
-      allergies: member.restrictions.allergies || [],
-      intolerances: member.restrictions.intolerances || [],
-      dietary_pattern: member.restrictions.dietary_pattern || [],
-      age_band: member.restrictions.age_band,
-    };
-
-    const safetyCheck = validateRecipeSafety(recipe, {
-      safety: memberConstraints,
-      preferences: {},
-      health: {},
-      household: [],
-    });
-
-    return {
-      member: member.nickname,
-      canEat: safetyCheck.safe,
-      issues: safetyCheck.warnings,
-      ageAppropriate: isRecipeAgeAppropriate(
-        recipe,
-        member.restrictions.age_band
-      ),
-    };
-  });
-
-  return {
-    allMembersCanEat: memberResults.every((result) => result.canEat),
-    memberResults,
-    recommendations: generateHouseholdRecommendations(memberResults),
-  };
-};
-```
-
-### 4. Cultural and Traditional Medicine Integration
+### 3. Cultural Integration (Simplified)
 
 ```typescript
 // src/lib/ai/culturalIntegration.ts
 interface CulturalContext {
-  cuisines: string[];
-  spice_level: number;
-  traditional_medicine?: {
-    ayurveda_doshas?: string[];
-    tcm_opt_in?: boolean;
-  };
+  preferred_cuisines: string[];
+  spice_tolerance?: number;
+  region?: string;
 }
 
 export const buildCulturalPrompt = (context: CulturalContext): string => {
   const sections = [];
 
   // Cuisine preferences
-  if (context.cuisines.length > 0) {
-    sections.push(`Preferred cuisines: ${context.cuisines.join(', ')}`);
+  if (context.preferred_cuisines.length > 0) {
     sections.push(
-      `Focus on authentic ${context.cuisines[0]} flavors and techniques`
+      `Preferred cuisines: ${context.preferred_cuisines.join(', ')}`
     );
-  }
-
-  // Spice level
-  sections.push(
-    `Spice tolerance: ${context.spice_level}/5 (1=mild, 5=very hot)`
-  );
-
-  // Traditional medicine considerations
-  if (context.traditional_medicine?.ayurveda_doshas?.length > 0) {
-    const doshas = context.traditional_medicine.ayurveda_doshas;
-    sections.push(
-      `Ayurvedic considerations: Balance for ${doshas.join(', ')} dosha(s)`
-    );
-
-    // Add dosha-specific guidance
-    if (doshas.includes('vata')) {
+    if (context.preferred_cuisines.length === 1) {
       sections.push(
-        'Vata balancing: Warm, moist, grounding foods; avoid cold, dry, light foods'
-      );
-    }
-    if (doshas.includes('pitta')) {
-      sections.push(
-        'Pitta balancing: Cooling, sweet, bitter foods; avoid hot, spicy, sour foods'
-      );
-    }
-    if (doshas.includes('kapha')) {
-      sections.push(
-        'Kapha balancing: Light, dry, warm foods; avoid heavy, oily, cold foods'
+        `Focus on authentic ${context.preferred_cuisines[0]} flavors and techniques`
       );
     }
   }
 
-  if (context.traditional_medicine?.tcm_opt_in) {
+  // Spice level
+  if (context.spice_tolerance) {
     sections.push(
-      'TCM considerations: Balance warming/cooling energetics, support Spleen-Qi'
+      `Spice tolerance: ${context.spice_tolerance}/5 (1=mild, 5=very hot)`
+    );
+  }
+
+  // Regional preferences
+  if (context.region) {
+    sections.push(
+      `Region: ${context.region} - consider local ingredients and cooking methods`
     );
   }
 
@@ -333,15 +238,13 @@ export const buildCulturalPrompt = (context: CulturalContext): string => {
 // src/lib/ai/enhancedPrompts.ts
 export const buildRecipeGenerationPrompt = (
   userRequest: string,
-  userData: UserPreferencesForAI,
-  household: HouseholdMember[]
+  userData: UserPreferencesForAI
 ): string => {
   const userContext = buildUserContextPrompt(userData);
-  const householdContext = buildHouseholdContext(household);
   const culturalContext = buildCulturalPrompt({
-    cuisines: userData.preferences.cuisines,
-    spice_level: userData.preferences.spice_level,
-    traditional_medicine: userData.preferences.traditional_medicine,
+    preferred_cuisines: userData.cooking.preferred_cuisines,
+    spice_tolerance: userData.cooking.spice_tolerance,
+    region: userData.profile.region,
   });
 
   return `
@@ -352,22 +255,19 @@ USER REQUEST: ${userRequest}
 USER CONTEXT:
 ${userContext}
 
-HOUSEHOLD CONTEXT:
-${householdContext}
-
 CULTURAL PREFERENCES:
 ${culturalContext}
 
 REQUIREMENTS:
 1. NEVER include ingredients from the user's allergy list
-2. Respect all dietary restrictions and health concerns
-3. Ensure the recipe is appropriate for all household members
-4. Use available cooking equipment and respect time constraints
-5. Stay within budget considerations
-6. Incorporate preferred cuisines and spice levels
-7. Consider traditional medicine principles if requested
+2. Respect all dietary restrictions  
+3. Use available cooking equipment and respect time constraints
+4. Match the user's skill level
+5. Incorporate preferred cuisines and spice levels
+6. Avoid disliked ingredients when possible
+7. Use appropriate measurement units (metric/imperial)
 8. Provide clear, step-by-step instructions
-9. Include nutritional information
+9. Include estimated cooking time
 10. Suggest substitutions for any problematic ingredients
 
 Generate a recipe that meets all these requirements while being delicious and achievable.
@@ -388,8 +288,7 @@ interface RecipeScore {
 
 export const scoreRecipeForUser = (
   recipe: Recipe,
-  userData: UserPreferencesForAI,
-  household: HouseholdMember[]
+  userData: UserPreferencesForAI
 ): RecipeScore => {
   let score = 100;
   const reasons = [];
@@ -407,15 +306,20 @@ export const scoreRecipeForUser = (
 
   // Time constraint
   const estimatedTime = estimateRecipeTime(recipe);
-  const userTimeLimit = parseTimeConstraint(userData.preferences.time_per_meal);
-  if (estimatedTime > userTimeLimit) {
+  if (
+    userData.profile.time_per_meal &&
+    estimatedTime > userData.profile.time_per_meal
+  ) {
     score -= 15;
     reasons.push('Exceeds time limit');
   }
 
   // Skill level
   const recipeDifficulty = assessRecipeDifficulty(recipe);
-  if (recipeDifficulty > userData.preferences.skill_level) {
+  if (
+    userData.profile.skill_level &&
+    recipeDifficulty > userData.profile.skill_level
+  ) {
     score -= 10;
     reasons.push('Above skill level');
   }
@@ -423,7 +327,7 @@ export const scoreRecipeForUser = (
   // Cuisine preference
   const cuisineMatch = calculateCuisineMatch(
     recipe,
-    userData.preferences.cuisines
+    userData.cooking.preferred_cuisines
   );
   if (cuisineMatch < 0.5) {
     score -= 10;
@@ -433,18 +337,11 @@ export const scoreRecipeForUser = (
   // Equipment availability
   const equipmentMatch = checkEquipmentAvailability(
     recipe,
-    userData.preferences.equipment
+    userData.cooking.available_equipment
   );
   if (!equipmentMatch.available) {
     score -= 15;
     reasons.push(`Requires ${equipmentMatch.missing.join(', ')}`);
-  }
-
-  // Household compatibility
-  const householdResult = validateRecipeForHousehold(recipe, household);
-  if (!householdResult.allMembersCanEat) {
-    score -= 25;
-    reasons.push('Not suitable for all household members');
   }
 
   return {
@@ -469,15 +366,13 @@ const ChatInterface: React.FC = () => {
   const sendMessage = async (content: string) => {
     // Get comprehensive user data
     const userData = await getUserDataForAI(user.id);
-    const household = await getHouseholdMembers(user.id);
 
     // Build enhanced prompt
-    const prompt = buildRecipeGenerationPrompt(content, userData, household);
+    const prompt = buildRecipeGenerationPrompt(content, userData);
 
     // Send to AI with user context
     const response = await sendToAI(prompt, {
       userContext: userData,
-      household,
       safetyChecks: true
     });
 
@@ -517,12 +412,10 @@ const ChatInterface: React.FC = () => {
 interface RecipeDisplayProps {
   recipe: Recipe;
   userData: UserPreferencesForAI;
-  household: HouseholdMember[];
 }
 
-const RecipeDisplay: React.FC<RecipeDisplayProps> = ({ recipe, userData, household }) => {
+const RecipeDisplay: React.FC<RecipeDisplayProps> = ({ recipe, userData }) => {
   const safetyResult = validateRecipeSafety(recipe, userData);
-  const householdResult = validateRecipeForHousehold(recipe, household);
 
   return (
     <div className="recipe-display">
@@ -541,22 +434,7 @@ const RecipeDisplay: React.FC<RecipeDisplayProps> = ({ recipe, userData, househo
         </div>
       )}
 
-      {/* Household Compatibility */}
-      {!householdResult.allMembersCanEat && (
-        <div className="household-warning">
-          <Users className="w-4 h-4" />
-          <span>Not suitable for all household members</span>
-          <ul>
-            {householdResult.memberResults
-              .filter(result => !result.canEat)
-              .map(result => (
-                <li key={result.member}>
-                  {result.member}: {result.issues.join(', ')}
-                </li>
-              ))}
-          </ul>
-        </div>
-      )}
+
 
       {/* Recipe Content */}
       <RecipeContent recipe={recipe} />
@@ -618,14 +496,13 @@ export const getUserDataForAI = async (
 };
 ```
 
-### 2. Batch Processing for Household Validation
+### 2. Batch Processing for Recipe Validation
 
 ```typescript
 // src/lib/ai/batchProcessing.ts
 export const validateMultipleRecipes = async (
   recipes: Recipe[],
-  userData: UserPreferencesForAI,
-  household: HouseholdMember[]
+  userData: UserPreferencesForAI
 ): Promise<RecipeScore[]> => {
   // Process in batches for performance
   const batchSize = 10;
@@ -634,7 +511,7 @@ export const validateMultipleRecipes = async (
   for (let i = 0; i < recipes.length; i += batchSize) {
     const batch = recipes.slice(i, i + batchSize);
     const batchResults = await Promise.all(
-      batch.map((recipe) => scoreRecipeForUser(recipe, userData, household))
+      batch.map((recipe) => scoreRecipeForUser(recipe, userData))
     );
     results.push(...batchResults);
   }

@@ -67,6 +67,13 @@ export type Profile = {
   username: string | null;
   full_name: string | null;
   avatar_url: string | null;
+  bio: string | null;
+  // Phase 1A: Basic preferences
+  region: string | null;
+  language: string | null;
+  units: string | null;
+  time_per_meal: number | null;
+  skill_level: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -75,6 +82,27 @@ export type Username = {
   username: string;
   user_id: string;
   created_at: string;
+};
+
+// Phase 1B: Safety data type
+export type UserSafety = {
+  user_id: string;
+  allergies: string[];
+  dietary_restrictions: string[];
+  medical_conditions: string[];
+  created_at: string;
+  updated_at: string;
+};
+
+// Phase 1C: Cooking preferences type
+export type CookingPreferences = {
+  user_id: string;
+  preferred_cuisines: string[];
+  available_equipment: string[];
+  disliked_ingredients: string[];
+  spice_tolerance: number | null;
+  created_at: string;
+  updated_at: string;
 };
 
 export type AccountEvent = {

@@ -2,7 +2,7 @@
 
 ## Overview
 
-Implement a progressive, user-friendly onboarding system that collects essential personalization data while respecting user time and privacy. Focus on safety-critical data first, then build comprehensive profiles for optimal AI recommendations.
+**Feature-First Implementation**: Implement a progressive, user-friendly onboarding system that collects essential personalization data while respecting user time and privacy. Build atomic components that align with the revised Phase 1 database schema and follow established codebase patterns.
 
 ## Design Principles
 
@@ -12,150 +12,158 @@ Implement a progressive, user-friendly onboarding system that collects essential
 4. **Mobile-Optimized**: Touch-friendly, responsive design
 5. **Clear Value**: Show immediate benefits of each data point
 
-## Two-Tier Onboarding Approach
+## Feature-Aligned Onboarding Approach
 
-### Tier 1: Minimal Onboarding (60-90 seconds)
+### Phase 1A Onboarding: Basic Profile Setup (60-90 seconds)
 
-**Goal**: Get users cooking safely with basic personalization
+**Goal**: Collect data for Phase 1A database schema (extended profiles table)
 
 **Required Fields**:
 
-- Region & units (for recipe scaling and measurements)
-- Dietary restrictions (allergies, intolerances, basic diet)
-- Time per meal (for recipe filtering)
+- Region (text field)
+- Units (metric/imperial selection)
+- Time per meal (10-120 minutes slider)
 
 **Optional Fields**:
 
-- Skill level
-- Budget preference
+- Language (dropdown with default 'en')
+- Skill level (beginner/intermediate/advanced)
 
-**User Flow**:
+### Phase 1B Onboarding: Safety Data (30-60 seconds)
+
+**Goal**: Collect data for Phase 1B database schema (user_safety table)
+
+**Required Fields**:
+
+- Allergies (multi-select from common allergens + custom input)
+- Dietary restrictions (multi-select: vegan, vegetarian, etc.)
+
+### Phase 1C Onboarding: Cooking Preferences (30-60 seconds)
+
+**Goal**: Collect data for Phase 1C database schema (cooking_preferences table)
+
+**Optional Fields**:
+
+- Preferred cuisines (multi-select)
+- Available equipment (multi-select)
+- Disliked ingredients (text input)
+- Spice tolerance (1-5 scale)
+
+## Incremental User Flow Strategy
+
+### Immediate Onboarding (Post-Signup)
+
+**Trigger**: After user completes account creation
+**Components**: Phase 1A onboarding only
+**Goal**: Get basic personalization data to start using the app
 
 1. Welcome screen with value proposition
-2. Region & units selection (dropdown)
-3. Safety checklist (allergies, intolerances, dietary restrictions)
-4. Time preference (quick selection)
-5. Optional: Skill level & budget
-6. Start cooking immediately
+2. Region & units selection
+3. Time per meal preference
+4. Optional: Language and skill level
+5. Start cooking immediately
 
-### Tier 2: Advanced Onboarding (5 minutes)
+### Progressive Enhancement (Settings Page)
 
-**Goal**: Comprehensive personalization for optimal AI recommendations
+**Trigger**: User visits settings or after using app 2-3 times
+**Components**: Phase 1B and 1C onboarding
+**Goal**: Collect safety and preference data for better personalization
 
-**Additional Data**:
-
-- Health context (conditions, medications, targets)
-- Cultural preferences (cuisines, spice tolerance)
-- Equipment availability
-- Household members
-- Traditional medicine preferences (optional)
-
-**User Flow**:
-
-1. Health context collection
-2. Cultural & preference setup
-3. Kitchen equipment inventory
-4. Household member management
-5. Traditional medicine opt-in
-6. Review & confirmation
+1. Safety data collection (Phase 1B)
+   - Allergies and dietary restrictions
+   - Clear safety value proposition
+2. Cooking preferences (Phase 1C)
+   - Cuisines and equipment
+   - Spice tolerance and dislikes
 
 ## Implementation Plan
 
-### Step 1: Create Onboarding Components
+### Step 1: Create Atomic Onboarding Components
 
 ```typescript
 // src/components/onboarding/
 ├── OnboardingWizard.tsx          // Main wizard container
 ├── WelcomeStep.tsx               // Introduction & value prop
-├── SafetyStep.tsx                // Allergies & dietary restrictions
-├── PreferencesStep.tsx           // Basic preferences
-├── HealthStep.tsx                // Health context (advanced)
-├── CultureStep.tsx               // Cultural preferences (advanced)
-├── EquipmentStep.tsx             // Kitchen equipment (advanced)
-├── HouseholdStep.tsx             // Family members (advanced)
-├── ReviewStep.tsx                // Summary & confirmation
-└── OnboardingProgress.tsx        // Progress indicator
+├── BasicProfileStep.tsx          // Phase 1A: region, units, time, skill
+├── SafetyStep.tsx                // Phase 1B: allergies & dietary restrictions
+├── CookingPreferencesStep.tsx    // Phase 1C: cuisines, equipment, spice
+├── OnboardingProgress.tsx        // Progress indicator
+└── OnboardingNavigation.tsx      // Navigation controls
 ```
 
-### Step 2: Data Collection Forms
+### Step 2: Atomic Form Components
 
 ```typescript
 // src/components/onboarding/forms/
-├── SafetyForm.tsx                // Allergies, intolerances, diet
-├── PreferencesForm.tsx           // Time, skill, budget
-├── HealthForm.tsx                // Health concerns, medications
-├── CultureForm.tsx               // Cuisines, spice level, dislikes
-├── EquipmentForm.tsx             // Available cooking equipment
-└── HouseholdForm.tsx             // Family member management
+├── BasicProfileForm.tsx          // Phase 1A: region, units, time, skill
+├── SafetyForm.tsx                // Phase 1B: allergies, dietary restrictions
+└── CookingPreferencesForm.tsx    // Phase 1C: cuisines, equipment, spice
 ```
 
-### Step 3: Onboarding Context & State Management
+### Step 3: Aligned Onboarding Context & State Management
 
 ```typescript
 // src/contexts/OnboardingContext.tsx
 interface OnboardingState {
+  currentPhase: '1A' | '1B' | '1C';
   currentStep: number;
   totalSteps: number;
-  isMinimalMode: boolean;
-  completedSteps: Set<number>;
+  completedPhases: Set<string>;
   formData: OnboardingFormData;
   canSkip: boolean;
 }
 
 interface OnboardingFormData {
-  // Safety data
-  allergies: string[];
-  intolerances: string[];
-  dietary_pattern: string[];
+  // Phase 1A: Basic profile extensions
+  region?: string;
+  language?: string;
+  units?: 'metric' | 'imperial';
+  time_per_meal?: number;
+  skill_level?: 'beginner' | 'intermediate' | 'advanced';
 
-  // Basic preferences
-  region: string;
-  units: 'metric' | 'imperial';
-  time_per_meal: string;
-  skill_level?: string;
-  budget?: string;
+  // Phase 1B: Safety data
+  allergies?: string[];
+  dietary_restrictions?: string[];
 
-  // Advanced data
-  health_concerns?: string[];
-  medications?: string[];
-  cuisines?: string[];
-  spice_level?: number;
-  equipment?: string[];
-  household_members?: HouseholdMember[];
+  // Phase 1C: Cooking preferences
+  preferred_cuisines?: string[];
+  available_equipment?: string[];
+  disliked_ingredients?: string[];
+  spice_tolerance?: number;
 }
 ```
 
 ## User Experience Design
 
-### Minimal Onboarding Flow
+### Immediate Onboarding Flow (Phase 1A)
 
 ```
-Welcome → Safety → Preferences → Start Cooking
-   ↓         ↓         ↓           ↓
-  30s      30s       30s        Immediate
+Welcome → Basic Profile Setup → Start Cooking
+   ↓         ↓                    ↓
+  30s      60-90s              Immediate
 ```
 
 **Key Features**:
 
+- Essential data only (region, units, time, skill)
 - Clear progress indicator
-- Skip options for non-critical fields
-- Immediate value demonstration
+- Skip options for optional fields
 - Mobile-optimized touch targets
 
-### Advanced Onboarding Flow
+### Progressive Enhancement Flow (Phase 1B + 1C)
 
 ```
-Welcome → Safety → Preferences → Health → Culture → Equipment → Household → Review
-   ↓         ↓         ↓         ↓        ↓         ↓          ↓         ↓
-  30s      30s       30s       60s      60s       60s        60s       30s
+Settings Prompt → Safety Data → Cooking Preferences → Enhanced Experience
+       ↓              ↓              ↓                    ↓
+      30s           30-60s         30-60s              Immediate
 ```
 
 **Key Features**:
 
-- Detailed explanations for each section
-- Smart defaults based on region/culture
-- Preview of AI recommendations
-- Save progress functionality
+- Triggered contextually (after 2-3 app uses)
+- Safety-first messaging
+- Clear value proposition for each phase
+- Independent completion (can do 1B without 1C)
 
 ## Component Architecture
 

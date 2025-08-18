@@ -2,7 +2,7 @@
 
 ## Overview
 
-Implement a comprehensive, user-friendly interface for profile management and onboarding that prioritizes safety, accessibility, and ease of use. Focus on clean, intuitive design that guides users through data collection while respecting their time and privacy.
+**Feature-First Implementation**: Implement atomic, user-friendly interface components for profile management and onboarding that align with the revised Phase 1 database schema. Prioritize safety, accessibility, and ease of use while following established codebase patterns.
 
 ## Design Principles
 
@@ -14,7 +14,7 @@ Implement a comprehensive, user-friendly interface for profile management and on
 
 ## Profile Management Implementation
 
-### 1. Account Settings Page Structure
+### 1. Account Settings Page Structure (Aligned with Phase 1)
 
 ```typescript
 // src/pages/settings-page.tsx
@@ -26,32 +26,25 @@ interface SettingsPageProps {
 const SettingsPage: React.FC<SettingsPageProps> = ({ user, profile }) => {
   const sections = [
     {
-      id: 'safety',
-      title: 'Safety & Dietary',
-      icon: Shield,
-      component: SafetySettings,
+      id: 'basic',
+      title: 'Basic Profile',
+      icon: User,
+      component: BasicProfileSettings, // Phase 1A data
       priority: 'high'
     },
     {
-      id: 'preferences',
-      title: 'Preferences',
-      icon: Settings,
-      component: PreferencesSettings,
-      priority: 'medium'
+      id: 'safety',
+      title: 'Safety & Dietary',
+      icon: Shield,
+      component: SafetySettings, // Phase 1B data
+      priority: 'high'
     },
     {
-      id: 'health',
-      title: 'Health Context',
-      icon: Heart,
-      component: HealthSettings,
+      id: 'cooking',
+      title: 'Cooking Preferences',
+      icon: ChefHat,
+      component: CookingSettings, // Phase 1C data
       priority: 'medium'
-    },
-    {
-      id: 'household',
-      title: 'Household',
-      icon: Users,
-      component: HouseholdSettings,
-      priority: 'low'
     },
     {
       id: 'privacy',
@@ -72,18 +65,88 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ user, profile }) => {
 };
 ```
 
-### 2. Settings Section Components
+### 2. Atomic Settings Components (Aligned with Phase 1)
 
 ```typescript
-// src/components/settings/SafetySettings.tsx
-const SafetySettings: React.FC = () => {
+// src/components/settings/BasicProfileSettings.tsx - Phase 1A
+const BasicProfileSettings: React.FC = () => {
   const { profile, updateProfile } = useAuth();
-  const [safetyData, setSafetyData] = useState(profile?.safety || {});
+  const [profileData, setProfileData] = useState({
+    region: profile?.region || '',
+    language: profile?.language || 'en',
+    units: profile?.units || 'metric',
+    time_per_meal: profile?.time_per_meal || 30,
+    skill_level: profile?.skill_level || 'beginner'
+  });
+
+  return (
+    <SettingsSection title="Basic Profile">
+      <div className="profile-grid">
+        <FormField label="Region">
+          <Input
+            value={profileData.region}
+            onChange={(value) => setProfileData({ ...profileData, region: value })}
+            placeholder="e.g., United States, Canada, UK"
+          />
+        </FormField>
+
+        <FormField label="Units">
+          <Select
+            value={profileData.units}
+            onValueChange={(units) => setProfileData({ ...profileData, units })}
+          >
+            <SelectItem value="metric">Metric</SelectItem>
+            <SelectItem value="imperial">Imperial</SelectItem>
+          </Select>
+        </FormField>
+
+        <FormField label="Time per meal (minutes)">
+          <Slider
+            value={[profileData.time_per_meal]}
+            onValueChange={([time_per_meal]) => setProfileData({ ...profileData, time_per_meal })}
+            min={10}
+            max={120}
+            step={5}
+          />
+        </FormField>
+
+        <FormField label="Skill Level">
+          <Select
+            value={profileData.skill_level}
+            onValueChange={(skill_level) => setProfileData({ ...profileData, skill_level })}
+          >
+            <SelectItem value="beginner">Beginner</SelectItem>
+            <SelectItem value="intermediate">Intermediate</SelectItem>
+            <SelectItem value="advanced">Advanced</SelectItem>
+          </Select>
+        </FormField>
+      </div>
+
+      <SettingsActions
+        onSave={() => updateProfile(profileData)}
+        onReset={() => setProfileData({
+          region: profile?.region || '',
+          language: profile?.language || 'en',
+          units: profile?.units || 'metric',
+          time_per_meal: profile?.time_per_meal || 30,
+          skill_level: profile?.skill_level || 'beginner'
+        })}
+      />
+    </SettingsSection>
+  );
+};
+
+// src/components/settings/SafetySettings.tsx - Phase 1B
+const SafetySettings: React.FC = () => {
+  const { user } = useAuth();
+  const [safetyData, setSafetyData] = useState({
+    allergies: [],
+    dietary_restrictions: []
+  });
 
   return (
     <SettingsSection title="Safety & Dietary Restrictions">
       <div className="safety-grid">
-        {/* Allergies Section */}
         <div className="allergies-card">
           <h3>Food Allergies</h3>
           <p className="description">
@@ -95,28 +158,80 @@ const SafetySettings: React.FC = () => {
           />
         </div>
 
-        {/* Dietary Restrictions */}
         <div className="dietary-card">
-          <h3>Dietary Preferences</h3>
-          <DietarySelector
-            selected={safetyData.dietary_pattern}
-            onChange={(pattern) => setSafetyData({ ...safetyData, dietary_pattern: pattern })}
-          />
-        </div>
-
-        {/* Intolerances */}
-        <div className="intolerances-card">
-          <h3>Food Intolerances</h3>
-          <IntoleranceSelector
-            selected={safetyData.intolerances}
-            onChange={(intolerances) => setSafetyData({ ...safetyData, intolerances })}
+          <h3>Dietary Restrictions</h3>
+          <DietaryRestrictionsSelector
+            selected={safetyData.dietary_restrictions}
+            onChange={(dietary_restrictions) => setSafetyData({ ...safetyData, dietary_restrictions })}
           />
         </div>
       </div>
 
       <SettingsActions
-        onSave={() => updateProfile({ safety: safetyData })}
-        onReset={() => setSafetyData(profile?.safety || {})}
+        onSave={() => updateUserSafety(user.id, safetyData)}
+        onReset={() => setSafetyData({ allergies: [], dietary_restrictions: [] })}
+      />
+    </SettingsSection>
+  );
+};
+
+// src/components/settings/CookingSettings.tsx - Phase 1C
+const CookingSettings: React.FC = () => {
+  const { user } = useAuth();
+  const [cookingData, setCookingData] = useState({
+    preferred_cuisines: [],
+    available_equipment: [],
+    disliked_ingredients: [],
+    spice_tolerance: 3
+  });
+
+  return (
+    <SettingsSection title="Cooking Preferences">
+      <div className="cooking-grid">
+        <FormField label="Preferred Cuisines">
+          <CuisineSelector
+            selected={cookingData.preferred_cuisines}
+            onChange={(preferred_cuisines) => setCookingData({ ...cookingData, preferred_cuisines })}
+          />
+        </FormField>
+
+        <FormField label="Available Equipment">
+          <EquipmentSelector
+            selected={cookingData.available_equipment}
+            onChange={(available_equipment) => setCookingData({ ...cookingData, available_equipment })}
+          />
+        </FormField>
+
+        <FormField label="Spice Tolerance">
+          <Slider
+            value={[cookingData.spice_tolerance]}
+            onValueChange={([spice_tolerance]) => setCookingData({ ...cookingData, spice_tolerance })}
+            min={1}
+            max={5}
+            step={1}
+          />
+        </FormField>
+
+        <FormField label="Disliked Ingredients">
+          <Textarea
+            value={cookingData.disliked_ingredients.join(', ')}
+            onChange={(value) => setCookingData({
+              ...cookingData,
+              disliked_ingredients: value.split(',').map(s => s.trim()).filter(Boolean)
+            })}
+            placeholder="e.g., cilantro, mushrooms, olives"
+          />
+        </FormField>
+      </div>
+
+      <SettingsActions
+        onSave={() => updateCookingPreferences(user.id, cookingData)}
+        onReset={() => setCookingData({
+          preferred_cuisines: [],
+          available_equipment: [],
+          disliked_ingredients: [],
+          spice_tolerance: 3
+        })}
       />
     </SettingsSection>
   );
