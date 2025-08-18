@@ -3,6 +3,7 @@
 Scope: Extract business logic into reusable hooks and simplify the main profile page. No UI changes.
 
 Quality gates (every PR)
+
 - `npm run build`
 - `npx tsc --noEmit`
 - `npm run test:run`
@@ -13,6 +14,7 @@ Quality gates (every PR)
 ## Target Structure
 
 ### Components under `src/components/profile/`:
+
 - **Basic profile**
   - `AvatarCard.tsx` (upload/change photo)
   - `BioCard.tsx` (About Me + save)
@@ -41,16 +43,19 @@ Quality gates (every PR)
   - `RangeWithTicks.tsx`
 
 ### Hooks under `src/hooks/profile/`:
+
 - `useUserSafety.ts` (load/save allergies, dietary, medical)
 - `useCookingPreferences.ts`
 - `useUsernameAvailability.ts` (debounced checker)
 - `useProfileBasics.ts` (region/language/units/time/skill)
 
 ### Lib stays as is:
+
 - `src/lib/user-preferences.ts` (already central)
 - `src/lib/auth.ts` (profile updates, avatar, username)
 
 ### Page becomes a thin orchestrator:
+
 - `src/pages/profile-page.tsx`:
   - Tabs + layout shell
   - Composes atomic cards/sections
@@ -59,6 +64,7 @@ Quality gates (every PR)
 ---
 
 PR 15 – Extract useProfileUpdate hook ✅ **COMPLETED**
+
 - Create `src/hooks/useProfileUpdate.ts` with:
   - Generic `useProfileUpdate<T>` hook for common update patterns
   - Specialized hooks: `useBioUpdate`, `useUserSafetyUpdate`, `useCookingPreferencesUpdate`
@@ -69,6 +75,7 @@ PR 15 – Extract useProfileUpdate hook ✅ **COMPLETED**
 ---
 
 PR 16 – Extract useUserSafety hook
+
 - Create `src/hooks/profile/useUserSafety.ts`:
   - `loadUserSafety()` - fetch allergies, dietary, medical conditions
   - `saveUserSafety(data)` - update safety preferences
@@ -80,6 +87,7 @@ PR 16 – Extract useUserSafety hook
 ---
 
 PR 17 – Extract useCookingPreferences hook
+
 - Create `src/hooks/profile/useCookingPreferences.ts`:
   - `loadCookingPreferences()` - fetch cuisines, equipment, spices, dislikes
   - `saveCookingPreferences(data)` - update cooking preferences
@@ -91,6 +99,7 @@ PR 17 – Extract useCookingPreferences hook
 ---
 
 PR 18 – Extract useUsernameAvailability hook
+
 - Create `src/hooks/profile/useUsernameAvailability.ts`:
   - `checkUsername(username)` - debounced availability check
   - `claimUsername(username)` - claim available username
@@ -101,6 +110,7 @@ PR 18 – Extract useUsernameAvailability hook
 ---
 
 PR 19 – Extract useProfileBasics hook
+
 - Create `src/hooks/profile/useProfileBasics.ts`:
   - `loadProfileBasics()` - fetch region, language, units, time, skill
   - `saveProfileBasics(data)` - update basic preferences
@@ -112,6 +122,7 @@ PR 19 – Extract useProfileBasics hook
 ---
 
 PR 20 – Create shared primitives
+
 - Create `src/components/profile/SectionCard.tsx` (DaisyUI card shell)
 - Create `src/components/profile/FieldLabel.tsx` (label + helper/alt text with wrapping)
 - Create `src/components/profile/TagToggleGroup.tsx` (toggleable chip set)
@@ -122,6 +133,7 @@ PR 20 – Create shared primitives
 ---
 
 PR 21 – Extract AvatarCard component
+
 - Create `src/components/profile/AvatarCard.tsx`:
   - Avatar upload/change functionality
   - File input handling
@@ -133,6 +145,7 @@ PR 21 – Extract AvatarCard component
 ---
 
 PR 22 – Extract BioCard component
+
 - Create `src/components/profile/BioCard.tsx`:
   - Bio textarea with character counter
   - Save button with loading state
@@ -143,6 +156,7 @@ PR 22 – Extract BioCard component
 ---
 
 PR 23 – Extract ProfileInfoForm component
+
 - Create `src/components/profile/ProfileInfoForm.tsx`:
   - Name, username, region, language, units, time, skill fields
   - Uses `useProfileBasics` and `useUsernameAvailability` hooks
@@ -153,6 +167,7 @@ PR 23 – Extract ProfileInfoForm component
 ---
 
 PR 24 – Extract SafetySection components
+
 - Create `src/components/profile/SafetySection.tsx` (wrapper)
 - Create `src/components/profile/MedicalConditionsField.tsx`
 - Create `src/components/profile/AllergiesField.tsx`
@@ -165,6 +180,7 @@ PR 24 – Extract SafetySection components
 ---
 
 PR 25 – Extract CookingSection components
+
 - Create `src/components/profile/CookingSection.tsx` (wrapper)
 - Create `src/components/profile/PreferredCuisinesField.tsx`
 - Create `src/components/profile/EquipmentField.tsx`
@@ -178,6 +194,7 @@ PR 25 – Extract CookingSection components
 ---
 
 PR 26 – Extract Account components
+
 - Create `src/components/profile/EmailCard.tsx`
 - Create `src/components/profile/PasswordCard.tsx`
 - Update profile page to use components
@@ -186,6 +203,7 @@ PR 26 – Extract Account components
 ---
 
 PR 27 – Simplify main profile page
+
 - Remove direct state management for preferences (now in hooks)
 - Remove duplicate update logic (now in useProfileUpdate)
 - Keep only:
@@ -198,6 +216,7 @@ PR 27 – Simplify main profile page
 ---
 
 PR 28 – Add hook tests
+
 - Create `src/hooks/profile/__tests__/useUserSafety.test.ts`
 - Create `src/hooks/profile/__tests__/useCookingPreferences.test.ts`
 - Create `src/hooks/profile/__tests__/useUsernameAvailability.test.ts`
@@ -209,6 +228,7 @@ PR 28 – Add hook tests
 ---
 
 PR 29 – Add component tests
+
 - Create `src/components/profile/__tests__/AvatarCard.test.tsx`
 - Create `src/components/profile/__tests__/BioCard.test.tsx`
 - Create `src/components/profile/__tests__/ProfileInfoForm.test.tsx`
@@ -220,6 +240,7 @@ PR 29 – Add component tests
 ---
 
 PR 30 – Update documentation
+
 - Update `docs/profile-modularization/README.md` with Phase 2 completion
 - Add hook usage examples to component docs
 - Update API documentation for new hooks
@@ -230,26 +251,31 @@ PR 30 – Update documentation
 ## Phase 2 Completion Criteria
 
 ✅ **All hooks extracted and tested**
+
 - Business logic moved from page to hooks
 - Each hook has comprehensive tests
 - Hooks are reusable across components
 
 ✅ **All components extracted and tested**
+
 - UI logic moved from page to atomic components
 - Each component has comprehensive tests
 - Components use hooks for business logic
 
 ✅ **Main page simplified**
+
 - Profile page <500 lines
 - No direct state management for preferences
 - Clean separation of concerns
 
 ✅ **No functionality regression**
+
 - All existing features work
 - All tests pass
 - No UI changes visible to users
 
 ✅ **Code quality improved**
+
 - Reduced duplication
 - Better testability
 - Clearer separation of concerns
