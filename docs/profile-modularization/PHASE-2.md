@@ -1,224 +1,130 @@
-## Phase 2: Feature Hooks and Page Simplification (Atomic, Small PRs)
+## Phase 2: Hooks Extraction and Main Page Simplification
 
-Goal: Move state management and side-effects out of `src/pages/profile-page.tsx` into focused hooks, then reduce the page to a thin orchestrator that composes atomic components from Phase 1. No user-visible changes.
+Scope: Extract business logic into reusable hooks and simplify the main profile page. No UI changes.
 
-Why keep Markdown (.md)?
+Quality gates (every PR)
 
-- Works best in GitHub/PRs (rendered headings, anchors, code fences, checklists)
-- Easier intra-repo linking and structured review
-- AI agents can parse both `.md` and `.txt`; `.md` adds semantics without cost
-
-Gates for every PR
-
-- Build: `npm run build`
-- Type check: `npx tsc --noEmit`
-- Tests: `npm run test:run`
-- Lint/format: `npm run lint`, `npm run format:check`
-- No copy/UX changes
-
-Target structure (from Phase 1)
-
-```
-src/hooks/profile/
-  useUsernameAvailability.ts
-  useProfileBasics.ts
-  useUserSafety.ts
-  useCookingPreferences.ts
-```
+- `npm run build`
+- `npx tsc --noEmit`
+- `npm run test:run`
+- `npm run lint` && `npm run format:check`
 
 ---
 
-PR 11 – Hook: useUsernameAvailability (isolated)
+PR 15 – Extract useProfileUpdate hook
 
-- File: `src/hooks/profile/useUsernameAvailability.ts`
-- Responsibilities:
-  - Manage `username`, `available`, `checking` state
-  - Debounce availability calls using existing `checkUsernameAvailability`
-  - Validate pattern client-side (`^[a-z0-9_]{3,24}$`)
-- API (tentative):
-
-```ts
-export function useUsernameAvailability(initial?: string) {
-  return {
-    username,
-    setUsername, // lowercases and sanitizes
-    available, // boolean | null
-    checking, // boolean
-    checkNow, // manual trigger (optional)
-  };
-}
-```
-
-- Page change: replace inline debounce logic with hook wiring in `ProfileInfoForm` props
-- Tests: debounce behavior, pattern enforcement, states toggle on mock responses
-
-Acceptance
-
-- [ ] Same UX for claim/change username
-- [ ] No extra requests; debounce parity verified
+- Create `src/hooks/useProfileUpdate.ts` with:
+  - Generic `useProfileUpdate<T>` hook for common update patterns
+  - Specialized hooks: `useBioUpdate`, `useUserSafetyUpdate`, `useCookingPreferencesUpdate`
+  - Handles loading state, error handling, and toast notifications
+  - Reduces code duplication across profile update functions
+- Acceptance: profile page uses new hooks, tests pass
 
 ---
 
-PR 12 – Hook: useProfileBasics
+PR 16 – Extract useUserSafety hook
 
-- File: `src/hooks/profile/useProfileBasics.ts`
-- Responsibilities:
-  - Local state for name, region, language, units, timePerMeal, skillLevel
-  - Submit via `updateProfile`, then `refreshProfile`
-  - No avatar/username responsibilities
-- API (tentative):
-
-```ts
-export function useProfileBasics(
-  initial: {
-    fullName: string;
-    region: string;
-    language: string;
-    units: string;
-    timePerMeal: number;
-    skillLevel: string;
-  },
-  deps: { update: typeof updateProfile; refresh: () => Promise<void> }
-) {
-  return { values, setField, submitting, submit };
-}
-```
-
-- Page change: pass hook outputs to `ProfileInfoForm`; remove submit logic from page
-- Tests: submit calls update+refresh, field changes reflect state
-
-Acceptance
-
-- [ ] Profile info updates unchanged; toasts still fire in page or moved helper
+- Create `src/hooks/profile/useUserSafety.ts`:
+  - `loadUserSafety()` - fetch allergies, dietary, medical conditions
+  - `saveUserSafety(data)` - update safety preferences
+  - `validateSafetyData(data)` - client-side validation
+  - State: `allergies`, `dietaryRestrictions`, `medicalConditions`, `loading`, `error`
+- Update profile page to use hook
+- Acceptance: safety section uses hook, existing functionality preserved
 
 ---
 
-PR 13 – Hook: useUserSafety
+PR 17 – Extract useCookingPreferences hook
 
-- File: `src/hooks/profile/useUserSafety.ts`
-- Responsibilities:
-  - Load via `getUserSafety(userId)`
-  - Maintain arrays: `medicalConditions`, `allergies`, `dietaryRestrictions`
-  - Save via `updateUserSafety(userId, payload)`
-  - Expose add/remove helpers for toggles and custom input
-- API (tentative):
-
-```ts
-export function useUserSafety(userId: string) {
-  return {
-    loading,
-    saving,
-    medicalConditions,
-    setMedicalConditions,
-    allergies,
-    setAllergies,
-    dietaryRestrictions,
-    setDietaryRestrictions,
-    save, // persists all three vectors atomically
-  };
-}
-```
-
-- Page change: wire `SafetySection` children from hook instead of page state
-- Tests: load default, add/remove, save calls, error path
-
-Acceptance
-
-- [ ] Safety save parity; helper texts and wrapping intact
+- Create `src/hooks/profile/useCookingPreferences.ts`:
+  - `loadCookingPreferences()` - fetch cuisines, equipment, spices, dislikes
+  - `saveCookingPreferences(data)` - update cooking preferences
+  - `validateCookingData(data)` - client-side validation
+  - State: `preferredCuisines`, `availableEquipment`, `spiceTolerance`, `dislikedIngredients`, `loading`, `error`
+- Update profile page to use hook
+- Acceptance: cooking section uses hook, existing functionality preserved
 
 ---
 
-PR 14 – Hook: useCookingPreferences
+PR 18 – Extract useUsernameAvailability hook
 
-- File: `src/hooks/profile/useCookingPreferences.ts`
-- Responsibilities:
-  - Load via `getCookingPreferences(userId)`
-  - Maintain `preferredCuisines`, `availableEquipment`, `dislikedIngredients`, `spiceTolerance`
-  - Save via `updateCookingPreferences(userId, payload)`
-  - Helpers for chip add/remove and slider change
-- API (tentative):
-
-```ts
-export function useCookingPreferences(userId: string) {
-  return {
-    loading,
-    saving,
-    preferredCuisines,
-    setPreferredCuisines,
-    availableEquipment,
-    setAvailableEquipment,
-    dislikedIngredients,
-    setDislikedIngredients,
-    spiceTolerance,
-    setSpiceTolerance,
-    save,
-  };
-}
-```
-
-- Page change: wire cooking fields to hook outputs, move save handler to hook or keep in page invoking `save()`
-- Tests: toggles, chips, slider, save calls
-
-Acceptance
-
-- [ ] Cooking save parity and toast behavior retained
+- Create `src/hooks/profile/useUsernameAvailability.ts`:
+  - `checkUsername(username)` - debounced availability check
+  - `claimUsername(username)` - claim available username
+  - State: `username`, `isAvailable`, `isChecking`, `error`
+- Update profile page to use hook
+- Acceptance: username validation uses hook, debouncing works
 
 ---
 
-PR 15 – Consolidate domain constants (optional but helpful)
+PR 19 – Extract useProfileBasics hook
 
-- File: `src/components/profile/constants.ts`
-- Move lists used across fields:
-  - `COMMON_ALLERGENS`, `COMMON_DIETARY_RESTRICTIONS`
-  - `POPULAR_CUISINES`, `COMMON_EQUIPMENT`
-- Update fields to import from constants
-- Tests: not required beyond type-safety; keep values identical
-
-Acceptance
-
-- [ ] Zero behavioral change; easier reuse
+- Create `src/hooks/profile/useProfileBasics.ts`:
+  - `loadProfileBasics()` - fetch region, language, units, time, skill
+  - `saveProfileBasics(data)` - update basic preferences
+  - `validateBasicsData(data)` - client-side validation
+  - State: `region`, `language`, `units`, `timePerMeal`, `skillLevel`, `loading`, `error`
+- Update profile page to use hook
+- Acceptance: basic preferences use hook, existing functionality preserved
 
 ---
 
-PR 16 – Feedback helper (optional)
+PR 20 – Simplify main profile page
 
-- File: `src/hooks/profile/useSaveFeedback.ts`
-- Centralize toast success/error UX to avoid duplication across save buttons
-- Page/components call `withFeedback(asyncFn)` wrapper
-
-Acceptance
-
-- [ ] Toaster UX identical; less repetition
-
----
-
-PR 17 – Page slim-down pass
-
-- Remove residual state/effects moved into hooks
-- `src/pages/profile-page.tsx` retains only:
-  - Auth/context access (`useAuth`)
-  - Tabs/layout scaffolding
-  - Composition of atomic components, passing hook results
-- Re-run full QA suite
-
-Acceptance
-
-- [ ] Page becomes primarily composition; no substantial logic
-- [ ] All flows verified (avatar, bio, basics, safety, cooking, email, password)
+- Remove direct state management for preferences (now in hooks)
+- Remove duplicate update logic (now in useProfileUpdate)
+- Keep only:
+  - Tab state management
+  - Avatar upload logic
+  - Email/password forms
+  - Layout composition
+- Acceptance: page is <500 lines, all functionality preserved
 
 ---
 
-Testing & QA notes
+PR 21 – Add hook tests
 
-- Hooks unit tests should mock `supabase` functions (`getUserSafety`, `updateUserSafety`, etc.)
-- Component tests remain UI-focused (props in, callbacks out)
-- Keep coverage improvements incremental; prioritize hooks behavior
+- Create `src/hooks/profile/__tests__/useUserSafety.test.ts`
+- Create `src/hooks/profile/__tests__/useCookingPreferences.test.ts`
+- Create `src/hooks/profile/__tests__/useUsernameAvailability.test.ts`
+- Create `src/hooks/profile/__tests__/useProfileBasics.test.ts`
+- Create `src/hooks/__tests__/useProfileUpdate.test.ts`
+- Test loading states, error handling, validation
+- Acceptance: all hook tests pass, >80% coverage
 
-Rollback strategy
+---
 
-- Each PR is isolated; if an issue arises, revert the last PR without impacting others
+PR 22 – Update documentation
 
-Out of scope for Phase 2
+- Update `docs/profile-modularization/README.md` with Phase 2 completion
+- Add hook usage examples to component docs
+- Update API documentation for new hooks
+- Acceptance: docs reflect current implementation
 
-- Visual redesigns, string changes, new fields
-- Cross-feature refactors beyond profile domain
+---
+
+## Phase 2 Completion Criteria
+
+✅ **All hooks extracted and tested**
+
+- Business logic moved from page to hooks
+- Each hook has comprehensive tests
+- Hooks are reusable across components
+
+✅ **Main page simplified**
+
+- Profile page <500 lines
+- No direct state management for preferences
+- Clean separation of concerns
+
+✅ **No functionality regression**
+
+- All existing features work
+- All tests pass
+- No UI changes visible to users
+
+✅ **Code quality improved**
+
+- Reduced duplication
+- Better testability
+- Clearer separation of concerns

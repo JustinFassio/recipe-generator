@@ -104,6 +104,11 @@ vi.mock('react-router-dom', () => ({
 // Mock toast
 vi.mock('@/hooks/use-toast', () => ({
   toast: vi.fn(),
+  useToast: vi.fn(() => ({
+    toast: vi.fn(),
+    dismiss: vi.fn(),
+    toasts: [],
+  })),
 }));
 
 // Mock AuthProvider for tests
