@@ -708,14 +708,24 @@ export default function ProfilePage() {
 
                 <div className="space-y-4">
                   {/* Medical Conditions */}
-                  <fieldset className="form-control" aria-labelledby="medical-conditions-legend">
-                    <legend id="medical-conditions-legend" className="font-medium mb-2">
+                  <fieldset
+                    className="form-control"
+                    aria-labelledby="medical-conditions-legend"
+                  >
+                    <legend
+                      id="medical-conditions-legend"
+                      className="mb-2 font-medium"
+                    >
                       Medical Conditions
                     </legend>
-                    <span className="label-text-alt whitespace-normal break-words text-info mb-2">
+                    <span className="label-text-alt mb-2 whitespace-normal break-words text-info">
                       Help us recommend foods that support your health
                     </span>
-                    <div className="mb-2 flex flex-wrap gap-2" role="group" aria-labelledby="medical-conditions-legend">
+                    <div
+                      className="mb-2 flex flex-wrap gap-2"
+                      role="group"
+                      aria-labelledby="medical-conditions-legend"
+                    >
                       {[
                         'diabetes',
                         'hypertension',
@@ -770,14 +780,21 @@ export default function ProfilePage() {
                   </fieldset>
 
                   {/* Allergies */}
-                  <fieldset className="form-control" aria-labelledby="allergies-legend">
-                    <legend id="allergies-legend" className="font-medium mb-2">
+                  <fieldset
+                    className="form-control"
+                    aria-labelledby="allergies-legend"
+                  >
+                    <legend id="allergies-legend" className="mb-2 font-medium">
                       Food Allergies
                     </legend>
-                    <span className="label-text-alt text-warning mb-2">
+                    <span className="label-text-alt mb-2 text-warning">
                       Critical for safety
                     </span>
-                    <div className="mb-2 flex flex-wrap gap-2" role="group" aria-labelledby="allergies-legend">
+                    <div
+                      className="mb-2 flex flex-wrap gap-2"
+                      role="group"
+                      aria-labelledby="allergies-legend"
+                    >
                       {[
                         'peanut',
                         'tree nuts',
@@ -828,11 +845,21 @@ export default function ProfilePage() {
                   </fieldset>
 
                   {/* Dietary Restrictions */}
-                  <fieldset className="form-control" aria-labelledby="dietary-restrictions-legend">
-                    <legend id="dietary-restrictions-legend" className="font-medium mb-2">
+                  <fieldset
+                    className="form-control"
+                    aria-labelledby="dietary-restrictions-legend"
+                  >
+                    <legend
+                      id="dietary-restrictions-legend"
+                      className="mb-2 font-medium"
+                    >
                       Dietary Restrictions
                     </legend>
-                    <div className="flex flex-wrap gap-2" role="group" aria-labelledby="dietary-restrictions-legend">
+                    <div
+                      className="flex flex-wrap gap-2"
+                      role="group"
+                      aria-labelledby="dietary-restrictions-legend"
+                    >
                       {[
                         'vegan',
                         'vegetarian',
@@ -845,7 +872,9 @@ export default function ProfilePage() {
                         <button
                           key={restriction}
                           type="button"
-                          aria-pressed={dietaryRestrictions.includes(restriction)}
+                          aria-pressed={dietaryRestrictions.includes(
+                            restriction
+                          )}
                           aria-describedby="dietary-restrictions-legend"
                           onClick={() => {
                             if (dietaryRestrictions.includes(restriction)) {
@@ -935,11 +964,21 @@ export default function ProfilePage() {
 
                 <div className="space-y-4">
                   {/* Preferred Cuisines */}
-                  <fieldset className="form-control" aria-labelledby="preferred-cuisines-legend">
-                    <legend id="preferred-cuisines-legend" className="font-medium mb-2">
+                  <fieldset
+                    className="form-control"
+                    aria-labelledby="preferred-cuisines-legend"
+                  >
+                    <legend
+                      id="preferred-cuisines-legend"
+                      className="mb-2 font-medium"
+                    >
                       Preferred Cuisines
                     </legend>
-                    <div className="flex flex-wrap gap-2" role="group" aria-labelledby="preferred-cuisines-legend">
+                    <div
+                      className="flex flex-wrap gap-2"
+                      role="group"
+                      aria-labelledby="preferred-cuisines-legend"
+                    >
                       {[
                         'italian',
                         'mexican',
@@ -978,11 +1017,21 @@ export default function ProfilePage() {
                   </fieldset>
 
                   {/* Available Equipment */}
-                  <fieldset className="form-control" aria-labelledby="available-equipment-legend">
-                    <legend id="available-equipment-legend" className="font-medium mb-2">
+                  <fieldset
+                    className="form-control"
+                    aria-labelledby="available-equipment-legend"
+                  >
+                    <legend
+                      id="available-equipment-legend"
+                      className="mb-2 font-medium"
+                    >
                       Available Equipment
                     </legend>
-                    <div className="flex flex-wrap gap-2" role="group" aria-labelledby="available-equipment-legend">
+                    <div
+                      className="flex flex-wrap gap-2"
+                      role="group"
+                      aria-labelledby="available-equipment-legend"
+                    >
                       {[
                         'oven',
                         'stove',
