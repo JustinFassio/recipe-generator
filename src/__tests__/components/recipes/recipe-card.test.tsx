@@ -11,6 +11,7 @@ const mockRecipe: Recipe = {
   notes: 'Test notes and tips for the recipe.',
   image_url: null,
   user_id: 'user1',
+  is_public: false,
   created_at: '2023-12-31T00:00:00Z',
   updated_at: '2023-12-31T00:00:00Z',
 };
