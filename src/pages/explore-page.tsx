@@ -60,8 +60,9 @@ export default function ExplorePage() {
   );
 
   const getAuthorName = (recipe: PublicRecipe) => {
-    if (recipe.author_name) {
-      return recipe.author_name.split(' ')[0]; // First name only
+    if (recipe.author_name && recipe.author_name.trim() !== '') {
+      const firstName = recipe.author_name.trim().split(' ')[0];
+      return firstName || 'Anonymous';
     }
     return 'Anonymous';
   };
