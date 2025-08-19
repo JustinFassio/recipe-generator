@@ -38,7 +38,7 @@ export const recipeApi = {
       .select(
         `
         *,
-        profiles!recipes_user_id_fkey (
+        profiles!inner (
           full_name
         )
       `
