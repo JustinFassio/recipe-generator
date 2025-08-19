@@ -161,6 +161,139 @@ async function upsertCooking(userId: string, cooking: SeedUser['cooking']) {
   if (error) throw error;
 }
 
+async function seedRecipes() {
+  const recipes = [
+    {
+      id: '11111111-1111-1111-1111-111111111111',
+      title: 'Avocado Toast',
+      ingredients: [
+        '2 slices sourdough',
+        '1 ripe avocado',
+        'salt',
+        'pepper',
+        'chili flakes',
+      ],
+      instructions:
+        'Toast bread. Mash avocado with salt and pepper. Spread and top with chili flakes.',
+      notes: 'Simple, fast breakfast.',
+      image_url: 'https://picsum.photos/seed/avocado_toast/800/600',
+      user_email: 'alice@example.com',
+      is_public: true,
+    },
+    {
+      id: '22222222-2222-2222-2222-222222222222',
+      title: 'Classic Caesar Salad',
+      ingredients: [
+        'romaine lettuce',
+        'parmesan',
+        'croutons',
+        'caesar dressing',
+        'lemon',
+      ],
+      instructions:
+        'Chop lettuce. Toss with dressing, croutons, parmesan. Finish with lemon.',
+      notes: 'Great with grilled chicken.',
+      image_url: 'https://picsum.photos/seed/caesar_salad/800/600',
+      user_email: 'bob@example.com',
+      is_public: true,
+    },
+    {
+      id: '33333333-3333-3333-3333-333333333333',
+      title: 'One-Pot Pasta',
+      ingredients: [
+        'spaghetti',
+        'garlic',
+        'olive oil',
+        'tomatoes',
+        'basil',
+        'salt',
+      ],
+      instructions:
+        'Cook garlic in oil. Add tomatoes and pasta with water. Simmer until tender. Finish with basil.',
+      notes: 'Weeknight friendly.',
+      image_url: 'https://picsum.photos/seed/one_pot_pasta/800/600',
+      user_email: 'cora@example.com',
+      is_public: true,
+    },
+    {
+      id: '44444444-4444-4444-4444-444444444444',
+      title: 'Grilled Chicken Breast',
+      ingredients: [
+        'chicken breast',
+        'olive oil',
+        'garlic powder',
+        'paprika',
+        'salt',
+        'pepper',
+      ],
+      instructions:
+        'Season chicken. Grill 6-8 minutes per side until 165°F internal temperature.',
+      notes: 'Perfect for meal prep.',
+      image_url: 'https://picsum.photos/seed/grilled_chicken/800/600',
+      user_email: 'bob@example.com',
+      is_public: true,
+    },
+    {
+      id: '55555555-5555-5555-5555-555555555555',
+      title: 'Spanish Paella',
+      ingredients: [
+        'rice',
+        'saffron',
+        'shrimp',
+        'chicken',
+        'bell peppers',
+        'onion',
+        'garlic',
+      ],
+      instructions:
+        'Sauté aromatics. Add rice and saffron. Layer with proteins and simmer until rice is tender.',
+      notes: 'Traditional Spanish dish.',
+      image_url: 'https://picsum.photos/seed/paella/800/600',
+      user_email: 'cora@example.com',
+      is_public: true,
+    },
+  ];
+
+  for (const recipe of recipes) {
+    // Get user ID for the recipe
+    const { data: user } = await admin.auth.admin.listUsers({
+      page: 1,
+      perPage: 100,
+    });
+    const userMatch = user.users.find(
+      (x) => x.email?.toLowerCase() === recipe.user_email.toLowerCase()
+    );
+
+    if (!userMatch) {
+      console.warn(
+        `User ${recipe.user_email} not found for recipe ${recipe.title}`
+      );
+      continue;
+    }
+
+    // Insert recipe
+    const { error } = await admin.from('recipes').upsert(
+      {
+        id: recipe.id,
+        title: recipe.title,
+        ingredients: recipe.ingredients,
+        instructions: recipe.instructions,
+        notes: recipe.notes,
+        image_url: recipe.image_url,
+        user_id: userMatch.id,
+        is_public: recipe.is_public,
+      },
+      { onConflict: 'id' }
+    );
+
+    if (error) {
+      console.error(`Error seeding recipe ${recipe.title}:`, error);
+    }
+  }
+
+  console.log('✅ Recipes seeded successfully.');
+}
+
 async function main() {
   for (const u of users) {
     // Create or fetch existing user
@@ -206,6 +339,9 @@ async function main() {
     await upsertSafety(effectiveUserId, u.safety);
     await upsertCooking(effectiveUserId, u.cooking);
   }
+
+  // Seed recipes after all users are created
+  await seedRecipes();
 
   console.log('✅ Seed users complete.');
 }
