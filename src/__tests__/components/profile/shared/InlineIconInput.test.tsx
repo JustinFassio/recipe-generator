@@ -60,4 +60,18 @@ describe('InlineIconInput', () => {
       'pl-10'
     );
   });
+
+  it('has aria-hidden on icon for accessibility', () => {
+    const { container } = render(
+      <InlineIconInput
+        icon={User}
+        value=""
+        onChange={() => {}}
+        placeholder="Test"
+      />
+    );
+
+    const icon = container.querySelector('svg');
+    expect(icon).toHaveAttribute('aria-hidden', 'true');
+  });
 });

@@ -28,7 +28,10 @@ export const InlineIconInput: React.FC<InlineIconInputProps> = ({
 }) => {
   return (
     <div className="relative">
-      <Icon className="text-base-content/40 absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform" />
+      <Icon
+        className="text-base-content/40 absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform"
+        aria-hidden="true"
+      />
       <input
         type={type}
         className={`input-bordered input w-full pl-10 ${className}`}
