@@ -68,6 +68,28 @@ export const recipeApi = {
     return publicRecipes;
   },
 
+  // Toggle recipe public status
+  async toggleRecipePublic(recipeId: string, isPublic: boolean): Promise<void> {
+    const { error } = await supabase
+      .from('recipes')
+      .update({ is_public: isPublic })
+      .eq('id', recipeId);
+
+    if (error) throw error;
+  },
+
+  // Get recipe sharing status
+  async getRecipeSharingStatus(recipeId: string): Promise<boolean> {
+    const { data, error } = await supabase
+      .from('recipes')
+      .select('is_public')
+      .eq('id', recipeId)
+      .single();
+
+    if (error) throw error;
+    return data?.is_public || false;
+  },
+
   // Create a new recipe
   async createRecipe(
     recipe: Omit<Recipe, 'id' | 'user_id' | 'created_at' | 'updated_at'>
