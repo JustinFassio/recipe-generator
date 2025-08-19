@@ -675,7 +675,10 @@ export default function ProfilePage() {
                     type="submit"
                     className="btn btn-primary w-full"
                     disabled={
-                      loading || (!!username && usernameAvailable !== true)
+                      loading ||
+                      (!!username &&
+                        username !== profile.username &&
+                        usernameAvailable !== true)
                     }
                   >
                     {loading ? (
