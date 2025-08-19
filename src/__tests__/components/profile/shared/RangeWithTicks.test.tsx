@@ -41,6 +41,39 @@ describe('RangeWithTicks', () => {
     expect(screen.getByText('High')).toBeInTheDocument();
   });
 
+  it('has proper accessibility attributes for ticks', () => {
+    const ticks = ['Low', 'Medium', 'High'];
+    render(
+      <RangeWithTicks
+        value={5}
+        onChange={() => {}}
+        min={1}
+        max={10}
+        ticks={ticks}
+      />
+    );
+
+    // Check container has proper role and aria-label
+    const tickContainer = screen.getByRole('group');
+    expect(tickContainer).toHaveAttribute(
+      'aria-label',
+      'Range value indicators'
+    );
+
+    // Check individual ticks have proper aria-labels
+    const lowTick = screen.getByText('Low');
+    expect(lowTick).toHaveAttribute('aria-label', 'Low (position 1 of 3)');
+
+    const mediumTick = screen.getByText('Medium');
+    expect(mediumTick).toHaveAttribute(
+      'aria-label',
+      'Medium (position 2 of 3)'
+    );
+
+    const highTick = screen.getByText('High');
+    expect(highTick).toHaveAttribute('aria-label', 'High (position 3 of 3)');
+  });
+
   it('applies custom className', () => {
     const { container } = render(
       <RangeWithTicks

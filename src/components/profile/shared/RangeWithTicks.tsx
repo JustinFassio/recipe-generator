@@ -31,9 +31,18 @@ export const RangeWithTicks: React.FC<RangeWithTicksProps> = ({
         className="range range-primary"
       />
       {ticks && (
-        <div className="flex w-full justify-between px-2 text-xs">
+        <div
+          className="flex w-full justify-between px-2 text-xs"
+          role="group"
+          aria-label="Range value indicators"
+        >
           {ticks.map((tick, index) => (
-            <span key={index}>{tick}</span>
+            <span
+              key={index}
+              aria-label={`${tick} (position ${index + 1} of ${ticks.length})`}
+            >
+              {tick}
+            </span>
           ))}
         </div>
       )}
