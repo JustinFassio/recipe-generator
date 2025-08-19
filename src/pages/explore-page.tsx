@@ -29,7 +29,7 @@ export default function ExplorePage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [toast]);
 
   useEffect(() => {
     loadPublicRecipes();
