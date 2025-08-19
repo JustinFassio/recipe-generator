@@ -64,9 +64,7 @@ export type Recipe = {
 };
 
 export type PublicRecipe = Recipe & {
-  profiles?: {
-    full_name: string | null;
-  };
+  author_name: string;
 };
 
 export type Profile = {

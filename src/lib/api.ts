@@ -33,21 +33,39 @@ export const recipeApi = {
 
   // Fetch public recipes for the Explore feed
   async getPublicRecipes(): Promise<PublicRecipe[]> {
-    const { data, error } = await supabase
+    // First, get all public recipes
+    const { data: recipes, error: recipesError } = await supabase
       .from('recipes')
-      .select(
-        `
-        *,
-        profiles!inner (
-          full_name
-        )
-      `
-      )
+      .select('*')
       .eq('is_public', true)
       .order('created_at', { ascending: false });
 
-    if (error) throw error;
-    return data || [];
+    if (recipesError) throw recipesError;
+    if (!recipes || recipes.length === 0) return [];
+
+    // Get unique user IDs from recipes
+    const userIds = [...new Set(recipes.map((recipe) => recipe.user_id))];
+
+    // Fetch profiles for those users
+    const { data: profiles, error: profilesError } = await supabase
+      .from('profiles')
+      .select('id, full_name')
+      .in('id', userIds);
+
+    if (profilesError) throw profilesError;
+
+    // Create a map of user_id to full_name
+    const profileMap = new Map(
+      (profiles || []).map((profile) => [profile.id, profile.full_name])
+    );
+
+    // Combine recipes with profile data
+    const publicRecipes: PublicRecipe[] = recipes.map((recipe) => ({
+      ...recipe,
+      author_name: profileMap.get(recipe.user_id) || 'Unknown Author',
+    }));
+
+    return publicRecipes;
   },
 
   // Create a new recipe
