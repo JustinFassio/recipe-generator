@@ -1,12 +1,18 @@
 import { supabase } from './supabase';
-import type { Recipe } from './supabase';
+import type { Recipe, PublicRecipe } from './supabase';
 
 export const recipeApi = {
   // Fetch all recipes for the current user
   async getRecipes(): Promise<Recipe[]> {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error('User not authenticated');
+
     const { data, error } = await supabase
       .from('recipes')
       .select('*')
+      .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
     if (error) throw error;
@@ -25,6 +31,25 @@ export const recipeApi = {
     return data;
   },
 
+  // Fetch public recipes for the Explore feed
+  async getPublicRecipes(): Promise<PublicRecipe[]> {
+    const { data, error } = await supabase
+      .from('recipes')
+      .select(
+        `
+        *,
+        profiles!recipes_user_id_fkey (
+          full_name
+        )
+      `
+      )
+      .eq('is_public', true)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data || [];
+  },
+
   // Create a new recipe
   async createRecipe(
     recipe: Omit<Recipe, 'id' | 'user_id' | 'created_at' | 'updated_at'>
@@ -36,7 +61,7 @@ export const recipeApi = {
 
     const { data, error } = await supabase
       .from('recipes')
-      .insert({ ...recipe, user_id: user.id })
+      .insert({ ...recipe, user_id: user.id, is_public: false })
       .select()
       .single();
 
@@ -62,6 +87,45 @@ export const recipeApi = {
     const { error } = await supabase.from('recipes').delete().eq('id', id);
 
     if (error) throw error;
+  },
+
+  // Save (clone) a public recipe to user's collection
+  async savePublicRecipe(recipeId: string): Promise<Recipe> {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error('User not authenticated');
+
+    // First, get the public recipe
+    const { data: sourceRecipe, error: fetchError } = await supabase
+      .from('recipes')
+      .select('*')
+      .eq('id', recipeId)
+      .eq('is_public', true)
+      .single();
+
+    if (fetchError) throw fetchError;
+    if (!sourceRecipe) throw new Error('Recipe not found or not public');
+
+    // Create a new recipe with the current user as owner
+    const newRecipe = {
+      title: sourceRecipe.title,
+      ingredients: sourceRecipe.ingredients,
+      instructions: sourceRecipe.instructions,
+      notes: sourceRecipe.notes,
+      image_url: sourceRecipe.image_url, // Keep the same image URL for now
+      user_id: user.id,
+      is_public: false, // Make it private by default
+    };
+
+    const { data, error } = await supabase
+      .from('recipes')
+      .insert(newRecipe)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
   },
 
   // Upload recipe image

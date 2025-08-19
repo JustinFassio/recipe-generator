@@ -58,8 +58,15 @@ export type Recipe = {
   notes: string;
   image_url: string | null;
   user_id: string;
+  is_public: boolean;
   created_at: string;
   updated_at: string;
+};
+
+export type PublicRecipe = Recipe & {
+  profiles?: {
+    full_name: string | null;
+  };
 };
 
 export type Profile = {
