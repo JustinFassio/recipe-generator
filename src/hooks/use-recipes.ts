@@ -6,7 +6,7 @@ import { toast } from '@/hooks/use-toast';
 export const useRecipes = () => {
   return useQuery({
     queryKey: ['recipes'],
-    queryFn: recipeApi.getRecipes,
+    queryFn: recipeApi.getUserRecipes,
   });
 };
 

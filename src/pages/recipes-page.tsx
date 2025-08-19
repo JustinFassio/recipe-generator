@@ -176,6 +176,14 @@ export function RecipesPage() {
                 recipe={recipe}
                 onEdit={handleEditRecipe}
                 onView={handleViewRecipe}
+                showShareButton={true}
+                onShareToggle={(recipeId, isPublic) => {
+                  // Note: The recipe state is updated automatically by the RecipeCard component
+                  // In a real app, you might want to refetch the data or update local state
+                  console.log(
+                    `Recipe ${recipeId} sharing toggled to ${isPublic}`
+                  );
+                }}
               />
             ))}
           </div>

@@ -10,6 +10,7 @@ import { RecipeViewPage } from '@/pages/recipe-view-page';
 import { ChatRecipePage } from '@/pages/chat-recipe-page';
 import ProfilePage from '@/pages/profile-page';
 import AuthCallbackPage from '@/pages/auth-callback-page';
+import ExplorePage from '@/pages/explore-page';
 import { AuthForm } from '@/components/auth/auth-form';
 import { ThemeProvider } from '@/components/ui/theme-provider';
 
@@ -55,6 +56,19 @@ function AppContent() {
               <Header />
               <main>
                 <RecipesPage />
+              </main>
+            </div>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/explore"
+        element={
+          <ProtectedRoute>
+            <div className="min-h-screen bg-base-100">
+              <Header />
+              <main>
+                <ExplorePage />
               </main>
             </div>
           </ProtectedRoute>

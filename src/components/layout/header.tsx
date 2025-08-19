@@ -46,7 +46,13 @@ export function Header() {
               variant={location.pathname === '/recipes' ? 'default' : 'ghost'}
               onClick={() => navigate('/recipes')}
             >
-              Recipes
+              My Recipes
+            </Button>
+            <Button
+              variant={location.pathname === '/explore' ? 'default' : 'ghost'}
+              onClick={() => navigate('/explore')}
+            >
+              Explore
             </Button>
 
             <AccessibilityProvider />
@@ -166,7 +172,17 @@ export function Header() {
               }}
               className="w-full justify-start"
             >
-              Recipes
+              My Recipes
+            </Button>
+            <Button
+              variant={location.pathname === '/explore' ? 'default' : 'ghost'}
+              onClick={() => {
+                navigate('/explore');
+                closeMobileMenu();
+              }}
+              className="w-full justify-start"
+            >
+              Explore
             </Button>
 
             <Button

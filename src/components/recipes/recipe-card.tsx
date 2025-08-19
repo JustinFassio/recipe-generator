@@ -3,11 +3,13 @@ import {
   createDaisyUICardTitleClasses,
 } from '@/lib/card-migration';
 import { createDaisyUIBadgeClasses } from '@/lib/badge-migration';
-import { Trash2, Edit, Eye } from 'lucide-react';
+import { Trash2, Edit, Eye, Share, Check, Loader2 } from 'lucide-react';
 import type { Recipe } from '@/lib/supabase';
 import { useDeleteRecipe } from '@/hooks/use-recipes';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { recipeApi } from '@/lib/api';
+import { useAuth } from '@/contexts/AuthProvider';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,15 +25,43 @@ interface RecipeCardProps {
   recipe: Recipe;
   onEdit?: (recipe: Recipe) => void;
   onView?: (recipe: Recipe) => void;
+  showShareButton?: boolean;
+  onShareToggle?: (recipeId: string, isPublic: boolean) => void;
 }
 
-export function RecipeCard({ recipe, onEdit, onView }: RecipeCardProps) {
+export function RecipeCard({
+  recipe,
+  onEdit,
+  onView,
+  showShareButton,
+  onShareToggle,
+}: RecipeCardProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [isSharing, setIsSharing] = useState(false);
+  const [isPublic, setIsPublic] = useState(recipe.is_public);
   const deleteRecipe = useDeleteRecipe();
+  const { user } = useAuth();
+
+  // Only show share button if explicitly requested and user owns the recipe
+  const canShare = showShareButton && user?.id === recipe.user_id;
 
   const handleDelete = () => {
     deleteRecipe.mutate(recipe.id);
     setShowDeleteDialog(false);
+  };
+
+  const handleShareToggle = async () => {
+    setIsSharing(true);
+    try {
+      await recipeApi.toggleRecipePublic(recipe.id, !isPublic);
+      setIsPublic(!isPublic);
+      onShareToggle?.(recipe.id, !isPublic);
+    } catch (error) {
+      console.error('Error toggling recipe sharing:', error);
+      // No need to revert state - it was never changed if API call failed
+    } finally {
+      setIsSharing(false);
+    }
   };
 
   return (
@@ -57,6 +87,30 @@ export function RecipeCard({ recipe, onEdit, onView }: RecipeCardProps) {
               {recipe.title}
             </h3>
             <div className="flex items-center space-x-1 opacity-0 transition-opacity group-hover:opacity-100 sm:opacity-0 sm:group-hover:opacity-100">
+              {canShare && (
+                <Button
+                  variant={isPublic ? 'default' : 'outline'}
+                  size="sm"
+                  className="h-8 px-2"
+                  onClick={handleShareToggle}
+                  disabled={isSharing}
+                  aria-label={isPublic ? 'Unshare recipe' : 'Share recipe'}
+                >
+                  {isSharing ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : isPublic ? (
+                    <>
+                      <Check className="mr-1 h-4 w-4" />
+                      Shared
+                    </>
+                  ) : (
+                    <>
+                      <Share className="mr-1 h-4 w-4" />
+                      Share
+                    </>
+                  )}
+                </Button>
+              )}
               <Button
                 variant="ghost"
                 size="sm"

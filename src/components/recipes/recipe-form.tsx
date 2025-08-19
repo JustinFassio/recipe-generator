@@ -142,7 +142,10 @@ export function RecipeForm({
           updates: recipeData,
         });
       } else {
-        await createRecipe.mutateAsync(recipeData);
+        await createRecipe.mutateAsync({
+          ...recipeData,
+          is_public: false,
+        });
       }
 
       onSuccess?.();
