@@ -26,4 +26,20 @@ describe('FieldLabel', () => {
     expect(labelElement).toBeInTheDocument();
     expect(spanElement).toBeInTheDocument();
   });
+
+  it('applies htmlFor attribute when provided', () => {
+    const { container } = render(
+      <FieldLabel htmlFor="test-input">Test Label</FieldLabel>
+    );
+
+    const labelElement = container.querySelector('.label');
+    expect(labelElement).toHaveAttribute('for', 'test-input');
+  });
+
+  it('does not apply htmlFor attribute when not provided', () => {
+    const { container } = render(<FieldLabel>Test Label</FieldLabel>);
+
+    const labelElement = container.querySelector('.label');
+    expect(labelElement).not.toHaveAttribute('for');
+  });
 });
