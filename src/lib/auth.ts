@@ -324,7 +324,7 @@ export async function checkUsernameAvailability(
   }
 }
 
-// Reserve/claim username using database function for atomic operation
+// Update username using database function for atomic operation
 export async function claimUsername(
   username: string
 ): Promise<{ success: boolean; error?: AuthError; profile?: Profile }> {
@@ -337,7 +337,7 @@ export async function claimUsername(
       return {
         success: false,
         error: {
-          message: 'You must be signed in to claim a username',
+          message: 'You must be signed in to update your username',
           code: 'UNAUTHENTICATED',
         },
       };
@@ -355,10 +355,10 @@ export async function claimUsername(
       };
     }
 
-    // Use the database function for atomic username claiming
-    const { error } = await supabase.rpc('claim_username_atomic', {
+    // Use the database function for atomic username updating
+    const { error } = await supabase.rpc('update_username_atomic', {
       p_user_id: user.id,
-      p_username: username.toLowerCase(),
+      p_new_username: username.toLowerCase(),
     });
 
     if (error) {
@@ -369,16 +369,6 @@ export async function claimUsername(
           error: {
             message: 'This username is already taken',
             code: 'USERNAME_TAKEN',
-          },
-        };
-      }
-
-      if (error.message?.includes('user_already_has_username')) {
-        return {
-          success: false,
-          error: {
-            message: 'You already have a username',
-            code: 'USERNAME_EXISTS',
           },
         };
       }
@@ -414,7 +404,7 @@ export async function claimUsername(
     return {
       success: false,
       error: {
-        message: 'An unexpected error occurred while claiming username',
+        message: 'An unexpected error occurred while updating username',
         details: error instanceof Error ? error.message : 'Unknown error',
       },
     };
