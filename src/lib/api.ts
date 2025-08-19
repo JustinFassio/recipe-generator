@@ -3,7 +3,7 @@ import type { Recipe, PublicRecipe } from './supabase';
 
 export const recipeApi = {
   // Fetch all recipes for the current user
-  async getRecipes(): Promise<Recipe[]> {
+  async getUserRecipes(): Promise<Recipe[]> {
     const {
       data: { user },
     } = await supabase.auth.getUser();
