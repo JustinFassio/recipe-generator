@@ -23,7 +23,6 @@ import {
   User,
   Mail,
   Lock,
-  Camera,
   Check,
   X,
   Loader2,
@@ -37,12 +36,12 @@ import {
   Shield,
   ChefHat,
 } from 'lucide-react';
+import { AvatarCard } from '@/components/profile/basic/AvatarCard';
 
 export default function ProfilePage() {
   const { user, profile, refreshProfile } = useAuth();
   const [loading, setLoading] = useState(false);
   const [avatarLoading, setAvatarLoading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const usernameTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Cleanup timeout on unmount
@@ -285,10 +284,7 @@ export default function ProfilePage() {
     setLoading(false);
   };
 
-  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
+  const handleAvatarUpload = async (file: File) => {
     setAvatarLoading(true);
     const { success, error } = await uploadAvatar(file);
 
@@ -307,11 +303,6 @@ export default function ProfilePage() {
     }
 
     setAvatarLoading(false);
-
-    // Reset file input
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
   };
 
   return (
@@ -347,48 +338,11 @@ export default function ProfilePage() {
         {activeTab === 'profile' && (
           <div className="grid gap-8 md:grid-cols-2">
             {/* Avatar Section */}
-            <div className="card bg-base-200 shadow-lg">
-              <div className="card-body">
-                <h2 className="card-title">Profile Picture</h2>
-
-                <div className="flex flex-col items-center space-y-4">
-                  <div className="avatar">
-                    <div className="h-24 w-24 rounded-full">
-                      {profile.avatar_url ? (
-                        <img src={profile.avatar_url} alt="Profile" />
-                      ) : (
-                        <div className="flex items-center justify-center bg-primary/20">
-                          <User className="h-12 w-12 text-primary" />
-                        </div>
-                      )}
-                      {avatarLoading && (
-                        <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/50">
-                          <Loader2 className="h-6 w-6 animate-spin text-white" />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleAvatarUpload}
-                    className="hidden"
-                  />
-
-                  <button
-                    type="button"
-                    className="btn btn-outline btn-sm"
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={avatarLoading}
-                  >
-                    <Camera className="mr-2 h-4 w-4" />
-                    {avatarLoading ? 'Uploading...' : 'Change Photo'}
-                  </button>
-                </div>
-              </div>
-            </div>
+            <AvatarCard
+              avatarUrl={profile.avatar_url}
+              loading={avatarLoading}
+              onUpload={handleAvatarUpload}
+            />
 
             {/* Bio Section */}
             <div className="card w-full bg-base-200 shadow-lg">
