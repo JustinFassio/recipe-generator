@@ -58,8 +58,7 @@ export function RecipeCard({
       onShareToggle?.(recipe.id, !isPublic);
     } catch (error) {
       console.error('Error toggling recipe sharing:', error);
-      // Revert the state on error
-      setIsPublic(isPublic);
+      // No need to revert state - it was never changed if API call failed
     } finally {
       setIsSharing(false);
     }
