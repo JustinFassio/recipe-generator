@@ -15,15 +15,33 @@ export async function clearAuthTokens() {
     await supabase.auth.signOut();
 
     // Clear any remaining auth-related localStorage items
-    if (typeof window !== 'undefined') {
-      const keysToRemove = [];
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key && (key.includes('supabase') || key.includes('auth'))) {
-          keysToRemove.push(key);
+    if (typeof window !== 'undefined' && window.localStorage) {
+      try {
+        const keysToRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          try {
+            const key = localStorage.key(i);
+            if (key && (key.includes('supabase') || key.includes('auth'))) {
+              keysToRemove.push(key);
+            }
+          } catch (keyError) {
+            console.warn('Error accessing localStorage key:', keyError);
+            // Continue with other keys even if one fails
+          }
         }
+        
+        keysToRemove.forEach((key) => {
+          try {
+            localStorage.removeItem(key);
+          } catch (removeError) {
+            console.warn(`Error removing localStorage key "${key}":`, removeError);
+            // Continue with other keys even if one fails
+          }
+        });
+      } catch (localStorageError) {
+        console.warn('Error accessing localStorage:', localStorageError);
+        // Continue execution even if localStorage operations fail
       }
-      keysToRemove.forEach((key) => localStorage.removeItem(key));
     }
 
     console.log('🧹 Cleared all auth tokens');

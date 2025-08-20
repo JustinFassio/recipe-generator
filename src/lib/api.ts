@@ -2,6 +2,12 @@ import { supabase } from './supabase';
 import type { Recipe, PublicRecipe } from './types';
 import { parseRecipeFromText } from './recipe-parser';
 
+// Type for profile summary data used in API responses
+interface ProfileSummary {
+  id: string;
+  full_name: string | null;
+}
+
 // Simple error handler
 function handleError(error: unknown, operation: string): never {
   console.error(`${operation} error:`, error);
@@ -66,7 +72,7 @@ export const recipeApi = {
 
     // Create a map of user_id to full_name
     const profileMap = new Map(
-      (profiles || []).map((profile: { id: string; full_name: string | null }) => [
+      (profiles || []).map((profile: ProfileSummary) => [
         profile.id,
         profile.full_name,
       ])
