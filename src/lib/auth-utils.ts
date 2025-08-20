@@ -29,12 +29,15 @@ export async function clearAuthTokens() {
             // Continue with other keys even if one fails
           }
         }
-        
+
         keysToRemove.forEach((key) => {
           try {
             localStorage.removeItem(key);
           } catch (removeError) {
-            console.warn(`Error removing localStorage key "${key}":`, removeError);
+            console.warn(
+              `Error removing localStorage key "${key}":`,
+              removeError
+            );
             // Continue with other keys even if one fails
           }
         });
