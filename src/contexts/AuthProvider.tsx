@@ -196,13 +196,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const profileData = await fetchProfile(session.user.id);
         console.log('📋 Profile data received:', profileData);
         setProfile(profileData);
+        setLoading(false);
       } else {
         setUser(null);
         setProfile(null);
         console.log('❌ User signed out');
+        setLoading(false);
       }
-
-      setLoading(false);
     });
 
     return () => {
