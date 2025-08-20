@@ -42,6 +42,11 @@ export const PasswordCard: React.FC<PasswordCardProps> = ({
             placeholder="Enter new password"
             minLength={6}
           />
+          <label className="label">
+            <span className="label-text-alt text-base-content/60">
+              Password must be at least 6 characters long
+            </span>
+          </label>
         </div>
 
         {/* Confirm Password */}
@@ -55,6 +60,7 @@ export const PasswordCard: React.FC<PasswordCardProps> = ({
             value={confirmPassword}
             onChange={onConfirmPasswordChange}
             placeholder="Confirm new password"
+            minLength={6}
             className={confirmPassword && !passwordsMatch ? 'border-error' : ''}
           />
           {confirmPassword && !passwordsMatch && (
