@@ -7,7 +7,7 @@ import { useRecipes } from '@/hooks/use-recipes';
 import { RecipeCard } from '@/components/recipes/recipe-card';
 import { Button } from '@/components/ui/button';
 import { useNavigate, useLocation } from 'react-router-dom';
-import type { Recipe } from '@/lib/supabase';
+import type { Recipe } from '@/lib/types';
 
 export function RecipesPage() {
   const navigate = useNavigate();

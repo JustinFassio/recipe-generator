@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { recipeApi, parseRecipeFromText } from '@/lib/api';
-import type { Recipe } from '@/lib/supabase';
+import { recipeApi } from '@/lib/api';
+import type { Recipe } from '@/lib/types';
 import { toast } from '@/hooks/use-toast';
 
 export const useRecipes = () => {
@@ -90,7 +90,7 @@ export const useDeleteRecipe = () => {
 
 export const useParseRecipe = () => {
   return useMutation({
-    mutationFn: parseRecipeFromText,
+    mutationFn: recipeApi.parseRecipeFromText,
     onError: (error) => {
       toast({
         title: 'Error',

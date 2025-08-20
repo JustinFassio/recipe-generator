@@ -19,7 +19,7 @@ import { X, Upload, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 
-import type { Recipe } from '@/lib/supabase';
+import type { Recipe } from '@/lib/types';
 
 interface RecipeFormProps {
   recipe?: Recipe;

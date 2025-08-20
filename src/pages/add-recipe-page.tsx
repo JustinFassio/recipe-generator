@@ -5,7 +5,7 @@ import { ParseRecipeForm } from '@/components/recipes/parse-recipe-form';
 import { RecipeForm } from '@/components/recipes/recipe-form';
 import { Button } from '@/components/ui/button';
 import type { RecipeFormData } from '@/lib/schemas';
-import type { Recipe } from '@/lib/supabase';
+import type { Recipe } from '@/lib/types';
 
 export function AddRecipePage() {
   const navigate = useNavigate();

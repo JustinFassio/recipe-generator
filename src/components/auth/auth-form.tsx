@@ -9,7 +9,7 @@ import { toast } from '@/hooks/use-toast';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Divider } from '@/components/ui/divider';
 import { AppTitle } from '@/components/ui/app-title';
-import type { Recipe } from '@/lib/supabase';
+import type { Recipe } from '@/lib/types';
 
 export function AuthForm() {
   const { user } = useAuth();

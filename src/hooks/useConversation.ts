@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { openaiAPI, RECIPE_BOT_PERSONAS, type PersonaType } from '@/lib/openai';
 import type { RecipeFormData } from '@/lib/schemas';
 import { toast } from '@/hooks/use-toast';
-import { parseRecipeFromText } from '@/lib/api';
+import { parseRecipeFromText } from '@/lib/recipe-parser';
 
 export interface Message {
   id: string;

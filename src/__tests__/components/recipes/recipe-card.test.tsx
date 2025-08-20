@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { RecipeCard } from '@/components/recipes/recipe-card';
-import type { Recipe } from '@/lib/supabase';
+import type { Recipe } from '@/lib/types';
 
 const mockRecipe: Recipe = {
   id: '1',
