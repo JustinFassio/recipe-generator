@@ -254,13 +254,21 @@ async function seedRecipes() {
     },
   ];
 
-  for (const recipe of recipes) {
-    // Get user ID for the recipe
-    const { data: user } = await admin.auth.admin.listUsers({
+  // Fetch all users once before the loop for better performance
+  const { data: userList, error: userListError } =
+    await admin.auth.admin.listUsers({
       page: 1,
       perPage: 100,
     });
-    const userMatch = user.users.find(
+
+  if (userListError) {
+    console.error('Error fetching user list:', userListError);
+    return;
+  }
+
+  for (const recipe of recipes) {
+    // Get user ID for the recipe from cached user list
+    const userMatch = userList.users.find(
       (x) => x.email?.toLowerCase() === recipe.user_email.toLowerCase()
     );
 
