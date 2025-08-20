@@ -132,9 +132,9 @@ export const ProfileInfoForm: React.FC<ProfileInfoFormProps> = ({
               value={username}
               onChange={(e) => onUsernameChange(e.target.value)}
               placeholder="Choose a unique username"
-              pattern="^[a-zA-Z0-9_-]+$"
+              pattern="^[a-z0-9_]+$"
               minLength={3}
-              maxLength={30}
+              maxLength={24}
             />
             <div className="absolute right-3 top-1/2 -translate-y-1/2 transform">
               {usernameChecking ? (
@@ -165,7 +165,7 @@ export const ProfileInfoForm: React.FC<ProfileInfoFormProps> = ({
                     ? 'Username is available!'
                     : usernameAvailable === false
                       ? 'Username is not available'
-                      : 'Enter 3-30 characters (letters, numbers, _, -)'}
+                      : 'Enter 3-24 characters (lowercase letters, numbers, _)'}
               </span>
             </label>
           )}
