@@ -2,6 +2,12 @@ import { supabase } from './supabase';
 import type { Recipe, PublicRecipe } from './types';
 import { parseRecipeFromText } from './recipe-parser';
 
+// Type for profile summary data used in API responses
+interface ProfileSummary {
+  id: string;
+  full_name: string | null;
+}
+
 // Simple error handler
 function handleError(error: unknown, operation: string): never {
   console.error(`${operation} error:`, error);
@@ -52,7 +58,9 @@ export const recipeApi = {
     if (!recipes || recipes.length === 0) return [];
 
     // Get unique user IDs from recipes
-    const userIds = [...new Set(recipes.map((recipe) => recipe.user_id))];
+    const userIds = [
+      ...new Set(recipes.map((recipe: Recipe) => recipe.user_id)),
+    ];
 
     // Fetch profiles for those users
     const { data: profiles, error: profilesError } = await supabase
@@ -64,11 +72,14 @@ export const recipeApi = {
 
     // Create a map of user_id to full_name
     const profileMap = new Map(
-      (profiles || []).map((profile) => [profile.id, profile.full_name])
+      (profiles || []).map((profile: ProfileSummary) => [
+        profile.id,
+        profile.full_name,
+      ])
     );
 
     // Combine recipes with profile data
-    return recipes.map((recipe) => ({
+    return recipes.map((recipe: Recipe) => ({
       ...recipe,
       author_name: profileMap.get(recipe.user_id) || 'Unknown Author',
     }));

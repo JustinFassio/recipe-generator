@@ -19,12 +19,19 @@ if (!supabaseUrl || !supabaseAnonKey) {
   );
 }
 
-// Create Supabase client with simplified configuration
+// Create Supabase client with best practices for session management
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
     detectSessionInUrl: true,
+    storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+    storageKey: 'supabase-auth-token',
+  },
+  global: {
+    headers: {
+      'X-Client-Info': 'recipe-generator-web',
+    },
   },
 });
 
