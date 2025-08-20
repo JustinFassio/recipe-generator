@@ -32,6 +32,7 @@ interface UserPreferencesForAI {
   safety: {
     allergies: string[];
     dietary_restrictions: string[];
+    medical_conditions: string[];
   };
 
   // Phase 1C: Cooking preferences
@@ -58,6 +59,12 @@ export const buildUserContextPrompt = (
   if (userData.safety.dietary_restrictions.length > 0) {
     sections.push(
       `Dietary restrictions: ${userData.safety.dietary_restrictions.join(', ')}`
+    );
+  }
+
+  if (userData.safety.medical_conditions.length > 0) {
+    sections.push(
+      `Medical conditions: ${userData.safety.medical_conditions.join(', ')}`
     );
   }
 
