@@ -42,7 +42,7 @@ function parseJsonRecipe(parsed: Record<string, unknown>): ParsedRecipe {
     throw new Error('Missing required field: instructions');
   }
 
-  const title = parsed.name || parsed.title || 'Untitled Recipe';
+  const title = (parsed.name || parsed.title || 'Untitled Recipe') as string;
   const ingredients = parseIngredients(parsed.ingredients);
   const instructions = parseInstructions(parsed);
   const notes = parseNotes(parsed);
@@ -60,7 +60,7 @@ function parseIngredients(ingredients: unknown): string[] {
         ? item
         : `${item.amount || ''} ${item.item || ''} ${item.prep ? `, ${item.prep}` : ''}`.trim()
     );
-  } else if (typeof ingredients === 'object') {
+  } else if (typeof ingredients === 'object' && ingredients !== null) {
     // Nested object format with categories
     const categoryOrder = ['main', 'sauce', 'toppings', 'garnish'];
     const allCategories = Object.keys(ingredients);
@@ -71,7 +71,7 @@ function parseIngredients(ingredients: unknown): string[] {
     ];
 
     for (const category of orderedCategories) {
-      const items = ingredients[category];
+      const items = (ingredients as Record<string, unknown>)[category];
       if (Array.isArray(items) && items.length > 0) {
         const categoryTitle = category
           .replace(/([A-Z])/g, ' $1')
