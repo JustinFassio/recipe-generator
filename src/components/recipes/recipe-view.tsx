@@ -6,7 +6,7 @@ import { createDaisyUIBadgeClasses } from '@/lib/badge-migration';
 import { createDaisyUISeparatorClasses } from '@/lib/separator-migration';
 import { ArrowLeft, Clock, Users, Edit, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import type { Recipe } from '@/lib/supabase';
+import type { Recipe } from '@/lib/types';
 
 interface RecipeViewProps {
   recipe: Recipe;

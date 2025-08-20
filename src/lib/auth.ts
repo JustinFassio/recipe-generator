@@ -1,11 +1,14 @@
-import { supabase, type Profile } from './supabase';
+import { supabase } from './supabase';
+import type { Profile, AuthError } from './types';
 
-// Auth error types for better error handling
-export type AuthError = {
-  message: string;
-  code?: string;
-  details?: string;
-};
+// Simple error handler
+function createAuthError(
+  message: string,
+  code?: string,
+  details?: string
+): AuthError {
+  return { message, code, details };
+}
 
 // Sign up with email and password
 export async function signUp(
@@ -18,9 +21,7 @@ export async function signUp(
       email,
       password,
       options: {
-        data: {
-          full_name: fullName,
-        },
+        data: { full_name: fullName },
         emailRedirectTo: `${window.location.origin}/auth/callback`,
       },
     });
@@ -28,11 +29,7 @@ export async function signUp(
     if (error) {
       return {
         success: false,
-        error: {
-          message: error.message,
-          code: error.name,
-          details: error.message,
-        },
+        error: createAuthError(error.message, error.name, error.message),
       };
     }
 
@@ -40,10 +37,11 @@ export async function signUp(
   } catch (error) {
     return {
       success: false,
-      error: {
-        message: 'An unexpected error occurred during sign up',
-        details: error instanceof Error ? error.message : 'Unknown error',
-      },
+      error: createAuthError(
+        'An unexpected error occurred during sign up',
+        undefined,
+        error instanceof Error ? error.message : 'Unknown error'
+      ),
     };
   }
 }
@@ -62,11 +60,7 @@ export async function signIn(
     if (error) {
       return {
         success: false,
-        error: {
-          message: error.message,
-          code: error.name,
-          details: error.message,
-        },
+        error: createAuthError(error.message, error.name, error.message),
       };
     }
 
@@ -74,10 +68,11 @@ export async function signIn(
   } catch (error) {
     return {
       success: false,
-      error: {
-        message: 'An unexpected error occurred during sign in',
-        details: error instanceof Error ? error.message : 'Unknown error',
-      },
+      error: createAuthError(
+        'An unexpected error occurred during sign in',
+        undefined,
+        error instanceof Error ? error.message : 'Unknown error'
+      ),
     };
   }
 }
@@ -97,11 +92,7 @@ export async function signInWithMagicLink(
     if (error) {
       return {
         success: false,
-        error: {
-          message: error.message,
-          code: error.name,
-          details: error.message,
-        },
+        error: createAuthError(error.message, error.name, error.message),
       };
     }
 
@@ -109,10 +100,11 @@ export async function signInWithMagicLink(
   } catch (error) {
     return {
       success: false,
-      error: {
-        message: 'An unexpected error occurred while sending magic link',
-        details: error instanceof Error ? error.message : 'Unknown error',
-      },
+      error: createAuthError(
+        'An unexpected error occurred while sending magic link',
+        undefined,
+        error instanceof Error ? error.message : 'Unknown error'
+      ),
     };
   }
 }
@@ -129,11 +121,7 @@ export async function resetPassword(
     if (error) {
       return {
         success: false,
-        error: {
-          message: error.message,
-          code: error.name,
-          details: error.message,
-        },
+        error: createAuthError(error.message, error.name, error.message),
       };
     }
 
@@ -141,10 +129,11 @@ export async function resetPassword(
   } catch (error) {
     return {
       success: false,
-      error: {
-        message: 'An unexpected error occurred while sending reset email',
-        details: error instanceof Error ? error.message : 'Unknown error',
-      },
+      error: createAuthError(
+        'An unexpected error occurred while sending reset email',
+        undefined,
+        error instanceof Error ? error.message : 'Unknown error'
+      ),
     };
   }
 }
@@ -161,11 +150,7 @@ export async function updateEmail(
     if (error) {
       return {
         success: false,
-        error: {
-          message: error.message,
-          code: error.name,
-          details: error.message,
-        },
+        error: createAuthError(error.message, error.name, error.message),
       };
     }
 
@@ -173,10 +158,11 @@ export async function updateEmail(
   } catch (error) {
     return {
       success: false,
-      error: {
-        message: 'An unexpected error occurred while updating email',
-        details: error instanceof Error ? error.message : 'Unknown error',
-      },
+      error: createAuthError(
+        'An unexpected error occurred while updating email',
+        undefined,
+        error instanceof Error ? error.message : 'Unknown error'
+      ),
     };
   }
 }
@@ -193,11 +179,7 @@ export async function updatePassword(
     if (error) {
       return {
         success: false,
-        error: {
-          message: error.message,
-          code: error.name,
-          details: error.message,
-        },
+        error: createAuthError(error.message, error.name, error.message),
       };
     }
 
@@ -205,10 +187,11 @@ export async function updatePassword(
   } catch (error) {
     return {
       success: false,
-      error: {
-        message: 'An unexpected error occurred while updating password',
-        details: error instanceof Error ? error.message : 'Unknown error',
-      },
+      error: createAuthError(
+        'An unexpected error occurred while updating password',
+        undefined,
+        error instanceof Error ? error.message : 'Unknown error'
+      ),
     };
   }
 }
@@ -237,10 +220,10 @@ export async function updateProfile(
     if (!user) {
       return {
         success: false,
-        error: {
-          message: 'You must be signed in to update your profile',
-          code: 'UNAUTHENTICATED',
-        },
+        error: createAuthError(
+          'You must be signed in to update your profile',
+          'UNAUTHENTICATED'
+        ),
       };
     }
 
@@ -254,25 +237,19 @@ export async function updateProfile(
     if (error) {
       return {
         success: false,
-        error: {
-          message: error.message,
-          code: error.code,
-          details: error.details,
-        },
+        error: createAuthError(error.message, error.code, error.details),
       };
     }
 
-    return {
-      success: true,
-      profile: data,
-    };
+    return { success: true, profile: data };
   } catch (error) {
     return {
       success: false,
-      error: {
-        message: 'An unexpected error occurred while updating profile',
-        details: error instanceof Error ? error.message : 'Unknown error',
-      },
+      error: createAuthError(
+        'An unexpected error occurred while updating profile',
+        undefined,
+        error instanceof Error ? error.message : 'Unknown error'
+      ),
     };
   }
 }
@@ -286,11 +263,10 @@ export async function checkUsernameAvailability(
     if (!/^[a-z0-9_]{3,24}$/.test(username)) {
       return {
         available: false,
-        error: {
-          message:
-            'Username must be 3-24 characters long and contain only lowercase letters, numbers, and underscores',
-          code: 'INVALID_FORMAT',
-        },
+        error: createAuthError(
+          'Username must be 3-24 characters long and contain only lowercase letters, numbers, and underscores',
+          'INVALID_FORMAT'
+        ),
       };
     }
 
@@ -301,25 +277,19 @@ export async function checkUsernameAvailability(
     if (error) {
       return {
         available: false,
-        error: {
-          message: error.message,
-          code: error.code,
-          details: error.details,
-        },
+        error: createAuthError(error.message, error.code, error.details),
       };
     }
 
-    return {
-      available: data === true,
-    };
+    return { available: data === true };
   } catch (error) {
     return {
       available: false,
-      error: {
-        message:
-          'An unexpected error occurred while checking username availability',
-        details: error instanceof Error ? error.message : 'Unknown error',
-      },
+      error: createAuthError(
+        'An unexpected error occurred while checking username availability',
+        undefined,
+        error instanceof Error ? error.message : 'Unknown error'
+      ),
     };
   }
 }
@@ -336,10 +306,10 @@ export async function claimUsername(
     if (!user) {
       return {
         success: false,
-        error: {
-          message: 'You must be signed in to update your username',
-          code: 'UNAUTHENTICATED',
-        },
+        error: createAuthError(
+          'You must be signed in to update your username',
+          'UNAUTHENTICATED'
+        ),
       };
     }
 
@@ -347,11 +317,10 @@ export async function claimUsername(
     if (!/^[a-z0-9_]{3,24}$/.test(username)) {
       return {
         success: false,
-        error: {
-          message:
-            'Username must be 3-24 characters long and contain only lowercase letters, numbers, and underscores',
-          code: 'INVALID_FORMAT',
-        },
+        error: createAuthError(
+          'Username must be 3-24 characters long and contain only lowercase letters, numbers, and underscores',
+          'INVALID_FORMAT'
+        ),
       };
     }
 
@@ -366,20 +335,16 @@ export async function claimUsername(
       if (error.message?.includes('username_already_taken')) {
         return {
           success: false,
-          error: {
-            message: 'This username is already taken',
-            code: 'USERNAME_TAKEN',
-          },
+          error: createAuthError(
+            'This username is already taken',
+            'USERNAME_TAKEN'
+          ),
         };
       }
 
       return {
         success: false,
-        error: {
-          message: error.message,
-          code: error.code,
-          details: error.details,
-        },
+        error: createAuthError(error.message, error.code, error.details),
       };
     }
 
@@ -396,17 +361,15 @@ export async function claimUsername(
       console.error('Error fetching updated profile:', profileError);
     }
 
-    return {
-      success: true,
-      profile: profile || undefined,
-    };
+    return { success: true, profile: profile || undefined };
   } catch (error) {
     return {
       success: false,
-      error: {
-        message: 'An unexpected error occurred while updating username',
-        details: error instanceof Error ? error.message : 'Unknown error',
-      },
+      error: createAuthError(
+        'An unexpected error occurred while updating username',
+        undefined,
+        error instanceof Error ? error.message : 'Unknown error'
+      ),
     };
   }
 }
@@ -423,10 +386,10 @@ export async function uploadAvatar(
     if (!user) {
       return {
         success: false,
-        error: {
-          message: 'You must be signed in to upload an avatar',
-          code: 'UNAUTHENTICATED',
-        },
+        error: createAuthError(
+          'You must be signed in to upload an avatar',
+          'UNAUTHENTICATED'
+        ),
       };
     }
 
@@ -435,10 +398,10 @@ export async function uploadAvatar(
     if (!validTypes.includes(file.type)) {
       return {
         success: false,
-        error: {
-          message: 'Please upload a valid image file (JPEG, PNG, WebP, or GIF)',
-          code: 'INVALID_FILE_TYPE',
-        },
+        error: createAuthError(
+          'Please upload a valid image file (JPEG, PNG, WebP, or GIF)',
+          'INVALID_FILE_TYPE'
+        ),
       };
     }
 
@@ -446,10 +409,10 @@ export async function uploadAvatar(
     if (file.size > 5 * 1024 * 1024) {
       return {
         success: false,
-        error: {
-          message: 'File size must be less than 5MB',
-          code: 'FILE_TOO_LARGE',
-        },
+        error: createAuthError(
+          'File size must be less than 5MB',
+          'FILE_TOO_LARGE'
+        ),
       };
     }
 
@@ -460,18 +423,12 @@ export async function uploadAvatar(
     // Upload to storage
     const { error } = await supabase.storage
       .from('avatars')
-      .upload(fileName, file, {
-        upsert: true,
-      });
+      .upload(fileName, file, { upsert: true });
 
     if (error) {
       return {
         success: false,
-        error: {
-          message: error.message,
-          code: error.name,
-          details: error.message,
-        },
+        error: createAuthError(error.message, error.name, error.message),
       };
     }
 
@@ -491,25 +448,23 @@ export async function uploadAvatar(
     if (updateError) {
       return {
         success: false,
-        error: {
-          message: updateError.message,
-          code: updateError.code,
-          details: updateError.details,
-        },
+        error: createAuthError(
+          updateError.message,
+          updateError.code,
+          updateError.details
+        ),
       };
     }
 
-    return {
-      success: true,
-      avatarUrl: publicUrl,
-    };
+    return { success: true, avatarUrl: publicUrl };
   } catch (error) {
     return {
       success: false,
-      error: {
-        message: 'An unexpected error occurred while uploading avatar',
-        details: error instanceof Error ? error.message : 'Unknown error',
-      },
+      error: createAuthError(
+        'An unexpected error occurred while uploading avatar',
+        undefined,
+        error instanceof Error ? error.message : 'Unknown error'
+      ),
     };
   }
 }

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { RecipeCard } from '../components/recipes/recipe-card';
 import { recipeApi } from '../lib/api';
-import type { PublicRecipe } from '../lib/supabase';
+import type { PublicRecipe } from '@/lib/types';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Search, Save } from 'lucide-react';

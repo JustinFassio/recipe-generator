@@ -4,7 +4,7 @@ import {
 } from '@/lib/card-migration';
 import { createDaisyUIBadgeClasses } from '@/lib/badge-migration';
 import { Trash2, Edit, Eye, Share, Check, Loader2 } from 'lucide-react';
-import type { Recipe } from '@/lib/supabase';
+import type { Recipe } from '@/lib/types';
 import { useDeleteRecipe } from '@/hooks/use-recipes';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
