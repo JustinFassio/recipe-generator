@@ -20,7 +20,7 @@ export async function getUserSafety(
       .from('user_safety')
       .select('*')
       .eq('user_id', userId)
-      .single();
+      .maybeSingle();
 
     if (error) {
       if (error.code === 'PGRST116') {
@@ -90,7 +90,7 @@ export async function getCookingPreferences(
       .from('cooking_preferences')
       .select('*')
       .eq('user_id', userId)
-      .single();
+      .maybeSingle();
 
     if (error) {
       if (error.code === 'PGRST116') {
