@@ -175,7 +175,7 @@ export default function ProfilePage() {
         language,
         units,
         time_per_meal: timePerMeal,
-        skill_level: skillLevel,
+        skill_level: skillLevel.toString(),
       };
 
       const { success: profileSuccess, error: profileError } =
