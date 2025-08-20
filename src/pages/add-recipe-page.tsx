@@ -24,7 +24,7 @@ export function AddRecipePage() {
         title: existingRecipe.title,
         ingredients: existingRecipe.ingredients,
         instructions: existingRecipe.instructions,
-        notes: existingRecipe.notes,
+        notes: existingRecipe.notes || '',
         image_url: existingRecipe.image_url || '',
       });
     }

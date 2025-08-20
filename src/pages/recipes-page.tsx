@@ -25,7 +25,9 @@ export function RecipesPage() {
           ingredient.toLowerCase().includes(searchTerm.toLowerCase())
         ) ||
         recipe.instructions.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        recipe.notes.toLowerCase().includes(searchTerm.toLowerCase())
+        (recipe.notes
+          ? recipe.notes.toLowerCase().includes(searchTerm.toLowerCase())
+          : false)
     );
   }, [recipes, searchTerm]);
 
