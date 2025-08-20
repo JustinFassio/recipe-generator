@@ -19,8 +19,8 @@ export async function parseRecipeFromText(text: string): Promise<ParsedRecipe> {
     console.log('Successfully parsed JSON format');
 
     return parseJsonRecipe(parsed);
-  } catch {
-    console.log('JSON parsing failed, trying markdown parsing');
+  } catch (err) {
+    console.error('JSON parsing failed, trying markdown parsing:', err);
     return parseMarkdownRecipe(text);
   }
 }
