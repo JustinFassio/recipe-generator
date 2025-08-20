@@ -40,91 +40,47 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Function to fetch user profile
+  // Simple profile fetch function
   const fetchProfile = async (userId: string): Promise<Profile | null> => {
-    console.log('🔍 fetchProfile called with userId:', userId);
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select(
-          'id, username, full_name, avatar_url, bio, region, language, units, time_per_meal, skill_level, created_at, updated_at'
-        )
+        .select('*')
         .eq('id', userId)
         .single();
 
       if (error) {
-        // If the profiles table doesn't exist yet (migrations not run), fail gracefully
-        if (error.code === '42P01' || error.code === 'PGRST205') {
-          console.warn(
-            'Profiles table does not exist yet. Please run database migrations. Creating temporary profile...'
-          );
-          // Return a temporary profile object to prevent app crashes
-          return {
-            id: userId,
-            username: null,
-            full_name: null,
-            avatar_url: null,
-            bio: null,
-            region: null,
-            language: 'en',
-            units: 'metric',
-            time_per_meal: 30,
-            skill_level: 'beginner',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          };
-        }
-
-        // If profile doesn't exist (PGRST116), try to create it
+        // If profile doesn't exist, try to create one
         if (error.code === 'PGRST116') {
-          console.log('📝 Profile not found, attempting to create one...');
-          const { success, error: createError } = await ensureUserProfile();
-
+          const { success } = await ensureUserProfile();
           if (success) {
-            console.log('✅ Profile created successfully, fetching again...');
-            // Try to fetch the profile again
+            // Try fetching again
             const { data: newData, error: newError } = await supabase
               .from('profiles')
-              .select(
-                'id, username, full_name, avatar_url, bio, region, language, units, time_per_meal, skill_level, created_at, updated_at'
-              )
+              .select('*')
               .eq('id', userId)
               .single();
 
             if (newError) {
-              console.error(
-                '❌ Error fetching newly created profile:',
-                newError
-              );
+              console.error('Error fetching newly created profile:', newError);
               return null;
             }
-
-            console.log(
-              '✅ Newly created profile fetched successfully:',
-              newData
-            );
             return newData;
-          } else {
-            console.error('❌ Failed to create profile:', createError);
-            return null;
           }
         }
-
-        console.error('❌ Error fetching profile:', error);
+        console.error('Error fetching profile:', error);
         return null;
       }
 
-      console.log('✅ Profile fetched successfully:', data);
       return data;
     } catch (error) {
-      console.error('❌ Error in fetchProfile:', error);
+      console.error('Error in fetchProfile:', error);
       return null;
     }
   };
 
   const refreshProfile = async (): Promise<void> => {
     if (!user) return;
-
     const profileData = await fetchProfile(user.id);
     setProfile(profileData);
   };
@@ -132,9 +88,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let mounted = true;
 
-    // Simple initialization with cleanup for invalid sessions
-    const init = async () => {
+    // Initialize auth state
+    const initAuth = async () => {
       try {
+        // Get current session
         const {
           data: { session },
           error,
@@ -142,78 +99,55 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         if (error) {
           console.error('Session error:', error);
-          // Clear invalid session using existing utility
           await clearAuthTokens();
         }
 
         if (mounted) {
-          if (session?.user && !error) {
+          if (session?.user) {
             setUser(session.user);
-            console.log('✅ User found:', session.user.email);
 
-            // Fetch profile for the existing user
-            console.log(
-              '🔍 Fetching profile for existing user:',
-              session.user.id
-            );
+            // Fetch profile
             const profileData = await fetchProfile(session.user.id);
-            console.log('📋 Profile data received:', profileData);
             setProfile(profileData);
           } else {
             setUser(null);
             setProfile(null);
-            console.log('❌ No user session or session invalid');
           }
           setLoading(false);
         }
       } catch (error) {
         console.error('Auth init error:', error);
-        // Clear auth-related data on any auth error using existing utility
-        await clearAuthTokens();
-
         if (mounted) {
           setUser(null);
-          setError(null); // Don't show error, just clear everything
+          setProfile(null);
           setLoading(false);
         }
       }
     };
 
-    init();
+    initAuth();
 
     // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('🔄 Auth event:', event);
+      console.log('Auth state change:', event);
+
       if (!mounted) return;
 
       if (session?.user) {
         setUser(session.user);
-        console.log('✅ User signed in:', session.user.email);
+        setError(null);
 
-        // Fetch profile for the signed-in user
-        console.log('🔍 Fetching profile for user:', session.user.id);
+        // Fetch profile for new user
         const profileData = await fetchProfile(session.user.id);
-        console.log('📋 Profile data received:', profileData);
         setProfile(profileData);
-
-        // If profile fetch fails completely, clear auth and redirect to login
-        if (profileData === null) {
-          console.error('❌ Profile fetch failed, clearing authentication');
-          await clearAuthTokens();
-          setUser(null);
-          setProfile(null);
-          setError('Authentication failed. Please sign in again.');
-        }
-
-        setLoading(false);
       } else {
         setUser(null);
         setProfile(null);
-        console.log('❌ User signed out');
-        setLoading(false);
       }
+
+      setLoading(false);
     });
 
     return () => {

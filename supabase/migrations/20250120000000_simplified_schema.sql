@@ -43,6 +43,7 @@ CREATE INDEX IF NOT EXISTS profiles_username_idx ON public.profiles (username);
 CREATE INDEX IF NOT EXISTS profiles_created_at_idx ON public.profiles (created_at);
 
 -- Auto-update timestamp
+DROP TRIGGER IF EXISTS profiles_set_updated_at ON public.profiles;
 CREATE TRIGGER profiles_set_updated_at
   BEFORE UPDATE ON public.profiles
   FOR EACH ROW EXECUTE PROCEDURE moddatetime(updated_at);
@@ -67,6 +68,7 @@ CREATE INDEX IF NOT EXISTS recipes_is_public_created_idx ON public.recipes (is_p
 CREATE INDEX IF NOT EXISTS recipes_created_at_idx ON public.recipes (created_at DESC);
 
 -- Auto-update timestamp
+DROP TRIGGER IF EXISTS recipes_set_updated_at ON public.recipes;
 CREATE TRIGGER recipes_set_updated_at
   BEFORE UPDATE ON public.recipes
   FOR EACH ROW EXECUTE PROCEDURE moddatetime(updated_at);
@@ -114,6 +116,11 @@ ON CONFLICT (username) DO NOTHING;
 -- PROFILES POLICIES
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies first
+DROP POLICY IF EXISTS "profiles_read_public" ON public.profiles;
+DROP POLICY IF EXISTS "profiles_update_own" ON public.profiles;
+DROP POLICY IF EXISTS "profiles_insert_own" ON public.profiles;
+
 -- Anyone can read profiles (needed for public recipe authors)
 CREATE POLICY "profiles_read_public" ON public.profiles
   FOR SELECT USING (true);
@@ -129,17 +136,21 @@ CREATE POLICY "profiles_insert_own" ON public.profiles
 -- RECIPES POLICIES
 ALTER TABLE public.recipes ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies first
+DROP POLICY IF EXISTS "recipes_read_own" ON public.recipes;
+DROP POLICY IF EXISTS "recipes_read_public" ON public.recipes;
+DROP POLICY IF EXISTS "recipes_read_public_auth" ON public.recipes;
+DROP POLICY IF EXISTS "recipes_insert_own" ON public.recipes;
+DROP POLICY IF EXISTS "recipes_update_own" ON public.recipes;
+DROP POLICY IF EXISTS "recipes_delete_own" ON public.recipes;
+
 -- Users can read their own recipes
 CREATE POLICY "recipes_read_own" ON public.recipes
   FOR SELECT USING (auth.uid() = user_id);
 
--- Anonymous users can read public recipes
+-- Anyone can read public recipes
 CREATE POLICY "recipes_read_public" ON public.recipes
-  FOR SELECT TO anon USING (is_public = true);
-
--- Authenticated users can read public recipes
-CREATE POLICY "recipes_read_public_auth" ON public.recipes
-  FOR SELECT TO authenticated USING (is_public = true);
+  FOR SELECT USING (is_public = true);
 
 -- Users can create their own recipes
 CREATE POLICY "recipes_insert_own" ON public.recipes
@@ -156,6 +167,10 @@ CREATE POLICY "recipes_delete_own" ON public.recipes
 -- USERNAMES POLICIES
 ALTER TABLE public.usernames ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies first
+DROP POLICY IF EXISTS "usernames_read_public" ON public.usernames;
+DROP POLICY IF EXISTS "usernames_manage_own" ON public.usernames;
+
 -- Anyone can read usernames (to check availability)
 CREATE POLICY "usernames_read_public" ON public.usernames
   FOR SELECT USING (true);
@@ -166,6 +181,9 @@ CREATE POLICY "usernames_manage_own" ON public.usernames
 
 -- RESERVED USERNAMES POLICIES
 ALTER TABLE public.reserved_usernames ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies first
+DROP POLICY IF EXISTS "reserved_usernames_read_public" ON public.reserved_usernames;
 
 -- Anyone can read reserved usernames
 CREATE POLICY "reserved_usernames_read_public" ON public.reserved_usernames

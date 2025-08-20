@@ -1,131 +1,61 @@
 import { supabase } from './supabase';
 
 /**
- * Auth Utilities
+ * Simplified Auth Utilities for Pre-MVP
  *
- * Consolidated authentication utilities for token management, session validation,
- * error handling, and recovery operations.
+ * Focus on core functionality without complex recovery logic
+ * that can cause infinite loops and session issues.
  */
 
 /**
- * Clear all authentication tokens and data from localStorage
- * Useful when dealing with stale or invalid refresh tokens
+ * Clear all authentication data cleanly
  */
 export async function clearAuthTokens() {
   try {
-    // Sign out to clear Supabase tokens
     await supabase.auth.signOut();
 
-    // Clear any remaining auth-related items from localStorage
-    const keysToRemove = [];
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key && (key.includes('supabase') || key.includes('auth'))) {
-        keysToRemove.push(key);
+    // Clear any remaining auth-related localStorage items
+    if (typeof window !== 'undefined') {
+      const keysToRemove = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && (key.includes('supabase') || key.includes('auth'))) {
+          keysToRemove.push(key);
+        }
       }
+      keysToRemove.forEach((key) => localStorage.removeItem(key));
     }
 
-    keysToRemove.forEach((key) => {
-      localStorage.removeItem(key);
-    });
-
-    console.log('🧹 Cleared all auth tokens and localStorage data');
+    console.log('🧹 Cleared all auth tokens');
   } catch (error) {
     console.error('Error clearing auth tokens:', error);
   }
 }
 
 /**
- * Clear all auth data and force a fresh sign-in
- * This is useful when users are stuck in a loading state
+ * Simple session validation
  */
-export async function clearAuthAndReload(): Promise<void> {
-  try {
-    // Sign out from Supabase - this clears all relevant session data
-    await supabase.auth.signOut();
-
-    // Clear any session storage that might contain additional auth data
-    sessionStorage.clear();
-
-    // Reload the page to start fresh
-    window.location.reload();
-  } catch (error) {
-    console.error('Error clearing auth:', error);
-    // Even if there's an error, reload the page
-    window.location.reload();
-  }
-}
-
-/**
- * Generate a unique username for a user
- * Ensures uniqueness by checking against existing usernames
- */
-async function generateUniqueUsername(userId: string): Promise<string> {
-  const baseUsername = `user_${userId.substring(0, 8)}`;
-
-  // Check if the base username already exists
-  const { data: existingUser } = await supabase
-    .from('profiles')
-    .select('username')
-    .eq('username', baseUsername)
-    .single();
-
-  if (!existingUser) {
-    return baseUsername;
-  }
-
-  // If base username exists, try with more characters from the ID
-  const extendedUsername = `user_${userId.substring(0, 12)}`;
-  const { data: existingExtended } = await supabase
-    .from('profiles')
-    .select('username')
-    .eq('username', extendedUsername)
-    .single();
-
-  if (!existingExtended) {
-    return extendedUsername;
-  }
-
-  // If still exists, use the full ID with a timestamp suffix
-  const timestamp = Date.now().toString(36);
-  return `user_${userId.substring(0, 6)}_${timestamp}`;
-}
-
-/**
- * Check if the current user has a valid profile
- * Returns true if the user has a profile, false otherwise
- */
-export async function checkUserProfile(): Promise<boolean> {
+export async function validateSession() {
   try {
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      return false;
-    }
-
-    const { data: profile, error } = await supabase
-      .from('profiles')
-      .select('id, username, full_name')
-      .eq('id', user.id)
-      .single();
+      data: { session },
+      error,
+    } = await supabase.auth.getSession();
 
     if (error) {
-      console.error('Profile check error:', error);
-      return false;
+      console.warn('Session validation error:', error);
+      return null;
     }
 
-    return !!profile;
+    return session;
   } catch (error) {
-    console.error('Error checking user profile:', error);
-    return false;
+    console.error('Error validating session:', error);
+    return null;
   }
 }
 
 /**
- * Create a profile for the current user if one doesn't exist
- * This is useful for users who were created before the profile system
+ * Create a basic profile for the current user
  */
 export async function ensureUserProfile(): Promise<{
   success: boolean;
@@ -151,14 +81,11 @@ export async function ensureUserProfile(): Promise<{
       return { success: true };
     }
 
-    // Generate a unique username for the user
-    const username = await generateUniqueUsername(user.id);
-
-    // Create profile
+    // Create basic profile
     const { error: profileError } = await supabase.from('profiles').insert({
       id: user.id,
       full_name: user.user_metadata?.full_name || '',
-      username,
+      username: `user_${user.id.substring(0, 8)}`,
     });
 
     if (profileError) {
@@ -177,116 +104,14 @@ export async function ensureUserProfile(): Promise<{
 }
 
 /**
- * Force refresh the auth session
- * This can help resolve issues with stale tokens
- */
-export async function refreshAuthSession(): Promise<{
-  success: boolean;
-  error?: string;
-}> {
-  try {
-    const { data, error } = await supabase.auth.refreshSession();
-
-    if (error) {
-      console.error('Session refresh error:', error);
-      return { success: false, error: error.message };
-    }
-
-    if (!data.session) {
-      return { success: false, error: 'No session after refresh' };
-    }
-
-    return { success: true };
-  } catch (error) {
-    console.error('Error refreshing session:', error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
-    };
-  }
-}
-
-/**
- * Comprehensive auth recovery function
- * This tries multiple recovery methods in sequence
- */
-export async function recoverAuth(): Promise<{
-  success: boolean;
-  method: string;
-  error?: string;
-}> {
-  try {
-    // First, try to refresh the session
-    const refreshResult = await refreshAuthSession();
-    if (refreshResult.success) {
-      return { success: true, method: 'session_refresh' };
-    }
-
-    // Check if user has a profile
-    const hasProfile = await checkUserProfile();
-    if (!hasProfile) {
-      // Try to create a profile
-      const profileResult = await ensureUserProfile();
-      if (profileResult.success) {
-        return { success: true, method: 'profile_created' };
-      }
-    }
-
-    // If all else fails, suggest clearing auth
-    return {
-      success: false,
-      method: 'clear_auth_required',
-      error: 'Authentication recovery failed. Please sign in again.',
-    };
-  } catch (error) {
-    console.error('Auth recovery error:', error);
-    return {
-      success: false,
-      method: 'error',
-      error: error instanceof Error ? error.message : 'Unknown error',
-    };
-  }
-}
-
-/**
- * Check if the current session is valid and refresh if needed
- */
-export async function validateSession() {
-  try {
-    const {
-      data: { session },
-      error,
-    } = await supabase.auth.getSession();
-
-    if (error) {
-      console.warn('Session validation error:', error);
-
-      // If it's a refresh token error, clear everything
-      if (
-        error.message?.includes('Invalid Refresh Token') ||
-        error.message?.includes('Refresh Token Not Found')
-      ) {
-        await clearAuthTokens();
-        return null;
-      }
-    }
-
-    return session;
-  } catch (error) {
-    console.error('Error validating session:', error);
-    return null;
-  }
-}
-
-/**
- * Handle authentication errors gracefully
+ * Simple auth error handler
  */
 export function handleAuthError(error: unknown) {
   console.error('Auth error:', error);
 
   const errorMessage = error instanceof Error ? error.message : String(error);
 
-  // Common refresh token errors
+  // Handle common refresh token errors
   if (
     errorMessage.includes('Invalid Refresh Token') ||
     errorMessage.includes('Refresh Token Not Found') ||
@@ -297,18 +122,6 @@ export function handleAuthError(error: unknown) {
     return {
       shouldClearTokens: true,
       message: 'Your session has expired. Please sign in again.',
-    };
-  }
-
-  // Network errors
-  if (
-    errorMessage.includes('Failed to fetch') ||
-    errorMessage.includes('Network error')
-  ) {
-    return {
-      shouldClearTokens: false,
-      message:
-        'Network connection error. Please check your internet connection.',
     };
   }
 
