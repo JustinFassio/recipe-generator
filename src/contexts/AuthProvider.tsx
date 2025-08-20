@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { User } from '@supabase/supabase-js';
+import { User, AuthChangeEvent, Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import type { Profile } from '@/lib/types';
 import { clearAuthTokens, ensureUserProfile } from '@/lib/auth-utils';
@@ -130,25 +130,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event: string, session: any) => {
-      console.log('Auth state change:', event);
+    } = supabase.auth.onAuthStateChange(
+      async (event: AuthChangeEvent, session: Session | null) => {
+        console.log('Auth state change:', event);
 
-      if (!mounted) return;
+        if (!mounted) return;
 
-      if (session?.user) {
-        setUser(session.user);
-        setError(null);
+        if (session?.user) {
+          setUser(session.user);
+          setError(null);
 
-        // Fetch profile for new user
-        const profileData = await fetchProfile(session.user.id);
-        setProfile(profileData);
-      } else {
-        setUser(null);
-        setProfile(null);
+          // Fetch profile for new user
+          const profileData = await fetchProfile(session.user.id);
+          setProfile(profileData);
+        } else {
+          setUser(null);
+          setProfile(null);
+        }
+
+        setLoading(false);
       }
-
-      setLoading(false);
-    });
+    );
 
     return () => {
       mounted = false;

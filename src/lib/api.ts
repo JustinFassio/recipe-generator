@@ -52,7 +52,9 @@ export const recipeApi = {
     if (!recipes || recipes.length === 0) return [];
 
     // Get unique user IDs from recipes
-    const userIds = [...new Set(recipes.map((recipe: any) => recipe.user_id))];
+    const userIds = [
+      ...new Set(recipes.map((recipe: Recipe) => recipe.user_id)),
+    ];
 
     // Fetch profiles for those users
     const { data: profiles, error: profilesError } = await supabase
@@ -64,11 +66,14 @@ export const recipeApi = {
 
     // Create a map of user_id to full_name
     const profileMap = new Map(
-      (profiles || []).map((profile: any) => [profile.id, profile.full_name])
+      (profiles || []).map((profile: { id: string; full_name: string | null }) => [
+        profile.id,
+        profile.full_name,
+      ])
     );
 
     // Combine recipes with profile data
-    return recipes.map((recipe: any) => ({
+    return recipes.map((recipe: Recipe) => ({
       ...recipe,
       author_name: profileMap.get(recipe.user_id) || 'Unknown Author',
     }));
