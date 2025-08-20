@@ -29,9 +29,7 @@ export async function getUserSafety(
       }
       // If the table doesn't exist yet (migrations not run), fail gracefully
       if (error.code === '42P01' || error.code === 'PGRST205') {
-        console.warn(
-          'User safety table does not exist yet. Please run database migrations.'
-        );
+        // Table doesn't exist - this is expected during development
         return null;
       }
       throw error;
@@ -65,9 +63,6 @@ export async function updateUserSafety(
     if (error) {
       // If the table doesn't exist yet (migrations not run), fail gracefully
       if (error.code === '42P01' || error.code === 'PGRST205') {
-        console.warn(
-          'User safety table does not exist yet. Please run database migrations.'
-        );
         return {
           success: false,
           error: 'Database tables not set up yet. Please contact support.',
@@ -104,9 +99,7 @@ export async function getCookingPreferences(
       }
       // If the table doesn't exist yet (migrations not run), fail gracefully
       if (error.code === '42P01' || error.code === 'PGRST205') {
-        console.warn(
-          'Cooking preferences table does not exist yet. Please run database migrations.'
-        );
+        // Table doesn't exist - this is expected during development
         return null;
       }
       throw error;
@@ -143,9 +136,6 @@ export async function updateCookingPreferences(
     if (error) {
       // If the table doesn't exist yet (migrations not run), fail gracefully
       if (error.code === '42P01' || error.code === 'PGRST205') {
-        console.warn(
-          'Cooking preferences table does not exist yet. Please run database migrations.'
-        );
         return {
           success: false,
           error: 'Database tables not set up yet. Please contact support.',
