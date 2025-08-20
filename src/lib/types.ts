@@ -6,7 +6,7 @@ export type Recipe = {
   title: string;
   ingredients: string[];
   instructions: string;
-  notes: string;
+  notes: string | null;
   image_url: string | null;
   user_id: string;
   is_public: boolean;
