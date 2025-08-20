@@ -196,6 +196,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const profileData = await fetchProfile(session.user.id);
         console.log('📋 Profile data received:', profileData);
         setProfile(profileData);
+
+        // If profile fetch fails completely, clear auth and redirect to login
+        if (profileData === null) {
+          console.error('❌ Profile fetch failed, clearing authentication');
+          await clearAuthTokens();
+          setUser(null);
+          setProfile(null);
+          setError('Authentication failed. Please sign in again.');
+        }
+
         setLoading(false);
       } else {
         setUser(null);
