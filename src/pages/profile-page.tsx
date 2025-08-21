@@ -132,8 +132,14 @@ export default function ProfilePage() {
   const [timePerMeal, setTimePerMeal] = useState<number>(
     Number(profile?.time_per_meal) || 30
   );
+  // Robust skill level parsing function
+  function parseSkillLevel(value: unknown): number {
+    const num = typeof value === 'string' ? Number(value) : value;
+    return typeof num === 'number' && !isNaN(num) && num > 0 ? num : 1;
+  }
+
   const [skillLevel, setSkillLevel] = useState<number>(
-    Number(profile?.skill_level) || 1
+    parseSkillLevel(profile?.skill_level)
   );
   const [profileSubmitting, setProfileSubmitting] = useState(false);
 
