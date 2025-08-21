@@ -162,7 +162,9 @@ export default function ProfilePage() {
   };
 
   const handleUsernameChange = (value: string) => {
-    setUsername(value);
+    // Sanitize username input: lowercase and remove invalid characters
+    const sanitizedValue = value.toLowerCase().replace(/[^a-z0-9_]/g, '');
+    setUsername(sanitizedValue);
     setUsernameAvailable(null);
 
     if (usernameTimeoutRef.current) {
@@ -170,7 +172,7 @@ export default function ProfilePage() {
     }
 
     usernameTimeoutRef.current = setTimeout(() => {
-      checkUsername(value);
+      checkUsername(sanitizedValue);
     }, 500);
   };
 
