@@ -133,12 +133,17 @@ export default function ProfilePage() {
     Number(profile?.time_per_meal) || 30
   );
   // Robust skill level parsing function
-  function parseSkillLevel(value: unknown): number {
-    const num = typeof value === 'string' ? Number(value) : value;
-    return typeof num === 'number' && !isNaN(num) && num > 0 ? num : 1;
+  function parseSkillLevel(value: unknown): string {
+    if (typeof value === 'string' && /^[1-5]$/.test(value)) {
+      return value;
+    }
+    if (typeof value === 'number' && value >= 1 && value <= 5) {
+      return value.toString();
+    }
+    return '1'; // Default to beginner
   }
 
-  const [skillLevel, setSkillLevel] = useState<number>(
+  const [skillLevel, setSkillLevel] = useState<string>(
     parseSkillLevel(profile?.skill_level)
   );
   const [profileSubmitting, setProfileSubmitting] = useState(false);
@@ -181,7 +186,7 @@ export default function ProfilePage() {
         language,
         units,
         time_per_meal: timePerMeal,
-        skill_level: skillLevel.toString(),
+        skill_level: skillLevel,
       };
 
       const { success: profileSuccess, error: profileError } =

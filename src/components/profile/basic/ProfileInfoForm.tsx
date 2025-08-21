@@ -38,8 +38,8 @@ interface ProfileInfoFormProps {
   onUnitsChange: (value: string) => void;
   timePerMeal: number;
   onTimePerMealChange: (value: number) => void;
-  skillLevel: number;
-  onSkillLevelChange: (value: number) => void;
+  skillLevel: string;
+  onSkillLevelChange: (value: string) => void;
 
   // Form actions
   onSubmit: (e: React.FormEvent) => Promise<void>;
@@ -252,15 +252,15 @@ export const ProfileInfoForm: React.FC<ProfileInfoFormProps> = ({
         <div className="form-control">
           <label className="label">
             <span className="label-text">
-              Cooking Skill Level: {skillLevelLabels[skillLevel - 1]}
+              Cooking Skill Level: {skillLevelLabels[Number(skillLevel) - 1]}
             </span>
           </label>
           <div className="relative">
             <GraduationCap className="text-base-content/40 absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform" />
             <div className="pl-10">
               <RangeWithTicks
-                value={skillLevel}
-                onChange={onSkillLevelChange}
+                value={Number(skillLevel)}
+                onChange={(value) => onSkillLevelChange(value.toString())}
                 min={1}
                 max={5}
                 ticks={skillLevelLabels}
