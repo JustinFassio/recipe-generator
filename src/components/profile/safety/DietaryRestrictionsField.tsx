@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { FieldLabel, TagToggleGroup } from '@/components/profile/shared';
 import { withTextWrapping } from '@/lib/text-wrapping-migration';
 
@@ -23,88 +23,102 @@ const commonDietaryRestrictions = [
   'Kosher',
 ];
 
-export const DietaryRestrictionsField: React.FC<
-  DietaryRestrictionsFieldProps
-> = ({ values, onChange, className = '' }) => {
-  const [customInput, setCustomInput] = useState('');
+export const DietaryRestrictionsField: React.FC<DietaryRestrictionsFieldProps> =
+  React.memo(({ values, onChange, className = '' }) => {
+    const [customInput, setCustomInput] = useState('');
 
-  const toggleRestriction = (restriction: string) => {
-    if (values.includes(restriction)) {
-      onChange(values.filter((v) => v !== restriction));
-    } else {
-      onChange([...values, restriction]);
-    }
-  };
+    const toggleRestriction = useCallback(
+      (restriction: string) => {
+        if (values.includes(restriction)) {
+          onChange(values.filter((v) => v !== restriction));
+        } else {
+          onChange([...values, restriction]);
+        }
+      },
+      [values, onChange]
+    );
 
-  const addCustomRestriction = () => {
-    const trimmed = customInput.trim();
-    if (trimmed && !values.includes(trimmed)) {
-      onChange([...values, trimmed]);
-      setCustomInput('');
-    }
-  };
+    const addCustomRestriction = useCallback(() => {
+      const trimmed = customInput.trim();
+      if (trimmed && !values.includes(trimmed)) {
+        onChange([...values, trimmed]);
+        setCustomInput('');
+      }
+    }, [customInput, values, onChange]);
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      addCustomRestriction();
-    }
-  };
+    const handleKeyPress = useCallback(
+      (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          addCustomRestriction();
+        }
+      },
+      [addCustomRestriction]
+    );
 
-  return (
-    <div className={`form-control ${className}`}>
-      <FieldLabel>Dietary Restrictions</FieldLabel>
+    const handleInputChange = useCallback(
+      (e: React.ChangeEvent<HTMLInputElement>) => {
+        setCustomInput(e.target.value);
+      },
+      []
+    );
 
-      <TagToggleGroup className="mb-3">
-        {commonDietaryRestrictions.map((restriction) => (
+    return (
+      <div className={`form-control ${className}`}>
+        <FieldLabel>Dietary Restrictions</FieldLabel>
+
+        <TagToggleGroup className="mb-3">
+          {commonDietaryRestrictions.map((restriction) => (
+            <button
+              key={restriction}
+              type="button"
+              className={`btn btn-sm ${
+                values.includes(restriction) ? 'btn-info' : 'btn-outline'
+              }`}
+              onClick={() => toggleRestriction(restriction)}
+            >
+              {restriction}
+            </button>
+          ))}
+        </TagToggleGroup>
+
+        <div className="flex gap-2">
+          <input
+            type="text"
+            className="input-bordered input flex-1"
+            placeholder="Add custom restriction..."
+            value={customInput}
+            onChange={handleInputChange}
+            onKeyPress={handleKeyPress}
+          />
           <button
-            key={restriction}
             type="button"
-            className={`btn btn-sm ${
-              values.includes(restriction) ? 'btn-info' : 'btn-outline'
-            }`}
-            onClick={() => toggleRestriction(restriction)}
+            className="btn btn-outline btn-sm"
+            onClick={addCustomRestriction}
+            disabled={!customInput.trim()}
           >
-            {restriction}
+            Add
           </button>
-        ))}
-      </TagToggleGroup>
-
-      <div className="flex gap-2">
-        <input
-          type="text"
-          className="input-bordered input flex-1"
-          placeholder="Add custom restriction..."
-          value={customInput}
-          onChange={(e) => setCustomInput(e.target.value)}
-          onKeyPress={handleKeyPress}
-        />
-        <button
-          type="button"
-          className="btn btn-outline btn-sm"
-          onClick={addCustomRestriction}
-          disabled={!customInput.trim()}
-        >
-          Add
-        </button>
-      </div>
-
-      {values.length > 0 && (
-        <div className="mt-2">
-          <span className="text-sm font-medium">Selected:</span>
-          <div className={`mt-1 flex flex-wrap gap-1 ${withTextWrapping()}`}>
-            {values.map((restriction) => (
-              <span
-                key={restriction}
-                className="badge badge-info cursor-pointer"
-                onClick={() => toggleRestriction(restriction)}
-              >
-                {restriction} ×
-              </span>
-            ))}
-          </div>
         </div>
-      )}
-    </div>
-  );
-};
+
+        {values.length > 0 && (
+          <div className="mt-2">
+            <span className="text-sm font-medium">Selected:</span>
+            <div className={`mt-1 flex flex-wrap gap-1 ${withTextWrapping()}`}>
+              {values.map((restriction) => (
+                <span
+                  key={restriction}
+                  className="badge badge-info cursor-pointer"
+                  onClick={() => toggleRestriction(restriction)}
+                >
+                  {restriction} ×
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  });
+
+DietaryRestrictionsField.displayName = 'DietaryRestrictionsField';
