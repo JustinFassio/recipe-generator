@@ -1,31 +1,13 @@
 import React, { useState } from 'react';
 import { FieldLabel, TagToggleGroup } from '@/components/profile/shared';
 import { withTextWrapping } from '@/lib/text-wrapping-migration';
+import { commonEquipment } from '@/components/profile/constants';
 
 interface EquipmentFieldProps {
   values: string[];
   onChange: (values: string[]) => void;
   className?: string;
 }
-
-const commonEquipment = [
-  'Oven',
-  'Stovetop',
-  'Microwave',
-  'Air Fryer',
-  'Slow Cooker',
-  'Pressure Cooker',
-  'Rice Cooker',
-  'Blender',
-  'Food Processor',
-  'Stand Mixer',
-  'Grill',
-  'Cast Iron Pan',
-  'Non-stick Pan',
-  'Wok',
-  'Dutch Oven',
-  'Baking Sheets',
-];
 
 export const EquipmentField: React.FC<EquipmentFieldProps> = ({
   values,

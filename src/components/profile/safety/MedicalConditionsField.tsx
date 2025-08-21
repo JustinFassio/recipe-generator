@@ -1,23 +1,13 @@
 import React, { useState } from 'react';
 import { FieldLabel, TagToggleGroup } from '@/components/profile/shared';
 import { withTextWrapping } from '@/lib/text-wrapping-migration';
+import { commonMedicalConditions } from '@/components/profile/constants';
 
 interface MedicalConditionsFieldProps {
   values: string[];
   onChange: (values: string[]) => void;
   className?: string;
 }
-
-const commonMedicalConditions = [
-  'Diabetes',
-  'High Blood Pressure',
-  'Heart Disease',
-  'Kidney Disease',
-  'Liver Disease',
-  'Celiac Disease',
-  'IBS',
-  'GERD',
-];
 
 export const MedicalConditionsField: React.FC<MedicalConditionsFieldProps> = ({
   values,

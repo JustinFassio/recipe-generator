@@ -1,31 +1,13 @@
 import React, { useState } from 'react';
 import { FieldLabel, TagToggleGroup } from '@/components/profile/shared';
 import { withTextWrapping } from '@/lib/text-wrapping-migration';
+import { commonDislikedIngredients } from '@/components/profile/constants';
 
 interface DislikedIngredientsFieldProps {
   values: string[];
   onChange: (values: string[]) => void;
   className?: string;
 }
-
-const commonDislikedIngredients = [
-  'Mushrooms',
-  'Onions',
-  'Garlic',
-  'Cilantro',
-  'Olives',
-  'Tomatoes',
-  'Bell Peppers',
-  'Spicy Peppers',
-  'Coconut',
-  'Seafood',
-  'Liver',
-  'Blue Cheese',
-  'Anchovies',
-  'Pickles',
-  'Avocado',
-  'Eggplant',
-];
 
 export const DislikedIngredientsField: React.FC<
   DislikedIngredientsFieldProps

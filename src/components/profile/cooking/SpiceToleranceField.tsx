@@ -1,13 +1,12 @@
 import React from 'react';
 import { FieldLabel, RangeWithTicks } from '@/components/profile/shared';
+import { spiceLabels } from '@/components/profile/constants';
 
 interface SpiceToleranceFieldProps {
   value: number;
   onChange: (value: number) => void;
   className?: string;
 }
-
-const spiceLabels = ['Mild', 'Medium', 'Hot', 'Very Hot', 'Extreme'];
 
 export const SpiceToleranceField: React.FC<SpiceToleranceFieldProps> = ({
   value,

@@ -1,27 +1,13 @@
 import React, { useState } from 'react';
 import { FieldLabel, TagToggleGroup } from '@/components/profile/shared';
 import { withTextWrapping } from '@/lib/text-wrapping-migration';
+import { commonDietaryRestrictions } from '@/components/profile/constants';
 
 interface DietaryRestrictionsFieldProps {
   values: string[];
   onChange: (values: string[]) => void;
   className?: string;
 }
-
-const commonDietaryRestrictions = [
-  'Vegetarian',
-  'Vegan',
-  'Pescatarian',
-  'Keto',
-  'Paleo',
-  'Low Carb',
-  'Low Fat',
-  'Low Sodium',
-  'Gluten-Free',
-  'Dairy-Free',
-  'Halal',
-  'Kosher',
-];
 
 export const DietaryRestrictionsField: React.FC<
   DietaryRestrictionsFieldProps

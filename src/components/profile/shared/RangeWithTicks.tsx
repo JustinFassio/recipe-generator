@@ -7,7 +7,7 @@ interface RangeWithTicksProps {
   max: number;
   step?: number;
   className?: string;
-  ticks?: string[];
+  ticks?: readonly string[];
 }
 
 export const RangeWithTicks: React.FC<RangeWithTicksProps> = ({

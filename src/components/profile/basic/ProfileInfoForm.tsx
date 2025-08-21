@@ -5,6 +5,11 @@ import {
   RangeWithTicks,
 } from '@/components/profile/shared';
 import {
+  timePerMealLabels,
+  skillLevelLabels,
+  USERNAME_PATTERN,
+} from '@/components/profile/constants';
+import {
   User,
   AtSign,
   MapPin,
@@ -16,9 +21,6 @@ import {
   X,
   Loader2,
 } from 'lucide-react';
-
-// Username validation constant
-const USERNAME_PATTERN = '^[a-z0-9_]+$';
 
 interface ProfileInfoFormProps {
   // Form data
@@ -49,15 +51,6 @@ interface ProfileInfoFormProps {
   submitting: boolean;
   className?: string;
 }
-
-const timePerMealLabels = ['15m', '30m', '45m', '60m', '90m+'];
-const skillLevelLabels = [
-  'Beginner',
-  'Intermediate',
-  'Advanced',
-  'Expert',
-  'Chef',
-];
 
 export const ProfileInfoForm: React.FC<ProfileInfoFormProps> = ({
   fullName,

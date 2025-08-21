@@ -1,31 +1,13 @@
 import React, { useState } from 'react';
 import { FieldLabel, TagToggleGroup } from '@/components/profile/shared';
 import { withTextWrapping } from '@/lib/text-wrapping-migration';
+import { commonCuisines } from '@/components/profile/constants';
 
 interface PreferredCuisinesFieldProps {
   values: string[];
   onChange: (values: string[]) => void;
   className?: string;
 }
-
-const commonCuisines = [
-  'American',
-  'Italian',
-  'Mexican',
-  'Chinese',
-  'Japanese',
-  'Indian',
-  'Thai',
-  'French',
-  'Mediterranean',
-  'Greek',
-  'Korean',
-  'Vietnamese',
-  'Spanish',
-  'Middle Eastern',
-  'German',
-  'British',
-];
 
 export const PreferredCuisinesField: React.FC<PreferredCuisinesFieldProps> = ({
   values,

@@ -1,25 +1,13 @@
 import React, { useState } from 'react';
 import { FieldLabel, TagToggleGroup } from '@/components/profile/shared';
 import { withTextWrapping } from '@/lib/text-wrapping-migration';
+import { commonAllergens } from '@/components/profile/constants';
 
 interface AllergiesFieldProps {
   values: string[];
   onChange: (values: string[]) => void;
   className?: string;
 }
-
-const commonAllergens = [
-  'Peanuts',
-  'Tree Nuts',
-  'Milk',
-  'Eggs',
-  'Fish',
-  'Shellfish',
-  'Soy',
-  'Wheat',
-  'Sesame',
-  'Sulfites',
-];
 
 export const AllergiesField: React.FC<AllergiesFieldProps> = ({
   values,
