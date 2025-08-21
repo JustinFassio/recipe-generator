@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthProvider';
 import { useToast } from '@/hooks/use-toast';
 import { updateProfile } from '@/lib/auth';
+import { MIN_TIME_PER_MEAL, MAX_TIME_PER_MEAL } from '@/lib/user-preferences';
 
 // Data interface for profile basics updates
 export interface ProfileBasicsData {
@@ -93,9 +94,11 @@ export function useProfileBasics(): UseProfileBasicsReturn {
           return false;
         }
 
-        // Validate time per meal (should be a positive number)
-        if (data.time_per_meal <= 0 || data.time_per_meal > 300) {
-          // Max 5 hours
+        // Validate time per meal (should be within established bounds)
+        if (
+          data.time_per_meal < MIN_TIME_PER_MEAL ||
+          data.time_per_meal > MAX_TIME_PER_MEAL
+        ) {
           return false;
         }
 
