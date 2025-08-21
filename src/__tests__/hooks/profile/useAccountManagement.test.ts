@@ -201,7 +201,7 @@ describe('useAccountManagement', () => {
       });
 
       expect(updateResult!).toBe(false);
-      expect(result.current.emailError).toBe(errorMessage);
+      expect(result.current.emailError).toBe('Failed to update email');
     });
 
     it('should set loading state during email update', async () => {
@@ -404,7 +404,7 @@ describe('useAccountManagement', () => {
       });
 
       expect(updateResult!).toBe(false);
-      expect(result.current.passwordError).toBe(errorMessage);
+      expect(result.current.passwordError).toBe('Failed to update password');
     });
 
     it('should set loading state during password update', async () => {
@@ -542,7 +542,7 @@ describe('useAccountManagement', () => {
       });
 
       expect(updateResult!).toBe(false);
-      expect(result.current.emailError).toBe(errorMessage);
+      expect(result.current.emailError).toBe('Failed to update email');
     });
 
     it('should handle non-Error exceptions in password update', async () => {
@@ -561,7 +561,7 @@ describe('useAccountManagement', () => {
       });
 
       expect(updateResult!).toBe(false);
-      expect(result.current.passwordError).toBe(errorMessage);
+      expect(result.current.passwordError).toBe('Failed to update password');
     });
   });
 

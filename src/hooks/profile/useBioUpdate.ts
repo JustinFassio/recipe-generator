@@ -71,7 +71,6 @@ export function useBioUpdate(): UseBioUpdateReturn {
         variant: 'destructive',
       });
 
-      setError('Failed to update bio');
       return false;
     } finally {
       setLoading(false);

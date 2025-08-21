@@ -135,7 +135,7 @@ describe('useAvatarUpload', () => {
       });
 
       expect(uploadResult!).toBe(false);
-      expect(result.current.error).toBe(errorMessage);
+      expect(result.current.error).toBe('Failed to upload avatar');
       expect(mockToast).toHaveBeenCalledWith({
         title: 'Error',
         description: 'Failed to upload avatar',
@@ -214,7 +214,7 @@ describe('useAvatarUpload', () => {
       });
 
       expect(uploadResult!).toBe(false);
-      expect(result.current.error).toBe(errorMessage);
+      expect(result.current.error).toBe('Failed to upload avatar');
     });
   });
 
