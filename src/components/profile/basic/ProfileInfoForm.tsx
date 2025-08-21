@@ -17,6 +17,9 @@ import {
   Loader2,
 } from 'lucide-react';
 
+// Username validation constant
+const USERNAME_PATTERN = '^[a-z0-9_]+$';
+
 interface ProfileInfoFormProps {
   // Form data
   fullName: string;
@@ -132,7 +135,7 @@ export const ProfileInfoForm: React.FC<ProfileInfoFormProps> = ({
               value={username}
               onChange={(e) => onUsernameChange(e.target.value)}
               placeholder="Choose a unique username"
-              pattern="^[a-z0-9_]+$"
+              pattern={USERNAME_PATTERN}
               minLength={3}
               maxLength={24}
             />

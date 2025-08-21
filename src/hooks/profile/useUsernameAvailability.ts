@@ -3,6 +3,9 @@ import { useAuth } from '@/contexts/AuthProvider';
 import { useToast } from '@/hooks/use-toast';
 import { checkUsernameAvailability, claimUsername } from '@/lib/auth';
 
+// Username validation constants
+const USERNAME_SANITIZATION_REGEX = /[^a-z0-9_]/g;
+
 // Hook return interface
 export interface UseUsernameAvailabilityReturn {
   // State
@@ -150,7 +153,9 @@ export function useUsernameAvailability(): UseUsernameAvailabilityReturn {
   const handleUsernameChange = useCallback(
     (value: string) => {
       // Sanitize username input: lowercase and remove invalid characters
-      const sanitizedValue = value.toLowerCase().replace(/[^a-z0-9_]/g, '');
+      const sanitizedValue = value
+        .toLowerCase()
+        .replace(USERNAME_SANITIZATION_REGEX, '');
       setUsername(sanitizedValue);
       setIsAvailable(null);
       setError(null);
