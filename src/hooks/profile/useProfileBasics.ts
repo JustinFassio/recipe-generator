@@ -34,7 +34,7 @@ export interface UseProfileBasicsReturn {
   setTimePerMeal: (value: number) => void;
   setSkillLevel: (value: string) => void;
 
-  // Utility functions
+  // Utility function to parse skill level from unknown input
   parseSkillLevel: (value: unknown) => string;
 }
 
@@ -205,7 +205,7 @@ export function useProfileBasics(): UseProfileBasicsReturn {
     setTimePerMeal,
     setSkillLevel,
 
-    // Utility functions
+    // Utility function to parse skill level from unknown input
     parseSkillLevel,
   };
 }
