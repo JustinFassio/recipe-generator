@@ -191,7 +191,7 @@ describe('useBioUpdate', () => {
       });
 
       expect(saveResult!).toBe(false);
-      expect(result.current.error).toBe('Failed to update bio');
+      expect(result.current.error).toBe(errorMessage);
     });
 
     it('should set loading state during save operation', async () => {
@@ -324,7 +324,7 @@ describe('useBioUpdate', () => {
       });
 
       expect(saveResult!).toBe(false);
-      expect(result.current.error).toBe('Failed to update bio');
+      expect(result.current.error).toBe(errorMessage);
     });
   });
 

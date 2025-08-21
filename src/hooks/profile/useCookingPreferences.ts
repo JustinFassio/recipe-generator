@@ -81,13 +81,8 @@ export function useCookingPreferences(): UseCookingPreferencesReturn {
         setDislikedIngredients([]);
         setSpiceTolerance(3);
       }
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error
-          ? err.message
-          : 'Failed to load cooking preferences';
-      setError(errorMessage);
-      console.error('Error loading cooking preferences:', err);
+    } catch {
+      setError('Failed to load cooking preferences');
     } finally {
       setLoading(false);
     }
@@ -133,8 +128,8 @@ export function useCookingPreferences(): UseCookingPreferencesReturn {
         }
 
         return true;
-      } catch (err) {
-        console.error('Error validating cooking preferences data:', err);
+      } catch {
+        setError('Validation error occurred');
         return false;
       }
     },
