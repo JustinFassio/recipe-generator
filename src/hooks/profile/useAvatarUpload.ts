@@ -67,7 +67,6 @@ export function useAvatarUpload(): UseAvatarUploadReturn {
           variant: 'destructive',
         });
 
-        console.error('Error uploading avatar:', err);
         return false;
       } finally {
         setLoading(false);

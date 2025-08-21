@@ -74,11 +74,8 @@ export function useUserSafety(): UseUserSafetyReturn {
         setDietaryRestrictions([]);
         setMedicalConditions([]);
       }
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : 'Failed to load safety data';
-      setError(errorMessage);
-      console.error('Error loading user safety data:', err);
+    } catch {
+      setError('Failed to load safety preferences');
     } finally {
       setLoading(false);
     }
@@ -113,8 +110,8 @@ export function useUserSafety(): UseUserSafetyReturn {
       }
 
       return true;
-    } catch (err) {
-      console.error('Error validating safety data:', err);
+    } catch {
+      setError('Validation error occurred');
       return false;
     }
   }, []);
@@ -158,14 +155,12 @@ export function useUserSafety(): UseUserSafetyReturn {
         } else {
           throw new Error(result.error || 'Failed to save safety preferences');
         }
-      } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : 'Failed to save safety data';
-        setError(errorMessage);
+      } catch {
+        setError('Failed to save safety data');
 
         toast({
           title: 'Error',
-          description: errorMessage,
+          description: 'Failed to save safety data',
           variant: 'destructive',
         });
       } finally {
