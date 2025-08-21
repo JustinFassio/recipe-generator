@@ -17,29 +17,37 @@ vi.mock('@/lib/supabase', () => ({
       })),
       signOut: vi.fn(() => Promise.resolve({ error: null })),
     },
-    from: vi.fn(() => ({
-      select: vi.fn(() => ({
-        order: vi.fn(() => Promise.resolve({ data: [], error: null })),
-      })),
-      eq: vi.fn(() => ({
-        single: vi.fn(() => Promise.resolve({ data: null, error: null })),
-      })),
-      insert: vi.fn(() => ({
+    from: vi.fn(() => {
+      const chain = {
         select: vi.fn(() => ({
+          // support both select().eq().single() and select().order()
+          eq: vi.fn(() => ({
+            single: vi.fn(() => Promise.resolve({ data: null, error: null })),
+          })),
+          order: vi.fn(() => Promise.resolve({ data: [], error: null })),
           single: vi.fn(() => Promise.resolve({ data: null, error: null })),
         })),
-      })),
-      update: vi.fn(() => ({
         eq: vi.fn(() => ({
+          single: vi.fn(() => Promise.resolve({ data: null, error: null })),
+        })),
+        insert: vi.fn(() => ({
           select: vi.fn(() => ({
             single: vi.fn(() => Promise.resolve({ data: null, error: null })),
           })),
         })),
-      })),
-      delete: vi.fn(() => ({
-        eq: vi.fn(() => Promise.resolve({ error: null })),
-      })),
-    })),
+        update: vi.fn(() => ({
+          eq: vi.fn(() => ({
+            select: vi.fn(() => ({
+              single: vi.fn(() => Promise.resolve({ data: null, error: null })),
+            })),
+          })),
+        })),
+        delete: vi.fn(() => ({
+          eq: vi.fn(() => Promise.resolve({ error: null })),
+        })),
+      };
+      return chain;
+    }),
     storage: {
       from: vi.fn(() => ({
         upload: vi.fn(() => Promise.resolve({ error: null })),
@@ -133,6 +141,49 @@ vi.mock('@/contexts/AuthProvider', () => ({
     signOut: vi.fn(),
     refreshProfile: vi.fn(),
   })),
+}));
+
+// Globally stub app data layer to keep page/integration tests simple and deterministic
+vi.mock('@/lib/user-preferences', () => ({
+  getUserSafety: vi.fn().mockResolvedValue({
+    allergies: [],
+    dietary_restrictions: [],
+    medical_conditions: [],
+  }),
+  updateUserSafety: vi.fn().mockResolvedValue({ success: true }),
+  getCookingPreferences: vi.fn().mockResolvedValue({
+    preferred_cuisines: [],
+    available_equipment: [],
+    disliked_ingredients: [],
+    spice_tolerance: 3,
+  }),
+  updateCookingPreferences: vi.fn().mockResolvedValue({ success: true }),
+  validateAllergies: vi.fn((allergies: string[]) =>
+    allergies.every((allergy) => allergy.trim().length > 0)
+  ),
+  validateSpiceTolerance: vi.fn(
+    (level: number) => Number.isInteger(level) && level >= 1 && level <= 5
+  ),
+  validateTimePerMeal: vi.fn(
+    (minutes: number) =>
+      Number.isInteger(minutes) && minutes >= 10 && minutes <= 120
+  ),
+  MIN_SPICE_TOLERANCE: 1,
+  MAX_SPICE_TOLERANCE: 5,
+  MIN_TIME_PER_MEAL: 10,
+  MAX_TIME_PER_MEAL: 120,
+}));
+
+vi.mock('@/lib/auth', () => ({
+  updateProfile: vi.fn().mockResolvedValue({ success: true }),
+  updateEmail: vi.fn().mockResolvedValue({ success: true }),
+  updatePassword: vi.fn().mockResolvedValue({ success: true }),
+  uploadAvatar: vi.fn().mockResolvedValue({
+    success: true,
+    avatarUrl: 'https://example.com/avatar.jpg',
+  }),
+  checkUsernameAvailability: vi.fn().mockResolvedValue({ available: true }),
+  claimUsername: vi.fn().mockResolvedValue({ success: true }),
 }));
 
 // Mock window.matchMedia

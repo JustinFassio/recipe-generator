@@ -1,6 +1,9 @@
 import { supabase } from './supabase';
 import type { Profile, AuthError } from './types';
 
+// Username validation constants
+const USERNAME_VALIDATION_REGEX = /^[a-z0-9_]{3,24}$/;
+
 // Simple error handler
 function createAuthError(
   message: string,
@@ -260,7 +263,7 @@ export async function checkUsernameAvailability(
 ): Promise<{ available: boolean; error?: AuthError }> {
   try {
     // Basic client-side validation
-    if (!/^[a-z0-9_]{3,24}$/.test(username)) {
+    if (!USERNAME_VALIDATION_REGEX.test(username)) {
       return {
         available: false,
         error: createAuthError(
@@ -314,7 +317,7 @@ export async function claimUsername(
     }
 
     // Basic client-side validation
-    if (!/^[a-z0-9_]{3,24}$/.test(username)) {
+    if (!USERNAME_VALIDATION_REGEX.test(username)) {
       return {
         success: false,
         error: createAuthError(
