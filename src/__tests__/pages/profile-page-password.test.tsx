@@ -37,6 +37,11 @@ vi.mock('@/lib/auth', () => ({
 // Mock toast
 vi.mock('@/hooks/use-toast', () => ({
   toast: vi.fn(),
+  useToast: vi.fn(() => ({
+    toast: vi.fn(),
+    dismiss: vi.fn(),
+    toasts: [],
+  })),
 }));
 
 // Test wrapper
