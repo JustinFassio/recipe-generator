@@ -12,6 +12,11 @@ interface InlineIconInputProps {
   pattern?: string;
   minLength?: number;
   maxLength?: number;
+  id?: string;
+  'aria-label'?: string;
+  'aria-describedby'?: string;
+  'aria-invalid'?: boolean;
+  'aria-required'?: boolean;
 }
 
 export const InlineIconInput: React.FC<InlineIconInputProps> = ({
@@ -25,6 +30,11 @@ export const InlineIconInput: React.FC<InlineIconInputProps> = ({
   pattern,
   minLength,
   maxLength,
+  id,
+  'aria-label': ariaLabel,
+  'aria-describedby': ariaDescribedby,
+  'aria-invalid': ariaInvalid,
+  'aria-required': ariaRequired,
 }) => {
   return (
     <div className="relative">
@@ -34,6 +44,7 @@ export const InlineIconInput: React.FC<InlineIconInputProps> = ({
       />
       <input
         type={type}
+        id={id}
         className={`input-bordered input w-full pl-10 ${className}`}
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -42,6 +53,10 @@ export const InlineIconInput: React.FC<InlineIconInputProps> = ({
         pattern={pattern}
         minLength={minLength}
         maxLength={maxLength}
+        aria-label={ariaLabel}
+        aria-describedby={ariaDescribedby}
+        aria-invalid={ariaInvalid}
+        aria-required={ariaRequired}
       />
     </div>
   );

@@ -18,7 +18,7 @@ describe('AvatarCard', () => {
       />
     );
 
-    const avatarImage = screen.getByAltText('Profile');
+    const avatarImage = screen.getByAltText('Your profile picture');
     expect(avatarImage).toBeInTheDocument();
     expect(avatarImage).toHaveAttribute(
       'src',

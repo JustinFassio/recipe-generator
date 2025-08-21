@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useId } from 'react';
 import {
   SectionCard,
   InlineIconInput,
@@ -81,6 +81,17 @@ export const ProfileInfoForm: React.FC<ProfileInfoFormProps> = ({
   submitting,
   className = '',
 }) => {
+  const formId = useId();
+  const fullNameId = `${formId}-fullname`;
+  const currentUsernameId = `${formId}-current-username`;
+  const usernameId = `${formId}-username`;
+  // Note: These IDs are prepared for future accessibility enhancements
+  // const regionId = `${formId}-region`;
+  // const languageId = `${formId}-language`;
+  // const unitsId = `${formId}-units`;
+  // const timePerMealId = `${formId}-time-per-meal`;
+  // const skillLevelId = `${formId}-skill-level`;
+  const usernameStatusId = `${formId}-username-status`;
   return (
     <SectionCard className={className}>
       <h2 className="card-title">Profile Information</h2>
@@ -88,42 +99,50 @@ export const ProfileInfoForm: React.FC<ProfileInfoFormProps> = ({
       <form onSubmit={onSubmit} className="space-y-4">
         {/* Full Name */}
         <div className="form-control">
-          <label className="label">
+          <label className="label" htmlFor={fullNameId}>
             <span className="label-text">Full Name</span>
           </label>
           <InlineIconInput
+            id={fullNameId}
             icon={User}
             value={fullName}
             onChange={onFullNameChange}
             placeholder="Your full name"
+            aria-required={true}
           />
         </div>
 
         {/* Current Username */}
         {currentUsername && (
           <div className="form-control">
-            <label className="label">
+            <label className="label" htmlFor={currentUsernameId}>
               <span className="label-text">Current Username</span>
             </label>
             <InlineIconInput
+              id={currentUsernameId}
               icon={AtSign}
               value={currentUsername}
               onChange={() => {}} // disabled
               disabled={true}
+              aria-label="Current username (read-only)"
             />
           </div>
         )}
 
         {/* New Username */}
         <div className="form-control">
-          <label className="label">
+          <label className="label" htmlFor={usernameId}>
             <span className="label-text">
               {currentUsername ? 'Change Username' : 'Claim Username'}
             </span>
           </label>
           <div className="relative">
-            <AtSign className="text-base-content/40 absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform" />
+            <AtSign
+              className="text-base-content/40 absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform"
+              aria-hidden="true"
+            />
             <input
+              id={usernameId}
               type="text"
               className={`input-bordered input w-full pl-10 pr-10 ${
                 username && usernameAvailable === true
@@ -138,8 +157,16 @@ export const ProfileInfoForm: React.FC<ProfileInfoFormProps> = ({
               pattern={USERNAME_PATTERN}
               minLength={3}
               maxLength={24}
+              aria-describedby={usernameStatusId}
+              aria-invalid={
+                username && usernameAvailable === false ? true : undefined
+              }
+              aria-required={true}
             />
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 transform">
+            <div
+              className="absolute right-3 top-1/2 -translate-y-1/2 transform"
+              aria-hidden="true"
+            >
               {usernameChecking ? (
                 <Loader2 className="h-4 w-4 animate-spin text-primary" />
               ) : username ? (
@@ -152,25 +179,26 @@ export const ProfileInfoForm: React.FC<ProfileInfoFormProps> = ({
             </div>
           </div>
           {username && (
-            <label className="label">
-              <span
-                className={`label-text-alt ${
-                  usernameAvailable === true
-                    ? 'text-success'
-                    : usernameAvailable === false
-                      ? 'text-error'
-                      : ''
-                }`}
-              >
-                {usernameChecking
-                  ? 'Checking availability...'
-                  : usernameAvailable === true
-                    ? 'Username is available!'
-                    : usernameAvailable === false
-                      ? 'Username is not available'
-                      : 'Enter 3-24 characters (lowercase letters, numbers, _)'}
-              </span>
-            </label>
+            <div
+              id={usernameStatusId}
+              className={`label-text-alt mt-1 ${
+                usernameAvailable === true
+                  ? 'text-success'
+                  : usernameAvailable === false
+                    ? 'text-error'
+                    : ''
+              }`}
+              aria-live="polite"
+              aria-atomic="true"
+            >
+              {usernameChecking
+                ? 'Checking availability...'
+                : usernameAvailable === true
+                  ? 'Username is available!'
+                  : usernameAvailable === false
+                    ? 'Username is not available'
+                    : 'Enter 3-24 characters (lowercase letters, numbers, _)'}
+            </div>
           )}
         </div>
 

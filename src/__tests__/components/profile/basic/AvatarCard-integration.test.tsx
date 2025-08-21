@@ -24,7 +24,7 @@ describe('AvatarCard Integration with useAvatarUpload', () => {
   it('renders avatar card with current avatar', () => {
     render(<AvatarCard {...mockAvatarUpload} />);
 
-    expect(screen.getByAltText('Profile')).toBeInTheDocument();
+    expect(screen.getByAltText('Your profile picture')).toBeInTheDocument();
     expect(
       screen.getByRole('button', { name: /change photo/i })
     ).toBeInTheDocument();
