@@ -37,7 +37,7 @@ import { EmailCard, PasswordCard } from '@/components/profile/account';
 export default function ProfilePage() {
   const { user, profile } = useAuth();
 
-  // Phase 2: All profile functionality via hooks
+  // All profile functionality via hooks
   const userSafety = useUserSafety();
   const cookingPrefs = useCookingPreferences();
   const usernameAvailability = useUsernameAvailability();
@@ -52,13 +52,13 @@ export default function ProfilePage() {
       if (!user?.id) return;
 
       try {
-        // Load data via hooks (Phase 2)
+        // Load data via hooks
         await Promise.all([
           userSafety.loadUserSafety(),
           cookingPrefs.loadCookingPreferences(),
         ]);
-      } catch (error) {
-        console.error('Error loading user preferences:', error);
+      } catch {
+        // Error handling is managed by individual hooks
       }
     };
 
@@ -111,12 +111,12 @@ export default function ProfilePage() {
     }
   };
 
-  // Wrapper handlers to match component expectations
-  const handleAvatarUpload = async (file: File) => {
+  // Wrapper handlers for component compatibility
+  const handleAvatarUpload = async (file: File): Promise<void> => {
     await avatarUpload.uploadAvatar(file);
   };
 
-  const handleBioSave = async () => {
+  const handleBioSave = async (): Promise<void> => {
     await bioUpdate.saveBio();
   };
 
