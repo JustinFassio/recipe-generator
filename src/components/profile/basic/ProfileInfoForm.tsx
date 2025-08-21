@@ -186,12 +186,13 @@ export const ProfileInfoForm: React.FC<ProfileInfoFormProps> = ({
 
         {/* Language */}
         <div className="form-control">
-          <label className="label">
+          <label className="label" htmlFor="language-select">
             <span className="label-text">Language</span>
           </label>
           <div className="relative">
             <Globe className="text-base-content/40 absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform" />
             <select
+              id="language-select"
               className="select-bordered select w-full pl-10"
               value={language}
               onChange={(e) => onLanguageChange(e.target.value)}
@@ -211,12 +212,13 @@ export const ProfileInfoForm: React.FC<ProfileInfoFormProps> = ({
 
         {/* Units */}
         <div className="form-control">
-          <label className="label">
+          <label className="label" htmlFor="units-select">
             <span className="label-text">Measurement Units</span>
           </label>
           <div className="relative">
             <Ruler className="text-base-content/40 absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform" />
             <select
+              id="units-select"
               className="select-bordered select w-full pl-10"
               value={units}
               onChange={(e) => onUnitsChange(e.target.value)}

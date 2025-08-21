@@ -6,7 +6,9 @@ import { useAvatarUpload } from '@/hooks/profile/useAvatarUpload';
 // Mock the hook
 vi.mock('@/hooks/profile/useAvatarUpload');
 
-const mockUseAvatarUpload = useAvatarUpload as vi.MockedFunction<typeof useAvatarUpload>;
+const mockUseAvatarUpload = useAvatarUpload as vi.MockedFunction<
+  typeof useAvatarUpload
+>;
 
 describe('AvatarCard Integration with useAvatarUpload', () => {
   const mockAvatarUpload = {
@@ -23,7 +25,9 @@ describe('AvatarCard Integration with useAvatarUpload', () => {
     render(<AvatarCard {...mockAvatarUpload} />);
 
     expect(screen.getByAltText('Profile')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /change photo/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /change photo/i })
+    ).toBeInTheDocument();
   });
 
   it('handles file upload', async () => {
@@ -35,9 +39,11 @@ describe('AvatarCard Integration with useAvatarUpload', () => {
 
     // Simulate file selection by clicking the button and then triggering file input
     fireEvent.click(fileInput);
-    
+
     // Get the hidden file input and trigger change
-    const hiddenFileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+    const hiddenFileInput = document.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement;
     fireEvent.change(hiddenFileInput, { target: { files: [file] } });
 
     await waitFor(() => {
@@ -56,14 +62,18 @@ describe('AvatarCard Integration with useAvatarUpload', () => {
     render(<AvatarCard {...mockAvatarUpload} avatarUrl={null} />);
 
     // Should show default avatar placeholder (User icon)
-    expect(screen.getByRole('button', { name: /change photo/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /change photo/i })
+    ).toBeInTheDocument();
     // The User icon should be present in the default avatar
   });
 
   it('accepts only image files', () => {
     render(<AvatarCard {...mockAvatarUpload} />);
 
-    const hiddenFileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+    const hiddenFileInput = document.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement;
     expect(hiddenFileInput).toHaveAttribute('accept', 'image/*');
   });
 });

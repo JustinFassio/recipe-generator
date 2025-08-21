@@ -1,20 +1,15 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthProvider';
-import {
-  updateProfile,
-  updateEmail,
-  updatePassword,
-  claimUsername,
-  checkUsernameAvailability,
-  uploadAvatar,
-} from '@/lib/auth';
 import { toast } from '@/hooks/use-toast';
-import { getUserSafety, getCookingPreferences } from '@/lib/user-preferences';
 import {
+  useUserSafety,
+  useCookingPreferences,
+  useUsernameAvailability,
+  useProfileBasics,
+  useAvatarUpload,
   useBioUpdate,
-  useUserSafetyUpdate,
-  useCookingPreferencesUpdate,
-} from '@/hooks/useProfileUpdate';
+  useAccountManagement,
+} from '@/hooks/profile';
 
 // Component imports
 import {
@@ -40,22 +35,16 @@ import {
 import { EmailCard, PasswordCard } from '@/components/profile/account';
 
 export default function ProfilePage() {
-  const { user, profile, refreshProfile } = useAuth();
-  const usernameTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const { user, profile } = useAuth();
 
-  // Hooks for profile updates
+  // Phase 2: All profile functionality via hooks
+  const userSafety = useUserSafety();
+  const cookingPrefs = useCookingPreferences();
+  const usernameAvailability = useUsernameAvailability();
+  const profileBasics = useProfileBasics();
+  const avatarUpload = useAvatarUpload();
   const bioUpdate = useBioUpdate();
-  const safetyUpdate = useUserSafetyUpdate();
-  const cookingUpdate = useCookingPreferencesUpdate();
-
-  // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (usernameTimeoutRef.current) {
-        clearTimeout(usernameTimeoutRef.current);
-      }
-    };
-  }, []);
+  const accountManagement = useAccountManagement();
 
   // Load user preferences data
   useEffect(() => {
@@ -63,118 +52,21 @@ export default function ProfilePage() {
       if (!user?.id) return;
 
       try {
-        const [safetyData, cookingData] = await Promise.all([
-          getUserSafety(user.id),
-          getCookingPreferences(user.id),
+        // Load data via hooks (Phase 2)
+        await Promise.all([
+          userSafety.loadUserSafety(),
+          cookingPrefs.loadCookingPreferences(),
         ]);
-
-        if (safetyData) {
-          setAllergies(safetyData.allergies);
-          setDietaryRestrictions(safetyData.dietary_restrictions);
-          setMedicalConditions(safetyData.medical_conditions);
-        }
-
-        if (cookingData) {
-          setPreferredCuisines(cookingData.preferred_cuisines);
-          setAvailableEquipment(cookingData.available_equipment);
-          setDislikedIngredients(cookingData.disliked_ingredients);
-          setSpiceTolerance(cookingData.spice_tolerance || 3);
-        }
       } catch (error) {
         console.error('Error loading user preferences:', error);
       }
     };
 
     loadUserPreferences();
-  }, [user?.id]);
+  }, [user?.id, userSafety, cookingPrefs]);
 
-  // Avatar state and handlers
-  const [avatarLoading, setAvatarLoading] = useState(false);
-  const handleAvatarUpload = async (file: File) => {
-    setAvatarLoading(true);
-    const { success, error } = await uploadAvatar(file);
-
-    if (!success && error) {
-      toast({
-        title: 'Error',
-        description: error.message,
-        variant: 'destructive',
-      });
-    } else {
-      toast({
-        title: 'Success',
-        description: 'Avatar updated successfully!',
-      });
-      await refreshProfile();
-    }
-    setAvatarLoading(false);
-  };
-
-  // Bio state and handlers
-  const [bio, setBio] = useState(profile?.bio || '');
-  const handleBioSave = async () => {
-    const result = await bioUpdate.executeUpdate({ bio: bio || null });
-    if (result.success) {
-      await refreshProfile();
-    }
-  };
-
-  // Profile form state
-  const [fullName, setFullName] = useState(profile?.full_name || '');
-  const [username, setUsername] = useState('');
-  const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(
-    null
-  );
-  const [usernameChecking, setUsernameChecking] = useState(false);
-  const [region, setRegion] = useState(profile?.region || '');
-  const [language, setLanguage] = useState(profile?.language || 'en');
-  const [units, setUnits] = useState(profile?.units || 'metric');
-  const [timePerMeal, setTimePerMeal] = useState<number>(
-    Number(profile?.time_per_meal) || 30
-  );
-  // Robust skill level parsing function
-  function parseSkillLevel(value: unknown): string {
-    if (typeof value === 'string' && /^[1-5]$/.test(value)) {
-      return value;
-    }
-    if (typeof value === 'number' && value >= 1 && value <= 5) {
-      return value.toString();
-    }
-    return '1'; // Default to beginner
-  }
-
-  const [skillLevel, setSkillLevel] = useState<string>(
-    parseSkillLevel(profile?.skill_level)
-  );
+  // Profile form submission state
   const [profileSubmitting, setProfileSubmitting] = useState(false);
-
-  // Username availability check
-  const checkUsername = async (usernameValue: string) => {
-    if (!usernameValue || usernameValue.length < 3) {
-      setUsernameAvailable(null);
-      return;
-    }
-
-    setUsernameChecking(true);
-    const { available } = await checkUsernameAvailability(usernameValue);
-    setUsernameAvailable(available);
-    setUsernameChecking(false);
-  };
-
-  const handleUsernameChange = (value: string) => {
-    // Sanitize username input: lowercase and remove invalid characters
-    const sanitizedValue = value.toLowerCase().replace(/[^a-z0-9_]/g, '');
-    setUsername(sanitizedValue);
-    setUsernameAvailable(null);
-
-    if (usernameTimeoutRef.current) {
-      clearTimeout(usernameTimeoutRef.current);
-    }
-
-    usernameTimeoutRef.current = setTimeout(() => {
-      checkUsername(sanitizedValue);
-    }, 500);
-  };
 
   // Profile form submission
   const handleProfileUpdate = async (e: React.FormEvent) => {
@@ -182,40 +74,31 @@ export default function ProfilePage() {
     setProfileSubmitting(true);
 
     try {
-      const updates = {
-        full_name: fullName || null,
-        region: region || null,
-        language,
-        units,
-        time_per_meal: timePerMeal,
-        skill_level: skillLevel,
-      };
+      // Update profile basics via hook
+      const profileSuccess = await profileBasics.updateProfileBasics({
+        full_name: profileBasics.fullName || null,
+        region: profileBasics.region || null,
+        language: profileBasics.language,
+        units: profileBasics.units,
+        time_per_meal: profileBasics.timePerMeal,
+        skill_level: profileBasics.skillLevel,
+      });
 
-      const { success: profileSuccess, error: profileError } =
-        await updateProfile(updates);
-
-      if (!profileSuccess && profileError) {
-        throw new Error(profileError.message);
+      if (!profileSuccess) {
+        throw new Error('Failed to update profile');
       }
 
-      if (username && usernameAvailable) {
-        const { success: usernameSuccess, error: usernameError } =
-          await claimUsername(username);
-        if (!usernameSuccess && usernameError) {
-          throw new Error(usernameError.message);
+      // Handle username claiming via hook
+      if (usernameAvailability.username && usernameAvailability.isAvailable) {
+        const usernameSuccess = await usernameAvailability.claimUsername(
+          usernameAvailability.username
+        );
+        if (!usernameSuccess) {
+          throw new Error('Failed to update username');
         }
       }
 
-      await refreshProfile();
-      toast({
-        title: 'Success',
-        description: 'Profile updated successfully!',
-      });
-
-      if (username && usernameAvailable) {
-        setUsername('');
-        setUsernameAvailable(null);
-      }
+      // Success message is handled by the hook
     } catch (error) {
       toast({
         title: 'Error',
@@ -228,115 +111,44 @@ export default function ProfilePage() {
     }
   };
 
-  // Safety preferences state
-  const [allergies, setAllergies] = useState<string[]>([]);
-  const [dietaryRestrictions, setDietaryRestrictions] = useState<string[]>([]);
-  const [medicalConditions, setMedicalConditions] = useState<string[]>([]);
+  // Wrapper handlers to match component expectations
+  const handleAvatarUpload = async (file: File) => {
+    await avatarUpload.uploadAvatar(file);
+  };
+
+  const handleBioSave = async () => {
+    await bioUpdate.saveBio();
+  };
 
   const handleSafetySave = async () => {
-    if (!user?.id) return;
-
-    const result = await safetyUpdate.executeUpdate(user.id, {
-      allergies,
-      dietary_restrictions: dietaryRestrictions,
-      medical_conditions: medicalConditions,
+    await userSafety.saveUserSafety({
+      allergies: userSafety.allergies,
+      dietary_restrictions: userSafety.dietaryRestrictions,
+      medical_conditions: userSafety.medicalConditions,
     });
-
-    if (result.success) {
-      // Success handled by hook
-    }
   };
-
-  // Cooking preferences state
-  const [preferredCuisines, setPreferredCuisines] = useState<string[]>([]);
-  const [availableEquipment, setAvailableEquipment] = useState<string[]>([]);
-  const [dislikedIngredients, setDislikedIngredients] = useState<string[]>([]);
-  const [spiceTolerance, setSpiceTolerance] = useState(3);
 
   const handleCookingSave = async () => {
-    if (!user?.id) return;
-
-    const result = await cookingUpdate.executeUpdate(user.id, {
-      preferred_cuisines: preferredCuisines,
-      available_equipment: availableEquipment,
-      disliked_ingredients: dislikedIngredients,
-      spice_tolerance: spiceTolerance,
+    await cookingPrefs.saveCookingPreferences({
+      preferred_cuisines: cookingPrefs.preferredCuisines,
+      available_equipment: cookingPrefs.availableEquipment,
+      disliked_ingredients: cookingPrefs.dislikedIngredients,
+      spice_tolerance: cookingPrefs.spiceTolerance,
     });
-
-    if (result.success) {
-      // Success handled by hook
-    }
   };
-
-  // Email/Password form state
-  const [currentEmail] = useState(user?.email || '');
-  const [newEmail, setNewEmail] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [emailLoading, setEmailLoading] = useState(false);
-  const [passwordLoading, setPasswordLoading] = useState(false);
 
   // Active tab state
   const [activeTab, setActiveTab] = useState<'profile' | 'account'>('profile');
 
-  // Email update handler
+  // Simple form handlers that delegate to hooks
   const handleEmailUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
-    setEmailLoading(true);
-
-    try {
-      const { success, error } = await updateEmail(newEmail);
-
-      if (!success && error) {
-        throw new Error(error.message);
-      }
-
-      toast({
-        title: 'Success',
-        description:
-          'Email update initiated! Please check your new email for confirmation.',
-      });
-      setNewEmail('');
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description:
-          error instanceof Error ? error.message : 'Failed to update email',
-        variant: 'destructive',
-      });
-    } finally {
-      setEmailLoading(false);
-    }
+    await accountManagement.updateEmailAddress();
   };
 
-  // Password update handler
   const handlePasswordUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
-    setPasswordLoading(true);
-
-    try {
-      const { success, error } = await updatePassword(newPassword);
-
-      if (!success && error) {
-        throw new Error(error.message);
-      }
-
-      toast({
-        title: 'Success',
-        description: 'Password updated successfully!',
-      });
-      setNewPassword('');
-      setConfirmPassword('');
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description:
-          error instanceof Error ? error.message : 'Failed to update password',
-        variant: 'destructive',
-      });
-    } finally {
-      setPasswordLoading(false);
-    }
+    await accountManagement.updateUserPassword();
   };
 
   if (!profile) {
@@ -380,37 +192,37 @@ export default function ProfilePage() {
           {/* Avatar Section */}
           <AvatarCard
             avatarUrl={profile.avatar_url}
-            loading={avatarLoading}
+            loading={avatarUpload.loading}
             onUpload={handleAvatarUpload}
           />
 
           {/* Bio Section */}
           <BioCard
-            bio={bio}
-            onChange={setBio}
+            bio={bioUpdate.bio}
+            onChange={bioUpdate.setBio}
             onSave={handleBioSave}
             loading={bioUpdate.loading}
           />
 
           {/* Profile Form */}
           <ProfileInfoForm
-            fullName={fullName}
-            onFullNameChange={setFullName}
-            username={username}
-            onUsernameChange={handleUsernameChange}
-            usernameAvailable={usernameAvailable}
-            usernameChecking={usernameChecking}
+            fullName={profileBasics.fullName}
+            onFullNameChange={profileBasics.setFullName}
+            username={usernameAvailability.username}
+            onUsernameChange={usernameAvailability.handleUsernameChange}
+            usernameAvailable={usernameAvailability.isAvailable}
+            usernameChecking={usernameAvailability.isChecking}
             currentUsername={profile.username}
-            region={region}
-            onRegionChange={setRegion}
-            language={language}
-            onLanguageChange={setLanguage}
-            units={units}
-            onUnitsChange={setUnits}
-            timePerMeal={timePerMeal}
-            onTimePerMealChange={setTimePerMeal}
-            skillLevel={skillLevel}
-            onSkillLevelChange={setSkillLevel}
+            region={profileBasics.region}
+            onRegionChange={profileBasics.setRegion}
+            language={profileBasics.language}
+            onLanguageChange={profileBasics.setLanguage}
+            units={profileBasics.units}
+            onUnitsChange={profileBasics.setUnits}
+            timePerMeal={profileBasics.timePerMeal}
+            onTimePerMealChange={profileBasics.setTimePerMeal}
+            skillLevel={profileBasics.skillLevel}
+            onSkillLevelChange={profileBasics.setSkillLevel}
             onSubmit={handleProfileUpdate}
             submitting={profileSubmitting}
             className="md:col-span-2"
@@ -420,19 +232,22 @@ export default function ProfilePage() {
           <SafetySection className="md:col-span-2">
             <div className="grid gap-4 md:grid-cols-2">
               <MedicalConditionsField
-                values={medicalConditions}
-                onChange={setMedicalConditions}
+                values={userSafety.medicalConditions}
+                onChange={userSafety.setMedicalConditions}
               />
-              <AllergiesField values={allergies} onChange={setAllergies} />
+              <AllergiesField
+                values={userSafety.allergies}
+                onChange={userSafety.setAllergies}
+              />
             </div>
             <DietaryRestrictionsField
-              values={dietaryRestrictions}
-              onChange={setDietaryRestrictions}
+              values={userSafety.dietaryRestrictions}
+              onChange={userSafety.setDietaryRestrictions}
               className="mt-4"
             />
             <SafetySaveButton
               onClick={handleSafetySave}
-              loading={safetyUpdate.loading}
+              loading={userSafety.loading}
               className="mt-4"
             />
           </SafetySection>
@@ -441,25 +256,25 @@ export default function ProfilePage() {
           <CookingSection className="md:col-span-2">
             <div className="grid gap-4 md:grid-cols-2">
               <PreferredCuisinesField
-                values={preferredCuisines}
-                onChange={setPreferredCuisines}
+                values={cookingPrefs.preferredCuisines}
+                onChange={cookingPrefs.setPreferredCuisines}
               />
               <EquipmentField
-                values={availableEquipment}
-                onChange={setAvailableEquipment}
+                values={cookingPrefs.availableEquipment}
+                onChange={cookingPrefs.setAvailableEquipment}
               />
               <SpiceToleranceField
-                value={spiceTolerance}
-                onChange={setSpiceTolerance}
+                value={cookingPrefs.spiceTolerance}
+                onChange={cookingPrefs.setSpiceTolerance}
               />
               <DislikedIngredientsField
-                values={dislikedIngredients}
-                onChange={setDislikedIngredients}
+                values={cookingPrefs.dislikedIngredients}
+                onChange={cookingPrefs.setDislikedIngredients}
               />
             </div>
             <CookingSaveButton
               onClick={handleCookingSave}
-              loading={cookingUpdate.loading}
+              loading={cookingPrefs.loading}
               className="mt-4"
             />
           </CookingSection>
@@ -471,21 +286,21 @@ export default function ProfilePage() {
         <div className="grid gap-8 md:grid-cols-2">
           {/* Email Section */}
           <EmailCard
-            currentEmail={currentEmail}
-            newEmail={newEmail}
-            onNewEmailChange={setNewEmail}
+            currentEmail={accountManagement.currentEmail}
+            newEmail={accountManagement.newEmail}
+            onNewEmailChange={accountManagement.setNewEmail}
             onSubmit={handleEmailUpdate}
-            loading={emailLoading}
+            loading={accountManagement.emailLoading}
           />
 
           {/* Password Section */}
           <PasswordCard
-            newPassword={newPassword}
-            onNewPasswordChange={setNewPassword}
-            confirmPassword={confirmPassword}
-            onConfirmPasswordChange={setConfirmPassword}
+            newPassword={accountManagement.newPassword}
+            onNewPasswordChange={accountManagement.setNewPassword}
+            confirmPassword={accountManagement.confirmPassword}
+            onConfirmPasswordChange={accountManagement.setConfirmPassword}
             onSubmit={handlePasswordUpdate}
-            loading={passwordLoading}
+            loading={accountManagement.passwordLoading}
           />
         </div>
       )}

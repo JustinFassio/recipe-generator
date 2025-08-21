@@ -8,8 +8,11 @@ import { useUsernameAvailability } from '@/hooks/profile/useUsernameAvailability
 vi.mock('@/hooks/profile/useProfileBasics');
 vi.mock('@/hooks/profile/useUsernameAvailability');
 
-const mockUseProfileBasics = useProfileBasics as vi.MockedFunction<typeof useProfileBasics>;
-const mockUseUsernameAvailability = useUsernameAvailability as vi.MockedFunction<typeof useUsernameAvailability>;
+const mockUseProfileBasics = useProfileBasics as vi.MockedFunction<
+  typeof useProfileBasics
+>;
+const mockUseUsernameAvailability =
+  useUsernameAvailability as vi.MockedFunction<typeof useUsernameAvailability>;
 
 describe('ProfileInfoForm Integration with Hooks', () => {
   const mockProfileBasics = {
@@ -43,29 +46,41 @@ describe('ProfileInfoForm Integration with Hooks', () => {
   });
 
   it('renders form with all fields and handles interactions', async () => {
-    render(<ProfileInfoForm {...mockProfileBasics} {...mockUsernameAvailability} />);
+    render(
+      <ProfileInfoForm {...mockProfileBasics} {...mockUsernameAvailability} />
+    );
 
     // Check that all form fields are rendered
     expect(screen.getByDisplayValue('John Doe')).toBeInTheDocument();
     expect(screen.getByDisplayValue('North America')).toBeInTheDocument();
-    expect(screen.getByRole('combobox', { name: /language/i })).toBeInTheDocument();
-    expect(screen.getByRole('combobox', { name: /measurement units/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('combobox', { name: /language/i })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('combobox', { name: /measurement units/i })
+    ).toBeInTheDocument();
     expect(screen.getByText('Time Per Meal: 45m')).toBeInTheDocument();
-    expect(screen.getByText('Cooking Skill Level: Intermediate')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /update profile/i })).toBeInTheDocument();
+    expect(
+      screen.getByText('Cooking Skill Level: Intermediate')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /update profile/i })
+    ).toBeInTheDocument();
   });
 
   it('handles form submission', async () => {
     const mockOnSubmit = vi.fn();
     render(
-      <ProfileInfoForm 
-        {...mockProfileBasics} 
-        {...mockUsernameAvailability} 
+      <ProfileInfoForm
+        {...mockProfileBasics}
+        {...mockUsernameAvailability}
         onSubmit={mockOnSubmit}
       />
     );
 
-    const submitButton = screen.getByRole('button', { name: /update profile/i });
+    const submitButton = screen.getByRole('button', {
+      name: /update profile/i,
+    });
     fireEvent.click(submitButton);
 
     await waitFor(() => {
@@ -76,8 +91,8 @@ describe('ProfileInfoForm Integration with Hooks', () => {
   it('handles language selection change', async () => {
     const mockOnLanguageChange = vi.fn();
     render(
-      <ProfileInfoForm 
-        {...mockProfileBasics} 
+      <ProfileInfoForm
+        {...mockProfileBasics}
         {...mockUsernameAvailability}
         onLanguageChange={mockOnLanguageChange}
       />
@@ -92,14 +107,16 @@ describe('ProfileInfoForm Integration with Hooks', () => {
   it('handles units selection change', async () => {
     const mockOnUnitsChange = vi.fn();
     render(
-      <ProfileInfoForm 
-        {...mockProfileBasics} 
+      <ProfileInfoForm
+        {...mockProfileBasics}
         {...mockUsernameAvailability}
         onUnitsChange={mockOnUnitsChange}
       />
     );
 
-    const unitsSelect = screen.getByRole('combobox', { name: /measurement units/i });
+    const unitsSelect = screen.getByRole('combobox', {
+      name: /measurement units/i,
+    });
     fireEvent.change(unitsSelect, { target: { value: 'imperial' } });
 
     expect(mockOnUnitsChange).toHaveBeenCalledWith('imperial');
@@ -107,8 +124,8 @@ describe('ProfileInfoForm Integration with Hooks', () => {
 
   it('shows loading state during submission', () => {
     render(
-      <ProfileInfoForm 
-        {...mockProfileBasics} 
+      <ProfileInfoForm
+        {...mockProfileBasics}
         {...mockUsernameAvailability}
         submitting={true}
       />
@@ -127,10 +144,7 @@ describe('ProfileInfoForm Integration with Hooks', () => {
     };
 
     render(
-      <ProfileInfoForm 
-        {...mockProfileBasics} 
-        {...mockWithCurrentUsername}
-      />
+      <ProfileInfoForm {...mockProfileBasics} {...mockWithCurrentUsername} />
     );
 
     expect(screen.getByDisplayValue('existinguser')).toBeInTheDocument();
@@ -146,10 +160,7 @@ describe('ProfileInfoForm Integration with Hooks', () => {
     };
 
     render(
-      <ProfileInfoForm 
-        {...mockProfileBasics} 
-        {...mockWithUsernameCheck}
-      />
+      <ProfileInfoForm {...mockProfileBasics} {...mockWithUsernameCheck} />
     );
 
     expect(screen.getByText('Username is not available')).toBeInTheDocument();

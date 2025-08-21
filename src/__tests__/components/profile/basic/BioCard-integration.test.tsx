@@ -23,8 +23,12 @@ describe('BioCard Integration with useBioUpdate', () => {
   it('renders bio card with current bio', () => {
     render(<BioCard {...mockBioUpdate} />);
 
-    expect(screen.getByDisplayValue('I love cooking Italian food!')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /save bio/i })).toBeInTheDocument();
+    expect(
+      screen.getByDisplayValue('I love cooking Italian food!')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /save bio/i })
+    ).toBeInTheDocument();
   });
 
   it('handles bio text change', () => {
@@ -59,7 +63,9 @@ describe('BioCard Integration with useBioUpdate', () => {
   it('displays empty bio when none provided', () => {
     render(<BioCard {...mockBioUpdate} bio="" />);
 
-    const textarea = screen.getByPlaceholderText(/tell us a bit about yourself/i);
+    const textarea = screen.getByPlaceholderText(
+      /tell us a bit about yourself/i
+    );
     expect(textarea).toBeInTheDocument();
     expect(textarea).toHaveValue('');
   });

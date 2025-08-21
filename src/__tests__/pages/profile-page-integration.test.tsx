@@ -19,13 +19,24 @@ vi.mock('@/hooks/profile/useUserSafety');
 vi.mock('@/hooks/profile/useCookingPreferences');
 vi.mock('@/hooks/profile/useAccountManagement');
 
-const mockUseProfileBasics = useProfileBasics as vi.MockedFunction<typeof useProfileBasics>;
-const mockUseUsernameAvailability = useUsernameAvailability as vi.MockedFunction<typeof useUsernameAvailability>;
-const mockUseAvatarUpload = useAvatarUpload as vi.MockedFunction<typeof useAvatarUpload>;
+const mockUseProfileBasics = useProfileBasics as vi.MockedFunction<
+  typeof useProfileBasics
+>;
+const mockUseUsernameAvailability =
+  useUsernameAvailability as vi.MockedFunction<typeof useUsernameAvailability>;
+const mockUseAvatarUpload = useAvatarUpload as vi.MockedFunction<
+  typeof useAvatarUpload
+>;
 const mockUseBioUpdate = useBioUpdate as vi.MockedFunction<typeof useBioUpdate>;
-const mockUseUserSafety = useUserSafety as vi.MockedFunction<typeof useUserSafety>;
-const mockUseCookingPreferences = useCookingPreferences as vi.MockedFunction<typeof useCookingPreferences>;
-const mockUseAccountManagement = useAccountManagement as vi.MockedFunction<typeof useAccountManagement>;
+const mockUseUserSafety = useUserSafety as vi.MockedFunction<
+  typeof useUserSafety
+>;
+const mockUseCookingPreferences = useCookingPreferences as vi.MockedFunction<
+  typeof useCookingPreferences
+>;
+const mockUseAccountManagement = useAccountManagement as vi.MockedFunction<
+  typeof useAccountManagement
+>;
 
 const renderWithRouter = (component: React.ReactElement) => {
   return render(<BrowserRouter>{component}</BrowserRouter>);
@@ -109,13 +120,33 @@ describe('ProfilePage Integration Tests', () => {
   };
 
   beforeEach(() => {
-    mockUseProfileBasics.mockReturnValue(mockProfileBasics as any);
-    mockUseUsernameAvailability.mockReturnValue(mockUsernameAvailability as any);
-    mockUseAvatarUpload.mockReturnValue(mockAvatarUpload as any);
-    mockUseBioUpdate.mockReturnValue(mockBioUpdate as any);
-    mockUseUserSafety.mockReturnValue(mockUserSafety as any);
-    mockUseCookingPreferences.mockReturnValue(mockCookingPreferences as any);
-    mockUseAccountManagement.mockReturnValue(mockAccountManagement as any);
+    mockUseProfileBasics.mockReturnValue(
+      mockProfileBasics as unknown as ReturnType<typeof useProfileBasics>
+    );
+    mockUseUsernameAvailability.mockReturnValue(
+      mockUsernameAvailability as unknown as ReturnType<
+        typeof useUsernameAvailability
+      >
+    );
+    mockUseAvatarUpload.mockReturnValue(
+      mockAvatarUpload as unknown as ReturnType<typeof useAvatarUpload>
+    );
+    mockUseBioUpdate.mockReturnValue(
+      mockBioUpdate as unknown as ReturnType<typeof useBioUpdate>
+    );
+    mockUseUserSafety.mockReturnValue(
+      mockUserSafety as unknown as ReturnType<typeof useUserSafety>
+    );
+    mockUseCookingPreferences.mockReturnValue(
+      mockCookingPreferences as unknown as ReturnType<
+        typeof useCookingPreferences
+      >
+    );
+    mockUseAccountManagement.mockReturnValue(
+      mockAccountManagement as unknown as ReturnType<
+        typeof useAccountManagement
+      >
+    );
   });
 
   it('renders all profile sections', () => {
@@ -123,7 +154,7 @@ describe('ProfilePage Integration Tests', () => {
 
     expect(screen.getByText('Profile Information')).toBeInTheDocument();
     expect(screen.getByText('About Me')).toBeInTheDocument();
-    expect(screen.getByText(/Safety \& Dietary/i)).toBeInTheDocument();
+    expect(screen.getByText(/Safety & Dietary/i)).toBeInTheDocument();
     expect(screen.getByText('Cooking Preferences')).toBeInTheDocument();
     expect(screen.getByText('Account')).toBeInTheDocument();
   });
@@ -142,11 +173,13 @@ describe('ProfilePage Integration Tests', () => {
     mockUseProfileBasics.mockReturnValue({
       ...mockProfileBasics,
       updateProfileBasics: spy,
-    } as any);
+    } as unknown as ReturnType<typeof useProfileBasics>);
 
     renderWithRouter(<ProfilePage />);
 
-    const submitButton = screen.getByRole('button', { name: /update profile/i });
+    const submitButton = screen.getByRole('button', {
+      name: /update profile/i,
+    });
     fireEvent.click(submitButton);
 
     await waitFor(() => {
@@ -159,7 +192,7 @@ describe('ProfilePage Integration Tests', () => {
     mockUseBioUpdate.mockReturnValue({
       ...mockBioUpdate,
       saveBio: spy,
-    } as any);
+    } as unknown as ReturnType<typeof useBioUpdate>);
 
     renderWithRouter(<ProfilePage />);
 
@@ -176,11 +209,13 @@ describe('ProfilePage Integration Tests', () => {
     mockUseUserSafety.mockReturnValue({
       ...mockUserSafety,
       saveUserSafety: spy,
-    } as any);
+    } as unknown as ReturnType<typeof useUserSafety>);
 
     renderWithRouter(<ProfilePage />);
 
-    const saveButton = screen.getByRole('button', { name: /save safety preferences/i });
+    const saveButton = screen.getByRole('button', {
+      name: /save safety preferences/i,
+    });
     fireEvent.click(saveButton);
 
     await waitFor(() => {
@@ -193,11 +228,13 @@ describe('ProfilePage Integration Tests', () => {
     mockUseCookingPreferences.mockReturnValue({
       ...mockCookingPreferences,
       saveCookingPreferences: spy,
-    } as any);
+    } as unknown as ReturnType<typeof useCookingPreferences>);
 
     renderWithRouter(<ProfilePage />);
 
-    const saveButton = screen.getByRole('button', { name: /save cooking preferences/i });
+    const saveButton = screen.getByRole('button', {
+      name: /save cooking preferences/i,
+    });
     fireEvent.click(saveButton);
 
     await waitFor(() => {
@@ -206,13 +243,24 @@ describe('ProfilePage Integration Tests', () => {
   });
 
   it('shows loading states correctly', () => {
-    mockUseBioUpdate.mockReturnValue({ ...mockBioUpdate, loading: true } as any);
-    mockUseUserSafety.mockReturnValue({ ...mockUserSafety, loading: true } as any);
-    mockUseCookingPreferences.mockReturnValue({ ...mockCookingPreferences, loading: true } as any);
+    mockUseBioUpdate.mockReturnValue({
+      ...mockBioUpdate,
+      loading: true,
+    } as unknown as ReturnType<typeof useBioUpdate>);
+    mockUseUserSafety.mockReturnValue({
+      ...mockUserSafety,
+      loading: true,
+    } as unknown as ReturnType<typeof useUserSafety>);
+    mockUseCookingPreferences.mockReturnValue({
+      ...mockCookingPreferences,
+      loading: true,
+    } as unknown as ReturnType<typeof useCookingPreferences>);
 
     renderWithRouter(<ProfilePage />);
 
-    expect(screen.getAllByRole('button', { name: /saving/i }).length).toBeGreaterThan(0);
+    expect(
+      screen.getAllByRole('button', { name: /saving/i }).length
+    ).toBeGreaterThan(0);
   });
 
   it('displays safety information', () => {

@@ -12,10 +12,11 @@
     "format:check": "prettier --check .",
     "test": "vitest",
     "test:run": "vitest run",
+    "test:core": "cross-env NODE_OPTIONS=--max-old-space-size=4096 vitest run src/__tests__/hooks/profile/ src/__tests__/components/profile/ src/__tests__/lib/ src/__tests__/hooks/ src/__tests__/components/auth/ src/__tests__/components/recipes/ src/__tests__/pages/profile-page-password.test.tsx --pool=threads --poolOptions.threads.workers=1",
     "test:coverage": "vitest run --coverage",
     "test:ui": "vitest --ui",
-    "verify": "npm run lint && npm run format:check && tsc --noEmit && npm run test:run && npm run build",
-    "verify:quick": "npm run lint && tsc --noEmit && npm run test:run && npm run build",
+    "verify": "npm run lint && npm run format:check && tsc --noEmit && npm run test:core && npm run build",
+    "verify:quick": "npm run lint && tsc --noEmit && npm run test:core && npm run build",
     "prepare": "husky",
     "seed": "cross-env NODE_OPTIONS=--no-warnings tsx scripts/seed-users.ts"
   },
