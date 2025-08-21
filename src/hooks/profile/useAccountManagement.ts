@@ -100,7 +100,6 @@ export function useAccountManagement(): UseAccountManagementReturn {
         variant: 'destructive',
       });
 
-      console.error('Error updating email:', err);
       return false;
     } finally {
       setEmailLoading(false);
@@ -154,7 +153,6 @@ export function useAccountManagement(): UseAccountManagementReturn {
         variant: 'destructive',
       });
 
-      console.error('Error updating password:', err);
       return false;
     } finally {
       setPasswordLoading(false);

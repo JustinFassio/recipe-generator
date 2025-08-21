@@ -34,8 +34,7 @@ export interface UseProfileBasicsReturn {
   setTimePerMeal: (value: number) => void;
   setSkillLevel: (value: string) => void;
 
-  // Validation
-  validateProfileData: (data: ProfileBasicsData) => boolean;
+  // Utility function to parse skill level from unknown input
   parseSkillLevel: (value: unknown) => string;
 }
 
@@ -108,8 +107,8 @@ export function useProfileBasics(): UseProfileBasicsReturn {
         }
 
         return true;
-      } catch (err) {
-        console.error('Error validating profile basics data:', err);
+      } catch {
+        setError('Validation error occurred');
         return false;
       }
     },
@@ -177,7 +176,7 @@ export function useProfileBasics(): UseProfileBasicsReturn {
           variant: 'destructive',
         });
 
-        console.error('Error updating profile basics:', err);
+        setError('Failed to update profile basics');
         return false;
       } finally {
         setLoading(false);
@@ -206,8 +205,7 @@ export function useProfileBasics(): UseProfileBasicsReturn {
     setTimePerMeal,
     setSkillLevel,
 
-    // Validation
-    validateProfileData,
+    // Utility function to parse skill level from unknown input
     parseSkillLevel,
   };
 }

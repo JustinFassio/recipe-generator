@@ -111,7 +111,9 @@ describe('useUsernameAvailability', () => {
       });
 
       expect(result.current.isAvailable).toBe(null);
-      expect(result.current.error).toBe(errorMessage);
+      expect(result.current.error).toBe(
+        'Failed to check username availability'
+      );
       expect(result.current.isChecking).toBe(false);
     });
 
@@ -227,7 +229,7 @@ describe('useUsernameAvailability', () => {
       });
 
       expect(claimResult!).toBe(false);
-      expect(result.current.error).toBe(errorMessage);
+      expect(result.current.error).toBe('Failed to claim username');
       expect(mockToast).toHaveBeenCalledWith({
         title: 'Error',
         description: errorMessage,

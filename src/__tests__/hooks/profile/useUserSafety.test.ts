@@ -114,7 +114,7 @@ describe('useUserSafety', () => {
         await result.current.loadUserSafety();
       });
 
-      expect(result.current.error).toBe(errorMessage);
+      expect(result.current.error).toBe('Failed to load safety preferences');
       expect(result.current.loading).toBe(false);
     });
 
@@ -194,10 +194,10 @@ describe('useUserSafety', () => {
         await result.current.saveUserSafety(safetyData);
       });
 
-      expect(result.current.error).toBe(errorMessage);
+      expect(result.current.error).toBe('Failed to save safety data');
       expect(mockToast).toHaveBeenCalledWith({
         title: 'Error',
-        description: errorMessage,
+        description: 'Failed to save safety data',
         variant: 'destructive',
       });
     });

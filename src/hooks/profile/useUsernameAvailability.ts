@@ -73,14 +73,9 @@ export function useUsernameAvailability(): UseUsernameAvailabilityReturn {
       } else {
         setIsAvailable(available);
       }
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error
-          ? err.message
-          : 'Failed to check username availability';
-      setError(errorMessage);
+    } catch {
+      setError('Failed to check username availability');
       setIsAvailable(null);
-      console.error('Error checking username availability:', err);
     } finally {
       setIsChecking(false);
     }
@@ -140,7 +135,7 @@ export function useUsernameAvailability(): UseUsernameAvailabilityReturn {
           variant: 'destructive',
         });
 
-        console.error('Error claiming username:', err);
+        setError('Failed to claim username');
         return false;
       }
     },

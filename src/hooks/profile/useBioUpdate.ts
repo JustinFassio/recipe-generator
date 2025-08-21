@@ -71,7 +71,6 @@ export function useBioUpdate(): UseBioUpdateReturn {
         variant: 'destructive',
       });
 
-      console.error('Error updating bio:', err);
       return false;
     } finally {
       setLoading(false);
@@ -125,7 +124,7 @@ export function useBioUpdate(): UseBioUpdateReturn {
           variant: 'destructive',
         });
 
-        console.error('Error updating bio:', err);
+        setError('Failed to update bio');
         return false;
       } finally {
         setLoading(false);

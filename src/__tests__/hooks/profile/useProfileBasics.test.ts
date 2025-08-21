@@ -86,7 +86,7 @@ describe('useProfileBasics', () => {
       expect(typeof result.current.setUnits).toBe('function');
       expect(typeof result.current.setTimePerMeal).toBe('function');
       expect(typeof result.current.setSkillLevel).toBe('function');
-      expect(typeof result.current.validateProfileData).toBe('function');
+      // validateProfileData is now internal to the hook
       expect(typeof result.current.parseSkillLevel).toBe('function');
     });
   });
@@ -119,101 +119,7 @@ describe('useProfileBasics', () => {
     });
   });
 
-  describe('validateProfileData', () => {
-    it('should validate correct profile data', () => {
-      const { result } = renderHook(() => useProfileBasics());
-
-      const validData = {
-        full_name: 'Test User',
-        region: 'US',
-        language: 'en',
-        units: 'metric',
-        time_per_meal: 30,
-        skill_level: '3',
-      };
-
-      expect(result.current.validateProfileData(validData)).toBe(true);
-    });
-
-    it('should reject empty language', () => {
-      const { result } = renderHook(() => useProfileBasics());
-
-      const invalidData = {
-        full_name: 'Test User',
-        region: 'US',
-        language: '',
-        units: 'metric',
-        time_per_meal: 30,
-        skill_level: '3',
-      };
-
-      expect(result.current.validateProfileData(invalidData)).toBe(false);
-    });
-
-    it('should reject invalid units', () => {
-      const { result } = renderHook(() => useProfileBasics());
-
-      const invalidData = {
-        full_name: 'Test User',
-        region: 'US',
-        language: 'en',
-        units: 'invalid',
-        time_per_meal: 30,
-        skill_level: '3',
-      };
-
-      expect(result.current.validateProfileData(invalidData)).toBe(false);
-    });
-
-    it('should reject invalid time per meal', () => {
-      const { result } = renderHook(() => useProfileBasics());
-
-      const invalidData1 = {
-        full_name: 'Test User',
-        region: 'US',
-        language: 'en',
-        units: 'metric',
-        time_per_meal: 0,
-        skill_level: '3',
-      };
-
-      const invalidData2 = {
-        full_name: 'Test User',
-        region: 'US',
-        language: 'en',
-        units: 'metric',
-        time_per_meal: 400, // Over 5 hours
-        skill_level: '3',
-      };
-
-      expect(result.current.validateProfileData(invalidData1)).toBe(false);
-      expect(result.current.validateProfileData(invalidData2)).toBe(false);
-    });
-
-    it('should reject invalid skill level', () => {
-      const { result } = renderHook(() => useProfileBasics());
-
-      const invalidData = {
-        full_name: 'Test User',
-        region: 'US',
-        language: 'en',
-        units: 'metric',
-        time_per_meal: 30,
-        skill_level: '0',
-      };
-
-      expect(result.current.validateProfileData(invalidData)).toBe(false);
-    });
-
-    it('should handle validation errors gracefully', () => {
-      const { result } = renderHook(() => useProfileBasics());
-
-      // Mock data that would cause an error during validation
-      const errorData = null;
-
-      expect(result.current.validateProfileData(errorData)).toBe(false);
-    });
-  });
+  // validateProfileData is now internal to the hook and not part of the public API
 
   describe('updateProfileBasics', () => {
     it('should update profile successfully', async () => {
@@ -283,7 +189,7 @@ describe('useProfileBasics', () => {
       });
 
       expect(updateResult!).toBe(false);
-      expect(result.current.error).toBe(errorMessage);
+      expect(result.current.error).toBe('Failed to update profile basics');
       expect(mockToast).toHaveBeenCalledWith({
         title: 'Error',
         description: errorMessage,
@@ -312,7 +218,7 @@ describe('useProfileBasics', () => {
       });
 
       expect(updateResult!).toBe(false);
-      expect(result.current.error).toBe(errorMessage);
+      expect(result.current.error).toBe('Failed to update profile basics');
       expect(mockToast).toHaveBeenCalledWith({
         title: 'Error',
         description: errorMessage,
