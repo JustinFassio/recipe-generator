@@ -47,10 +47,11 @@ export default function ProfilePage() {
   const accountManagement = useAccountManagement();
 
   // Load user preferences data
+  // Load user preferences data once when component mounts
   useEffect(() => {
-    const loadUserPreferences = async () => {
-      if (!user?.id) return;
+    if (!user?.id) return;
 
+    const loadData = async () => {
       try {
         // Load data via hooks
         await Promise.all([
@@ -62,8 +63,8 @@ export default function ProfilePage() {
       }
     };
 
-    loadUserPreferences();
-  }, [user?.id, userSafety, cookingPrefs]);
+    loadData();
+  }, [user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Profile form submission state
   const [profileSubmitting, setProfileSubmitting] = useState(false);

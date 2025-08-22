@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthProvider';
 import { useToast } from '@/hooks/use-toast';
 import { updateProfile } from '@/lib/auth';
@@ -26,6 +26,13 @@ export function useBioUpdate(): UseBioUpdateReturn {
   const [bio, setBio] = useState(profile?.bio || '');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Update bio state when profile changes (fixes refresh issue)
+  useEffect(() => {
+    if (profile) {
+      setBio(profile.bio || '');
+    }
+  }, [profile]);
 
   /**
    * Save current bio to database

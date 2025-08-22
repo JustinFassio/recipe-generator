@@ -76,47 +76,6 @@ export async function validateSession() {
 }
 
 /**
- * Generate a unique username with collision handling
- */
-async function generateUniqueUsername(userId: string): Promise<string> {
-  // Start with 12 characters from UUID for better uniqueness
-  const baseUsername = `user_${userId.substring(0, 12)}`;
-  let username = baseUsername;
-  let attempts = 0;
-  const maxAttempts = 5;
-
-  while (attempts < maxAttempts) {
-    // Check if username is available using direct query
-    const { data: existingUser, error } = await supabase
-      .from('profiles')
-      .select('username')
-      .eq('username', username)
-      .single();
-
-    if (error && error.code === 'PGRST116') {
-      // No rows returned - username is available
-      return username;
-    } else if (error) {
-      console.warn('Username availability check failed:', error);
-      // Continue with next attempt
-    } else if (!existingUser) {
-      // Username is available
-      return username;
-    }
-
-    // Username is taken, try with random suffix
-    const randomSuffix = Math.random().toString(36).substring(2, 6);
-    username = `${baseUsername}_${randomSuffix}`;
-    attempts++;
-  }
-
-  // Fallback: use timestamp-based username
-  const timestamp = Date.now().toString(36);
-  const random = Math.random().toString(36).substring(2, 6);
-  return `user_${timestamp}_${random}`;
-}
-
-/**
  * Create a basic profile for the current user
  */
 export async function ensureUserProfile(): Promise<{
@@ -143,14 +102,11 @@ export async function ensureUserProfile(): Promise<{
       return { success: true };
     }
 
-    // Generate unique username
-    const username = await generateUniqueUsername(user.id);
-
-    // Create basic profile
+    // Create basic profile without username (users can add one later if needed)
     const { error: profileError } = await supabase.from('profiles').insert({
       id: user.id,
       full_name: user.user_metadata?.full_name || '',
-      username: username,
+      // username is now optional - users can set it later in their profile
     });
 
     if (profileError) {

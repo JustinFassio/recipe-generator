@@ -15,13 +15,15 @@ export function ProtectedRoute({
   const { user, loading, error } = useAuth();
   const location = useLocation();
 
-  console.log('🛡️ ProtectedRoute state:', {
+  // Debug logging enabled for troubleshooting
+  console.log('🛡️ ProtectedRoute render:', {
     loading,
     hasUser: !!user,
     userEmail: user?.email,
     error,
     requiresAuth,
     currentPath: location.pathname,
+    timestamp: new Date().toISOString(),
   });
 
   // Show error state if there's an error
@@ -71,7 +73,7 @@ export function ProtectedRoute({
     return <Navigate to={redirectTo} replace />;
   }
 
-  console.log('✅ Rendering protected content');
+  // console.log('✅ Rendering protected content');
   return <>{children}</>;
 }
 
