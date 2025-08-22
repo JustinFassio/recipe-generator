@@ -52,8 +52,19 @@ After adding environment variables:
 
 ### Issue: Still getting "ERR_NAME_NOT_RESOLVED"
 
-- **Cause**: Environment variables not properly set
-- **Solution**: Double-check the variable names (must start with `VITE_`)
+- **Cause**: Environment variables not properly set or pointing to wrong Supabase project
+- **Solution**:
+  1. Double-check the variable names (must start with `VITE_`)
+  2. Verify the Supabase URL matches your actual project
+  3. Check for project ID mismatches (e.g., `sxvdkipywmjycithdfpp` vs `oyjwduxjeyoazwoskqve`)
+
+### Issue: Different Supabase project in production vs development
+
+- **Cause**: Production environment variables point to a different Supabase project
+- **Solution**:
+  1. Check your Vercel environment variables
+  2. Update to match your local `.env.local` values
+  3. Ensure both URL and anon key are from the same project
 
 ### Issue: "Failed to fetch" errors
 
