@@ -1,8 +1,14 @@
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthProvider';
 import { useToast } from '@/hooks/use-toast';
 import { updateProfile } from '@/lib/auth';
 import { MIN_TIME_PER_MEAL, MAX_TIME_PER_MEAL } from '@/lib/user-preferences';
+import {
+  SKILL_LEVEL_MAP,
+  SKILL_LEVEL_REVERSE_MAP,
+  SKILL_LEVEL_DB_VALUES,
+  type SkillLevelDB,
+} from '@/lib/profile-constants';
 
 // Data interface for profile basics updates
 export interface ProfileBasicsData {
@@ -55,54 +61,30 @@ export function useProfileBasics(): UseProfileBasicsReturn {
     Number(profile?.time_per_meal) || 30
   );
 
-  // Map numeric skill levels to database-expected string values
-  const skillLevelMap = useMemo<Record<string, string>>(
-    () => ({
-      '1': 'beginner',
-      '2': 'intermediate',
-      '3': 'advanced',
-      '4': 'expert',
-      '5': 'chef',
-    }),
-    []
-  );
+  // Use shared skill level mapping constants
 
   // Robust skill level parsing function
-  const parseSkillLevel = useCallback(
-    (value: unknown): string => {
-      if (typeof value === 'string') {
-        // If it's already a valid database value, return it
-        if (
-          ['beginner', 'intermediate', 'advanced', 'expert', 'chef'].includes(
-            value
-          )
-        ) {
-          return value;
-        }
-        // If it's a numeric string (1-5), convert to database value
-        if (/^[1-5]$/.test(value)) {
-          return skillLevelMap[value];
-        }
+  const parseSkillLevel = useCallback((value: unknown): string => {
+    if (typeof value === 'string') {
+      // If it's already a valid database value, return it
+      if (SKILL_LEVEL_DB_VALUES.includes(value as SkillLevelDB)) {
+        return value;
       }
-      if (typeof value === 'number' && value >= 1 && value <= 5) {
-        return skillLevelMap[value.toString()];
+      // If it's a numeric string (1-5), convert to database value
+      if (/^[1-5]$/.test(value)) {
+        return SKILL_LEVEL_MAP[value];
       }
-      return 'beginner'; // Default to beginner
-    },
-    [skillLevelMap]
-  );
+    }
+    if (typeof value === 'number' && value >= 1 && value <= 5) {
+      return SKILL_LEVEL_MAP[value.toString()];
+    }
+    return 'beginner'; // Default to beginner
+  }, []);
 
   // Convert database skill level to numeric for UI display
   const getSkillLevelForUI = useCallback((dbValue: string | null): string => {
     if (!dbValue) return '1';
-    const reverseMap: Record<string, string> = {
-      beginner: '1',
-      intermediate: '2',
-      advanced: '3',
-      expert: '4',
-      chef: '5',
-    };
-    return reverseMap[dbValue] || '1';
+    return SKILL_LEVEL_REVERSE_MAP[dbValue] || '1';
   }, []);
 
   const [skillLevel, setSkillLevel] = useState<string>(
@@ -187,7 +169,7 @@ export function useProfileBasics(): UseProfileBasicsReturn {
 
       try {
         // Convert numeric skill level to database string value
-        const dbSkillLevel = skillLevelMap[data.skill_level] || 'beginner';
+        const dbSkillLevel = SKILL_LEVEL_MAP[data.skill_level] || 'beginner';
 
         const { success, error: updateError } = await updateProfile({
           full_name: data.full_name,
@@ -236,7 +218,7 @@ export function useProfileBasics(): UseProfileBasicsReturn {
         setLoading(false);
       }
     },
-    [validateProfileData, toast, refreshProfile, skillLevelMap]
+    [validateProfileData, toast, refreshProfile]
   );
 
   return {

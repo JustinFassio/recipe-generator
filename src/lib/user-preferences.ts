@@ -5,9 +5,13 @@ import { supabase, type UserSafety, type CookingPreferences } from './supabase';
  * Following the Phase 1 atomic feature approach
  */
 
-// Validation constants
+// Validation constants - match database constraints
+
+// Time per meal (minutes)
 export const MIN_TIME_PER_MEAL = 10;
 export const MAX_TIME_PER_MEAL = 120;
+
+// Spice tolerance (scale 1-5)
 export const MIN_SPICE_TOLERANCE = 1;
 export const MAX_SPICE_TOLERANCE = 5;
 
