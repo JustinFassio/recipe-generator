@@ -1,9 +1,13 @@
 import { supabase, type UserSafety, type CookingPreferences } from './supabase';
+import { createLogger } from './logger';
 
 /**
  * Helper functions for managing user preferences data
  * Following the Phase 1 atomic feature approach
  */
+
+// Create logger instance for this module
+const logger = createLogger('UserPreferences');
 
 // Validation constants - match database constraints
 
@@ -31,7 +35,7 @@ export async function getUserSafety(
     if (error) {
       if (error.code === 'PGRST116') {
         // No safety data found - return default values
-        console.log('No user safety data found for user:', userId);
+        logger.debug('No user safety data found for user:', userId);
         return {
           user_id: userId,
           allergies: [],
@@ -43,7 +47,7 @@ export async function getUserSafety(
       }
       // If the table doesn't exist yet (migrations not run), fail gracefully
       if (error.code === '42P01' || error.code === 'PGRST205') {
-        console.warn('user_safety table does not exist yet');
+        logger.warn('user_safety table does not exist yet');
         return null;
       }
       throw error;
@@ -51,7 +55,7 @@ export async function getUserSafety(
 
     return data;
   } catch (error) {
-    console.error('Error fetching user safety data:', error);
+    logger.error('Error fetching user safety data:', error);
     // Return default values instead of null to prevent infinite loops
     return {
       user_id: userId,
@@ -86,13 +90,13 @@ export async function updateUserSafety(
     );
 
     if (error) {
-      console.error('Error updating user safety:', error);
+      logger.error('Error updating user safety:', error);
       return { success: false, error: error.message };
     }
 
     return { success: true };
   } catch (error) {
-    console.error('Error in updateUserSafety:', error);
+    logger.error('Error in updateUserSafety:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -116,7 +120,7 @@ export async function getCookingPreferences(
     if (error) {
       if (error.code === 'PGRST116') {
         // No preferences found - return default values
-        console.log('No cooking preferences found for user:', userId);
+        logger.debug('No cooking preferences found for user:', userId);
         return {
           user_id: userId,
           preferred_cuisines: [],
@@ -129,7 +133,7 @@ export async function getCookingPreferences(
       }
       // If the table doesn't exist yet (migrations not run), fail gracefully
       if (error.code === '42P01' || error.code === 'PGRST205') {
-        console.warn('cooking_preferences table does not exist yet');
+        logger.warn('cooking_preferences table does not exist yet');
         return null;
       }
       throw error;
@@ -137,7 +141,7 @@ export async function getCookingPreferences(
 
     return data;
   } catch (error) {
-    console.error('Error fetching cooking preferences:', error);
+    logger.error('Error fetching cooking preferences:', error);
     // Return default values instead of null to prevent infinite loops
     return {
       user_id: userId,
@@ -176,13 +180,13 @@ export async function updateCookingPreferences(
     );
 
     if (error) {
-      console.error('Error updating cooking preferences:', error);
+      logger.error('Error updating cooking preferences:', error);
       return { success: false, error: error.message };
     }
 
     return { success: true };
   } catch (error) {
-    console.error('Error in updateCookingPreferences:', error);
+    logger.error('Error in updateCookingPreferences:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -210,7 +214,7 @@ export async function getAllUserPreferences(userId: string): Promise<{
 
     return { safety, cooking };
   } catch (error) {
-    console.error('Error fetching all user preferences:', error);
+    logger.error('Error fetching all user preferences:', error);
     return null;
   }
 }
