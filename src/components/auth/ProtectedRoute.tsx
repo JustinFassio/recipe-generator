@@ -1,5 +1,6 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthProvider';
+import { createLogger } from '@/lib/logger';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -15,11 +16,14 @@ export function ProtectedRoute({
   const { user, loading, error } = useAuth();
   const location = useLocation();
 
-  console.log('🛡️ ProtectedRoute state:', {
+  // Create logger instance for this component
+  const logger = createLogger('ProtectedRoute');
+
+  // Debug logging enabled for troubleshooting
+  logger.debug('ProtectedRoute render', {
     loading,
     hasUser: !!user,
-    userEmail: user?.email,
-    error,
+    hasError: !!error,
     requiresAuth,
     currentPath: location.pathname,
   });
@@ -60,18 +64,18 @@ export function ProtectedRoute({
 
   // If auth is required but user is not authenticated, redirect to sign in
   if (requiresAuth && !user) {
-    console.log('🚫 Redirecting to sign in - no user');
+    logger.auth('Redirecting to sign in - no user');
     return <Navigate to={redirectTo} state={{ from: location }} replace />;
   }
 
   // If auth is NOT required but user IS authenticated, optionally redirect
   // This is useful for auth pages that shouldn't be accessible when logged in
   if (!requiresAuth && user && redirectTo) {
-    console.log('🔄 Redirecting authenticated user away from auth page');
+    logger.auth('Redirecting authenticated user away from auth page');
     return <Navigate to={redirectTo} replace />;
   }
 
-  console.log('✅ Rendering protected content');
+  // console.log('✅ Rendering protected content');
   return <>{children}</>;
 }
 

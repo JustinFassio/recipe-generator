@@ -57,7 +57,7 @@ describe('useProfileBasics', () => {
       expect(result.current.language).toBe('en');
       expect(result.current.units).toBe('metric');
       expect(result.current.timePerMeal).toBe(45);
-      expect(result.current.skillLevel).toBe('3');
+      expect(result.current.skillLevel).toBe('1');
       expect(result.current.loading).toBe(false);
       expect(result.current.error).toBe(null);
     });
@@ -95,27 +95,27 @@ describe('useProfileBasics', () => {
     it('should parse valid string skill levels', () => {
       const { result } = renderHook(() => useProfileBasics());
 
-      expect(result.current.parseSkillLevel('1')).toBe('1');
-      expect(result.current.parseSkillLevel('3')).toBe('3');
-      expect(result.current.parseSkillLevel('5')).toBe('5');
+      expect(result.current.parseSkillLevel('1')).toBe('beginner');
+      expect(result.current.parseSkillLevel('3')).toBe('advanced');
+      expect(result.current.parseSkillLevel('5')).toBe('chef');
     });
 
     it('should parse valid number skill levels', () => {
       const { result } = renderHook(() => useProfileBasics());
 
-      expect(result.current.parseSkillLevel(1)).toBe('1');
-      expect(result.current.parseSkillLevel(3)).toBe('3');
-      expect(result.current.parseSkillLevel(5)).toBe('5');
+      expect(result.current.parseSkillLevel(1)).toBe('beginner');
+      expect(result.current.parseSkillLevel(3)).toBe('advanced');
+      expect(result.current.parseSkillLevel(5)).toBe('chef');
     });
 
     it('should return default for invalid skill levels', () => {
       const { result } = renderHook(() => useProfileBasics());
 
-      expect(result.current.parseSkillLevel('0')).toBe('1');
-      expect(result.current.parseSkillLevel('6')).toBe('1');
-      expect(result.current.parseSkillLevel('invalid')).toBe('1');
-      expect(result.current.parseSkillLevel(null)).toBe('1');
-      expect(result.current.parseSkillLevel(undefined)).toBe('1');
+      expect(result.current.parseSkillLevel('0')).toBe('beginner');
+      expect(result.current.parseSkillLevel('6')).toBe('beginner');
+      expect(result.current.parseSkillLevel('invalid')).toBe('beginner');
+      expect(result.current.parseSkillLevel(null)).toBe('beginner');
+      expect(result.current.parseSkillLevel(undefined)).toBe('beginner');
     });
   });
 
@@ -148,7 +148,7 @@ describe('useProfileBasics', () => {
         language: 'fr',
         units: 'imperial',
         time_per_meal: 60,
-        skill_level: '4',
+        skill_level: 'expert',
       });
       expect(mockRefreshProfile).toHaveBeenCalled();
       expect(mockToast).toHaveBeenCalledWith({
@@ -382,7 +382,7 @@ describe('useProfileBasics', () => {
       const { result } = renderHook(() => useProfileBasics());
 
       expect(result.current.timePerMeal).toBe(45);
-      expect(result.current.skillLevel).toBe('3');
+      expect(result.current.skillLevel).toBe('1');
     });
   });
 });

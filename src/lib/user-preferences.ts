@@ -1,17 +1,27 @@
 import { supabase, type UserSafety, type CookingPreferences } from './supabase';
+import { createLogger } from './logger';
 
 /**
  * Helper functions for managing user preferences data
  * Following the Phase 1 atomic feature approach
  */
 
+// Create logger instance for this module
+const logger = createLogger('UserPreferences');
+
 // Validation constants - match database constraints
-export const MIN_SPICE_TOLERANCE = 1;
-export const MAX_SPICE_TOLERANCE = 5;
+
+// Time per meal (minutes)
 export const MIN_TIME_PER_MEAL = 10;
 export const MAX_TIME_PER_MEAL = 120;
 
-// Phase 1B: User Safety Functions
+// Spice tolerance (scale 1-5)
+export const MIN_SPICE_TOLERANCE = 1;
+export const MAX_SPICE_TOLERANCE = 5;
+
+/**
+ * Get user safety data (allergies, dietary restrictions, medical conditions)
+ */
 export async function getUserSafety(
   userId: string
 ): Promise<UserSafety | null> {
@@ -24,12 +34,20 @@ export async function getUserSafety(
 
     if (error) {
       if (error.code === 'PGRST116') {
-        // No safety data found - return default
-        return null;
+        // No safety data found - return default values
+        logger.debug('No user safety data found for user:', userId);
+        return {
+          user_id: userId,
+          allergies: [],
+          dietary_restrictions: [],
+          medical_conditions: [],
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        };
       }
       // If the table doesn't exist yet (migrations not run), fail gracefully
       if (error.code === '42P01' || error.code === 'PGRST205') {
-        // Table doesn't exist - this is expected during development
+        logger.warn('user_safety table does not exist yet');
         return null;
       }
       throw error;
@@ -37,8 +55,16 @@ export async function getUserSafety(
 
     return data;
   } catch (error) {
-    console.error('Error fetching user safety data:', error);
-    return null;
+    logger.error('Error fetching user safety data:', error);
+    // Return default values instead of null to prevent infinite loops
+    return {
+      user_id: userId,
+      allergies: [],
+      dietary_restrictions: [],
+      medical_conditions: [],
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
   }
 }
 
@@ -56,24 +82,21 @@ export async function updateUserSafety(
       {
         user_id: userId,
         ...safetyData,
+        updated_at: new Date().toISOString(),
       },
-      { onConflict: 'user_id' }
+      {
+        onConflict: 'user_id',
+      }
     );
 
     if (error) {
-      // If the table doesn't exist yet (migrations not run), fail gracefully
-      if (error.code === '42P01' || error.code === 'PGRST205') {
-        return {
-          success: false,
-          error: 'Database tables not set up yet. Please contact support.',
-        };
-      }
-      throw error;
+      logger.error('Error updating user safety:', error);
+      return { success: false, error: error.message };
     }
 
     return { success: true };
   } catch (error) {
-    console.error('Error updating user safety data:', error);
+    logger.error('Error in updateUserSafety:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -81,7 +104,9 @@ export async function updateUserSafety(
   }
 }
 
-// Phase 1C: Cooking Preferences Functions
+/**
+ * Get cooking preferences (cuisines, equipment, ingredients, spice tolerance)
+ */
 export async function getCookingPreferences(
   userId: string
 ): Promise<CookingPreferences | null> {
@@ -94,12 +119,21 @@ export async function getCookingPreferences(
 
     if (error) {
       if (error.code === 'PGRST116') {
-        // No cooking preferences found - return default
-        return null;
+        // No preferences found - return default values
+        logger.debug('No cooking preferences found for user:', userId);
+        return {
+          user_id: userId,
+          preferred_cuisines: [],
+          available_equipment: [],
+          disliked_ingredients: [],
+          spice_tolerance: 3,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        };
       }
       // If the table doesn't exist yet (migrations not run), fail gracefully
       if (error.code === '42P01' || error.code === 'PGRST205') {
-        // Table doesn't exist - this is expected during development
+        logger.warn('cooking_preferences table does not exist yet');
         return null;
       }
       throw error;
@@ -107,8 +141,17 @@ export async function getCookingPreferences(
 
     return data;
   } catch (error) {
-    console.error('Error fetching cooking preferences:', error);
-    return null;
+    logger.error('Error fetching cooking preferences:', error);
+    // Return default values instead of null to prevent infinite loops
+    return {
+      user_id: userId,
+      preferred_cuisines: [],
+      available_equipment: [],
+      disliked_ingredients: [],
+      spice_tolerance: 3,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
   }
 }
 
@@ -129,24 +172,21 @@ export async function updateCookingPreferences(
       {
         user_id: userId,
         ...preferencesData,
+        updated_at: new Date().toISOString(),
       },
-      { onConflict: 'user_id' }
+      {
+        onConflict: 'user_id',
+      }
     );
 
     if (error) {
-      // If the table doesn't exist yet (migrations not run), fail gracefully
-      if (error.code === '42P01' || error.code === 'PGRST205') {
-        return {
-          success: false,
-          error: 'Database tables not set up yet. Please contact support.',
-        };
-      }
-      throw error;
+      logger.error('Error updating cooking preferences:', error);
+      return { success: false, error: error.message };
     }
 
     return { success: true };
   } catch (error) {
-    console.error('Error updating cooking preferences:', error);
+    logger.error('Error in updateCookingPreferences:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -154,57 +194,82 @@ export async function updateCookingPreferences(
   }
 }
 
-// Combined function to get all user preference data for AI integration
-// Type for the profile data selected in getAllUserPreferences
-type ProfilePreferences = {
-  region: string | null;
-  language: string | null;
-  units: string | null;
-  time_per_meal: number | null;
-  skill_level: string | null;
-};
-
+/**
+ * Get all user preferences in one call for efficiency
+ */
 export async function getAllUserPreferences(userId: string): Promise<{
-  success: boolean;
-  data?: {
-    profile: ProfilePreferences | null;
-    safety: UserSafety | null;
-    cooking: CookingPreferences | null;
-  };
-  error?: string;
-}> {
+  safety: UserSafety | null;
+  cooking: CookingPreferences | null;
+} | null> {
   try {
-    const [profile, safety, cooking] = await Promise.all([
-      supabase
-        .from('profiles')
-        .select('region, language, units, time_per_meal, skill_level')
-        .eq('id', userId)
-        .single(),
+    const [safetyResult, cookingResult] = await Promise.allSettled([
       getUserSafety(userId),
       getCookingPreferences(userId),
     ]);
 
-    return {
-      success: true,
-      data: {
-        profile: profile.data,
-        safety,
-        cooking,
-      },
-    };
+    const safety =
+      safetyResult.status === 'fulfilled' ? safetyResult.value : null;
+    const cooking =
+      cookingResult.status === 'fulfilled' ? cookingResult.value : null;
+
+    return { safety, cooking };
   } catch (error) {
-    console.error('Error fetching all user preferences:', error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
-    };
+    logger.error('Error fetching all user preferences:', error);
+    return null;
   }
 }
 
-// Validation helpers
+// Validation functions
 export function validateAllergies(allergies: string[]): boolean {
-  // Basic validation - ensure no empty strings
-  return allergies.every((allergy) => allergy.trim().length > 0);
+  return (
+    Array.isArray(allergies) &&
+    allergies.every(
+      (item) => typeof item === 'string' && item.trim().length > 0
+    )
+  );
+}
+
+export function validateDietaryRestrictions(restrictions: string[]): boolean {
+  return (
+    Array.isArray(restrictions) &&
+    restrictions.every(
+      (item) => typeof item === 'string' && item.trim().length > 0
+    )
+  );
+}
+
+export function validateMedicalConditions(conditions: string[]): boolean {
+  return (
+    Array.isArray(conditions) &&
+    conditions.every(
+      (item) => typeof item === 'string' && item.trim().length > 0
+    )
+  );
+}
+
+export function validateCuisines(cuisines: string[]): boolean {
+  return (
+    Array.isArray(cuisines) &&
+    cuisines.every((item) => typeof item === 'string' && item.trim().length > 0)
+  );
+}
+
+export function validateEquipment(equipment: string[]): boolean {
+  return (
+    Array.isArray(equipment) &&
+    equipment.every(
+      (item) => typeof item === 'string' && item.trim().length > 0
+    )
+  );
+}
+
+export function validateIngredients(ingredients: string[]): boolean {
+  return (
+    Array.isArray(ingredients) &&
+    ingredients.every(
+      (item) => typeof item === 'string' && item.trim().length > 0
+    )
+  );
 }
 
 export function validateSpiceTolerance(level: number): boolean {

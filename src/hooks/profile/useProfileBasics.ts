@@ -1,8 +1,14 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthProvider';
 import { useToast } from '@/hooks/use-toast';
 import { updateProfile } from '@/lib/auth';
 import { MIN_TIME_PER_MEAL, MAX_TIME_PER_MEAL } from '@/lib/user-preferences';
+import {
+  SKILL_LEVEL_MAP,
+  SKILL_LEVEL_REVERSE_MAP,
+  SKILL_LEVEL_DB_VALUES,
+  type SkillLevelDB,
+} from '@/lib/profile-constants';
 
 // Data interface for profile basics updates
 export interface ProfileBasicsData {
@@ -55,22 +61,49 @@ export function useProfileBasics(): UseProfileBasicsReturn {
     Number(profile?.time_per_meal) || 30
   );
 
+  // Use shared skill level mapping constants
+
   // Robust skill level parsing function
   const parseSkillLevel = useCallback((value: unknown): string => {
-    if (typeof value === 'string' && /^[1-5]$/.test(value)) {
-      return value;
+    if (typeof value === 'string') {
+      // If it's already a valid database value, return it
+      if (SKILL_LEVEL_DB_VALUES.includes(value as SkillLevelDB)) {
+        return value;
+      }
+      // If it's a numeric string (1-5), convert to database value
+      if (/^[1-5]$/.test(value)) {
+        return SKILL_LEVEL_MAP[value];
+      }
     }
     if (typeof value === 'number' && value >= 1 && value <= 5) {
-      return value.toString();
+      return SKILL_LEVEL_MAP[value.toString()];
     }
-    return '1'; // Default to beginner
+    return 'beginner'; // Default to beginner
+  }, []);
+
+  // Convert database skill level to numeric for UI display
+  const getSkillLevelForUI = useCallback((dbValue: string | null): string => {
+    if (!dbValue) return '1';
+    return SKILL_LEVEL_REVERSE_MAP[dbValue] || '1';
   }, []);
 
   const [skillLevel, setSkillLevel] = useState<string>(
-    parseSkillLevel(profile?.skill_level)
+    getSkillLevelForUI(profile?.skill_level || null)
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Update state when profile changes (fixes refresh issue)
+  useEffect(() => {
+    if (profile) {
+      setFullName(profile.full_name || '');
+      setRegion(profile.region || '');
+      setLanguage(profile.language || 'en');
+      setUnits(profile.units || 'metric');
+      setTimePerMeal(Number(profile.time_per_meal) || 30);
+      setSkillLevel(getSkillLevelForUI(profile.skill_level));
+    }
+  }, [profile, getSkillLevelForUI]);
 
   /**
    * Validate profile basics data before updating
@@ -101,7 +134,7 @@ export function useProfileBasics(): UseProfileBasicsReturn {
           return false;
         }
 
-        // Validate skill level (should be 1-5)
+        // Validate skill level (should be 1-5 for UI)
         if (!/^[1-5]$/.test(data.skill_level)) {
           return false;
         }
@@ -135,13 +168,16 @@ export function useProfileBasics(): UseProfileBasicsReturn {
       setError(null);
 
       try {
+        // Convert numeric skill level to database string value
+        const dbSkillLevel = SKILL_LEVEL_MAP[data.skill_level] || 'beginner';
+
         const { success, error: updateError } = await updateProfile({
           full_name: data.full_name,
           region: data.region,
           language: data.language,
           units: data.units,
           time_per_meal: data.time_per_meal,
-          skill_level: data.skill_level,
+          skill_level: dbSkillLevel,
         });
 
         if (success) {
@@ -151,7 +187,7 @@ export function useProfileBasics(): UseProfileBasicsReturn {
           setLanguage(data.language);
           setUnits(data.units);
           setTimePerMeal(data.time_per_meal);
-          setSkillLevel(data.skill_level);
+          setSkillLevel(data.skill_level); // Keep numeric value for UI
 
           // Refresh the profile context
           await refreshProfile();
