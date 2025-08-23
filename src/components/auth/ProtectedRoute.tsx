@@ -8,6 +8,9 @@ interface ProtectedRouteProps {
   redirectTo?: string;
 }
 
+// Create logger instance outside component to prevent recreation on every render
+const logger = createLogger('ProtectedRoute');
+
 export function ProtectedRoute({
   children,
   requiresAuth = true,
@@ -15,9 +18,6 @@ export function ProtectedRoute({
 }: ProtectedRouteProps) {
   const { user, loading, error } = useAuth();
   const location = useLocation();
-
-  // Create logger instance for this component
-  const logger = createLogger('ProtectedRoute');
 
   // Debug logging enabled for troubleshooting
   logger.debug('ProtectedRoute render', {
