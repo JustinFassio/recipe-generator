@@ -2,31 +2,33 @@ import type { ParsedRecipe, IngredientItem } from './types';
 
 // Convert markdown formatting to plain text
 function convertMarkdownToPlainText(text: string): string {
-  return text
-    // Remove markdown headers
-    .replace(/^#{1,6}\s+/gm, '')
-    // Convert bold text **text** to text
-    .replace(/\*\*([^*]+)\*\*/g, '$1')
-    // Convert italic text *text* to text
-    .replace(/\*([^*]+)\*/g, '$1')
-    // Convert inline code `text` to text
-    .replace(/`([^`]+)`/g, '$1')
-    // Remove markdown links [text](url) to just text
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-    // Remove horizontal rules
-    .replace(/^[-=*_]{3,}$/gm, '')
-    // Remove markdown blockquotes
-    .replace(/^>\s+/gm, '')
-    // Remove markdown code blocks
-    .replace(/```[\s\S]*?```/g, '')
-    // Remove markdown code blocks with language
-    .replace(/```\w*\n[\s\S]*?```/g, '')
-    // Remove bullet points and list markers
-    .replace(/^[-*•]\s+/gm, '')
-    .replace(/^\d+\.\s+/gm, '')
-    // Clean up extra whitespace
-    .replace(/\n\s*\n/g, '\n')
-    .trim();
+  return (
+    text
+      // Remove markdown headers
+      .replace(/^#{1,6}\s+/gm, '')
+      // Convert bold text **text** to text
+      .replace(/\*\*([^*]+)\*\*/g, '$1')
+      // Convert italic text *text* to text
+      .replace(/\*([^*]+)\*/g, '$1')
+      // Convert inline code `text` to text
+      .replace(/`([^`]+)`/g, '$1')
+      // Remove markdown links [text](url) to just text
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+      // Remove horizontal rules
+      .replace(/^[-=*_]{3,}$/gm, '')
+      // Remove markdown blockquotes
+      .replace(/^>\s+/gm, '')
+      // Remove markdown code blocks
+      .replace(/```[\s\S]*?```/g, '')
+      // Remove markdown code blocks with language
+      .replace(/```\w*\n[\s\S]*?```/g, '')
+      // Remove bullet points and list markers
+      .replace(/^[-*•]\s+/gm, '')
+      .replace(/^\d+\.\s+/gm, '')
+      // Clean up extra whitespace
+      .replace(/\n\s*\n/g, '\n')
+      .trim()
+  );
 }
 
 // Parse recipe from text using external API
