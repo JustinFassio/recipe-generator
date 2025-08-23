@@ -135,18 +135,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           } else {
             logger.error('Database error:', error);
 
-            // Network errors - implement backoff
+            // Network errors - log backoff delay for debugging
             if (
               error.message?.includes('Failed to fetch') ||
               error.message?.includes('ERR_INSUFFICIENT_RESOURCES')
             ) {
               const delay = getBackoffDelay(attempt - 1);
-              logger.error(`Network error, backing off for ${delay}ms`);
-
-              // Wait before allowing next retry
-              setTimeout(() => {
-                // Don't automatically retry here - let calling code decide
-              }, delay);
+              logger.error(
+                `Network error, would back off for ${delay}ms (retry mechanism not implemented)`
+              );
             }
 
             return null;
