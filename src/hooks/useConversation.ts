@@ -280,9 +280,18 @@ export function useConversation(): ConversationState & ConversationActions {
       }
 
       // Use the existing parsing infrastructure (same as parse-recipe-form)
-      const recipe = await parseRecipeFromText(recipeText);
+      const parsedRecipe = await parseRecipeFromText(recipeText);
 
-      console.log('Parsed recipe result:', recipe);
+      console.log('Parsed recipe result:', parsedRecipe);
+
+      // Convert ParsedRecipe to the expected format
+      const recipe = {
+        title: parsedRecipe.title,
+        ingredients: parsedRecipe.ingredients,
+        instructions: parsedRecipe.instructions,
+        notes: parsedRecipe.notes || '',
+        image_url: '',
+      };
 
       setGeneratedRecipe(recipe);
 

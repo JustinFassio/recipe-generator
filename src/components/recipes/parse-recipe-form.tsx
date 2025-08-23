@@ -18,6 +18,7 @@ import {
   type ParseRecipeFormData,
   type RecipeFormData,
 } from '@/lib/schemas';
+import type { ParsedRecipe } from '@/lib/types';
 import { useParseRecipe } from '@/hooks/use-recipes';
 
 interface ParseRecipeFormProps {
@@ -39,39 +40,105 @@ export function ParseRecipeForm({ onParsed }: ParseRecipeFormProps) {
 
   const onSubmit = async (data: ParseRecipeFormData) => {
     try {
-      const parsed = await parseRecipe.mutateAsync(data.recipeText);
-      onParsed(parsed);
+      const parsed = (await parseRecipe.mutateAsync(
+        data.recipeText
+      )) as ParsedRecipe;
+      // Convert ParsedRecipe to RecipeFormData
+      const recipeFormData: RecipeFormData = {
+        title: parsed.title,
+        ingredients: parsed.ingredients,
+        instructions: parsed.instructions,
+        notes: parsed.notes || '',
+        image_url: '',
+      };
+      onParsed(recipeFormData);
     } catch (error) {
       console.error('Parse error:', error);
     }
   };
 
   const loadExample = () => {
-    const example = `# Chocolate Chip Cookies
+    const example = `🌼 Golden Summer Curry with Blistered Shishito Peppers
 
-## Ingredients
-- 2 1/4 cups all-purpose flour
-- 1 teaspoon baking soda
-- 1 teaspoon salt
-- 1 cup butter, softened
-- 3/4 cup granulated sugar
-- 3/4 cup brown sugar, packed
-- 2 large eggs
-- 2 teaspoons vanilla extract
-- 2 cups chocolate chips
+*(Vegan, summer-balanced, anti-inflammatory)*
 
-## Instructions
-1. Preheat oven to 375°F (190°C).
-2. Mix flour, baking soda, and salt in a bowl.
-3. Cream butter and sugars until light and fluffy.
-4. Beat in eggs and vanilla.
-5. Gradually blend in flour mixture.
-6. Stir in chocolate chips.
-7. Drop rounded tablespoons onto ungreased cookie sheets.
-8. Bake 9-11 minutes or until golden brown.
+---
 
-## Notes
-Makes about 48 cookies. Store in airtight container.`;
+### **Prep First (Mise en Place)**
+
+* **Crookneck squash (2 small):** rinse, trim ends, chop into half-moons.
+* **Cauliflower (1 cup florets):** cut into small bite-sized pieces.
+* **Carrot (1 medium):** peel if desired, thinly slice into rounds or half-moons.
+* **Onion (1 medium):** peel, slice thinly.
+* **Garlic (3 cloves):** peel, mince.
+* **Jalapeño (1 pepper):** slice lengthwise, remove seeds and white pith (unless you want extra heat), mince finely.
+* **Shishito peppers (6–8 whole):** rinse and pat dry. Leave stems and seeds intact.
+* Measure out **2 Tbsp curry powder, 1 tsp ground coriander, ½ tsp smoked paprika**.
+* Have ready: **1 cup coconut milk**, **½ cup vegetable broth**.
+
+---
+
+### **Ingredients** (serves 2–3)
+
+* Prepared vegetables and aromatics (above)
+* 6–8 shishito peppers, whole (seeds in)
+* 2 Tbsp curry powder (turmeric-forward if possible)
+* 1 tsp ground coriander
+* ½ tsp smoked paprika (optional)
+* 1 cup coconut milk (or cashew cream/oat milk)
+* ½ cup vegetable broth
+* 1 Tbsp sesame oil (for curry base)
+* 1–2 tsp sesame oil (for blistering shishitos)
+* 1 Tbsp olive oil (to finish)
+* Sea salt & black pepper, to taste
+* Fresh cilantro or parsley, for garnish
+* Lime or lemon wedge, for serving
+
+---
+
+### **Cooking Steps**
+
+#### **Step 1: Blister the Shishitos**
+
+1. Heat a cast iron or heavy skillet over **medium-high**.
+2. Add **1–2 tsp sesame oil**, then whole **shishito peppers**.
+3. Cook **2–3 minutes per side**, until blistered and charred in spots but still slightly firm.
+4. Sprinkle lightly with sea salt; set aside.
+
+---
+
+#### **Step 2: Build the Curry Base**
+
+1. In a wide pan, heat **1 Tbsp sesame oil**.
+2. Add sliced onion, minced garlic, and minced jalapeño. Sauté 3–4 minutes until softened and fragrant.
+3. Stir in curry powder, coriander, and paprika; toast gently for 1–2 minutes.
+
+---
+
+#### **Step 3: Cook the Vegetables**
+
+1. Add chopped carrot, cauliflower, and crookneck squash. Stir to coat evenly in spices.
+2. Season lightly with salt.
+
+---
+
+#### **Step 4: Simmer the Curry**
+
+1. Pour in **coconut milk** and **vegetable broth**.
+2. Simmer gently **8–10 minutes**, until vegetables are tender but squash still holds shape.
+
+---
+
+#### **Step 5: Finish and Serve**
+
+1. Fold in blistered shishito peppers, warming through for 1 minute.
+2. Drizzle with olive oil, add a squeeze of lime/lemon, and adjust seasoning.
+3. Garnish with fresh cilantro or parsley.
+4. Serve with jasmine rice, quinoa, or cauliflower rice.
+
+---
+
+✨ **Flow tip:** blister the shishitos first, then start the curry base in the same pan while they rest on a plate — you'll carry a little smoky flavor into the curry itself.`;
 
     setValue('recipeText', example);
     setShowExample(false);
@@ -112,6 +179,13 @@ Makes about 48 cookies. Store in airtight container.`;
                     <p className="font-medium">Supported formats:</p>
                     <ul className="ml-4 space-y-1 text-sm">
                       <li>
+                        • Any recipe text with Ingredients and Instructions
+                        sections
+                      </li>
+                      <li>
+                        • ChatGPT recipe outputs with emojis and formatting
+                      </li>
+                      <li>
                         • Markdown with headings (# Title, ## Ingredients, ##
                         Instructions)
                       </li>
@@ -138,7 +212,7 @@ Makes about 48 cookies. Store in airtight container.`;
             <Textarea
               id="recipeText"
               {...register('recipeText')}
-              placeholder="Paste your recipe here (Markdown, JSON, or plain text)..."
+              placeholder="Paste your recipe here (any format from ChatGPT, websites, or your notes)..."
               rows={8}
               variant="default"
               size="md"

@@ -10,15 +10,17 @@ import type { Recipe } from '@/lib/types';
 export function AddRecipePage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [, setParsedData] = useState<RecipeFormData | null>(null);
+  const [parsedData, setParsedData] = useState<RecipeFormData | null>(null);
   const [showParser, setShowParser] = useState(true);
 
   // Check if we're editing an existing recipe
   const existingRecipe = location.state?.recipe as Recipe | undefined;
 
   useEffect(() => {
+    let isMounted = true;
+
     // If editing an existing recipe, skip the parser and go straight to the form
-    if (existingRecipe) {
+    if (existingRecipe && isMounted) {
       setShowParser(false);
       setParsedData({
         title: existingRecipe.title,
@@ -28,6 +30,10 @@ export function AddRecipePage() {
         image_url: existingRecipe.image_url || '',
       });
     }
+
+    return () => {
+      isMounted = false;
+    };
   }, [existingRecipe]);
 
   const handleParsed = (data: RecipeFormData) => {
@@ -109,6 +115,7 @@ export function AddRecipePage() {
 
             <RecipeForm
               existingRecipe={existingRecipe}
+              initialData={parsedData || undefined}
               onSuccess={handleSuccess}
             />
           </div>

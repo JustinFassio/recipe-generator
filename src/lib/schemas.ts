@@ -13,7 +13,13 @@ export const recipeSchema = z.object({
 export type RecipeFormData = z.infer<typeof recipeSchema>;
 
 export const parseRecipeSchema = z.object({
-  recipeText: z.string().min(1, 'Please paste your recipe content'),
+  recipeText: z
+    .string()
+    .min(1, 'Please paste your recipe content')
+    .max(
+      10000,
+      'Recipe text is too long. Please keep it under 10,000 characters.'
+    ),
 });
 
 export type ParseRecipeFormData = z.infer<typeof parseRecipeSchema>;

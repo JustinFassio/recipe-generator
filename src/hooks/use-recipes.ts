@@ -90,7 +90,9 @@ export const useDeleteRecipe = () => {
 
 export const useParseRecipe = () => {
   return useMutation({
-    mutationFn: recipeApi.parseRecipeFromText,
+    mutationFn: async (text: string) => {
+      return recipeApi.parseRecipeFromText(text);
+    },
     onError: (error) => {
       toast({
         title: 'Error',
