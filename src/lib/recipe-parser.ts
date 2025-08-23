@@ -18,10 +18,8 @@ function convertMarkdownToPlainText(text: string): string {
       .replace(/^[-=*_]{3,}$/gm, '')
       // Remove markdown blockquotes
       .replace(/^>\s+/gm, '')
-      // Remove markdown code blocks
+      // Remove markdown code blocks (with or without language specifiers)
       .replace(/```[\s\S]*?```/g, '')
-      // Remove markdown code blocks with language
-      .replace(/```\w*\n[\s\S]*?```/g, '')
       // Remove bullet points and list markers
       .replace(/^[-*•]\s+/gm, '')
       .replace(/^\d+\.\s+/gm, '')
