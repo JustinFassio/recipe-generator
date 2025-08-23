@@ -249,7 +249,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
           // Fetch profile non-blocking with error boundaries
           try {
-            const profileData = await fetchProfileRef.current!(session.user.id);
+            let profileData = null;
+            if (
+              fetchProfileRef.current &&
+              typeof fetchProfileRef.current === 'function'
+            ) {
+              profileData = await fetchProfileRef.current(session.user.id);
+            } else {
+              logger.error(
+                'fetchProfileRef.current is not set or not a function'
+              );
+            }
+
             if (isMounted) {
               logger.db(`Initial profile fetch result: ${!!profileData}`);
               setProfile(profileData);
@@ -318,9 +329,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 logger.db(
                   `Starting background profile fetch for user: ${session.user.id}`
                 );
-                const profileData = await fetchProfileRef.current!(
-                  session.user.id
-                );
+                let profileData = null;
+                if (
+                  fetchProfileRef.current &&
+                  typeof fetchProfileRef.current === 'function'
+                ) {
+                  profileData = await fetchProfileRef.current(session.user.id);
+                } else {
+                  logger.error(
+                    'fetchProfileRef.current is not set or not a function'
+                  );
+                }
 
                 if (isMounted) {
                   logger.db('Background profile fetch result', {
