@@ -1,5 +1,34 @@
 import type { ParsedRecipe, IngredientItem } from './types';
 
+// Convert markdown formatting to plain text
+function convertMarkdownToPlainText(text: string): string {
+  return text
+    // Remove markdown headers
+    .replace(/^#{1,6}\s+/gm, '')
+    // Convert bold text **text** to text
+    .replace(/\*\*([^*]+)\*\*/g, '$1')
+    // Convert italic text *text* to text
+    .replace(/\*([^*]+)\*/g, '$1')
+    // Convert inline code `text` to text
+    .replace(/`([^`]+)`/g, '$1')
+    // Remove markdown links [text](url) to just text
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    // Remove horizontal rules
+    .replace(/^[-=*_]{3,}$/gm, '')
+    // Remove markdown blockquotes
+    .replace(/^>\s+/gm, '')
+    // Remove markdown code blocks
+    .replace(/```[\s\S]*?```/g, '')
+    // Remove markdown code blocks with language
+    .replace(/```\w*\n[\s\S]*?```/g, '')
+    // Remove bullet points and list markers
+    .replace(/^[-*•]\s+/gm, '')
+    .replace(/^\d+\.\s+/gm, '')
+    // Clean up extra whitespace
+    .replace(/\n\s*\n/g, '\n')
+    .trim();
+}
+
 // Parse recipe from text using external API
 export function parseRecipeFromText(text: string): ParsedRecipe {
   // Input validation
@@ -290,7 +319,7 @@ function parseFlexibleRecipe(text: string): ParsedRecipe {
         line.match(/^[A-Z][^.!?]*$/) || // Single line starting with capital, no punctuation
         (line.length > 5 && line.length < 80 && !line.includes(':'))) // Reasonable length without colons
     ) {
-      title = line
+      title = convertMarkdownToPlainText(line)
         .replace(/^#+\s+/, '')
         .replace(/[^\w\s-]/g, '')
         .trim();
@@ -377,10 +406,8 @@ function parseFlexibleRecipe(text: string): ParsedRecipe {
         line.includes('lb') ||
         line.includes('kg')
       ) {
-        // Clean up the ingredient line
-        const cleanIngredient = line
-          .replace(/^[-*•]\s+/, '') // Remove bullet points
-          .replace(/^\d+\.\s+/, '') // Remove numbers
+        // Clean up the ingredient line - convert markdown to plain text
+        const cleanIngredient = convertMarkdownToPlainText(line)
           .replace(/^\*\*[^*]+\*\*:\s*/, '') // Remove bold headers like **Prep:**
           .replace(/^[A-Z\s]+:\s*/, '') // Remove ALL CAPS headers
           .trim();
@@ -406,10 +433,8 @@ function parseFlexibleRecipe(text: string): ParsedRecipe {
         line.includes('boil') ||
         line.includes('fry')
       ) {
-        // Clean up the instruction line
-        const cleanInstruction = line
-          .replace(/^[-*•]\s+/, '') // Remove bullet points
-          .replace(/^\d+\.\s+/, '') // Remove numbers
+        // Clean up the instruction line - convert markdown to plain text
+        const cleanInstruction = convertMarkdownToPlainText(line)
           .replace(/^Step\s+\d+:\s*/i, '') // Remove Step X: prefix
           .replace(/^\*\*([^*]+)\*\*$/, '$1') // Remove bold formatting
           .trim();
@@ -430,9 +455,8 @@ function parseFlexibleRecipe(text: string): ParsedRecipe {
         line.includes('serves') ||
         line.includes('yield')
       ) {
-        const cleanNote = line
-          .replace(/^[-*•✨💡]/u, '') // Remove bullet points and emojis
-          .replace(/^\d+\.\s+/, '') // Remove numbers
+        const cleanNote = convertMarkdownToPlainText(line)
+          .replace(/^[✨💡]/u, '') // Remove emojis
           .trim();
 
         if (cleanNote && cleanNote.length > 3) {
@@ -495,7 +519,7 @@ function extractFromUnstructuredText(text: string): ParsedRecipe {
         line.includes('large') ||
         line.includes('small'))
     ) {
-      ingredients.push(line);
+      ingredients.push(convertMarkdownToPlainText(line));
     }
     // Try to identify instructions by action words
     else if (
@@ -512,7 +536,7 @@ function extractFromUnstructuredText(text: string): ParsedRecipe {
       lowerLine.includes('combine') ||
       lowerLine.includes('pour')
     ) {
-      instructions.push(line);
+      instructions.push(convertMarkdownToPlainText(line));
     }
   }
 
