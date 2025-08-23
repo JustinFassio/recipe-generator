@@ -22,12 +22,10 @@ if (!supabaseUrl || !supabaseAnonKey) {
     'VITE_SUPABASE_ANON_KEY:',
     supabaseAnonKey ? '✅ Set' : '❌ Missing'
   );
-  console.error(
-    'Please configure these in your production environment variables.'
-  );
+  console.error('Please configure these in your environment variables.');
 
   throw new Error(
-    'Missing Supabase environment variables. Please configure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your production environment.'
+    'Missing Supabase environment variables. Please configure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your environment variables.'
   );
 }
 
