@@ -161,15 +161,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           logger.auth(`Initial session found: ${session.user.id}`);
           setUser(session.user);
 
-          // Fetch profile non-blocking
-          fetchProfile(session.user.id)
-            .then((profileData) => {
-              logger.db(`Initial profile fetch result: ${!!profileData}`);
-              if (isMounted) setProfile(profileData);
-            })
-            .catch((err) => {
-              logger.error('Initial profile fetch failed:', err);
-            });
+          // TEMPORARILY DISABLE INITIAL PROFILE FETCH
+          logger.warn('Initial profile fetch temporarily disabled');
+          if (isMounted) setProfile(null);
         } else {
           logger.auth('No initial session found');
         }
@@ -205,39 +199,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           logger.auth('Setting loading to false immediately after SIGNED_IN');
           setLoading(false);
 
-          // Fetch profile in background with detailed logging - don't block UI
-          logger.db(`Starting profile fetch for user: ${session.user.id}`);
-
-          // Add retry logic to prevent infinite loops
-          let retryCount = 0;
-          const maxRetries = 2;
-
-          const attemptProfileFetch = async () => {
-            try {
-              const profileData = await fetchProfile(session.user.id);
-              logger.db('Profile fetch result', {
-                success: !!profileData,
-                hasData: !!profileData,
-              });
-              setProfile(profileData);
-            } catch (profileError) {
-              logger.error('Profile fetch error:', profileError);
-              retryCount++;
-              if (retryCount < maxRetries) {
-                logger.db(
-                  `Retrying profile fetch (${retryCount}/${maxRetries})`
-                );
-                setTimeout(attemptProfileFetch, 2000); // Wait 2 seconds before retry
-              } else {
-                logger.error(
-                  'Max profile fetch retries reached, continuing without profile'
-                );
-                // Continue without profile - user can still use the app
-              }
-            }
-          };
-
-          attemptProfileFetch();
+          // TEMPORARILY DISABLE PROFILE FETCH TO PREVENT INFINITE LOOP
+          // TODO: Re-enable once the underlying issue is resolved
+          logger.warn(
+            'Profile fetch temporarily disabled to prevent infinite loop'
+          );
+          setProfile(null);
         } else if (event === 'SIGNED_OUT') {
           logger.auth('User signed out');
           setUser(null);
