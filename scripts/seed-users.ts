@@ -127,9 +127,9 @@ const users: SeedUser[] = [
 
 async function ensureUsername(userId: string, username: string) {
   // Use the atomic function defined in migrations
-  const { error } = await admin.rpc('claim_username_atomic', {
-    p_user_id: userId,
-    p_username: username,
+  const { error } = await admin.rpc('update_username_atomic', {
+    user_uuid: userId,
+    new_username: username,
   });
   if (error && !String(error.message).includes('user_already_has_username')) {
     throw error;

@@ -11,6 +11,21 @@ interface ProfileSummary {
 // Simple error handler
 function handleError(error: unknown, operation: string): never {
   console.error(`${operation} error:`, error);
+
+  // Handle Supabase errors
+  if (error && typeof error === 'object' && 'message' in error) {
+    const errorMessage = (error as { message: string }).message;
+    throw new Error(`${operation} failed: ${errorMessage}`);
+  }
+
+  // Handle PostgrestError
+  if (error && typeof error === 'object' && 'details' in error) {
+    const details =
+      (error as { details?: string }).details || 'Unknown database error';
+    throw new Error(`${operation} failed: ${details}`);
+  }
+
+  // Fallback
   const errorMessage = error instanceof Error ? error.message : 'Unknown error';
   throw new Error(`${operation} failed: ${errorMessage}`);
 }
@@ -87,20 +102,32 @@ export const recipeApi = {
 
   // Toggle recipe public status
   async toggleRecipePublic(recipeId: string, isPublic: boolean): Promise<void> {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error('User not authenticated');
+
     const { error } = await supabase
       .from('recipes')
       .update({ is_public: isPublic })
-      .eq('id', recipeId);
+      .eq('id', recipeId)
+      .eq('user_id', user.id); // Ensure user owns the recipe
 
     if (error) handleError(error, 'Toggle recipe public status');
   },
 
   // Get recipe sharing status
   async getRecipeSharingStatus(recipeId: string): Promise<boolean> {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error('User not authenticated');
+
     const { data, error } = await supabase
       .from('recipes')
       .select('is_public')
       .eq('id', recipeId)
+      .eq('user_id', user.id) // Ensure user owns the recipe
       .single();
 
     if (error) handleError(error, 'Get recipe sharing status');
@@ -128,10 +155,16 @@ export const recipeApi = {
 
   // Update an existing recipe
   async updateRecipe(id: string, updates: Partial<Recipe>): Promise<Recipe> {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error('User not authenticated');
+
     const { data, error } = await supabase
       .from('recipes')
       .update(updates)
       .eq('id', id)
+      .eq('user_id', user.id) // Ensure user owns the recipe
       .select()
       .single();
 
@@ -141,7 +174,16 @@ export const recipeApi = {
 
   // Delete a recipe
   async deleteRecipe(id: string): Promise<void> {
-    const { error } = await supabase.from('recipes').delete().eq('id', id);
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error('User not authenticated');
+
+    const { error } = await supabase
+      .from('recipes')
+      .delete()
+      .eq('id', id)
+      .eq('user_id', user.id); // Ensure user owns the recipe
 
     if (error) handleError(error, 'Delete recipe');
   },
