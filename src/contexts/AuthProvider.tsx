@@ -5,12 +5,7 @@ import React, {
   useState,
   useCallback,
 } from 'react';
-import {
-  User,
-  AuthChangeEvent,
-  Session,
-  PostgrestError,
-} from '@supabase/supabase-js';
+import { User, AuthChangeEvent, Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import type { Profile } from '@/lib/types';
 import { ensureUserProfile } from '@/lib/auth-utils';
@@ -44,7 +39,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Create logger instance for this component
   const logger = createLogger('AuthProvider');
 
-  // Simple profile fetch with detailed logging and timeout
+  // Simple profile fetch with detailed logging
   const fetchProfile = useCallback(
     async (userId: string): Promise<Profile | null> => {
       try {
@@ -59,21 +54,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           return null;
         }
 
-        // Add timeout to prevent hanging
-        const queryPromise = supabase
+        // Simple query without timeout
+        const { data, error } = await supabase
           .from('profiles')
           .select('*')
           .eq('id', userId)
           .single();
-
-        const timeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error('Profile query timeout')), 10000); // Increased timeout
-        });
-
-        const { data, error } = (await Promise.race([
-          queryPromise,
-          timeoutPromise,
-        ])) as { data: Profile | null; error: PostgrestError | null };
 
         logger.db('Supabase query result', {
           hasData: !!data,
@@ -161,9 +147,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           logger.auth(`Initial session found: ${session.user.id}`);
           setUser(session.user);
 
-          // TEMPORARILY DISABLE INITIAL PROFILE FETCH
-          logger.warn('Initial profile fetch temporarily disabled');
-          if (isMounted) setProfile(null);
+          // Fetch profile non-blocking
+          fetchProfile(session.user.id)
+            .then((profileData) => {
+              logger.db(`Initial profile fetch result: ${!!profileData}`);
+              if (isMounted) setProfile(profileData);
+            })
+            .catch((err) => {
+              logger.error('Initial profile fetch failed:', err);
+            });
         } else {
           logger.auth('No initial session found');
         }
@@ -199,12 +191,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           logger.auth('Setting loading to false immediately after SIGNED_IN');
           setLoading(false);
 
-          // TEMPORARILY DISABLE PROFILE FETCH TO PREVENT INFINITE LOOP
-          // TODO: Re-enable once the underlying issue is resolved
-          logger.warn(
-            'Profile fetch temporarily disabled to prevent infinite loop'
-          );
-          setProfile(null);
+          // Fetch profile in background with detailed logging - don't block UI
+          logger.db(`Starting profile fetch for user: ${session.user.id}`);
+
+          // Single attempt with proper error handling
+          fetchProfile(session.user.id)
+            .then((profileData) => {
+              logger.db('Profile fetch result', {
+                success: !!profileData,
+                hasData: !!profileData,
+              });
+              setProfile(profileData);
+            })
+            .catch((profileError) => {
+              logger.error('Profile fetch error:', profileError);
+              // Continue without profile - user can still use the app
+            });
         } else if (event === 'SIGNED_OUT') {
           logger.auth('User signed out');
           setUser(null);
