@@ -50,6 +50,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         logger.db(`Querying profiles table for user: ${userId}`);
 
+        // Check if user is authenticated first
+        const {
+          data: { user: currentUser },
+        } = await supabase.auth.getUser();
+        if (!currentUser) {
+          logger.error('No authenticated user found');
+          return null;
+        }
+
         // Add timeout to prevent hanging
         const queryPromise = supabase
           .from('profiles')
@@ -58,7 +67,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           .single();
 
         const timeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error('Profile query timeout')), 5000);
+          setTimeout(() => reject(new Error('Profile query timeout')), 10000); // Increased timeout
         });
 
         const { data, error } = (await Promise.race([
@@ -198,18 +207,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
           // Fetch profile in background with detailed logging - don't block UI
           logger.db(`Starting profile fetch for user: ${session.user.id}`);
-          fetchProfile(session.user.id)
-            .then((profileData) => {
+
+          // Add retry logic to prevent infinite loops
+          let retryCount = 0;
+          const maxRetries = 2;
+
+          const attemptProfileFetch = async () => {
+            try {
+              const profileData = await fetchProfile(session.user.id);
               logger.db('Profile fetch result', {
                 success: !!profileData,
                 hasData: !!profileData,
               });
               setProfile(profileData);
-            })
-            .catch((profileError) => {
+            } catch (profileError) {
               logger.error('Profile fetch error:', profileError);
-              // Continue without profile - user can still use the app
-            });
+              retryCount++;
+              if (retryCount < maxRetries) {
+                logger.db(
+                  `Retrying profile fetch (${retryCount}/${maxRetries})`
+                );
+                setTimeout(attemptProfileFetch, 2000); // Wait 2 seconds before retry
+              } else {
+                logger.error(
+                  'Max profile fetch retries reached, continuing without profile'
+                );
+                // Continue without profile - user can still use the app
+              }
+            }
+          };
+
+          attemptProfileFetch();
         } else if (event === 'SIGNED_OUT') {
           logger.auth('User signed out');
           setUser(null);
