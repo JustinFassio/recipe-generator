@@ -5,7 +5,12 @@ import React, {
   useState,
   useCallback,
 } from 'react';
-import { User, AuthChangeEvent, Session } from '@supabase/supabase-js';
+import {
+  User,
+  AuthChangeEvent,
+  Session,
+  PostgrestError,
+} from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import type { Profile } from '@/lib/types';
 import { ensureUserProfile } from '@/lib/auth-utils';
@@ -24,7 +29,6 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Create logger instance outside component to prevent recreation on every render
 const logger = createLogger('AuthProvider');
-
 export function useAuth(): AuthContextType {
   const context = useContext(AuthContext);
   if (context === undefined) {
@@ -39,28 +43,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Simple profile fetch with detailed logging
+  // Simple profile fetch with detailed logging and timeout
   const fetchProfile = useCallback(
     async (userId: string): Promise<Profile | null> => {
       try {
         logger.db(`Querying profiles table for user: ${userId}`);
 
-        // Check if user is authenticated first
-        const {
-          data: { user: currentUser },
-        } = await supabase.auth.getUser();
-        if (!currentUser) {
-          logger.error('No authenticated user found');
-          return null;
-        }
-
-        // Simple query without timeout
-        const { data, error } = await supabase
+        // Add timeout to prevent hanging
+        const queryPromise = supabase
           .from('profiles')
           .select('*')
           .eq('id', userId)
           .single();
 
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Profile query timeout')), 5000);
+        });
+
+        const { data, error } = (await Promise.race([
+          queryPromise,
+          timeoutPromise,
+        ])) as { data: Profile | null; error: PostgrestError | null };
         logger.db('Supabase query result', {
           hasData: !!data,
           error: error?.message,
