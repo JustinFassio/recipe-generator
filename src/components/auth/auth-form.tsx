@@ -253,6 +253,7 @@ export function AuthForm() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className="input-bordered input w-full border-gray-300 bg-white pl-10 text-gray-900 focus:border-green-500"
+                      autoComplete="username"
                       required
                     />
                   </div>
@@ -305,6 +306,7 @@ export function AuthForm() {
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
                       className="input-bordered input w-full border-gray-300 bg-white pl-10 text-gray-900 focus:border-green-500"
+                      autoComplete="name"
                       required
                     />
                   </div>
@@ -323,6 +325,7 @@ export function AuthForm() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className="input-bordered input w-full border-gray-300 bg-white pl-10 text-gray-900 focus:border-green-500"
+                      autoComplete="username"
                       required
                     />
                   </div>
@@ -423,6 +426,7 @@ export function AuthForm() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className="input-bordered input w-full border-gray-300 bg-white pl-10 text-gray-900 focus:border-green-500"
+                      autoComplete="username"
                       required
                     />
                   </div>
@@ -456,6 +460,7 @@ export function AuthForm() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className="input-bordered input w-full border-gray-300 bg-white pl-10 text-gray-900 focus:border-green-500"
+                      autoComplete="username"
                       required
                     />
                   </div>
