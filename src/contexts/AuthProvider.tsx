@@ -22,6 +22,9 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Create logger instance outside component to prevent recreation on every render
+const logger = createLogger('AuthProvider');
+
 export function useAuth(): AuthContextType {
   const context = useContext(AuthContext);
   if (context === undefined) {
@@ -35,9 +38,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  // Create logger instance for this component
-  const logger = createLogger('AuthProvider');
 
   // Simple profile fetch with detailed logging
   const fetchProfile = useCallback(
@@ -101,7 +101,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return null;
       }
     },
-    [logger]
+    [] // Remove logger dependency since it's now stable
   );
 
   const refreshProfile = useCallback(async () => {
@@ -222,7 +222,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       isMounted = false;
       subscription.unsubscribe();
     };
-  }, [fetchProfile, logger]);
+  }, [fetchProfile]);
 
   const value: AuthContextType = {
     user,
