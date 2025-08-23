@@ -103,5 +103,5 @@ export type ParsedRecipe = {
   title: string;
   ingredients: string[];
   instructions: string;
-  notes: string;
+  notes: string | null;
 };
