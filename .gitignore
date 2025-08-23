@@ -30,3 +30,6 @@ dist-ssr
 # Debug files
 debug-env.js
 coverage/
+
+# Vercel
+.vercel
