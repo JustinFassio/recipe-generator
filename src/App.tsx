@@ -13,8 +13,6 @@ import AuthCallbackPage from '@/pages/auth-callback-page';
 import ExplorePage from '@/pages/explore-page';
 import { AuthForm } from '@/components/auth/auth-form';
 import { ThemeProvider } from '@/components/ui/theme-provider';
-import { ThemeTest } from '@/components/ui/theme-test';
-import { ThemeDebug } from '@/components/ui/theme-debug';
 
 import { Toaster } from '@/components/ui/toaster';
 
@@ -123,32 +121,6 @@ function AppContent() {
               <Header />
               <main>
                 <ProfilePage />
-              </main>
-            </div>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/theme-test"
-        element={
-          <ProtectedRoute>
-            <div className="bg-base-100 min-h-screen">
-              <Header />
-              <main>
-                <ThemeTest />
-              </main>
-            </div>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/theme-debug"
-        element={
-          <ProtectedRoute>
-            <div className="bg-base-100 min-h-screen">
-              <Header />
-              <main>
-                <ThemeDebug />
               </main>
             </div>
           </ProtectedRoute>
