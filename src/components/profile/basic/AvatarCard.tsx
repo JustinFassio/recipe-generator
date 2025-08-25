@@ -43,8 +43,8 @@ export const AvatarCard: React.FC<AvatarCardProps> = ({
             {avatarUrl ? (
               <img src={avatarUrl} alt="Profile" />
             ) : (
-              <div className="flex items-center justify-center bg-primary/20">
-                <User className="h-12 w-12 text-primary" />
+              <div className="bg-primary/20 flex items-center justify-center">
+                <User className="text-primary h-12 w-12" />
               </div>
             )}
             {loading && (

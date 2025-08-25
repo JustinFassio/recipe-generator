@@ -64,8 +64,8 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
           {profile.avatar_url ? (
             <img src={profile.avatar_url} alt="Profile" />
           ) : (
-            <div className="flex items-center justify-center bg-primary/20">
-              <User className="h-12 w-12 text-primary" />
+            <div className="bg-primary/20 flex items-center justify-center">
+              <User className="text-primary h-12 w-12" />
             </div>
           )}
           {avatarLoading && (

@@ -178,7 +178,7 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
                 }`}
               >
                 <div className="card-body p-3">
-                  <div className="whitespace-pre-wrap text-sm leading-relaxed">
+                  <div className="text-sm leading-relaxed whitespace-pre-wrap">
                     {message.content}
                   </div>
                   <div
@@ -225,7 +225,7 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
       </div>
 
       {/* Chat Input */}
-      <div className="rounded-b-lg border-t bg-base-100 p-4">
+      <div className="bg-base-100 rounded-b-lg border-t p-4">
         <div className="flex items-center space-x-2">
           <input
             ref={inputRef}

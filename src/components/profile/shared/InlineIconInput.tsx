@@ -29,7 +29,7 @@ export const InlineIconInput: React.FC<InlineIconInputProps> = ({
   return (
     <div className="relative">
       <Icon
-        className="text-base-content/40 absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform"
+        className="text-base-content/40 absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform"
         aria-hidden="true"
       />
       <input

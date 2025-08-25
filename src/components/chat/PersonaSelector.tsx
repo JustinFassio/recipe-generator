@@ -56,7 +56,7 @@ export function PersonaSelector({ onPersonaSelect }: PersonaSelectorProps) {
 
   return (
     <div className="mx-auto flex h-[calc(100vh-8rem)] max-w-4xl flex-col">
-      <div className="flex items-center justify-between rounded-t-lg border-b bg-base-100 p-4">
+      <div className="bg-base-100 flex items-center justify-between rounded-t-lg border-b p-4">
         <div className="flex items-center space-x-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-white bg-orange-100 shadow-sm">
             <div className="flex items-center justify-center text-orange-600">

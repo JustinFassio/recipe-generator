@@ -60,7 +60,7 @@ export function ChatHeader({
 
   return (
     <div className="relative">
-      <div className="flex items-center justify-between rounded-t-lg border-b bg-base-100 p-4">
+      <div className="bg-base-100 flex items-center justify-between rounded-t-lg border-b p-4">
         <div className="flex items-center space-x-3">
           <div
             className={`flex h-10 w-10 items-center justify-center rounded-full border-2 border-white shadow-sm ${getPersonaColor(selectedPersona)}`}
@@ -135,7 +135,7 @@ export function ChatHeader({
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
         <div
-          className="absolute left-0 right-0 top-full z-50 border-b border-gray-200 bg-base-100 shadow-lg md:hidden"
+          className="bg-base-100 absolute top-full right-0 left-0 z-50 border-b border-gray-200 shadow-lg md:hidden"
           role="dialog"
           aria-modal="true"
           aria-label="Mobile menu"

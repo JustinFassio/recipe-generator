@@ -194,7 +194,7 @@ export function RecipeForm({
                       type="button"
                       variant="ghost"
                       size="sm"
-                      className="absolute right-2 top-2 bg-white/80 hover:bg-white"
+                      className="absolute top-2 right-2 bg-white/80 hover:bg-white"
                       onClick={() => {
                         setImagePreview('');
                         setImageFile(null);

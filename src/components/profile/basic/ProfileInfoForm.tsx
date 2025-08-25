@@ -122,10 +122,10 @@ export const ProfileInfoForm: React.FC<ProfileInfoFormProps> = ({
             </span>
           </label>
           <div className="relative">
-            <AtSign className="text-base-content/40 absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform" />
+            <AtSign className="text-base-content/40 absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform" />
             <input
               type="text"
-              className={`input-bordered input w-full pl-10 pr-10 ${
+              className={`input-bordered input w-full pr-10 pl-10 ${
                 username && usernameAvailable === true
                   ? 'border-success'
                   : username && usernameAvailable === false
@@ -139,14 +139,14 @@ export const ProfileInfoForm: React.FC<ProfileInfoFormProps> = ({
               minLength={3}
               maxLength={24}
             />
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 transform">
+            <div className="absolute top-1/2 right-3 -translate-y-1/2 transform">
               {usernameChecking ? (
-                <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                <Loader2 className="text-primary h-4 w-4 animate-spin" />
               ) : username ? (
                 usernameAvailable === true ? (
-                  <Check className="h-4 w-4 text-success" />
+                  <Check className="text-success h-4 w-4" />
                 ) : usernameAvailable === false ? (
-                  <X className="h-4 w-4 text-error" />
+                  <X className="text-error h-4 w-4" />
                 ) : null
               ) : null}
             </div>
@@ -193,7 +193,7 @@ export const ProfileInfoForm: React.FC<ProfileInfoFormProps> = ({
             <span className="label-text">Language</span>
           </label>
           <div className="relative">
-            <Globe className="text-base-content/40 absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform" />
+            <Globe className="text-base-content/40 absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform" />
             <select
               id="language-select"
               className="select-bordered select w-full pl-10"
@@ -219,7 +219,7 @@ export const ProfileInfoForm: React.FC<ProfileInfoFormProps> = ({
             <span className="label-text">Measurement Units</span>
           </label>
           <div className="relative">
-            <Ruler className="text-base-content/40 absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform" />
+            <Ruler className="text-base-content/40 absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform" />
             <select
               id="units-select"
               className="select-bordered select w-full pl-10"
@@ -240,7 +240,7 @@ export const ProfileInfoForm: React.FC<ProfileInfoFormProps> = ({
             </span>
           </label>
           <div className="relative">
-            <Clock className="text-base-content/40 absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform" />
+            <Clock className="text-base-content/40 absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform" />
             <div className="pl-10">
               <RangeWithTicks
                 value={timePerMeal}
@@ -261,7 +261,7 @@ export const ProfileInfoForm: React.FC<ProfileInfoFormProps> = ({
             </span>
           </label>
           <div className="relative">
-            <GraduationCap className="text-base-content/40 absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform" />
+            <GraduationCap className="text-base-content/40 absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform" />
             <div className="pl-10">
               <RangeWithTicks
                 value={Number(skillLevel)}

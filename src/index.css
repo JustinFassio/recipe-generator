@@ -1,12 +1,30 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+@plugin "daisyui" {
+  themes:
+    light --default,
+    dark --prefersdark,
+    caramellatte;
+}
+
+/* Custom component variants */
+@layer components {
+  .btn-recipe {
+    @apply bg-secondary text-secondary-content hover:bg-secondary/80;
+  }
+
+  .btn-warm {
+    @apply bg-warning text-warning-content hover:bg-warning/80;
+  }
+
+  .card-recipe {
+    @apply bg-base-100 border-primary border-2 shadow-lg;
+  }
+}
 
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -31,60 +49,4 @@ body {
 h1 {
   font-size: 3.2em;
   line-height: 1.1;
-}
-
-/* Button styles will now be handled by DaisyUI */
-
-/* Theme switching will be handled by DaisyUI */
-
-@layer base {
-  :root {
-    /* DaisyUI will handle these variables through its theme system */
-    --radius: 0.5rem;
-  }
-
-  /* Apply Caramellatte theme globally */
-  html[data-theme='caramellatte'] {
-    color-scheme: light;
-    --color-primary: #3d2817;
-    --color-secondary: #6b4423;
-    --color-accent: #8b5a2b;
-    --color-neutral: #5d4037;
-    --color-base-100: #fef7ed;
-    --color-base-200: #f5e6d3;
-    --color-base-300: #e7d5c4;
-    --color-base-content: #3d2817;
-    --color-primary-content: #ffffff;
-    --color-secondary-content: #e7d5c4;
-    --color-accent-content: #e7d5c4;
-    --color-neutral-content: #fef7ed;
-    --color-info: #3abff8;
-    --color-info-content: #e7d5c4;
-    --color-success: #36d399;
-    --color-success-content: #e7d5c4;
-    --color-warning: #fbbd23;
-    --color-warning-content: #3d2817;
-    --color-error: #f87272;
-    --color-error-content: #3d2817;
-  }
-
-  /* Theme is applied via JavaScript in ThemeProvider */
-
-  /* Force apply the theme to all elements */
-  * {
-    color-scheme: light;
-  }
-
-  /* Ensure navbar and other components use the theme */
-  .navbar {
-    background-color: var(--color-base-100);
-  }
-
-  .bg-base-100 {
-    background-color: var(--color-base-100);
-  }
-}
-
-@layer base {
-  /* DaisyUI will handle theme colors through its system */
 }

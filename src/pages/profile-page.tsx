@@ -163,7 +163,7 @@ export default function ProfilePage() {
   return (
     <div className="container mx-auto max-w-6xl px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-base-content">
+        <h1 className="text-base-content text-3xl font-bold">
           Account Settings
         </h1>
         <p className="text-base-content/60 mt-2">

@@ -14,7 +14,7 @@ export const SafetySection: React.FC<SafetySectionProps> = ({
   return (
     <SectionCard className={className}>
       <h2 className="card-title flex items-center">
-        <Shield className="mr-2 h-5 w-5 text-warning" />
+        <Shield className="text-warning mr-2 h-5 w-5" />
         Safety & Dietary
       </h2>
       <p className="text-base-content/60 mb-4 text-sm">

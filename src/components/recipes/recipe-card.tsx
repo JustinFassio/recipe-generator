@@ -143,9 +143,7 @@ export function RecipeCard({
 
           <div className="space-y-3">
             <div className="flex items-center justify-between text-sm text-gray-500">
-              <span
-                className={createDaisyUIBadgeClasses('secondary', 'text-xs')}
-              >
+              <span className={createDaisyUIBadgeClasses('warning', 'text-xs')}>
                 {recipe.ingredients.length} ingredients
               </span>
               <span className="text-xs">
@@ -161,7 +159,7 @@ export function RecipeCard({
 
             {recipe.notes && (
               <div className="border-t pt-2">
-                <p className="line-clamp-2 text-xs italic text-gray-500">
+                <p className="line-clamp-2 text-xs text-gray-500 italic">
                   {recipe.notes}
                 </p>
               </div>

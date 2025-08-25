@@ -106,7 +106,7 @@ export function RecipeView({ recipe, onEdit, onBack }: RecipeViewProps) {
                 ) : (
                   // Regular ingredient
                   <>
-                    <div className="mr-3 mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-orange-100">
+                    <div className="mt-0.5 mr-3 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-orange-100">
                       <div className="h-2 w-2 rounded-full bg-orange-500"></div>
                     </div>
                     <p className="leading-relaxed text-gray-700">
@@ -156,7 +156,7 @@ export function RecipeView({ recipe, onEdit, onBack }: RecipeViewProps) {
               if (numberedMatch) {
                 return (
                   <div key={index} className="flex items-start">
-                    <div className="mr-4 mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-teal-100">
+                    <div className="mt-0.5 mr-4 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-teal-100">
                       <span className="text-sm font-semibold text-teal-700">
                         {numberedMatch[1]}
                       </span>
@@ -215,7 +215,7 @@ export function RecipeView({ recipe, onEdit, onBack }: RecipeViewProps) {
                 ) {
                   return (
                     <div key={index} className="flex items-start">
-                      <div className="mr-3 mt-2.5 h-2 w-2 flex-shrink-0 rounded-full bg-gray-400"></div>
+                      <div className="mt-2.5 mr-3 h-2 w-2 flex-shrink-0 rounded-full bg-gray-400"></div>
                       <p className="leading-relaxed text-gray-700">
                         {trimmedLine.replace(/^[•-]\s*/, '')}
                       </p>
