@@ -10,13 +10,11 @@ ON recipes USING GIN (categories);
 ALTER TABLE recipes 
 ALTER COLUMN categories SET NOT NULL;
 
--- Add constraint to limit category length (max 50 characters per category)
+-- Add constraint to limit number of categories (max 6 categories)
 -- NOTE: The maximum number of categories (6) must be kept in sync with the application layer
 ALTER TABLE recipes 
-ADD CONSTRAINT check_category_length 
-CHECK (array_length(categories, 1) IS NULL OR 
-       array_length(categories, 1) <= 6 AND 
-       (SELECT bool_and(length(cat) <= 50) FROM unnest(categories) AS cat));
+ADD CONSTRAINT check_category_count 
+CHECK (array_length(categories, 1) IS NULL OR array_length(categories, 1) <= 6);
 
 -- Update RLS policies to include categories
 DROP POLICY IF EXISTS "Users can view their own recipes" ON recipes;

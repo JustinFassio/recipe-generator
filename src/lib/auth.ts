@@ -419,9 +419,10 @@ export async function uploadAvatar(
       };
     }
 
-    // Generate unique filename
+    // Generate unique filename with timestamp for cache busting
     const fileExt = file.name.split('.').pop();
-    const fileName = `${user.id}/avatar.${fileExt}`;
+    const timestamp = Date.now();
+    const fileName = `${user.id}/avatar-${timestamp}.${fileExt}`;
 
     // Upload to storage
     const { error } = await supabase.storage
@@ -435,10 +436,8 @@ export async function uploadAvatar(
       };
     }
 
-    // Get public URL
-    const {
-      data: { publicUrl },
-    } = supabase.storage.from('avatars').getPublicUrl(fileName);
+    // Get public URL - manually construct to ensure production URL
+    const publicUrl = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/avatars/${fileName}`;
 
     // Update profile with new avatar URL
     const { error: updateError } = await supabase
