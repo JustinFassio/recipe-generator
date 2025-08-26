@@ -56,9 +56,7 @@ export const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({
                 item.onClick();
                 setIsOpen(false);
               }}
-              className={`btn btn-sm whitespace-nowrap shadow-lg ${
-                item.id === 'ai-create' ? 'btn-neutral' : 'btn-neutral'
-              }`}
+              className="btn btn-sm btn-neutral whitespace-nowrap shadow-lg"
               aria-label={item.label}
             >
               {item.icon}
