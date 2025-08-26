@@ -1,23 +1,29 @@
--- Fix Username Function for RPC Calls
--- Run this in Supabase SQL Editor
+-- Fix Username Function for RPC Calls - Version 2
+-- This migration fixes the update_username_atomic function to work properly with RPC calls
 
--- Drop and recreate the function to ensure it's properly exposed
+-- Drop and recreate the function with SECURITY INVOKER for proper RPC exposure
 DROP FUNCTION IF EXISTS update_username_atomic(uuid, citext);
 
--- Recreate the function with proper RPC exposure
+-- Recreate the function with SECURITY INVOKER for proper RPC exposure
 CREATE OR REPLACE FUNCTION update_username_atomic(
   p_user_id uuid,
   p_new_username citext
 )
 RETURNS json
 LANGUAGE plpgsql
-SECURITY DEFINER
+SECURITY INVOKER
 SET search_path = public
 AS $$
 DECLARE
   username_exists boolean;
   result json;
 BEGIN
+  -- Security check - ensure user can only update their own username
+  IF auth.uid() != p_user_id THEN
+    result := json_build_object('success', false, 'error', 'unauthorized');
+    RETURN result;
+  END IF;
+
   -- Check if username is already taken by another user
   SELECT EXISTS(
     SELECT 1 FROM usernames

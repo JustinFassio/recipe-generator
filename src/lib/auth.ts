@@ -343,15 +343,18 @@ export async function claimUsername(
     // Handle the JSON response from the function
     if (data && typeof data === 'object') {
       if (!data.success) {
-        const errorMessage = data.error === 'username_already_taken' 
-          ? 'This username is already taken'
-          : data.error || 'Failed to update username';
-        
+        const errorMessage =
+          data.error === 'username_already_taken'
+            ? 'This username is already taken'
+            : data.error || 'Failed to update username';
+
         return {
           success: false,
           error: createAuthError(
             errorMessage,
-            data.error === 'username_already_taken' ? 'USERNAME_TAKEN' : 'UPDATE_FAILED'
+            data.error === 'username_already_taken'
+              ? 'USERNAME_TAKEN'
+              : 'UPDATE_FAILED'
           ),
         };
       }
