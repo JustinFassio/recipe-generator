@@ -49,6 +49,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const retryAttempts = useRef<Map<string, number>>(new Map());
   const maxRetries = 3;
 
+  // Simple cache to prevent unnecessary re-fetches
+  const profileCache = useRef<
+    Map<string, { profile: Profile; timestamp: number }>
+  >(new Map());
+  const CACHE_DURATION_MS = 5 * 60 * 1000; // 5 minutes
+
   // Store current fetchProfile function to avoid dependency issues
   const fetchProfileRef = useRef<typeof fetchProfile>();
 
@@ -77,6 +83,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Profile fetch with exponential backoff and circuit breaker
   const fetchProfile = useCallback(
     async (userId: string): Promise<Profile | null> => {
+      // Check cache first
+      const cached = profileCache.current.get(userId);
+      if (cached && Date.now() - cached.timestamp < CACHE_DURATION_MS) {
+        logger.db(`Using cached profile for user: ${userId}`);
+        return cached.profile;
+      }
+
       if (!shouldRetry(userId)) {
         logger.error(`Max retries exceeded for user ${userId}, skipping fetch`);
         return null;
@@ -96,9 +109,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           .eq('id', userId)
           .single();
 
-        // Longer timeout for production (10 seconds instead of 5)
+        // Increased timeout for local development stability
         const timeoutPromise = new Promise<never>((_, reject) => {
-          setTimeout(() => reject(new Error('Profile query timeout')), 10000);
+          setTimeout(
+            () => reject(new Error('Profile query timeout')),
+            import.meta.env.DEV ? 20000 : 15000
+          );
         });
 
         const { data, error } = (await Promise.race([
@@ -150,9 +166,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
         }
 
-        // Success - reset retry counter
+        // Success - reset retry counter and cache the profile
         resetRetries(userId);
-        logger.success('Profile found successfully');
+        if (data) {
+          profileCache.current.set(userId, {
+            profile: data,
+            timestamp: Date.now(),
+          });
+          logger.success('Profile found successfully and cached');
+        }
         return data;
       } catch (err) {
         logger.error('Profile fetch exception:', err);
@@ -173,7 +195,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return null;
       }
     },
-    [shouldRetry, incrementRetries, resetRetries, logger]
+    [shouldRetry, incrementRetries, resetRetries, logger, CACHE_DURATION_MS]
   );
 
   // Store the current fetchProfile function in ref
@@ -183,6 +205,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const refreshProfile = useCallback(async () => {
     if (!user?.id) {
       logger.auth('No user ID, skipping profile refresh');
+      return;
+    }
+
+    // If we already have profile data, don't immediately re-fetch
+    // This prevents unnecessary API calls when navigating back to account page
+    if (profile) {
+      logger.auth(
+        `Profile already loaded for user: ${user.id}, skipping immediate refresh`
+      );
       return;
     }
 
@@ -196,7 +227,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       logger.error('Profile refresh failed');
       // Don't clear profile on refresh failure - keep existing data
     }
-  }, [user?.id, fetchProfile, logger]);
+  }, [user?.id, profile, fetchProfile, logger]);
 
   const signOut = async () => {
     try {
@@ -208,8 +239,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setProfile(null);
       setError(null);
 
-      // Clear retry counters
+      // Clear retry counters and cache
       retryAttempts.current.clear();
+      profileCache.current.clear();
 
       logger.success('User signed out successfully');
     } catch (err) {
@@ -226,8 +258,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         logger.auth('Initializing AuthProvider...');
 
-        // Session timeout configuration
-        const SESSION_TIMEOUT_MS = import.meta.env.DEV ? 8000 : 5000; // Longer timeout for development
+        // Session timeout configuration - increased for local development stability
+        const SESSION_TIMEOUT_MS = import.meta.env.DEV ? 15000 : 8000; // Much longer timeout for development
         const sessionPromise = supabase.auth.getSession();
         const timeoutPromise = new Promise<never>((_, reject) => {
           setTimeout(
@@ -271,6 +303,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }
           } catch (profileError) {
             logger.error('Initial profile fetch failed:', profileError);
+            // In development, be more lenient with profile fetch failures
+            if (import.meta.env.DEV) {
+              logger.auth(
+                'Development mode: continuing without profile, will retry on demand'
+              );
+            }
             // Continue without profile - don't block app initialization
           }
         } else {
@@ -354,6 +392,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 }
               } catch (profileError) {
                 logger.error('Background profile fetch error:', profileError);
+                // In development, be more lenient with profile fetch failures
+                if (import.meta.env.DEV) {
+                  logger.auth(
+                    'Development mode: background profile fetch failed, will retry on demand'
+                  );
+                }
                 // Continue without profile - user can still use the app
               }
             } else if (event === 'SIGNED_OUT') {
@@ -363,8 +407,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               setError(null);
               setLoading(false);
 
-              // Clear retry counters
+              // Clear retry counters and cache
               retryAttempts.current.clear();
+              profileCache.current.clear();
             } else if (event === 'TOKEN_REFRESHED') {
               logger.auth('Token refreshed - no profile fetch needed');
             }
@@ -400,9 +445,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         authSubscription = null;
       }
 
-      // Clear retry counters - capture ref value to avoid warning
+      // Clear retry counters and cache - capture ref values to avoid warning
       const currentRetryAttempts = retryAttempts.current;
+      const currentProfileCache = profileCache.current;
       currentRetryAttempts.clear();
+      currentProfileCache.clear();
     };
   }, [logger]); // Include logger to satisfy exhaustive-deps
 
