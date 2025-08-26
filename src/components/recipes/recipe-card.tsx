@@ -4,6 +4,7 @@ import {
 } from '@/lib/card-migration';
 import { createDaisyUIBadgeClasses } from '@/lib/badge-migration';
 import { Trash2, Edit, Eye, Share, Check, Loader2 } from 'lucide-react';
+import CategoryChip from '@/components/ui/CategoryChip';
 import type { Recipe } from '@/lib/types';
 import { useDeleteRecipe } from '@/hooks/use-recipes';
 import { useState } from 'react';
@@ -152,6 +153,24 @@ export function RecipeCard({
                 {new Date(recipe.created_at).toLocaleDateString('en-US')}
               </span>
             </div>
+
+            {recipe.categories && recipe.categories.length > 0 && (
+              <div className="flex flex-wrap gap-1">
+                {recipe.categories.slice(0, 3).map((category, index) => (
+                  <CategoryChip
+                    key={`${category}-${index}`}
+                    category={category}
+                    variant="readonly"
+                    size="sm"
+                  />
+                ))}
+                {recipe.categories.length > 3 && (
+                  <span className="text-xs text-gray-500">
+                    +{recipe.categories.length - 3} more
+                  </span>
+                )}
+              </div>
+            )}
 
             {recipe.instructions && (
               <p className="line-clamp-3 text-sm text-gray-600">

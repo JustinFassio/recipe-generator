@@ -293,7 +293,10 @@ export function useConversation(): ConversationState & ConversationActions {
         image_url: '',
       };
 
-      setGeneratedRecipe(recipe);
+      setGeneratedRecipe({
+        ...recipe,
+        categories: parsedRecipe.categories || [],
+      });
 
       toast({
         title: 'Recipe Parsed!',

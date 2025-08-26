@@ -50,6 +50,7 @@ export function ParseRecipeForm({ onParsed }: ParseRecipeFormProps) {
         instructions: parsed.instructions,
         notes: parsed.notes || '',
         image_url: '',
+        categories: parsed.categories || [],
       };
       onParsed(recipeFormData);
     } catch (error) {

@@ -388,6 +388,7 @@ class OpenAIAPI {
                 : [],
               instructions: parsed.instructions,
               notes: parsed.notes || '',
+              categories: parsed.categories || [],
             },
           };
         }
