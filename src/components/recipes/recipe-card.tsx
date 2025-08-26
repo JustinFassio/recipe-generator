@@ -143,7 +143,9 @@ export function RecipeCard({
 
           <div className="space-y-3">
             <div className="flex items-center justify-between text-sm text-gray-500">
-              <span className={createDaisyUIBadgeClasses('warning', 'text-xs')}>
+              <span
+                className={createDaisyUIBadgeClasses('secondary', 'text-xs')}
+              >
                 {recipe.ingredients.length} ingredients
               </span>
               <span className="text-xs">
