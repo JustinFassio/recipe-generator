@@ -13,18 +13,6 @@ export function AppTitle({ className = '', size = 'md' }: AppTitleProps) {
   return (
     <h1
       className={`text-neutral-content font-bold ${sizeClasses[size]} ${className}`}
-      style={{
-        textShadow: `
-          -2px -2px 0 #6b4423,
-          2px -2px 0 #6b4423,
-          2px 2px 0 #6b4423,
-          -2px 2px 0 #6b4423,
-          0 -2px 0 #6b4423,
-          2px 0 0 #6b4423,
-          0 2px 0 #6b4423,
-          -2px 0 0 #6b4423
-        `,
-      }}
     >
       Recipe Generator
     </h1>
