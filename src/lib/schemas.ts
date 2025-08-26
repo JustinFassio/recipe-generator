@@ -8,7 +8,9 @@ export const recipeSchema = z.object({
   instructions: z.string().min(1, 'Instructions are required'),
   notes: z.string(),
   image_url: z.string().optional(),
-  categories: z.array(z.string().min(1, 'Category cannot be empty')).default([]),
+  categories: z
+    .array(z.string().min(1, 'Category cannot be empty'))
+    .default([]),
 });
 
 export type RecipeFormData = z.infer<typeof recipeSchema>;

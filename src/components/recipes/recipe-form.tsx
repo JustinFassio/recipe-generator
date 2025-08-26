@@ -307,7 +307,9 @@ export function RecipeForm({
           <h3 className={createDaisyUICardTitleClasses()}>Categories</h3>
           <CategoryInput
             categories={watch('categories') || []}
-            onCategoriesChange={(categories) => setValue('categories', categories)}
+            onCategoriesChange={(categories) =>
+              setValue('categories', categories)
+            }
             placeholder="Add categories like 'Italian', 'Quick', 'Vegetarian'..."
             maxCategories={10}
           />

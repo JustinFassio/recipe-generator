@@ -25,38 +25,38 @@ const CategoryInput: React.FC<CategoryInputProps> = ({
 
   const handleAddCategory = (category: string) => {
     const trimmedCategory = category.trim();
-    
+
     if (!trimmedCategory) return;
-    
+
     // Validate category length
     if (trimmedCategory.length > 50) {
       alert('Category must be 50 characters or less');
       return;
     }
-    
+
     // Check if category already exists (case-insensitive)
-    const exists = categories.some(cat => 
-      cat.toLowerCase() === trimmedCategory.toLowerCase()
+    const exists = categories.some(
+      (cat) => cat.toLowerCase() === trimmedCategory.toLowerCase()
     );
-    
+
     if (exists) {
       alert('This category already exists');
       return;
     }
-    
+
     // Check max categories limit
     if (categories.length >= maxCategories) {
       alert(`Maximum ${maxCategories} categories allowed`);
       return;
     }
-    
+
     const newCategories = [...categories, trimmedCategory];
     onCategoriesChange(newCategories);
     setInputValue('');
   };
 
   const handleRemoveCategory = (categoryToRemove: string) => {
-    const newCategories = categories.filter(cat => cat !== categoryToRemove);
+    const newCategories = categories.filter((cat) => cat !== categoryToRemove);
     onCategoriesChange(newCategories);
   };
 
@@ -64,7 +64,11 @@ const CategoryInput: React.FC<CategoryInputProps> = ({
     if (e.key === 'Enter') {
       e.preventDefault();
       handleAddCategory(inputValue);
-    } else if (e.key === 'Backspace' && inputValue === '' && categories.length > 0) {
+    } else if (
+      e.key === 'Backspace' &&
+      inputValue === '' &&
+      categories.length > 0
+    ) {
       // Remove last category on backspace when input is empty
       const lastCategory = categories[categories.length - 1];
       handleRemoveCategory(lastCategory);
@@ -82,14 +86,14 @@ const CategoryInput: React.FC<CategoryInputProps> = ({
   return (
     <div className={`space-y-2 ${className}`}>
       <div
-        className={`min-h-[44px] p-2 border rounded-lg transition-colors ${
-          isFocused 
-            ? 'border-primary ring-2 ring-primary/20' 
+        className={`min-h-[44px] rounded-lg border p-2 transition-colors ${
+          isFocused
+            ? 'border-primary ring-primary/20 ring-2'
             : 'border-gray-300 hover:border-gray-400'
-        } ${disabled ? 'bg-gray-50 cursor-not-allowed' : 'bg-white'}`}
+        } ${disabled ? 'cursor-not-allowed bg-gray-50' : 'bg-white'}`}
         onClick={() => !disabled && inputRef.current?.focus()}
       >
-        <div className="flex flex-wrap gap-2 items-center">
+        <div className="flex flex-wrap items-center gap-2">
           {categories.map((category, index) => (
             <CategoryChip
               key={`${category}-${index}`}
@@ -99,7 +103,7 @@ const CategoryInput: React.FC<CategoryInputProps> = ({
               size="sm"
             />
           ))}
-          
+
           {categories.length < maxCategories && !disabled && (
             <input
               ref={inputRef}
@@ -110,13 +114,13 @@ const CategoryInput: React.FC<CategoryInputProps> = ({
               onFocus={() => setIsFocused(true)}
               onBlur={handleBlur}
               placeholder={categories.length === 0 ? placeholder : ''}
-              className="flex-1 min-w-[120px] bg-transparent outline-none text-sm placeholder-gray-400"
+              className="min-w-[120px] flex-1 bg-transparent text-sm placeholder-gray-400 outline-none"
               maxLength={50}
             />
           )}
         </div>
       </div>
-      
+
       {categories.length > 0 && (
         <div className="text-xs text-gray-500">
           {categories.length} of {maxCategories} categories

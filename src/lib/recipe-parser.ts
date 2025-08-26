@@ -310,7 +310,11 @@ function parseCategories(parsed: Record<string, unknown>): string[] {
   }
 
   // Handle cuisine field
-  if (parsed.cuisine && typeof parsed.cuisine === 'string' && parsed.cuisine.trim()) {
+  if (
+    parsed.cuisine &&
+    typeof parsed.cuisine === 'string' &&
+    parsed.cuisine.trim()
+  ) {
     categories.push(parsed.cuisine.trim());
   }
 
@@ -321,7 +325,7 @@ function parseCategories(parsed: Record<string, unknown>): string[] {
 
   // Remove duplicates and limit to 10 categories
   const uniqueCategories = [...new Set(categories)].slice(0, 10);
-  
+
   return uniqueCategories;
 }
 
