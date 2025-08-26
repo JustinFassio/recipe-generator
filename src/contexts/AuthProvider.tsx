@@ -226,10 +226,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         logger.auth('Initializing AuthProvider...');
 
-        // Longer timeout for local development
+        // Session timeout configuration
+        const SESSION_TIMEOUT_MS = import.meta.env.DEV ? 8000 : 5000; // Longer timeout for development
         const sessionPromise = supabase.auth.getSession();
         const timeoutPromise = new Promise<never>((_, reject) => {
-          setTimeout(() => reject(new Error('Initial session timeout')), 8000);
+          setTimeout(
+            () => reject(new Error('Initial session timeout')),
+            SESSION_TIMEOUT_MS
+          );
         });
 
         const {
