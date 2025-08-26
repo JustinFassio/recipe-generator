@@ -72,12 +72,12 @@ export default function AuthCallbackPage() {
   }, [user, status, navigate, searchParams]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-base-100">
-      <div className="card w-96 bg-base-200 shadow-xl">
+    <div className="bg-base-100 flex min-h-screen items-center justify-center">
+      <div className="card bg-base-200 w-96 shadow-xl">
         <div className="card-body text-center">
           {status === 'loading' && (
             <>
-              <div className="loading loading-spinner loading-lg mb-4 text-primary"></div>
+              <div className="loading loading-spinner loading-lg text-primary mb-4"></div>
               <h2 className="card-title justify-center">Authenticating</h2>
               <p className="text-base-content/60">{message}</p>
             </>
@@ -86,7 +86,7 @@ export default function AuthCallbackPage() {
           {status === 'success' && (
             <>
               <div className="mb-4 text-6xl">✅</div>
-              <h2 className="card-title justify-center text-success">
+              <h2 className="card-title text-success justify-center">
                 Success!
               </h2>
               <p className="text-base-content/60">{message}</p>
@@ -96,7 +96,7 @@ export default function AuthCallbackPage() {
           {status === 'error' && (
             <>
               <div className="mb-4 text-6xl">❌</div>
-              <h2 className="card-title justify-center text-error">Error</h2>
+              <h2 className="card-title text-error justify-center">Error</h2>
               <p className="text-base-content/60">{message}</p>
               <div className="card-actions mt-4 justify-center">
                 <button

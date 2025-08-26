@@ -14,7 +14,7 @@ export const CookingSection: React.FC<CookingSectionProps> = ({
   return (
     <SectionCard className={className}>
       <h2 className="card-title flex items-center">
-        <ChefHat className="mr-2 h-5 w-5 text-primary" />
+        <ChefHat className="text-primary mr-2 h-5 w-5" />
         Cooking Preferences
       </h2>
       <p className="text-base-content/60 mb-4 text-sm">

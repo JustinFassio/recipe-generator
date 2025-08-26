@@ -31,8 +31,8 @@ export function ProtectedRoute({
   // Show error state if there's an error
   if (error) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-base-100">
-        <div className="card w-96 bg-error text-error-content shadow-xl">
+      <div className="bg-base-100 flex min-h-screen items-center justify-center">
+        <div className="card bg-error text-error-content w-96 shadow-xl">
           <div className="card-body">
             <h2 className="card-title">Authentication Error</h2>
             <p>{error}</p>
@@ -53,9 +53,9 @@ export function ProtectedRoute({
   // Show loading spinner while checking auth state
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-base-100">
+      <div className="bg-base-100 flex min-h-screen items-center justify-center">
         <div className="text-center">
-          <div className="loading loading-spinner loading-lg mb-4 text-primary"></div>
+          <div className="loading loading-spinner loading-lg text-primary mb-4"></div>
           <p className="text-base-content/60">Loading authentication...</p>
         </div>
       </div>
@@ -97,9 +97,9 @@ export function PublicRoute({
 // Loading component for auth states
 export function AuthLoading() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-base-100">
+    <div className="bg-base-100 flex min-h-screen items-center justify-center">
       <div className="text-center">
-        <div className="loading loading-spinner loading-lg mb-4 text-primary"></div>
+        <div className="loading loading-spinner loading-lg text-primary mb-4"></div>
         <p className="text-base-content/60">Loading...</p>
       </div>
     </div>

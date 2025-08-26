@@ -52,7 +52,7 @@ function AppContent() {
         path="/recipes"
         element={
           <ProtectedRoute>
-            <div className="min-h-screen bg-base-100">
+            <div className="bg-base-100 min-h-screen">
               <Header />
               <main>
                 <RecipesPage />
@@ -65,7 +65,7 @@ function AppContent() {
         path="/explore"
         element={
           <ProtectedRoute>
-            <div className="min-h-screen bg-base-100">
+            <div className="bg-base-100 min-h-screen">
               <Header />
               <main>
                 <ExplorePage />
@@ -78,7 +78,7 @@ function AppContent() {
         path="/add"
         element={
           <ProtectedRoute>
-            <div className="min-h-screen bg-base-100">
+            <div className="bg-base-100 min-h-screen">
               <Header />
               <main>
                 <AddRecipePage />
@@ -91,7 +91,7 @@ function AppContent() {
         path="/chat-recipe"
         element={
           <ProtectedRoute>
-            <div className="min-h-screen bg-base-100">
+            <div className="bg-base-100 min-h-screen">
               <Header />
               <main>
                 <ChatRecipePage />
@@ -104,7 +104,7 @@ function AppContent() {
         path="/recipe/:id"
         element={
           <ProtectedRoute>
-            <div className="min-h-screen bg-base-100">
+            <div className="bg-base-100 min-h-screen">
               <Header />
               <main>
                 <RecipeViewPage />
@@ -117,7 +117,7 @@ function AppContent() {
         path="/profile"
         element={
           <ProtectedRoute>
-            <div className="min-h-screen bg-base-100">
+            <div className="bg-base-100 min-h-screen">
               <Header />
               <main>
                 <ProfilePage />

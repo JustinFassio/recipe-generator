@@ -59,7 +59,7 @@ describe('AuthForm', () => {
   describe('Initial Render', () => {
     it('should render the auth form with title', () => {
       renderWithAuth(<AuthForm />);
-      expect(screen.getByText('Family Recipe Generator')).toBeInTheDocument();
+      expect(screen.getAllByText('Recipe Generator')[0]).toBeInTheDocument();
     });
 
     it('should render sign in form by default', () => {
@@ -192,7 +192,7 @@ describe('AuthForm', () => {
     it('should render the app title and description', () => {
       renderWithAuth(<AuthForm />);
 
-      expect(screen.getByText('Recipe Generator')).toBeInTheDocument();
+      expect(screen.getAllByText('Recipe Generator')[0]).toBeInTheDocument();
       expect(
         screen.getByText(
           'Your digital cookbook for collecting and organizing recipes'

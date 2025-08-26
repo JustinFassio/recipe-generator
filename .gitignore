@@ -29,9 +29,18 @@ dist-ssr
 
 # Debug files
 debug-env.js
+debug-fab.js
 coverage/
 
 # Environment files
 .env.local
 .env.local.backup
 .env.*
+
+# Backup files
+*.backup
+tailwind.config.js.backup
+
+# Development/debug components
+src/components/ui/theme-debug.tsx
+src/components/ui/theme-test.tsx

@@ -16,7 +16,12 @@ import { cn } from '@/lib/utils';
  * @returns DaisyUI badge classes
  */
 export function createDaisyUIBadgeClasses(
-  variant: 'default' | 'secondary' | 'destructive' | 'outline' = 'default',
+  variant:
+    | 'default'
+    | 'secondary'
+    | 'destructive'
+    | 'outline'
+    | 'warning' = 'default',
   className?: string
 ): string {
   const baseClasses = 'badge badge-sm';
@@ -26,6 +31,7 @@ export function createDaisyUIBadgeClasses(
     secondary: 'badge-secondary',
     destructive: 'badge-error',
     outline: 'badge-outline',
+    warning: 'badge-warning',
   };
 
   return cn(baseClasses, variantClasses[variant], className);
@@ -40,6 +46,7 @@ export const badgeVariantMap = {
   secondary: 'badge-secondary',
   destructive: 'badge-error',
   outline: 'badge-outline',
+  warning: 'badge-warning',
 } as const;
 
 /**

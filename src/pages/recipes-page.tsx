@@ -2,10 +2,11 @@ import { useState, useMemo } from 'react';
 import { createDaisyUIInputClasses } from '@/lib/input-migration';
 import { createDaisyUICardClasses } from '@/lib/card-migration';
 import { createDaisyUISkeletonClasses } from '@/lib/skeleton-migration';
-import { Plus, Search, ChefHat, Sparkles } from 'lucide-react';
+import { Plus, Search, ChefHat, Sparkles, NotebookPen } from 'lucide-react';
 import { useRecipes } from '@/hooks/use-recipes';
 import { RecipeCard } from '@/components/recipes/recipe-card';
 import { Button } from '@/components/ui/button';
+import { FloatingActionButton } from '@/components/ui/fab';
 import { useNavigate, useLocation } from 'react-router-dom';
 import type { Recipe } from '@/lib/types';
 
@@ -70,7 +71,7 @@ export function RecipesPage() {
         <div className="mb-8">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h1 className="mb-2 text-3xl font-bold text-gray-900">
+              <h1 className="mb-2 inline-block rounded-lg px-4 py-2 text-3xl font-bold">
                 My Recipes
               </h1>
               <p className="text-gray-600">
@@ -85,17 +86,15 @@ export function RecipesPage() {
                 variant={
                   location.pathname === '/chat-recipe' ? 'default' : 'ghost'
                 }
-                className={
-                  location.pathname === '/chat-recipe'
-                    ? ''
-                    : 'bg-orange-500 text-white hover:bg-orange-600'
-                }
                 onClick={() => navigate('/chat-recipe')}
               >
                 <Sparkles className="mr-2 h-4 w-4" />
                 AI Recipe Creator
               </Button>
-              <Button onClick={() => navigate('/add')}>
+              <Button
+                onClick={() => navigate('/add')}
+                className="bg-success text-success-content hover:bg-success/80"
+              >
                 <Plus className="mr-2 h-4 w-4" />
                 Add Recipe
               </Button>
@@ -104,7 +103,7 @@ export function RecipesPage() {
 
           <div className="mt-6">
             <div className="relative">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+              <Search className="absolute top-3 left-3 h-4 w-4 text-gray-400" />
               <input
                 type="text"
                 placeholder="Search recipes, ingredients, or instructions..."
@@ -163,7 +162,10 @@ export function RecipesPage() {
                   Start building your digital cookbook by adding your first
                   recipe.
                 </p>
-                <Button onClick={() => navigate('/add')}>
+                <Button
+                  onClick={() => navigate('/add')}
+                  className="bg-success text-success-content hover:bg-success/80"
+                >
                   <Plus className="mr-2 h-4 w-4" />
                   Add Your First Recipe
                 </Button>
@@ -191,6 +193,26 @@ export function RecipesPage() {
           </div>
         )}
       </div>
+
+      {/* Floating Action Button */}
+      <FloatingActionButton
+        icon={<NotebookPen className="h-5 w-5" />}
+        position="bl"
+        items={[
+          {
+            id: 'ai-create',
+            icon: <Sparkles className="h-4 w-4" />,
+            label: 'AI Recipe Creator',
+            onClick: () => navigate('/chat-recipe'),
+          },
+          {
+            id: 'manual-add',
+            icon: <Plus className="h-4 w-4" />,
+            label: 'Add Recipe',
+            onClick: () => navigate('/add'),
+          },
+        ]}
+      />
     </div>
   );
 }

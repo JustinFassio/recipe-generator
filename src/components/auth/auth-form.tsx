@@ -178,7 +178,7 @@ export function AuthForm() {
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-orange-50 to-teal-50 p-4">
       <div className="flex w-full max-w-6xl flex-col gap-4 lg:flex-row">
         {/* Left Side - Authentication Form */}
-        <div className="card flex min-h-[600px] flex-1 flex-col rounded-box border border-gray-200 bg-white p-8 shadow-xl lg:min-h-[600px]">
+        <div className="card rounded-box flex min-h-[600px] flex-1 flex-col border border-gray-200 bg-white p-8 shadow-xl lg:min-h-[600px]">
           <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center">
             {/* Header Section */}
             <div className="mb-6 text-center">
@@ -245,7 +245,7 @@ export function AuthForm() {
                     <span className="label-text text-gray-700">Email</span>
                   </label>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
+                    <User className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
                     <input
                       id="email"
                       type="email"
@@ -263,7 +263,7 @@ export function AuthForm() {
                     <span className="label-text text-gray-700">Password</span>
                   </label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
+                    <Lock className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
                     <input
                       id="password"
                       type="password"
@@ -297,7 +297,7 @@ export function AuthForm() {
                     <span className="label-text text-gray-700">Full Name</span>
                   </label>
                   <div className="relative">
-                    <UserPlus className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
+                    <UserPlus className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
                     <input
                       id="signup-fullname"
                       type="text"
@@ -315,7 +315,7 @@ export function AuthForm() {
                     <span className="label-text text-gray-700">Email</span>
                   </label>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
+                    <User className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
                     <input
                       id="signup-email"
                       type="email"
@@ -333,7 +333,7 @@ export function AuthForm() {
                     <span className="label-text text-gray-700">Password</span>
                   </label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
+                    <Lock className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
                     <input
                       id="signup-password"
                       type="password"
@@ -415,7 +415,7 @@ export function AuthForm() {
                     <span className="label-text text-gray-700">Email</span>
                   </label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
+                    <Mail className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
                     <input
                       id="magic-email"
                       type="email"
@@ -448,7 +448,7 @@ export function AuthForm() {
                     <span className="label-text text-gray-700">Email</span>
                   </label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
+                    <Mail className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
                     <input
                       id="reset-email"
                       type="email"
@@ -532,7 +532,7 @@ export function AuthForm() {
         </div>
 
         {/* Right Side - User Recipes Showcase */}
-        <div className="card flex min-h-[400px] flex-1 flex-col rounded-box border border-gray-200 bg-white p-8 shadow-xl lg:min-h-[600px]">
+        <div className="card rounded-box flex min-h-[400px] flex-1 flex-col border border-gray-200 bg-white p-8 shadow-xl lg:min-h-[600px]">
           <div className="flex flex-1 flex-col justify-center text-center">
             <h3 className="mb-4 text-2xl font-bold text-gray-900">
               Discover Amazing Recipes

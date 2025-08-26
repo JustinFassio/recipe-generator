@@ -351,9 +351,9 @@ DaisyUI uses semantic class names instead of verbose utility classes:
 
 ```tsx
 // Using DaisyUI navbar
-<header className="navbar border-b bg-base-100 shadow-sm">
+<header className="navbar bg-base-100 border-b shadow-sm">
   <div className="navbar-start">
-    <ChefHat className="h-8 w-8 text-primary" />
+    <ChefHat className="text-primary h-8 w-8" />
   </div>
   {/* ... other navbar content */}
 </header>
@@ -450,7 +450,7 @@ switchTheme('dark');
 
 ```tsx
 // DaisyUI components are responsive by default
-<div className="card bg-base-100 shadow-xl lg:card-side">
+<div className="card bg-base-100 lg:card-side shadow-xl">
   <figure>
     <img src="/recipe.jpg" alt="Recipe" />
   </figure>

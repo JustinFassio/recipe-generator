@@ -27,7 +27,7 @@ export function Header() {
 
   return (
     <div className="relative">
-      <header className="navbar border-b bg-base-100 shadow-sm">
+      <header className="navbar bg-neutral text-neutral-content border-b shadow-sm">
         <div className="navbar-start">
           <div className="flex items-center space-x-4">
             <img
@@ -35,7 +35,7 @@ export function Header() {
               alt="Recipe Generator Logo"
               className="h-12 w-12 rounded-full object-cover"
             />
-            <AppTitle size="sm" className="text-base-content" />
+            <AppTitle size="sm" className="text-neutral-content" />
           </div>
         </div>
 
@@ -45,6 +45,11 @@ export function Header() {
             <Button
               variant={location.pathname === '/recipes' ? 'default' : 'ghost'}
               onClick={() => navigate('/recipes')}
+              className={
+                location.pathname === '/recipes'
+                  ? 'bg-success text-success-content hover:bg-success/80'
+                  : ''
+              }
             >
               My Recipes
             </Button>
@@ -72,15 +77,15 @@ export function Header() {
                       className="rounded-full"
                     />
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center rounded-full bg-primary/20">
-                      <User className="h-4 w-4 text-primary" />
+                    <div className="bg-primary/20 flex h-full w-full items-center justify-center rounded-full">
+                      <User className="text-primary h-4 w-4" />
                     </div>
                   )}
                 </div>
               </div>
               <ul
                 tabIndex={0}
-                className="menu dropdown-content menu-sm z-[1] mt-3 w-52 rounded-box border bg-base-100 p-2 shadow"
+                className="menu dropdown-content menu-sm rounded-box bg-base-100 z-[1] mt-3 w-52 border p-2 shadow"
               >
                 <li className="menu-title">
                   <span className="text-xs">
@@ -104,7 +109,7 @@ export function Header() {
                 <li>
                   <button
                     onClick={handleSignOut}
-                    className="flex items-center text-error"
+                    className="text-error flex items-center"
                   >
                     <LogOut className="mr-2 h-4 w-4" />
                     Sign Out
@@ -135,10 +140,10 @@ export function Header() {
 
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
-        <div className="fixed inset-0 top-16 z-50 border-b border-gray-200 bg-base-100 shadow-lg md:hidden">
+        <div className="bg-base-100 fixed inset-0 top-16 z-50 border-b border-gray-200 shadow-lg md:hidden">
           <nav className="flex flex-col space-y-2 p-4">
             {/* User Info */}
-            <div className="mb-2 flex items-center space-x-3 border-b border-base-200 p-2">
+            <div className="border-base-200 mb-2 flex items-center space-x-3 border-b p-2">
               <div className="h-10 w-10 rounded-full">
                 {profile?.avatar_url ? (
                   <img
@@ -147,8 +152,8 @@ export function Header() {
                     className="h-full w-full rounded-full object-cover"
                   />
                 ) : (
-                  <div className="flex h-full w-full items-center justify-center rounded-full bg-primary/20">
-                    <User className="h-5 w-5 text-primary" />
+                  <div className="bg-primary/20 flex h-full w-full items-center justify-center rounded-full">
+                    <User className="text-primary h-5 w-5" />
                   </div>
                 )}
               </div>
@@ -170,7 +175,7 @@ export function Header() {
                 navigate('/recipes');
                 closeMobileMenu();
               }}
-              className="w-full justify-start"
+              className={`w-full justify-start ${location.pathname === '/recipes' ? 'bg-success text-success-content hover:bg-success/80' : ''}`}
             >
               My Recipes
             </Button>
@@ -203,7 +208,7 @@ export function Header() {
                 handleSignOut();
                 closeMobileMenu();
               }}
-              className="w-full justify-start border-error text-error hover:bg-error hover:text-error-content"
+              className="border-error text-error hover:bg-error hover:text-error-content w-full justify-start"
             >
               <LogOut className="mr-2 h-4 w-4" />
               Sign Out

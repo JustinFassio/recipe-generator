@@ -66,7 +66,7 @@ export function ChatRecipePage() {
         </div>
 
         {showEditor && generatedRecipe ? (
-          <div className="rounded-lg bg-base-100 shadow-sm">
+          <div className="bg-base-100 rounded-lg shadow-sm">
             <div className="p-6">
               <RecipeForm
                 initialData={generatedRecipe}
@@ -75,7 +75,7 @@ export function ChatRecipePage() {
             </div>
           </div>
         ) : (
-          <div className="rounded-lg bg-base-100 shadow-sm">
+          <div className="bg-base-100 rounded-lg shadow-sm">
             <ChatInterface onRecipeGenerated={handleRecipeGenerated} />
           </div>
         )}
