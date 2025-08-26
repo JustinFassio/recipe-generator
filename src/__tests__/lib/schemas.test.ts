@@ -9,6 +9,7 @@ describe('recipeSchema', () => {
       instructions: 'Test instructions',
       notes: 'Test notes',
       image_url: 'https://example.com/image.jpg',
+      categories: ['Italian', 'Quick'],
     };
 
     const result = recipeSchema.safeParse(validRecipe);
@@ -20,6 +21,7 @@ describe('recipeSchema', () => {
       ingredients: ['ingredient 1'],
       instructions: 'Test instructions',
       notes: 'Test notes',
+      categories: [],
     };
 
     const result = recipeSchema.safeParse(invalidRecipe);
@@ -35,6 +37,7 @@ describe('recipeSchema', () => {
       ingredients: [],
       instructions: 'Test instructions',
       notes: 'Test notes',
+      categories: [],
     };
 
     const result = recipeSchema.safeParse(invalidRecipe);
@@ -50,6 +53,7 @@ describe('recipeSchema', () => {
       ingredients: ['ingredient 1', '', 'ingredient 3'],
       instructions: 'Test instructions',
       notes: 'Test notes',
+      categories: [],
     };
 
     const result = recipeSchema.safeParse(invalidRecipe);
@@ -64,6 +68,7 @@ describe('recipeSchema', () => {
       title: 'Test Recipe',
       ingredients: ['ingredient 1'],
       notes: 'Test notes',
+      categories: [],
     };
 
     const result = recipeSchema.safeParse(invalidRecipe);
@@ -79,6 +84,7 @@ describe('recipeSchema', () => {
       ingredients: ['ingredient 1'],
       instructions: 'Test instructions',
       notes: '',
+      categories: [],
     };
 
     const result = recipeSchema.safeParse(validRecipe);
@@ -91,6 +97,7 @@ describe('recipeSchema', () => {
       ingredients: ['ingredient 1'],
       instructions: 'Test instructions',
       notes: 'Test notes',
+      categories: [],
     };
 
     const result = recipeSchema.safeParse(validRecipe);
