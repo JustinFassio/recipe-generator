@@ -1,6 +1,10 @@
 import React, { useState, useRef } from 'react';
 
 import CategoryChip from './CategoryChip';
+import {
+  MAX_CATEGORIES_PER_RECIPE,
+  MAX_CATEGORY_LENGTH,
+} from '@/lib/constants';
 
 interface CategoryInputProps {
   categories: string[];
@@ -14,7 +18,7 @@ interface CategoryInputProps {
 const CategoryInput: React.FC<CategoryInputProps> = ({
   categories = [],
   onCategoriesChange,
-  maxCategories = 10,
+  maxCategories = MAX_CATEGORIES_PER_RECIPE,
   placeholder = 'Add a category...',
   className = '',
   disabled = false,
@@ -29,8 +33,8 @@ const CategoryInput: React.FC<CategoryInputProps> = ({
     if (!trimmedCategory) return;
 
     // Validate category length
-    if (trimmedCategory.length > 50) {
-      alert('Category must be 50 characters or less');
+    if (trimmedCategory.length > MAX_CATEGORY_LENGTH) {
+      alert(`Category must be ${MAX_CATEGORY_LENGTH} characters or less`);
       return;
     }
 

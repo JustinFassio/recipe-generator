@@ -11,10 +11,11 @@ ALTER TABLE recipes
 ALTER COLUMN categories SET NOT NULL;
 
 -- Add constraint to limit category length (max 50 characters per category)
+-- NOTE: The maximum number of categories (6) must be kept in sync with the application layer
 ALTER TABLE recipes 
 ADD CONSTRAINT check_category_length 
 CHECK (array_length(categories, 1) IS NULL OR 
-       array_length(categories, 1) <= 10 AND 
+       array_length(categories, 1) <= 6 AND 
        (SELECT bool_and(length(cat) <= 50) FROM unnest(categories) AS cat));
 
 -- Update RLS policies to include categories

@@ -16,6 +16,42 @@ describe('recipeSchema', () => {
     expect(result.success).toBe(true);
   });
 
+  it('should enforce maximum categories limit', () => {
+    const invalidRecipe = {
+      title: 'Test Recipe',
+      ingredients: ['ingredient 1'],
+      instructions: 'Test instructions',
+      notes: 'Test notes',
+      categories: ['Cat1', 'Cat2', 'Cat3', 'Cat4', 'Cat5', 'Cat6', 'Cat7'], // 7 categories
+    };
+
+    const result = recipeSchema.safeParse(invalidRecipe);
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0].path).toEqual(['categories']);
+      expect(result.error.issues[0].message).toContain(
+        'Maximum 6 categories allowed'
+      );
+    }
+  });
+
+  it('should enforce maximum category length', () => {
+    const invalidRecipe = {
+      title: 'Test Recipe',
+      ingredients: ['ingredient 1'],
+      instructions: 'Test instructions',
+      notes: 'Test notes',
+      categories: ['A'.repeat(51)], // 51 characters
+    };
+
+    const result = recipeSchema.safeParse(invalidRecipe);
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0].path).toEqual(['categories', 0]);
+      expect(result.error.issues[0].message).toContain('50 characters or less');
+    }
+  });
+
   it('should require title', () => {
     const invalidRecipe = {
       ingredients: ['ingredient 1'],

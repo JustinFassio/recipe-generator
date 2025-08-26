@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { MAX_CATEGORIES_PER_RECIPE, MAX_CATEGORY_LENGTH } from './constants';
 
 export const recipeSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -8,7 +9,20 @@ export const recipeSchema = z.object({
   instructions: z.string().min(1, 'Instructions are required'),
   notes: z.string(),
   image_url: z.string().optional(),
-  categories: z.array(z.string().min(1, 'Category cannot be empty')).min(0),
+  categories: z
+    .array(
+      z
+        .string()
+        .min(1, 'Category cannot be empty')
+        .max(
+          MAX_CATEGORY_LENGTH,
+          `Category must be ${MAX_CATEGORY_LENGTH} characters or less`
+        )
+    )
+    .max(
+      MAX_CATEGORIES_PER_RECIPE,
+      `Maximum ${MAX_CATEGORIES_PER_RECIPE} categories allowed`
+    ),
 });
 
 export type RecipeFormData = z.infer<typeof recipeSchema>;

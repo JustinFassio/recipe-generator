@@ -19,6 +19,7 @@ import { X, Upload, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import CategoryInput from '@/components/ui/CategoryInput';
+import { MAX_CATEGORIES_PER_RECIPE } from '@/lib/constants';
 
 import type { Recipe } from '@/lib/types';
 
@@ -311,7 +312,7 @@ export function RecipeForm({
               setValue('categories', categories)
             }
             placeholder="Add categories like 'Italian', 'Quick', 'Vegetarian'..."
-            maxCategories={10}
+            maxCategories={MAX_CATEGORIES_PER_RECIPE}
           />
           {errors.categories && (
             <p className="mt-1 text-sm text-red-500">
