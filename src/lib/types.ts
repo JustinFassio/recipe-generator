@@ -19,6 +19,20 @@ export type PublicRecipe = Recipe & {
   author_name: string;
 };
 
+// Recipe filtering types
+export type CookingTime = 'quick' | 'medium' | 'long';
+export type Difficulty = 'beginner' | 'intermediate' | 'advanced';
+export type SortOption = 'date' | 'title' | 'popularity';
+
+export type RecipeFilters = {
+  searchTerm?: string;
+  categories?: string[];
+  cookingTime?: CookingTime[];
+  difficulty?: Difficulty[];
+  sortBy?: SortOption;
+  sortOrder?: 'asc' | 'desc';
+};
+
 // User Profile types
 export type Profile = {
   id: string;
