@@ -90,8 +90,9 @@ function parseJsonRecipe(parsed: Record<string, unknown>): ParsedRecipe {
   const ingredients = parseIngredients(parsed.ingredients);
   const instructions = parseInstructions(parsed);
   const notes = parseNotes(parsed);
+  const categories = parseCategories(parsed);
 
-  return { title, ingredients, instructions, notes };
+  return { title, ingredients, instructions, notes, categories };
 }
 
 function parseIngredients(ingredients: unknown): string[] {
@@ -285,6 +286,43 @@ function parseNotes(parsed: Record<string, unknown>): string {
   }
 
   return notesParts.join('\n').trim();
+}
+
+function parseCategories(parsed: Record<string, unknown>): string[] {
+  const categories: string[] = [];
+
+  // Handle categories field
+  if (parsed.categories && Array.isArray(parsed.categories)) {
+    parsed.categories.forEach((category: unknown) => {
+      if (typeof category === 'string' && category.trim()) {
+        categories.push(category.trim());
+      }
+    });
+  }
+
+  // Handle tags field (alternative to categories)
+  if (parsed.tags && Array.isArray(parsed.tags)) {
+    parsed.tags.forEach((tag: unknown) => {
+      if (typeof tag === 'string' && tag.trim()) {
+        categories.push(tag.trim());
+      }
+    });
+  }
+
+  // Handle cuisine field
+  if (parsed.cuisine && typeof parsed.cuisine === 'string' && parsed.cuisine.trim()) {
+    categories.push(parsed.cuisine.trim());
+  }
+
+  // Handle type field
+  if (parsed.type && typeof parsed.type === 'string' && parsed.type.trim()) {
+    categories.push(parsed.type.trim());
+  }
+
+  // Remove duplicates and limit to 10 categories
+  const uniqueCategories = [...new Set(categories)].slice(0, 10);
+  
+  return uniqueCategories;
 }
 
 function parseFlexibleRecipe(text: string): ParsedRecipe {
@@ -484,6 +522,7 @@ function parseFlexibleRecipe(text: string): ParsedRecipe {
     ingredients,
     instructions: instructions.join('\n'),
     notes: notes.join('\n'),
+    categories: [],
   };
 }
 
@@ -545,5 +584,6 @@ function extractFromUnstructuredText(text: string): ParsedRecipe {
     ingredients,
     instructions: instructions.join('\n'),
     notes: '',
+    categories: [],
   };
 }

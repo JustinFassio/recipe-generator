@@ -8,6 +8,7 @@ export type Recipe = {
   instructions: string;
   notes: string | null;
   image_url: string | null;
+  categories: string[];
   user_id: string;
   is_public: boolean;
   created_at: string;
@@ -104,4 +105,5 @@ export type ParsedRecipe = {
   ingredients: string[];
   instructions: string;
   notes: string | null;
+  categories: string[];
 };

@@ -18,6 +18,7 @@ import { useLocation } from 'react-router-dom';
 import { X, Upload, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import CategoryInput from '@/components/ui/CategoryInput';
 
 import type { Recipe } from '@/lib/types';
 
@@ -52,6 +53,7 @@ export function RecipeForm({
     reset,
     control,
     setValue,
+    watch,
   } = useForm<RecipeFormData>({
     resolver: zodResolver(recipeSchema),
     defaultValues: editRecipe
@@ -61,6 +63,7 @@ export function RecipeForm({
           instructions: editRecipe.instructions,
           notes: editRecipe.notes || '',
           image_url: editRecipe.image_url || '',
+          categories: editRecipe.categories || [],
         }
       : {
           title: '',
@@ -68,6 +71,7 @@ export function RecipeForm({
           instructions: '',
           notes: '',
           image_url: '',
+          categories: [],
         },
   });
 
@@ -89,6 +93,7 @@ export function RecipeForm({
         instructions: initialData.instructions || '',
         notes: initialData.notes || '',
         image_url: initialData.image_url || '',
+        categories: initialData.categories || [],
       });
     }
   }, [initialData, reset]);
@@ -292,6 +297,23 @@ export function RecipeForm({
           {errors.instructions && (
             <p className="mt-1 text-sm text-red-500">
               {errors.instructions.message}
+            </p>
+          )}
+        </div>
+      </div>
+
+      <div className={createDaisyUICardClasses('bordered')}>
+        <div className="card-body">
+          <h3 className={createDaisyUICardTitleClasses()}>Categories</h3>
+          <CategoryInput
+            categories={watch('categories') || []}
+            onCategoriesChange={(categories) => setValue('categories', categories)}
+            placeholder="Add categories like 'Italian', 'Quick', 'Vegetarian'..."
+            maxCategories={10}
+          />
+          {errors.categories && (
+            <p className="mt-1 text-sm text-red-500">
+              {errors.categories.message}
             </p>
           )}
         </div>

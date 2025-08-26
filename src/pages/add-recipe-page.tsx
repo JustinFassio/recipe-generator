@@ -28,6 +28,7 @@ export function AddRecipePage() {
         instructions: existingRecipe.instructions,
         notes: existingRecipe.notes || '',
         image_url: existingRecipe.image_url || '',
+        categories: existingRecipe.categories || [],
       });
     }
 
