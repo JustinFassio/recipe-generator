@@ -328,27 +328,33 @@ export async function claimUsername(
     }
 
     // Use the database function for atomic username updating
-    const { error } = await supabase.rpc('update_username_atomic', {
+    const { data, error } = await supabase.rpc('update_username_atomic', {
       p_user_id: user.id,
       p_new_username: username.toLowerCase(),
     });
 
     if (error) {
-      // Handle specific error messages from the database function
-      if (error.message?.includes('username_already_taken')) {
-        return {
-          success: false,
-          error: createAuthError(
-            'This username is already taken',
-            'USERNAME_TAKEN'
-          ),
-        };
-      }
-
       return {
         success: false,
         error: createAuthError(error.message, error.code, error.details),
       };
+    }
+
+    // Handle the JSON response from the function
+    if (data && typeof data === 'object') {
+      if (!data.success) {
+        const errorMessage = data.error === 'username_already_taken' 
+          ? 'This username is already taken'
+          : data.error || 'Failed to update username';
+        
+        return {
+          success: false,
+          error: createAuthError(
+            errorMessage,
+            data.error === 'username_already_taken' ? 'USERNAME_TAKEN' : 'UPDATE_FAILED'
+          ),
+        };
+      }
     }
 
     // Fetch the updated profile

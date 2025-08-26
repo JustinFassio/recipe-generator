@@ -41,7 +41,15 @@ export const AvatarCard: React.FC<AvatarCardProps> = ({
         <div className="avatar">
           <div className="h-24 w-24 rounded-full">
             {avatarUrl ? (
-              <img src={avatarUrl} alt="Profile" />
+              <img
+                src={`${avatarUrl}?t=${Date.now()}`}
+                alt="Profile"
+                onError={(e) => {
+                  console.error('Avatar image failed to load:', avatarUrl);
+                  // Fallback to default avatar on error
+                  e.currentTarget.style.display = 'none';
+                }}
+              />
             ) : (
               <div className="bg-primary/20 flex items-center justify-center">
                 <User className="text-primary h-12 w-12" />
