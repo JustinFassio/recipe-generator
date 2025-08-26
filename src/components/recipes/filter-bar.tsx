@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Search, Filter, X, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -55,7 +55,7 @@ export function FilterBar({
   const toggleCategory = (category: string) => {
     const currentCategories = filters.categories || [];
     const newCategories = currentCategories.includes(category)
-      ? currentCategories.filter((c) => c !== category)
+      ? currentCategories.filter((c: string) => c !== category)
       : [...currentCategories, category];
     updateFilters({ categories: newCategories });
   };
@@ -63,7 +63,7 @@ export function FilterBar({
   const toggleCookingTime = (time: CookingTime) => {
     const currentTimes = filters.cookingTime || [];
     const newTimes = currentTimes.includes(time)
-      ? currentTimes.filter((t) => t !== time)
+      ? currentTimes.filter((t: CookingTime) => t !== time)
       : [...currentTimes, time];
     updateFilters({ cookingTime: newTimes });
   };
@@ -71,7 +71,7 @@ export function FilterBar({
   const toggleDifficulty = (difficulty: Difficulty) => {
     const currentDifficulties = filters.difficulty || [];
     const newDifficulties = currentDifficulties.includes(difficulty)
-      ? currentDifficulties.filter((d) => d !== difficulty)
+      ? currentDifficulties.filter((d: Difficulty) => d !== difficulty)
       : [...currentDifficulties, difficulty];
     updateFilters({ difficulty: newDifficulties });
   };
@@ -105,36 +105,29 @@ export function FilterBar({
       </div>
 
       {/* Filter Controls */}
-      <div className="flex flex-wrap items-center gap-2">
-        {/* Category Filter */}
+      <div className="flex flex-wrap gap-2">
+        {/* Categories Filter */}
         <DropdownMenu
           open={isCategoryDropdownOpen}
           onOpenChange={setIsCategoryDropdownOpen}
         >
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="gap-2">
-              <Filter className="h-4 w-4" />
+            <Button variant="outline" size="sm">
+              <Filter className="mr-2 h-4 w-4" />
               Categories
-              {filters.categories?.length ? (
-                <span className="bg-primary text-primary-foreground ml-1 rounded-full px-1.5 py-0.5 text-xs">
-                  {filters.categories.length}
-                </span>
-              ) : null}
-              <ChevronDown className="h-3 w-3" />
+              <ChevronDown className="ml-2 h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-64">
-            <div className="space-y-2 p-2">
-              {availableCategories.map((category) => (
-                <DropdownMenuCheckboxItem
-                  key={category}
-                  checked={filters.categories?.includes(category) || false}
-                  onCheckedChange={() => toggleCategory(category)}
-                >
-                  {category}
-                </DropdownMenuCheckboxItem>
-              ))}
-            </div>
+          <DropdownMenuContent align="start" className="w-56">
+            {availableCategories.map((category) => (
+              <DropdownMenuCheckboxItem
+                key={category}
+                checked={filters.categories?.includes(category) || false}
+                onCheckedChange={() => toggleCategory(category)}
+              >
+                {category}
+              </DropdownMenuCheckboxItem>
+            ))}
           </DropdownMenuContent>
         </DropdownMenu>
 
@@ -144,29 +137,22 @@ export function FilterBar({
           onOpenChange={setIsCookingTimeDropdownOpen}
         >
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="gap-2">
-              <Filter className="h-4 w-4" />
+            <Button variant="outline" size="sm">
+              <Filter className="mr-2 h-4 w-4" />
               Cooking Time
-              {filters.cookingTime?.length ? (
-                <span className="bg-primary text-primary-foreground ml-1 rounded-full px-1.5 py-0.5 text-xs">
-                  {filters.cookingTime.length}
-                </span>
-              ) : null}
-              <ChevronDown className="h-3 w-3" />
+              <ChevronDown className="ml-2 h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="start">
-            <div className="space-y-2 p-2">
-              {COOKING_TIME_OPTIONS.map((time) => (
-                <DropdownMenuCheckboxItem
-                  key={time}
-                  checked={filters.cookingTime?.includes(time) || false}
-                  onCheckedChange={() => toggleCookingTime(time)}
-                >
-                  {COOKING_TIME_LABELS[time]}
-                </DropdownMenuCheckboxItem>
-              ))}
-            </div>
+          <DropdownMenuContent align="start" className="w-56">
+            {COOKING_TIME_OPTIONS.map((time: CookingTime) => (
+              <DropdownMenuCheckboxItem
+                key={time}
+                checked={filters.cookingTime?.includes(time) || false}
+                onCheckedChange={() => toggleCookingTime(time)}
+              >
+                {COOKING_TIME_LABELS[time]}
+              </DropdownMenuCheckboxItem>
+            ))}
           </DropdownMenuContent>
         </DropdownMenu>
 
@@ -176,29 +162,22 @@ export function FilterBar({
           onOpenChange={setIsDifficultyDropdownOpen}
         >
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="gap-2">
-              <Filter className="h-4 w-4" />
+            <Button variant="outline" size="sm">
+              <Filter className="mr-2 h-4 w-4" />
               Difficulty
-              {filters.difficulty?.length ? (
-                <span className="bg-primary text-primary-foreground ml-1 rounded-full px-1.5 py-0.5 text-xs">
-                  {filters.difficulty.length}
-                </span>
-              ) : null}
-              <ChevronDown className="h-3 w-3" />
+              <ChevronDown className="ml-2 h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="start">
-            <div className="space-y-2 p-2">
-              {DIFFICULTY_OPTIONS.map((difficulty) => (
-                <DropdownMenuCheckboxItem
-                  key={difficulty}
-                  checked={filters.difficulty?.includes(difficulty) || false}
-                  onCheckedChange={() => toggleDifficulty(difficulty)}
-                >
-                  {DIFFICULTY_LABELS[difficulty]}
-                </DropdownMenuCheckboxItem>
-              ))}
-            </div>
+          <DropdownMenuContent align="start" className="w-56">
+            {DIFFICULTY_OPTIONS.map((difficulty: Difficulty) => (
+              <DropdownMenuCheckboxItem
+                key={difficulty}
+                checked={filters.difficulty?.includes(difficulty) || false}
+                onCheckedChange={() => toggleDifficulty(difficulty)}
+              >
+                {DIFFICULTY_LABELS[difficulty]}
+              </DropdownMenuCheckboxItem>
+            ))}
           </DropdownMenuContent>
         </DropdownMenu>
 
@@ -214,8 +193,8 @@ export function FilterBar({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="date">Date</SelectItem>
-            <SelectItem value="alphabetical">A-Z</SelectItem>
-            <SelectItem value="popularity">Popular</SelectItem>
+            <SelectItem value="title">Title</SelectItem>
+            <SelectItem value="popularity">Popularity</SelectItem>
           </SelectContent>
         </Select>
 
@@ -225,23 +204,21 @@ export function FilterBar({
             variant="ghost"
             size="sm"
             onClick={clearAllFilters}
-            className="gap-2"
+            className="text-gray-500 hover:text-gray-700"
           >
-            <X className="h-4 w-4" />
+            <X className="mr-1 h-4 w-4" />
             Clear Filters
           </Button>
         )}
       </div>
 
       {/* Active Filters Display */}
-      {hasActiveFilters && (
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-sm font-medium text-gray-700">
-            Active filters:
-          </span>
-
-          {/* Category chips */}
-          {filters.categories?.map((category) => (
+      {(filters.categories?.length ||
+        filters.cookingTime?.length ||
+        filters.difficulty?.length) && (
+        <div className="flex flex-wrap gap-2">
+          {/* Category Chips */}
+          {filters.categories?.map((category: string) => (
             <CategoryChip
               key={category}
               category={category}
@@ -250,28 +227,24 @@ export function FilterBar({
             />
           ))}
 
-          {/* Cooking time chips */}
-          {filters.cookingTime?.map((time) => (
-            <span
+          {/* Cooking Time Chips */}
+          {filters.cookingTime?.map((time: CookingTime) => (
+            <CategoryChip
               key={time}
-              className="inline-flex cursor-pointer items-center gap-1 rounded-full bg-blue-100 px-2 py-1 text-xs text-blue-800 hover:bg-blue-200"
+              category={COOKING_TIME_LABELS[time]}
+              size="sm"
               onClick={() => toggleCookingTime(time)}
-            >
-              {COOKING_TIME_LABELS[time]}
-              <X className="h-3 w-3" />
-            </span>
+            />
           ))}
 
-          {/* Difficulty chips */}
-          {filters.difficulty?.map((difficulty) => (
-            <span
+          {/* Difficulty Chips */}
+          {filters.difficulty?.map((difficulty: Difficulty) => (
+            <CategoryChip
               key={difficulty}
-              className="inline-flex cursor-pointer items-center gap-1 rounded-full bg-green-100 px-2 py-1 text-xs text-green-800 hover:bg-green-200"
+              category={DIFFICULTY_LABELS[difficulty]}
+              size="sm"
               onClick={() => toggleDifficulty(difficulty)}
-            >
-              {DIFFICULTY_LABELS[difficulty]}
-              <X className="h-3 w-3" />
-            </span>
+            />
           ))}
         </div>
       )}
