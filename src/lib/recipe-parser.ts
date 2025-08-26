@@ -1,4 +1,5 @@
 import type { ParsedRecipe, IngredientItem } from './types';
+import { MAX_CATEGORIES_PER_RECIPE } from './constants';
 
 // Convert markdown formatting to plain text
 function convertMarkdownToPlainText(text: string): string {
@@ -323,8 +324,11 @@ function parseCategories(parsed: Record<string, unknown>): string[] {
     categories.push(parsed.type.trim());
   }
 
-  // Remove duplicates and limit to 10 categories
-  const uniqueCategories = [...new Set(categories)].slice(0, 10);
+  // Remove duplicates and limit to MAX_CATEGORIES_PER_RECIPE
+  const uniqueCategories = [...new Set(categories)].slice(
+    0,
+    MAX_CATEGORIES_PER_RECIPE
+  );
 
   return uniqueCategories;
 }
