@@ -5,6 +5,7 @@ import {
   MAX_CATEGORIES_PER_RECIPE,
   MAX_CATEGORY_LENGTH,
 } from '@/lib/constants';
+import { useToast } from '@/hooks/use-toast';
 
 interface CategoryInputProps {
   categories: string[];
@@ -26,6 +27,7 @@ const CategoryInput: React.FC<CategoryInputProps> = ({
   const [inputValue, setInputValue] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
 
   const handleAddCategory = (category: string) => {
     const trimmedCategory = category.trim();
@@ -34,7 +36,11 @@ const CategoryInput: React.FC<CategoryInputProps> = ({
 
     // Validate category length
     if (trimmedCategory.length > MAX_CATEGORY_LENGTH) {
-      alert(`Category must be ${MAX_CATEGORY_LENGTH} characters or less`);
+      toast({
+        title: 'Category too long',
+        description: `Category must be ${MAX_CATEGORY_LENGTH} characters or less`,
+        variant: 'destructive',
+      });
       return;
     }
 
@@ -44,13 +50,21 @@ const CategoryInput: React.FC<CategoryInputProps> = ({
     );
 
     if (exists) {
-      alert('This category already exists');
+      toast({
+        title: 'Category already exists',
+        description: 'This category has already been added',
+        variant: 'destructive',
+      });
       return;
     }
 
     // Check max categories limit
     if (categories.length >= maxCategories) {
-      alert(`Maximum ${maxCategories} categories allowed`);
+      toast({
+        title: 'Maximum categories reached',
+        description: `Maximum ${maxCategories} categories allowed`,
+        variant: 'destructive',
+      });
       return;
     }
 
