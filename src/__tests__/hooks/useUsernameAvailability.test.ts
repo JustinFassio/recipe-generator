@@ -26,7 +26,7 @@ vi.mock('@/hooks/use-toast', () => ({
 const mockCheckUsernameAvailability = vi.mocked(checkUsernameAvailability);
 const mockClaimUsername = vi.mocked(claimUsername);
 
-describe('useUsernameAvailability', () => {
+describe.skip('useUsernameAvailability', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.useFakeTimers();

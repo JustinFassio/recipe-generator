@@ -204,7 +204,9 @@ describe('ProfileInfoForm Username Functionality', () => {
     it('should call onSubmit when form is submitted', async () => {
       render(<ProfileInfoForm {...defaultProps} />);
 
-      const submitButton = screen.getByRole('button', { name: /update profile/i });
+      const submitButton = screen.getByRole('button', {
+        name: /update profile/i,
+      });
       fireEvent.click(submitButton);
 
       expect(mockOnSubmit).toHaveBeenCalled();
