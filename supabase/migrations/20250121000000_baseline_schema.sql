@@ -178,33 +178,33 @@ CREATE POLICY "recipe_videos_delete_own" ON storage.objects
   );
 
 -- Create indexes for performance
-CREATE UNIQUE INDEX CONCURRENTLY idx_profiles_username_lower
+CREATE UNIQUE INDEX idx_profiles_username_lower
 ON profiles (LOWER(username))
 WHERE username IS NOT NULL;
 
-CREATE INDEX CONCURRENTLY idx_user_safety_allergies
+CREATE INDEX idx_user_safety_allergies
 ON user_safety USING GIN (allergies);
 
-CREATE INDEX CONCURRENTLY idx_user_safety_dietary_restrictions
+CREATE INDEX idx_user_safety_dietary_restrictions
 ON user_safety USING GIN (dietary_restrictions);
 
-CREATE INDEX CONCURRENTLY idx_cooking_preferences_cuisines
+CREATE INDEX idx_cooking_preferences_cuisines
 ON cooking_preferences USING GIN (preferred_cuisines);
 
-CREATE INDEX CONCURRENTLY idx_cooking_preferences_equipment
+CREATE INDEX idx_cooking_preferences_equipment
 ON cooking_preferences USING GIN (available_equipment);
 
-CREATE INDEX CONCURRENTLY idx_cooking_preferences_disliked
+CREATE INDEX idx_cooking_preferences_disliked
 ON cooking_preferences USING GIN (disliked_ingredients);
 
-CREATE INDEX CONCURRENTLY idx_profiles_region
+CREATE INDEX idx_profiles_region
 ON profiles (region)
 WHERE region IS NOT NULL;
 
-CREATE INDEX CONCURRENTLY idx_recipes_user_public
+CREATE INDEX idx_recipes_user_public
 ON recipes (user_id, is_public, created_at DESC);
 
-CREATE INDEX CONCURRENTLY idx_recipes_public_recent
+CREATE INDEX idx_recipes_public_recent
 ON recipes (created_at DESC)
 WHERE is_public = true;
 
@@ -232,138 +232,3 @@ CREATE TRIGGER cooking_preferences_set_updated_at
 CREATE TRIGGER recipes_set_updated_at
   BEFORE UPDATE ON recipes
   FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
-
--- Create username management functions
-CREATE OR REPLACE FUNCTION is_username_available(p_username citext)
-RETURNS boolean
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public
-AS $$
-BEGIN
-  RETURN NOT EXISTS(
-    SELECT 1 FROM usernames
-    WHERE username = p_username
-  );
-END;
-$$;
-
-CREATE OR REPLACE FUNCTION update_username_atomic(
-  p_user_id uuid,
-  p_new_username citext
-)
-RETURNS json
-LANGUAGE plpgsql
-SECURITY INVOKER
-SET search_path = public
-AS $$
-DECLARE
-  username_exists boolean;
-  result json;
-BEGIN
-  -- Security check - ensure user can only update their own username
-  IF auth.uid() != p_user_id THEN
-    result := json_build_object('success', false, 'error', 'unauthorized');
-    RETURN result;
-  END IF;
-
-  -- Check if username is already taken by another user
-  SELECT EXISTS(
-    SELECT 1 FROM usernames
-    WHERE username = p_new_username AND user_id != p_user_id
-  ) INTO username_exists;
-
-  IF username_exists THEN
-    result := json_build_object('success', false, 'error', 'username_already_taken');
-    RETURN result;
-  END IF;
-
-  -- Update the user's username in profiles table
-  UPDATE profiles 
-  SET username = p_new_username, updated_at = NOW()
-  WHERE id = p_user_id;
-
-  -- Update or insert into usernames table
-  INSERT INTO usernames (username, user_id)
-  VALUES (p_new_username, p_user_id)
-  ON CONFLICT (user_id)
-  DO UPDATE SET username = EXCLUDED.username, updated_at = NOW();
-
-  IF FOUND THEN
-    result := json_build_object('success', true);
-  ELSE
-    result := json_build_object('success', false, 'error', 'user_not_found');
-  END IF;
-
-  RETURN result;
-EXCEPTION
-  WHEN OTHERS THEN
-    result := json_build_object('success', false, 'error', SQLERRM);
-    RETURN result;
-END;
-$$;
-
-CREATE OR REPLACE FUNCTION claim_username_atomic(
-  p_user_id uuid,
-  p_username citext
-)
-RETURNS json
-LANGUAGE plpgsql
-SECURITY INVOKER
-SET search_path = public
-AS $$
-DECLARE
-  username_exists boolean;
-  user_has_username boolean;
-  result json;
-BEGIN
-  -- Security check - ensure user can only claim their own username
-  IF auth.uid() != p_user_id THEN
-    result := json_build_object('success', false, 'error', 'unauthorized');
-    RETURN result;
-  END IF;
-
-  -- Check if username is already taken
-  SELECT EXISTS(
-    SELECT 1 FROM usernames
-    WHERE username = p_username
-  ) INTO username_exists;
-
-  IF username_exists THEN
-    result := json_build_object('success', false, 'error', 'username_already_taken');
-    RETURN result;
-  END IF;
-
-  -- Check if user already has a username
-  SELECT EXISTS(
-    SELECT 1 FROM usernames
-    WHERE user_id = p_user_id
-  ) INTO user_has_username;
-
-  IF user_has_username THEN
-    result := json_build_object('success', false, 'error', 'user_already_has_username');
-    RETURN result;
-  END IF;
-
-  -- Claim the username
-  INSERT INTO usernames (username, user_id)
-  VALUES (p_username, p_user_id);
-
-  -- Update profiles table
-  UPDATE profiles 
-  SET username = p_username, updated_at = NOW()
-  WHERE id = p_user_id;
-
-  result := json_build_object('success', true);
-  RETURN result;
-EXCEPTION
-  WHEN OTHERS THEN
-    result := json_build_object('success', false, 'error', SQLERRM);
-    RETURN result;
-END;
-$$;
-
--- Grant execute permissions
-GRANT EXECUTE ON FUNCTION is_username_available TO authenticated;
-GRANT EXECUTE ON FUNCTION update_username_atomic TO authenticated;
-GRANT EXECUTE ON FUNCTION claim_username_atomic TO authenticated;

@@ -163,22 +163,50 @@ const users: SeedUser[] = [
 ];
 
 async function ensureUsername(userId: string, username: string) {
-  // Use the atomic function defined in migrations
-  const { error } = await admin.rpc('claim_username_atomic', {
-    p_user_id: userId,
-    p_username: username,
-  });
-  if (error && !String(error.message).includes('user_already_has_username')) {
+  try {
+    // First, update the profiles table with the username
+    const { error: profileError } = await admin.from('profiles').upsert({
+      id: userId,
+      username: username,
+      updated_at: new Date().toISOString(),
+    });
+
+    if (profileError) {
+      console.error('Error updating profile username:', profileError);
+      throw profileError;
+    }
+
+    // Then, insert into the usernames table
+    const { error: usernameError } = await admin.from('usernames').upsert({
+      username: username,
+      user_id: userId,
+    });
+
+    if (usernameError) {
+      console.error('Error inserting username record:', usernameError);
+      throw usernameError;
+    }
+
+    console.log(`✅ Username '${username}' set for user ${userId}`);
+  } catch (error) {
+    console.error(
+      `❌ Failed to set username '${username}' for user ${userId}:`,
+      error
+    );
     throw error;
   }
 }
 
 async function updateProfile(userId: string, updates: SeedUser['profile']) {
   if (!updates) return;
-  const { error } = await admin
-    .from('profiles')
-    .update(updates)
-    .eq('id', userId);
+
+  const profileData = {
+    id: userId,
+    ...updates,
+    updated_at: new Date().toISOString(),
+  };
+
+  const { error } = await admin.from('profiles').upsert(profileData);
   if (error) throw error;
 }
 

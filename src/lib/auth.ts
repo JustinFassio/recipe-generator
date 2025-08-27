@@ -274,7 +274,7 @@ export async function checkUsernameAvailability(
     }
 
     const { data, error } = await supabase.rpc('is_username_available', {
-      check_username: username,
+      p_username: username,
     });
 
     if (error) {
