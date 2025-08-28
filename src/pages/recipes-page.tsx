@@ -159,11 +159,16 @@ export function RecipesPage() {
 
         {/* Floating Action Button */}
         <FloatingActionButton
-          onClick={() => navigate('/add')}
-          className="bg-success text-success-content hover:bg-success/80"
-        >
-          <Plus className="h-6 w-6" />
-        </FloatingActionButton>
+          icon={<Plus className="h-6 w-6" />}
+          items={[
+            {
+              id: 'add-recipe',
+              icon: <Plus className="h-4 w-4" />,
+              label: 'Add Recipe',
+              onClick: () => navigate('/add'),
+            },
+          ]}
+        />
       </div>
     </div>
   );

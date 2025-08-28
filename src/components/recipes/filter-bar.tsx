@@ -190,8 +190,8 @@ export function FilterBar({
             <CategoryChip
               key={category}
               category={category}
-              onClick={() => toggleCategory(category)}
-              removable
+              onRemove={() => toggleCategory(category)}
+              variant="removable"
             />
           ))}
 
@@ -200,8 +200,8 @@ export function FilterBar({
             <CategoryChip
               key={cuisine}
               category={CUISINE_LABELS[cuisine]}
-              onClick={() => toggleCuisine(cuisine)}
-              removable
+              onRemove={() => toggleCuisine(cuisine)}
+              variant="removable"
             />
           ))}
         </div>
