@@ -27,9 +27,83 @@ export const recipeApi = {
 
     // Apply search filter
     if (filters?.searchTerm) {
-      query = query.or(
-        `title.ilike.%${filters.searchTerm}%,ingredients.cs.{${filters.searchTerm}},instructions.ilike.%${filters.searchTerm}%`
+      // Use separate queries to avoid SQL injection
+      const searchTerm = filters.searchTerm.toLowerCase();
+
+      // Create separate queries for each search field
+      const titleQuery = supabase
+        .from('recipes')
+        .select('*')
+        .eq('user_id', user.id)
+        .ilike('title', `%${searchTerm}%`);
+
+      const instructionsQuery = supabase
+        .from('recipes')
+        .select('*')
+        .eq('user_id', user.id)
+        .ilike('instructions', `%${searchTerm}%`);
+
+      const ingredientsQuery = supabase
+        .from('recipes')
+        .select('*')
+        .eq('user_id', user.id)
+        .contains('ingredients', [searchTerm]);
+
+      // Execute all queries and combine results
+      const [titleResults, instructionsResults, ingredientsResults] =
+        await Promise.all([titleQuery, instructionsQuery, ingredientsQuery]);
+
+      // Combine and deduplicate results
+      const allResults = [
+        ...(titleResults.data || []),
+        ...(instructionsResults.data || []),
+        ...(ingredientsResults.data || []),
+      ];
+
+      // Remove duplicates based on recipe ID
+      const uniqueResults = allResults.filter(
+        (recipe, index, self) =>
+          index === self.findIndex((r) => r.id === recipe.id)
       );
+
+      // Apply other filters to the combined results
+      let filteredResults = uniqueResults;
+
+      // Apply category filter
+      if (filters?.categories?.length) {
+        filteredResults = filteredResults.filter((recipe) =>
+          recipe.categories?.some((cat) => filters.categories!.includes(cat))
+        );
+      }
+
+      // Apply cuisine filter
+      if (filters?.cuisine?.length) {
+        const cuisineCategories = filters.cuisine.map((c) => `Cuisine: ${c}`);
+        filteredResults = filteredResults.filter((recipe) =>
+          recipe.categories?.some((cat) => cuisineCategories.includes(cat))
+        );
+      }
+
+      // Apply sorting
+      const sortBy = filters?.sortBy || 'date';
+      const sortOrder = filters?.sortOrder || 'desc';
+
+      filteredResults.sort((a, b) => {
+        if (sortBy === 'title') {
+          return sortOrder === 'asc'
+            ? a.title.localeCompare(b.title)
+            : b.title.localeCompare(a.title);
+        } else {
+          // Default to date sorting
+          return sortOrder === 'asc'
+            ? new Date(a.created_at).getTime() -
+                new Date(b.created_at).getTime()
+            : new Date(b.created_at).getTime() -
+                new Date(a.created_at).getTime();
+        }
+      });
+
+      return filteredResults;
     }
 
     // Apply category filter
