@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import type { Recipe, PublicRecipe } from './types';
+import type { Recipe, PublicRecipe, RecipeFilters } from './types';
 import { parseRecipeFromText } from './recipe-parser';
 
 // Type for profile summary data used in API responses
@@ -16,18 +16,47 @@ function handleError(error: unknown, operation: string): never {
 }
 
 export const recipeApi = {
-  // Fetch all recipes for the current user
-  async getUserRecipes(): Promise<Recipe[]> {
+  // Fetch all recipes for the current user with optional filters
+  async getUserRecipes(filters?: RecipeFilters): Promise<Recipe[]> {
     const {
       data: { user },
     } = await supabase.auth.getUser();
     if (!user) throw new Error('User not authenticated');
 
-    const { data, error } = await supabase
-      .from('recipes')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false });
+    let query = supabase.from('recipes').select('*').eq('user_id', user.id);
+
+    // Apply search filter
+    if (filters?.searchTerm) {
+      query = query.or(
+        `title.ilike.%${filters.searchTerm}%,ingredients.cs.{${filters.searchTerm}},instructions.ilike.%${filters.searchTerm}%`
+      );
+    }
+
+    // Apply category filter
+    if (filters?.categories?.length) {
+      query = query.overlaps('categories', filters.categories);
+    }
+
+    // Apply cuisine filter (cuisine is stored as a category)
+    if (filters?.cuisine?.length) {
+      const cuisineCategories = filters.cuisine.map((c) => `Cuisine: ${c}`);
+      query = query.overlaps('categories', cuisineCategories);
+    }
+
+    // Apply sorting
+    const sortBy = filters?.sortBy || 'date';
+    const sortOrder = filters?.sortOrder || 'desc';
+
+    if (sortBy === 'date') {
+      query = query.order('created_at', { ascending: sortOrder === 'asc' });
+    } else if (sortBy === 'title') {
+      query = query.order('title', { ascending: sortOrder === 'asc' });
+    } else {
+      // Default to date sorting
+      query = query.order('created_at', { ascending: false });
+    }
+
+    const { data, error } = await query;
 
     if (error) handleError(error, 'Get user recipes');
     return data || [];
