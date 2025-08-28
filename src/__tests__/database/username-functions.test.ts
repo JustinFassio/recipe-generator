@@ -36,12 +36,10 @@ RUN
         const { user } = await createUserAndProfile(admin, { username: null });
         expect(user.id).toBeTruthy();
 
-        const claim = await admin.rpc('claim_username_atomic', {
-          p_user_id: user.id,
-          p_username: taken,
-        });
-        expect(claim.error).toBeNull();
-        expect((claim.data as { success?: boolean })?.success).toBe(true);
+        const { error: insertErr } = await admin
+          .from('usernames')
+          .insert({ username: taken, user_id: user.id });
+        expect(insertErr).toBeNull();
 
         const { data, error } = await admin.rpc('is_username_available', {
           p_username: taken,
