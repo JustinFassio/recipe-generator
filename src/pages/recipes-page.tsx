@@ -162,6 +162,12 @@ export function RecipesPage() {
           icon={<Plus className="h-6 w-6" />}
           items={[
             {
+              id: 'ai-create',
+              icon: <Sparkles className="h-4 w-4" />,
+              label: 'AI Recipe Creator',
+              onClick: () => navigate('/chat-recipe'),
+            },
+            {
               id: 'add-recipe',
               icon: <Plus className="h-4 w-4" />,
               label: 'Add Recipe',
