@@ -10,111 +10,121 @@ import { truncatePhase1Tables } from './_utils/cleanup';
 
 const RUN = shouldRunDbTests();
 
-RUN ? describe('Database: Username Functions (integration)', () => {
-  const admin = createDbClient('service');
+RUN
+  ? describe('Database: Username Functions (integration)', () => {
+      const admin = createDbClient('service');
 
-  beforeAll(async () => {
-    // Ensure schema is migrated beforehand in CI/setup
-  });
+      beforeAll(async () => {
+        // Ensure schema is migrated beforehand in CI/setup
+      });
 
-  afterEach(async () => {
-    await truncatePhase1Tables(admin);
-  });
+      afterEach(async () => {
+        await truncatePhase1Tables(admin);
+      });
 
-  it('is_username_available: returns true for available username', async () => {
-    const username = uniqueUsername('avail');
-    const { data, error } = await admin.rpc('is_username_available', { p_username: username });
-    expect(error).toBeNull();
-    expect(data).toBe(true);
-  });
+      it('is_username_available: returns true for available username', async () => {
+        const username = uniqueUsername('avail');
+        const { data, error } = await admin.rpc('is_username_available', {
+          p_username: username,
+        });
+        expect(error).toBeNull();
+        expect(data).toBe(true);
+      });
 
-  it('is_username_available: returns false for taken username', async () => {
-    const taken = uniqueUsername('taken');
-    const { user } = await createUserAndProfile(admin, { username: null });
-    expect(user.id).toBeTruthy();
+      it('is_username_available: returns false for taken username', async () => {
+        const taken = uniqueUsername('taken');
+        const { user } = await createUserAndProfile(admin, { username: null });
+        expect(user.id).toBeTruthy();
 
-    const claim = await admin.rpc('claim_username_atomic', {
-      p_user_id: user.id,
-      p_username: taken,
-    });
-    expect(claim.error).toBeNull();
-    expect((claim.data as { success?: boolean })?.success).toBe(true);
+        const claim = await admin.rpc('claim_username_atomic', {
+          p_user_id: user.id,
+          p_username: taken,
+        });
+        expect(claim.error).toBeNull();
+        expect((claim.data as { success?: boolean })?.success).toBe(true);
 
-    const { data, error } = await admin.rpc('is_username_available', { p_username: taken });
-    expect(error).toBeNull();
-    expect(data).toBe(false);
-  });
+        const { data, error } = await admin.rpc('is_username_available', {
+          p_username: taken,
+        });
+        expect(error).toBeNull();
+        expect(data).toBe(false);
+      });
 
-  it('update_username_atomic: successfully updates own username', async () => {
-    const { user } = await createUserAndProfile(admin, { username: null });
-    const target = uniqueUsername('update');
+      it('update_username_atomic: successfully updates own username', async () => {
+        const { user } = await createUserAndProfile(admin, { username: null });
+        const target = uniqueUsername('update');
 
-    const { error } = await admin.rpc('update_username_atomic', {
-      p_user_id: user.id,
-      p_new_username: target,
-    });
-    expect(error).toBeNull();
+        const { error } = await admin.rpc('update_username_atomic', {
+          p_user_id: user.id,
+          p_new_username: target,
+        });
+        expect(error).toBeNull();
 
-    const { data: unameRow, error: unameErr } = await admin
-      .from('usernames')
-      .select('*')
-      .eq('user_id', user.id)
-      .single();
-    expect(unameErr).toBeNull();
-    expect(unameRow?.username).toBe(target);
-  });
+        const { data: unameRow, error: unameErr } = await admin
+          .from('usernames')
+          .select('*')
+          .eq('user_id', user.id)
+          .single();
+        expect(unameErr).toBeNull();
+        expect(unameRow?.username).toBe(target);
+      });
 
-  it('update_username_atomic: returns false when username already taken', async () => {
-    const taken = uniqueUsername('taken');
-    const { user: first } = await createUserAndProfile(admin, { username: taken });
-    const { user: second } = await createUserAndProfile(admin, { username: null });
-    expect(first.id && second.id).toBeTruthy();
+      it('update_username_atomic: returns false when username already taken', async () => {
+        const taken = uniqueUsername('taken');
+        const { user: first } = await createUserAndProfile(admin, {
+          username: taken,
+        });
+        const { user: second } = await createUserAndProfile(admin, {
+          username: null,
+        });
+        expect(first.id && second.id).toBeTruthy();
 
-    const { data, error } = await admin.rpc('update_username_atomic', {
-      p_user_id: second.id,
-      p_new_username: taken,
-    });
-    expect(error).toBeNull();
-    expect((data as { success?: boolean })?.success).toBe(false);
-  });
+        const { data, error } = await admin.rpc('update_username_atomic', {
+          p_user_id: second.id,
+          p_new_username: taken,
+        });
+        expect(error).toBeNull();
+        expect((data as { success?: boolean })?.success).toBe(false);
+      });
 
-  it('claim_username_atomic: successfully claims a free username', async () => {
-    const { user } = await createUserAndProfile(admin, { username: null });
-    const target = uniqueUsername('claim');
-    const { error } = await admin.rpc('claim_username_atomic', {
-      p_user_id: user.id,
-      p_username: target,
-    });
-    expect(error).toBeNull();
+      it('claim_username_atomic: successfully claims a free username', async () => {
+        const { user } = await createUserAndProfile(admin, { username: null });
+        const target = uniqueUsername('claim');
+        const { error } = await admin.rpc('claim_username_atomic', {
+          p_user_id: user.id,
+          p_username: target,
+        });
+        expect(error).toBeNull();
 
-    const { data, error: getErr } = await admin
-      .from('usernames')
-      .select('*')
-      .eq('username', target)
-      .single();
-    expect(getErr).toBeNull();
-    expect(data?.user_id).toBe(user.id);
-  });
+        const { data, error: getErr } = await admin
+          .from('usernames')
+          .select('*')
+          .eq('username', target)
+          .single();
+        expect(getErr).toBeNull();
+        expect(data?.user_id).toBe(user.id);
+      });
 
-  it('claim_username_atomic: returns false when user already has a username', async () => {
-    const { user } = await createUserAndProfile(admin, { username: null });
-    const first = uniqueUsername('first');
-    const second = uniqueUsername('second');
+      it('claim_username_atomic: returns false when user already has a username', async () => {
+        const { user } = await createUserAndProfile(admin, { username: null });
+        const first = uniqueUsername('first');
+        const second = uniqueUsername('second');
 
-    const firstClaim = await admin.rpc('claim_username_atomic', {
-      p_user_id: user.id,
-      p_username: first,
-    });
-    expect(firstClaim.error).toBeNull();
-    expect((firstClaim.data as { success?: boolean })?.success).toBe(true);
+        const firstClaim = await admin.rpc('claim_username_atomic', {
+          p_user_id: user.id,
+          p_username: first,
+        });
+        expect(firstClaim.error).toBeNull();
+        expect((firstClaim.data as { success?: boolean })?.success).toBe(true);
 
-    const secondClaim = await admin.rpc('claim_username_atomic', {
-      p_user_id: user.id,
-      p_username: second,
-    });
-    expect(secondClaim.error).toBeNull();
-    expect((secondClaim.data as { success?: boolean })?.success).toBe(false);
-  });
-}) : describe.skip('Database: Username Functions (integration) - missing SUPABASE_SERVICE_ROLE, skipping', () => {});
-
-
+        const secondClaim = await admin.rpc('claim_username_atomic', {
+          p_user_id: user.id,
+          p_username: second,
+        });
+        expect(secondClaim.error).toBeNull();
+        expect((secondClaim.data as { success?: boolean })?.success).toBe(
+          false
+        );
+      });
+    })
+  : describe.skip('Database: Username Functions (integration) - missing SUPABASE_SERVICE_ROLE, skipping', () => {});

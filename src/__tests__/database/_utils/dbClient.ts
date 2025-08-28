@@ -3,11 +3,16 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 type ClientRole = 'anon' | 'service';
 
 const url = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
-const anonKey = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
+const anonKey =
+  process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
 let serviceKey = process.env.SUPABASE_SERVICE_ROLE;
 // Fallback: if running against local Supabase and no service key provided, use default local service role
 // This matches the key used in scripts/create-test-user.js
-if ((!serviceKey || serviceKey.length === 0) && url && url.includes('127.0.0.1')) {
+if (
+  (!serviceKey || serviceKey.length === 0) &&
+  url &&
+  url.includes('127.0.0.1')
+) {
   serviceKey =
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU';
 }
@@ -27,7 +32,7 @@ export function hasServiceRole(): boolean {
 }
 
 export function createDbClient(role: ClientRole = 'anon'): SupabaseClient {
-  const key = role === 'service' ? serviceKey ?? anonKey! : anonKey!;
+  const key = role === 'service' ? (serviceKey ?? anonKey!) : anonKey!;
   return createClient(url!, key, {
     auth: {
       persistSession: false,
@@ -49,5 +54,3 @@ export function createDbClientAsUser(jwt: string): SupabaseClient {
     global: { headers: { 'X-Client-Info': 'recipe-generator-db-tests-user' } },
   });
 }
-
-

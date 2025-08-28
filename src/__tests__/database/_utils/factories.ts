@@ -1,6 +1,9 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 
-export async function createUserAndProfile(admin: SupabaseClient, opts?: { username?: string | null; fullName?: string }) {
+export async function createUserAndProfile(
+  admin: SupabaseClient,
+  opts?: { username?: string | null; fullName?: string }
+) {
   const email = `test+${Date.now()}_${Math.random().toString(36).slice(2)}@example.com`;
   const password = 'Password123!';
 
@@ -9,7 +12,8 @@ export async function createUserAndProfile(admin: SupabaseClient, opts?: { usern
     password,
     email_confirm: true,
   });
-  if (userErr || !userRes?.user) throw userErr ?? new Error('Failed to create user');
+  if (userErr || !userRes?.user)
+    throw userErr ?? new Error('Failed to create user');
 
   const { error: profErr } = await admin.from('profiles').insert({
     id: userRes.user.id,
@@ -35,5 +39,3 @@ export async function createUserAndProfile(admin: SupabaseClient, opts?: { usern
 export function uniqueUsername(base = 'user'): string {
   return `${base}_${Math.random().toString(36).slice(2, 8)}`.toLowerCase();
 }
-
-

@@ -7,5 +7,3 @@ export async function truncatePhase1Tables(admin: SupabaseClient) {
   await admin.from('usernames').delete().neq('username', '__never__');
   await admin.from('profiles').delete().neq('id', '__never__');
 }
-
-
