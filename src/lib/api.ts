@@ -72,7 +72,9 @@ export const recipeApi = {
       // Apply category filter
       if (filters?.categories?.length) {
         filteredResults = filteredResults.filter((recipe) =>
-          recipe.categories?.some((cat) => filters.categories!.includes(cat))
+          recipe.categories?.some((cat: string) =>
+            filters.categories!.includes(cat)
+          )
         );
       }
 
@@ -80,7 +82,9 @@ export const recipeApi = {
       if (filters?.cuisine?.length) {
         const cuisineCategories = filters.cuisine.map((c) => `Cuisine: ${c}`);
         filteredResults = filteredResults.filter((recipe) =>
-          recipe.categories?.some((cat) => cuisineCategories.includes(cat))
+          recipe.categories?.some((cat: string) =>
+            cuisineCategories.includes(cat)
+          )
         );
       }
 
