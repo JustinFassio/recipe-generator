@@ -97,6 +97,22 @@ export const recipeApi = {
           return sortOrder === 'asc'
             ? a.title.localeCompare(b.title)
             : b.title.localeCompare(a.title);
+        } else if (sortBy === 'popularity') {
+          // Use updated_at as a proxy for popularity (more popular recipes get updated more)
+          // Fall back to created_at for recipes with same updated_at
+          const aTime = new Date(a.updated_at).getTime();
+          const bTime = new Date(b.updated_at).getTime();
+
+          if (aTime === bTime) {
+            // If updated_at is the same, sort by created_at
+            const aCreated = new Date(a.created_at).getTime();
+            const bCreated = new Date(b.created_at).getTime();
+            return sortOrder === 'asc'
+              ? aCreated - bCreated
+              : bCreated - aCreated;
+          }
+
+          return sortOrder === 'asc' ? aTime - bTime : bTime - aTime;
         } else {
           // Default to date sorting
           return sortOrder === 'asc'
@@ -129,6 +145,12 @@ export const recipeApi = {
       query = query.order('created_at', { ascending: sortOrder === 'asc' });
     } else if (sortBy === 'title') {
       query = query.order('title', { ascending: sortOrder === 'asc' });
+    } else if (sortBy === 'popularity') {
+      // Use updated_at as a proxy for popularity (more popular recipes get updated more)
+      // Fall back to created_at for recipes with same updated_at
+      query = query
+        .order('updated_at', { ascending: sortOrder === 'asc' })
+        .order('created_at', { ascending: sortOrder === 'asc' });
     } else {
       // Default to date sorting
       query = query.order('created_at', { ascending: false });
