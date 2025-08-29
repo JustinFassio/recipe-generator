@@ -47,7 +47,11 @@ export const recipeApi = {
         .from('recipes')
         .select('*')
         .eq('user_id', user.id)
-        .contains('ingredients', [searchTerm]);
+        .filter(
+          "array_to_string(ingredients, ',')",
+          'ilike',
+          `%${searchTerm}%`
+        );
 
       // Execute all queries and combine results
       const [titleResults, instructionsResults, ingredientsResults] =
@@ -60,11 +64,13 @@ export const recipeApi = {
         ...(ingredientsResults.data || []),
       ];
 
-      // Remove duplicates based on recipe ID
-      const uniqueResults = allResults.filter(
-        (recipe, index, self) =>
-          index === self.findIndex((r) => r.id === recipe.id)
-      );
+      // Remove duplicates based on recipe ID using O(n) Set-based deduplication
+      const seenIds = new Set();
+      const uniqueResults = allResults.filter((recipe) => {
+        if (seenIds.has(recipe.id)) return false;
+        seenIds.add(recipe.id);
+        return true;
+      });
 
       // Apply other filters to the combined results
       let filteredResults = uniqueResults;
@@ -153,7 +159,7 @@ export const recipeApi = {
         .order('created_at', { ascending: sortOrder === 'asc' });
     } else {
       // Default to date sorting
-      query = query.order('created_at', { ascending: false });
+      query = query.order('created_at', { ascending: sortOrder === 'asc' });
     }
 
     const { data, error } = await query;

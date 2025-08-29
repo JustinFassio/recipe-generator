@@ -274,7 +274,7 @@ export async function checkUsernameAvailability(
     }
 
     const { data, error } = await supabase.rpc('is_username_available', {
-      p_username: username,
+      username: username,
     });
 
     if (error) {
@@ -328,9 +328,9 @@ export async function claimUsername(
     }
 
     // Use the database function for atomic username updating
-    const { data, error } = await supabase.rpc('update_username_atomic', {
-      p_user_id: user.id,
-      p_new_username: username.toLowerCase(),
+    const { error } = await supabase.rpc('update_username_atomic', {
+      user_id: user.id,
+      new_username: username.toLowerCase(),
     });
 
     if (error) {

@@ -208,15 +208,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    // If we already have profile data, don't immediately re-fetch
-    // This prevents unnecessary API calls when navigating back to account page
-    if (profile) {
-      logger.auth(
-        `Profile already loaded for user: ${user.id}, skipping immediate refresh`
-      );
-      return;
-    }
-
     logger.auth(`Refreshing profile for user: ${user.id}`);
     const profileData = await fetchProfile(user.id);
 
@@ -233,7 +224,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       logger.error('Profile refresh failed');
       // Don't clear profile on refresh failure - keep existing data
     }
-  }, [user?.id, profile, fetchProfile, logger]);
+  }, [user?.id, fetchProfile, logger]);
 
   const signOut = async () => {
     try {

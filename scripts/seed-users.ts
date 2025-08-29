@@ -197,16 +197,19 @@ async function ensureUsername(userId: string, username: string) {
   }
 }
 
-async function updateProfile(userId: string, updates: SeedUser['profile']) {
-  if (!updates) return;
-
-  const profileData = {
-    id: userId,
-    ...updates,
-    updated_at: new Date().toISOString(),
-  };
-
-  const { error } = await admin.from('profiles').upsert(profileData);
+async function createProfile(
+  userId: string,
+  fullName: string,
+  profile: SeedUser['profile']
+) {
+  const { error } = await admin.from('profiles').upsert(
+    {
+      id: userId,
+      full_name: fullName,
+      ...profile,
+    },
+    { onConflict: 'id' }
+  );
   if (error) throw error;
 }
 
@@ -707,7 +710,7 @@ async function main() {
 
     // Username + profile + related tables
     await ensureUsername(effectiveUserId, u.username);
-    await updateProfile(effectiveUserId, u.profile);
+    await createProfile(effectiveUserId, u.fullName, u.profile || {});
     await upsertSafety(effectiveUserId, u.safety);
     await upsertCooking(effectiveUserId, u.cooking);
   }
