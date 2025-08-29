@@ -221,6 +221,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const profileData = await fetchProfile(user.id);
 
     if (profileData) {
+      logger.db('Profile refresh result:', {
+        userId: profileData.id,
+        username: profileData.username,
+        avatarUrl: profileData.avatar_url,
+        hasAvatar: !!profileData.avatar_url,
+      });
       setProfile(profileData);
       logger.success('Profile refreshed successfully');
     } else {

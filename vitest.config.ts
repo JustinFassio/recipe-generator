@@ -5,8 +5,8 @@ import path from 'path';
 export default defineConfig({
   plugins: [react()],
   test: {
+    setupFiles: ['./src/test/load-env.ts', './src/test/setup.ts'],
     environment: 'jsdom',
-    setupFiles: ['./src/test/setup.ts'],
     globals: true,
     coverage: {
       provider: 'v8',

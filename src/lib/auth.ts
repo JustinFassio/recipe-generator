@@ -274,7 +274,7 @@ export async function checkUsernameAvailability(
     }
 
     const { data, error } = await supabase.rpc('is_username_available', {
-      check_username: username,
+      p_username: username,
     });
 
     if (error) {
@@ -328,27 +328,36 @@ export async function claimUsername(
     }
 
     // Use the database function for atomic username updating
-    const { error } = await supabase.rpc('update_username_atomic', {
+    const { data, error } = await supabase.rpc('update_username_atomic', {
       p_user_id: user.id,
       p_new_username: username.toLowerCase(),
     });
 
     if (error) {
-      // Handle specific error messages from the database function
-      if (error.message?.includes('username_already_taken')) {
-        return {
-          success: false,
-          error: createAuthError(
-            'This username is already taken',
-            'USERNAME_TAKEN'
-          ),
-        };
-      }
-
       return {
         success: false,
         error: createAuthError(error.message, error.code, error.details),
       };
+    }
+
+    // Handle the JSON response from the function
+    if (data && typeof data === 'object') {
+      if (!data.success) {
+        const errorMessage =
+          data.error === 'username_already_taken'
+            ? 'This username is already taken'
+            : data.error || 'Failed to update username';
+
+        return {
+          success: false,
+          error: createAuthError(
+            errorMessage,
+            data.error === 'username_already_taken'
+              ? 'USERNAME_TAKEN'
+              : 'UPDATE_FAILED'
+          ),
+        };
+      }
     }
 
     // Fetch the updated profile
@@ -419,9 +428,10 @@ export async function uploadAvatar(
       };
     }
 
-    // Generate unique filename
+    // Generate unique filename with timestamp for cache busting
     const fileExt = file.name.split('.').pop();
-    const fileName = `${user.id}/avatar.${fileExt}`;
+    const timestamp = Date.now();
+    const fileName = `${user.id}/avatar-${timestamp}.${fileExt}`;
 
     // Upload to storage
     const { error } = await supabase.storage
@@ -435,10 +445,8 @@ export async function uploadAvatar(
       };
     }
 
-    // Get public URL
-    const {
-      data: { publicUrl },
-    } = supabase.storage.from('avatars').getPublicUrl(fileName);
+    // Get public URL - manually construct to ensure production URL
+    const publicUrl = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/avatars/${fileName}`;
 
     // Update profile with new avatar URL
     const { error: updateError } = await supabase

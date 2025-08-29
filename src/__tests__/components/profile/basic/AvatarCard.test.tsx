@@ -20,9 +20,9 @@ describe('AvatarCard', () => {
 
     const avatarImage = screen.getByAltText('Profile');
     expect(avatarImage).toBeInTheDocument();
-    expect(avatarImage).toHaveAttribute(
-      'src',
-      'https://example.com/avatar.jpg'
+    expect(avatarImage).toHaveAttribute('src');
+    expect(avatarImage.getAttribute('src')).toMatch(
+      /^https:\/\/example\.com\/avatar\.jpg\?t=\d+$/
     );
   });
 
