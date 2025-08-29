@@ -211,6 +211,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     logger.auth(`Refreshing profile for user: ${user.id}`);
 
     // Clear cache for this user to force fresh data
+    console.log('🗑️ Clearing profile cache for user:', user.id);
     profileCache.current.delete(user.id);
 
     const profileData = await fetchProfile(user.id);
@@ -222,10 +223,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         avatarUrl: profileData.avatar_url,
         hasAvatar: !!profileData.avatar_url,
       });
+      console.log('📊 Profile data fetched:', {
+        id: profileData.id,
+        username: profileData.username,
+        fullName: profileData.full_name,
+      });
       setProfile(profileData);
       logger.success('Profile refreshed successfully');
     } else {
       logger.error('Profile refresh failed');
+      console.log('❌ Profile refresh failed - no data returned');
       // Don't clear profile on refresh failure - keep existing data
     }
   }, [user?.id, fetchProfile, logger]);

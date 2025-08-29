@@ -102,8 +102,14 @@ export function useUsernameAvailability(): UseUsernameAvailabilityReturn {
           setUsername('');
           setIsAvailable(null);
 
+          console.log(
+            '🔄 Username claimed successfully, refreshing profile...'
+          );
+
           // Refresh profile to get updated data
           await refreshProfile();
+
+          console.log('✅ Profile refresh completed');
 
           // Force a small delay to ensure the profile update is processed
           await new Promise((resolve) => setTimeout(resolve, 100));
