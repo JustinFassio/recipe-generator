@@ -61,10 +61,21 @@ wait_for_service() {
     return 1
 }
 
-# Step 1: Kill all running processes
-print_status "Step 1: Stopping all development processes..."
-pkill -f "vite\|dev" 2>/dev/null || true
-pkill -f "supabase" 2>/dev/null || true
+# Step 1: Kill specific development processes
+print_status "Step 1: Stopping development processes..."
+
+# Kill Vite dev server processes (more specific)
+pkill -f "vite.*dev" 2>/dev/null || true
+pkill -f "npm.*dev" 2>/dev/null || true
+
+# Kill Supabase processes (more specific)
+pkill -f "supabase start" 2>/dev/null || true
+pkill -f "supabase db" 2>/dev/null || true
+
+# Additional cleanup for any remaining dev processes on common ports
+lsof -ti:5174 | xargs kill -9 2>/dev/null || true
+lsof -ti:5175 | xargs kill -9 2>/dev/null || true
+lsof -ti:5176 | xargs kill -9 2>/dev/null || true
 
 # Wait a moment for processes to fully stop
 sleep 3
