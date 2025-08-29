@@ -105,6 +105,9 @@ export function useUsernameAvailability(): UseUsernameAvailabilityReturn {
           // Refresh profile to get updated data
           await refreshProfile();
 
+          // Force a small delay to ensure the profile update is processed
+          await new Promise((resolve) => setTimeout(resolve, 100));
+
           toast({
             title: 'Success',
             description: 'Username updated successfully!',
