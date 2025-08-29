@@ -274,7 +274,7 @@ export async function checkUsernameAvailability(
     }
 
     const { data, error } = await supabase.rpc('is_username_available', {
-      p_username: username,
+      check_username: username,
     });
 
     if (error) {
@@ -340,24 +340,15 @@ export async function claimUsername(
       };
     }
 
-    // Handle the JSON response from the function
-    if (data && typeof data === 'object') {
-      if (!data.success) {
-        const errorMessage =
-          data.error === 'username_already_taken'
-            ? 'This username is already taken'
-            : data.error || 'Failed to update username';
-
-        return {
-          success: false,
-          error: createAuthError(
-            errorMessage,
-            data.error === 'username_already_taken'
-              ? 'USERNAME_TAKEN'
-              : 'UPDATE_FAILED'
-          ),
-        };
-      }
+    // Handle the boolean response from the function
+    if (data === false) {
+      return {
+        success: false,
+        error: createAuthError(
+          'This username is already taken',
+          'USERNAME_TAKEN'
+        ),
+      };
     }
 
     // Fetch the updated profile

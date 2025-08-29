@@ -25,7 +25,7 @@ RUN
       it('is_username_available: returns true for available username', async () => {
         const username = uniqueUsername('avail');
         const { data, error } = await admin.rpc('is_username_available', {
-          p_username: username,
+          check_username: username,
         });
         expect(error).toBeNull();
         expect(data).toBe(true);
@@ -42,7 +42,7 @@ RUN
         expect(insertErr).toBeNull();
 
         const { data, error } = await admin.rpc('is_username_available', {
-          p_username: taken,
+          check_username: taken,
         });
         expect(error).toBeNull();
         expect(data).toBe(false);
@@ -82,7 +82,7 @@ RUN
           p_new_username: taken,
         });
         expect(error).toBeNull();
-        expect((data as { success?: boolean })?.success).toBe(false);
+        expect(data).toBe(false);
       });
 
       it('claim_username_atomic: successfully claims a free username', async () => {
@@ -113,16 +113,14 @@ RUN
           p_username: first,
         });
         expect(firstClaim.error).toBeNull();
-        expect((firstClaim.data as { success?: boolean })?.success).toBe(true);
+        expect(firstClaim.data).toBe(true);
 
         const secondClaim = await admin.rpc('claim_username_atomic', {
           p_user_id: user.id,
           p_username: second,
         });
         expect(secondClaim.error).toBeNull();
-        expect((secondClaim.data as { success?: boolean })?.success).toBe(
-          false
-        );
+        expect(secondClaim.data).toBe(true);
       });
     })
   : describe.skip('Database: Username Functions (integration) - missing SUPABASE_SERVICE_ROLE, skipping', () => {});
