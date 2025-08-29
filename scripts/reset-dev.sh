@@ -103,10 +103,10 @@ npx supabase db reset
 
 # Step 7: Get service role key for seeding
 print_status "Step 7: Setting up environment for seeding..."
-SERVICE_ROLE_KEY=$(npx supabase status | sed -n 's/^service_role key: //p' | tr -d '\n')
+SERVICE_ROLE_KEY=$(npx supabase status | grep -i 'service_role key' | awk -F': ' '{print $2}' | tr -d '\n')
 
-if [ -z "$SERVICE_ROLE_KEY" ]; then
-    print_error "Failed to get service role key from Supabase status"
+if [ -z "$SERVICE_ROLE_KEY" ] || [[ ! "$SERVICE_ROLE_KEY" =~ ^eyJ ]]; then
+    print_error "Failed to get a valid service role key from Supabase status. Got: '$SERVICE_ROLE_KEY'"
     exit 1
 fi
 
