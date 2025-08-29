@@ -9,7 +9,7 @@ DECLARE
   username_exists boolean;
 BEGIN
   SELECT EXISTS(
-    SELECT 1 FROM profiles
+    SELECT 1 FROM usernames
     WHERE username = check_username
   ) INTO username_exists;
   RETURN NOT username_exists;
