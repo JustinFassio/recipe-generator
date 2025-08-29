@@ -114,6 +114,9 @@ export function useUsernameAvailability(): UseUsernameAvailabilityReturn {
           // Force a small delay to ensure the profile update is processed
           await new Promise((resolve) => setTimeout(resolve, 100));
 
+          // Add additional debugging to check if profile was actually updated
+          console.log('🔍 Checking if profile was updated...');
+
           toast({
             title: 'Success',
             description: 'Username updated successfully!',

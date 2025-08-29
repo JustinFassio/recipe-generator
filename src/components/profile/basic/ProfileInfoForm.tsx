@@ -81,6 +81,16 @@ export const ProfileInfoForm: React.FC<ProfileInfoFormProps> = ({
   submitting,
   className = '',
 }) => {
+  // Debug logging for currentUsername
+  console.log('🎯 ProfileInfoForm received currentUsername:', currentUsername);
+  console.log(
+    '🎯 ProfileInfoForm will show "Current Username":',
+    !!currentUsername
+  );
+  console.log(
+    '🎯 ProfileInfoForm will show "Claim Username":',
+    !currentUsername
+  );
   return (
     <SectionCard className={className}>
       <h2 className="card-title">Profile Information</h2>
