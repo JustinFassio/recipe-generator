@@ -129,6 +129,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           attempt,
         });
 
+        // Add detailed debugging for profile data
+        if (data) {
+          console.log('🔍 Profile data returned from database:', {
+            id: data.id,
+            username: data.username,
+            full_name: data.full_name,
+            usernameType: typeof data.username,
+            usernameIsNull: data.username === null,
+            usernameIsUndefined: data.username === undefined,
+          });
+        }
+
         if (error) {
           if (error.code === 'PGRST116') {
             logger.user('Profile not found, attempting to create...');
@@ -228,6 +240,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         username: profileData.username,
         fullName: profileData.full_name,
       });
+      console.log(
+        '🔄 Setting profile state with username:',
+        profileData.username
+      );
       setProfile(profileData);
       logger.success('Profile refreshed successfully');
     } else {
