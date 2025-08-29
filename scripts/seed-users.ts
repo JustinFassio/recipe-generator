@@ -248,6 +248,7 @@ async function seedRecipes() {
       image_url: 'https://picsum.photos/seed/avocado_toast/800/600',
       user_email: 'alice@example.com',
       is_public: true,
+      categories: ['Course: Breakfast', 'Collection: Vegetarian', 'Technique: No-Cook'],
     },
     {
       id: '11111111-1111-1111-1111-111111111112',
@@ -265,6 +266,7 @@ async function seedRecipes() {
       image_url: 'https://picsum.photos/seed/caprese_salad/800/600',
       user_email: 'alice@example.com',
       is_public: false,
+      categories: ['Course: Appetizer', 'Dish Type: Salad', 'Cuisine: Italian', 'Collection: Vegetarian'],
     },
     {
       id: '11111111-1111-1111-1111-111111111113',
@@ -282,6 +284,7 @@ async function seedRecipes() {
       image_url: 'https://picsum.photos/seed/quick_pasta/800/600',
       user_email: 'alice@example.com',
       is_public: false,
+      categories: ['Course: Main', 'Dish Type: Pasta', 'Cuisine: Italian', 'Occasion: Weeknight', 'Collection: Vegetarian'],
     },
     {
       id: '11111111-1111-1111-1111-111111111114',
@@ -300,6 +303,7 @@ async function seedRecipes() {
       image_url: 'https://picsum.photos/seed/veggie_stir_fry/800/600',
       user_email: 'alice@example.com',
       is_public: false,
+      categories: ['Course: Main', 'Dish Type: Stir-Fry', 'Technique: Sauté', 'Collection: Vegetarian'],
     },
 
     // Bob's recipes (3 total: 1 shared, 2 private)
@@ -319,6 +323,7 @@ async function seedRecipes() {
       image_url: 'https://picsum.photos/seed/caesar_salad/800/600',
       user_email: 'bob@example.com',
       is_public: true,
+      categories: ['Course: Appetizer', 'Dish Type: Salad', 'Cuisine: American'],
     },
     {
       id: '22222222-2222-2222-2222-222222222222',
@@ -337,6 +342,7 @@ async function seedRecipes() {
       image_url: 'https://picsum.photos/seed/grilled_chicken/800/600',
       user_email: 'bob@example.com',
       is_public: false,
+      categories: ['Course: Main', 'Technique: Grill', 'Collection: High-Protein', 'Occasion: Meal Prep'],
     },
     {
       id: '22222222-2222-2222-2222-222222222223',
@@ -354,6 +360,7 @@ async function seedRecipes() {
       image_url: 'https://picsum.photos/seed/bbq_ribs/800/600',
       user_email: 'bob@example.com',
       is_public: false,
+      categories: ['Course: Main', 'Cuisine: BBQ', 'Technique: Smoke', 'Occasion: Weekend'],
     },
 
     // Cora's recipes (4 total: 2 shared, 2 private)
@@ -374,6 +381,7 @@ async function seedRecipes() {
       image_url: 'https://picsum.photos/seed/one_pot_pasta/800/600',
       user_email: 'cora@example.com',
       is_public: true,
+      categories: ['Course: Main', 'Dish Type: Pasta', 'Cuisine: Italian', 'Occasion: Weeknight', 'Collection: One-Pot'],
     },
     {
       id: '33333333-3333-3333-3333-333333333332',
@@ -393,6 +401,7 @@ async function seedRecipes() {
       image_url: 'https://picsum.photos/seed/paella/800/600',
       user_email: 'cora@example.com',
       is_public: true,
+      categories: ['Course: Main', 'Cuisine: Spanish', 'Technique: Simmer', 'Occasion: Weekend'],
     },
     {
       id: '33333333-3333-3333-3333-333333333333',
@@ -411,6 +420,7 @@ async function seedRecipes() {
       image_url: 'https://picsum.photos/seed/thai_curry/800/600',
       user_email: 'cora@example.com',
       is_public: false,
+      categories: ['Course: Main', 'Dish Type: Curry', 'Cuisine: Thai', 'Technique: Simmer'],
     },
     {
       id: '33333333-3333-3333-3333-333333333334',
@@ -429,6 +439,7 @@ async function seedRecipes() {
       image_url: 'https://picsum.photos/seed/rice_pilaf/800/600',
       user_email: 'cora@example.com',
       is_public: false,
+      categories: ['Course: Side', 'Dish Type: Rice', 'Technique: Simmer'],
     },
 
     // David's recipes (3 total: 1 shared, 2 private)
@@ -449,6 +460,7 @@ async function seedRecipes() {
       image_url: 'https://picsum.photos/seed/gluten_free_bread/800/600',
       user_email: 'david@example.com',
       is_public: true,
+      categories: ['Course: Side', 'Dish Type: Bread', 'Collection: Gluten-Free', 'Technique: Bake'],
     },
     {
       id: '44444444-4444-4444-4444-444444444442',
@@ -466,6 +478,7 @@ async function seedRecipes() {
       image_url: 'https://picsum.photos/seed/french_macarons/800/600',
       user_email: 'david@example.com',
       is_public: false,
+      categories: ['Course: Dessert', 'Cuisine: French', 'Technique: Bake'],
     },
     {
       id: '44444444-4444-4444-4444-444444444443',
@@ -485,6 +498,7 @@ async function seedRecipes() {
       image_url: 'https://picsum.photos/seed/mediterranean_salad/800/600',
       user_email: 'david@example.com',
       is_public: false,
+      categories: ['Course: Side', 'Dish Type: Salad', 'Cuisine: Mediterranean', 'Collection: Gluten-Free'],
     },
 
     // Emma's recipes (4 total: 1 shared, 3 private)
@@ -505,6 +519,7 @@ async function seedRecipes() {
       image_url: 'https://picsum.photos/seed/greek_yogurt_bowl/800/600',
       user_email: 'emma@example.com',
       is_public: true,
+      categories: ['Course: Breakfast', 'Cuisine: Greek', 'Collection: High-Protein', 'Collection: Dairy-Free'],
     },
     {
       id: '55555555-5555-5555-5555-555555555552',
@@ -523,6 +538,7 @@ async function seedRecipes() {
       image_url: 'https://picsum.photos/seed/sushi_roll/800/600',
       user_email: 'emma@example.com',
       is_public: false,
+      categories: ['Course: Main', 'Cuisine: Japanese', 'Technique: No-Cook'],
     },
     {
       id: '55555555-5555-5555-5555-555555555553',
@@ -542,6 +558,7 @@ async function seedRecipes() {
       image_url: 'https://picsum.photos/seed/air_fryer_salmon/800/600',
       user_email: 'emma@example.com',
       is_public: false,
+      categories: ['Course: Main', 'Collection: High-Protein', 'Technique: Air Fryer', 'Occasion: Weeknight'],
     },
     {
       id: '55555555-5555-5555-5555-555555555554',
@@ -559,6 +576,7 @@ async function seedRecipes() {
       image_url: 'https://picsum.photos/seed/protein_smoothie/800/600',
       user_email: 'emma@example.com',
       is_public: false,
+      categories: ['Course: Beverage', 'Beverage: Smoothie', 'Collection: High-Protein', 'Collection: Dairy-Free'],
     },
 
     // Frank's recipes (3 total: 2 shared, 1 private)
@@ -580,6 +598,7 @@ async function seedRecipes() {
       image_url: 'https://picsum.photos/seed/spicy_tacos/800/600',
       user_email: 'frank@example.com',
       is_public: true,
+      categories: ['Course: Main', 'Dish Type: Taco', 'Cuisine: Mexican'],
     },
     {
       id: '66666666-6666-6666-6666-666666666662',
@@ -599,6 +618,7 @@ async function seedRecipes() {
       image_url: 'https://picsum.photos/seed/korean_bbq/800/600',
       user_email: 'frank@example.com',
       is_public: true,
+      categories: ['Course: Main', 'Cuisine: Korean', 'Technique: Grill'],
     },
     {
       id: '66666666-6666-6666-6666-666666666663',
@@ -618,6 +638,7 @@ async function seedRecipes() {
       image_url: 'https://picsum.photos/seed/indian_curry/800/600',
       user_email: 'frank@example.com',
       is_public: false,
+      categories: ['Course: Main', 'Dish Type: Curry', 'Cuisine: Indian', 'Technique: Simmer'],
     },
   ];
 
@@ -657,6 +678,7 @@ async function seedRecipes() {
         image_url: recipe.image_url,
         user_id: userMatch.id,
         is_public: recipe.is_public,
+        categories: recipe.categories || [],
       },
       { onConflict: 'id' }
     );

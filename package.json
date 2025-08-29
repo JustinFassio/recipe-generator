@@ -20,7 +20,18 @@
     "verify:quick": "npm run lint && tsc --noEmit && npm run test:core && npm run build",
     "test:username": "./scripts/test-username-functions.sh",
     "prepare": "husky",
-    "seed": "cross-env NODE_OPTIONS=--no-warnings tsx scripts/seed-users.ts"
+    "seed": "cross-env NODE_OPTIONS=--no-warnings tsx scripts/seed-users.ts",
+    "db:status": "npx supabase status",
+    "db:start": "npx supabase start",
+    "db:stop": "npx supabase stop",
+    "db:reset": "npx supabase db reset",
+    "db:fresh": "npm run db:stop && npm run db:start && npm run db:reset && npm run seed",
+    "db:backup": "npx supabase db dump --local > backups/$(date +%Y%m%d_%H%M%S).sql",
+    "db:verify": "npm run db:status && psql postgresql://postgres:postgres@127.0.0.1:54322/postgres -c \"SELECT COUNT(*) as total_recipes, COUNT(*) FILTER (WHERE array_length(categories, 1) > 0) as recipes_with_categories FROM recipes;\"",
+    "dev:fresh": "npm run db:fresh && npm run dev -- --port 5174",
+    "dev:kill": "pkill -f 'vite\\|dev' 2>/dev/null || true",
+    "dev:restart": "npm run dev:kill && sleep 2 && npm run dev -- --port 5174",
+    "reset": "./scripts/reset-dev.sh"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",
