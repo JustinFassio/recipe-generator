@@ -328,7 +328,7 @@ export async function claimUsername(
     }
 
     // Use the database function for atomic username updating
-    const { error } = await supabase.rpc('update_username_atomic', {
+    const { data, error } = await supabase.rpc('update_username_atomic', {
       user_id: user.id,
       new_username: username.toLowerCase(),
     });
