@@ -177,7 +177,7 @@ export function FilterBar({
             className="text-gray-500 hover:text-gray-700"
           >
             <X className="mr-1 h-4 w-4" />
-            Clear
+            Clear Filters
           </Button>
         )}
       </div>

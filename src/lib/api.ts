@@ -25,105 +25,15 @@ export const recipeApi = {
 
     let query = supabase.from('recipes').select('*').eq('user_id', user.id);
 
-    // Apply search filter
+    // Apply search filter using efficient single query with OR conditions
     if (filters?.searchTerm) {
-      // Use separate queries to avoid SQL injection
       const searchTerm = filters.searchTerm.toLowerCase();
 
-      // Create separate queries for each search field
-      const titleQuery = supabase
-        .from('recipes')
-        .select('*')
-        .eq('user_id', user.id)
-        .ilike('title', `%${searchTerm}%`);
-
-      const instructionsQuery = supabase
-        .from('recipes')
-        .select('*')
-        .eq('user_id', user.id)
-        .ilike('instructions', `%${searchTerm}%`);
-
-      const ingredientsQuery = supabase
-        .from('recipes')
-        .select('*')
-        .eq('user_id', user.id)
-        .contains('ingredients', [searchTerm]);
-
-      // Execute all queries and combine results
-      const [titleResults, instructionsResults, ingredientsResults] =
-        await Promise.all([titleQuery, instructionsQuery, ingredientsQuery]);
-
-      // Combine and deduplicate results
-      const allResults = [
-        ...(titleResults.data || []),
-        ...(instructionsResults.data || []),
-        ...(ingredientsResults.data || []),
-      ];
-
-      // Remove duplicates based on recipe ID
-      const uniqueResults = allResults.filter(
-        (recipe, index, self) =>
-          index === self.findIndex((r) => r.id === recipe.id)
+      // Use a single query with OR conditions for better performance
+      // This avoids multiple database round trips and in-memory deduplication
+      query = query.or(
+        `title.ilike.%${searchTerm}%,instructions.ilike.%${searchTerm}%,array_to_string(ingredients,',').ilike.%${searchTerm}%`
       );
-
-      // Apply other filters to the combined results
-      let filteredResults = uniqueResults;
-
-      // Apply category filter
-      if (filters?.categories?.length) {
-        filteredResults = filteredResults.filter((recipe) =>
-          recipe.categories?.some((cat: string) =>
-            filters.categories!.includes(cat)
-          )
-        );
-      }
-
-      // Apply cuisine filter
-      if (filters?.cuisine?.length) {
-        const cuisineCategories = filters.cuisine.map((c) => `Cuisine: ${c}`);
-        filteredResults = filteredResults.filter((recipe) =>
-          recipe.categories?.some((cat: string) =>
-            cuisineCategories.includes(cat)
-          )
-        );
-      }
-
-      // Apply sorting
-      const sortBy = filters?.sortBy || 'date';
-      const sortOrder = filters?.sortOrder || 'desc';
-
-      filteredResults.sort((a, b) => {
-        if (sortBy === 'title') {
-          return sortOrder === 'asc'
-            ? a.title.localeCompare(b.title)
-            : b.title.localeCompare(a.title);
-        } else if (sortBy === 'popularity') {
-          // Use updated_at as a proxy for popularity (more popular recipes get updated more)
-          // Fall back to created_at for recipes with same updated_at
-          const aTime = new Date(a.updated_at).getTime();
-          const bTime = new Date(b.updated_at).getTime();
-
-          if (aTime === bTime) {
-            // If updated_at is the same, sort by created_at
-            const aCreated = new Date(a.created_at).getTime();
-            const bCreated = new Date(b.created_at).getTime();
-            return sortOrder === 'asc'
-              ? aCreated - bCreated
-              : bCreated - aCreated;
-          }
-
-          return sortOrder === 'asc' ? aTime - bTime : bTime - aTime;
-        } else {
-          // Default to date sorting
-          return sortOrder === 'asc'
-            ? new Date(a.created_at).getTime() -
-                new Date(b.created_at).getTime()
-            : new Date(b.created_at).getTime() -
-                new Date(a.created_at).getTime();
-        }
-      });
-
-      return filteredResults;
     }
 
     // Apply category filter
@@ -153,7 +63,7 @@ export const recipeApi = {
         .order('created_at', { ascending: sortOrder === 'asc' });
     } else {
       // Default to date sorting
-      query = query.order('created_at', { ascending: false });
+      query = query.order('created_at', { ascending: sortOrder === 'asc' });
     }
 
     const { data, error } = await query;

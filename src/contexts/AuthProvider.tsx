@@ -208,26 +208,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    // If we already have profile data, don't immediately re-fetch
-    // This prevents unnecessary API calls when navigating back to account page
-    if (profile) {
-      logger.auth(
-        `Profile already loaded for user: ${user.id}, skipping immediate refresh`
-      );
-      return;
-    }
-
     logger.auth(`Refreshing profile for user: ${user.id}`);
+
+    // Clear cache for this user to force fresh data
+    profileCache.current.delete(user.id);
+
     const profileData = await fetchProfile(user.id);
 
     if (profileData) {
+      logger.db('Profile refresh result:', {
+        userId: profileData.id,
+        username: profileData.username,
+        avatarUrl: profileData.avatar_url,
+        hasAvatar: !!profileData.avatar_url,
+      });
       setProfile(profileData);
       logger.success('Profile refreshed successfully');
     } else {
       logger.error('Profile refresh failed');
       // Don't clear profile on refresh failure - keep existing data
     }
-  }, [user?.id, profile, fetchProfile, logger]);
+  }, [user?.id, fetchProfile, logger]);
 
   const signOut = async () => {
     try {

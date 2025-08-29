@@ -4,6 +4,7 @@ import { X } from 'lucide-react';
 interface CategoryChipProps {
   category: string;
   onRemove?: (category: string) => void;
+  onClick?: () => void;
   variant?: 'default' | 'removable' | 'readonly';
   size?: 'sm' | 'md' | 'lg';
   className?: string;
@@ -12,6 +13,7 @@ interface CategoryChipProps {
 const CategoryChip: React.FC<CategoryChipProps> = ({
   category,
   onRemove,
+  onClick,
   variant = 'default',
   size = 'md',
   className = '',
@@ -41,8 +43,19 @@ const CategoryChip: React.FC<CategoryChipProps> = ({
     }
   };
 
+  const handleClick = () => {
+    if (onClick) {
+      onClick();
+    }
+  };
+
+  const Component = onClick ? 'button' : 'span';
+  const buttonProps = onClick
+    ? { type: 'button' as const, onClick: handleClick }
+    : {};
+
   return (
-    <span className={classes}>
+    <Component className={classes} {...buttonProps}>
       <span className="max-w-[120px] truncate">{category}</span>
       {variant === 'removable' && onRemove && (
         <button
@@ -54,7 +67,7 @@ const CategoryChip: React.FC<CategoryChipProps> = ({
           <X size={12} />
         </button>
       )}
-    </span>
+    </Component>
   );
 };
 

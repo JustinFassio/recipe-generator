@@ -8,6 +8,7 @@ import { FilterBar } from '@/components/recipes/filter-bar';
 import { Button } from '@/components/ui/button';
 import { FloatingActionButton } from '@/components/ui/fab';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useCallback } from 'react';
 import type { Recipe } from '@/lib/types';
 
 export function RecipesPage() {
@@ -16,13 +17,19 @@ export function RecipesPage() {
   const { filters, updateFilters } = useRecipeFilters();
   const { data: recipes = [], isLoading, error } = useRecipes(filters);
 
-  const handleEditRecipe = (recipe: Recipe) => {
-    navigate('/add', { state: { recipe } });
-  };
+  const handleEditRecipe = useCallback(
+    (recipe: Recipe) => {
+      navigate('/add', { state: { recipe } });
+    },
+    [navigate]
+  );
 
-  const handleViewRecipe = (recipe: Recipe) => {
-    navigate(`/recipe/${recipe.id}`);
-  };
+  const handleViewRecipe = useCallback(
+    (recipe: Recipe) => {
+      navigate(`/recipe/${recipe.id}`);
+    },
+    [navigate]
+  );
 
   if (error) {
     return (
@@ -150,8 +157,8 @@ export function RecipesPage() {
               <RecipeCard
                 key={recipe.id}
                 recipe={recipe}
-                onEdit={() => handleEditRecipe(recipe)}
-                onView={() => handleViewRecipe(recipe)}
+                onEdit={handleEditRecipe}
+                onView={handleViewRecipe}
               />
             ))}
           </div>
