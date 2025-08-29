@@ -1,10 +1,10 @@
-import { useState, useMemo } from 'react';
-import { createDaisyUIInputClasses } from '@/lib/input-migration';
 import { createDaisyUICardClasses } from '@/lib/card-migration';
 import { createDaisyUISkeletonClasses } from '@/lib/skeleton-migration';
-import { Plus, Search, ChefHat, Sparkles, NotebookPen } from 'lucide-react';
+import { Plus, ChefHat, Sparkles } from 'lucide-react';
 import { useRecipes } from '@/hooks/use-recipes';
+import { useRecipeFilters } from '@/hooks/use-recipe-filters';
 import { RecipeCard } from '@/components/recipes/recipe-card';
+import { FilterBar } from '@/components/recipes/filter-bar';
 import { Button } from '@/components/ui/button';
 import { FloatingActionButton } from '@/components/ui/fab';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -13,24 +13,8 @@ import type { Recipe } from '@/lib/types';
 export function RecipesPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { data: recipes = [], isLoading, error } = useRecipes();
-  const [searchTerm, setSearchTerm] = useState('');
-
-  const filteredRecipes = useMemo(() => {
-    if (!searchTerm) return recipes;
-
-    return recipes.filter(
-      (recipe) =>
-        recipe.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        recipe.ingredients.some((ingredient) =>
-          ingredient.toLowerCase().includes(searchTerm.toLowerCase())
-        ) ||
-        recipe.instructions.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (recipe.notes
-          ? recipe.notes.toLowerCase().includes(searchTerm.toLowerCase())
-          : false)
-    );
-  }, [recipes, searchTerm]);
+  const { filters, updateFilters } = useRecipeFilters();
+  const { data: recipes = [], isLoading, error } = useRecipes(filters);
 
   const handleEditRecipe = (recipe: Recipe) => {
     navigate('/add', { state: { recipe } });
@@ -77,7 +61,7 @@ export function RecipesPage() {
               <p className="text-gray-600">
                 {isLoading
                   ? 'Loading...'
-                  : `${filteredRecipes.length} recipe${filteredRecipes.length !== 1 ? 's' : ''} found`}
+                  : `${recipes.length} recipe${recipes.length !== 1 ? 's' : ''} found`}
               </p>
             </div>
 
@@ -100,119 +84,98 @@ export function RecipesPage() {
               </Button>
             </div>
           </div>
-
-          <div className="mt-6">
-            <div className="relative">
-              <Search className="absolute top-3 left-3 h-4 w-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search recipes, ingredients, or instructions..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className={`${createDaisyUIInputClasses('bordered')} pl-10`}
-              />
-            </div>
-          </div>
         </div>
 
+        {/* Filter Bar */}
+        <FilterBar
+          filters={filters}
+          onFiltersChange={updateFilters}
+          className="mb-6"
+        />
+
+        {/* Recipe Grid */}
         {isLoading ? (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {Array.from({ length: 8 }).map((_, i) => (
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, index) => (
               <div
-                key={i}
-                className={`${createDaisyUICardClasses('bordered')} border border-gray-200`}
+                key={index}
+                className={`${createDaisyUICardClasses('bordered')} h-64 animate-pulse`}
               >
-                <div className="aspect-video">
+                <div className="card-body">
                   <div
-                    className={createDaisyUISkeletonClasses('h-full w-full')}
+                    className={`${createDaisyUISkeletonClasses()} h-4 w-3/4`}
                   />
-                </div>
-                <div className="card-body space-y-3">
-                  <div className={createDaisyUISkeletonClasses('h-6 w-3/4')} />
-                  <div className={createDaisyUISkeletonClasses('h-4 w-1/2')} />
                   <div
-                    className={createDaisyUISkeletonClasses('h-16 w-full')}
+                    className={`${createDaisyUISkeletonClasses()} h-3 w-1/2`}
+                  />
+                  <div
+                    className={`${createDaisyUISkeletonClasses()} h-3 w-2/3`}
                   />
                 </div>
               </div>
             ))}
           </div>
-        ) : filteredRecipes.length === 0 ? (
-          <div className="py-20 text-center">
-            <ChefHat className="mx-auto mb-4 h-16 w-16 text-gray-300" />
-            {searchTerm ? (
-              <>
-                <h3 className="mb-2 text-lg font-semibold text-gray-600">
-                  No recipes found for "{searchTerm}"
-                </h3>
-                <p className="mb-6 text-gray-500">
-                  Try adjusting your search terms or clear the search to see all
-                  recipes.
+        ) : recipes.length === 0 ? (
+          <div className="py-12 text-center">
+            <div
+              className={`${createDaisyUICardClasses('bordered')} mx-auto max-w-md`}
+            >
+              <div className="card-body">
+                <ChefHat className="mx-auto mb-4 h-12 w-12 text-gray-400" />
+                <h3 className="mb-2 text-lg font-semibold">No recipes found</h3>
+                <p className="mb-4 text-gray-600">
+                  {filters.searchTerm ||
+                  filters.categories?.length ||
+                  filters.cuisine?.length
+                    ? 'Try adjusting your filters or search terms.'
+                    : 'Start by adding your first recipe!'}
                 </p>
-                <Button variant="outline" onClick={() => setSearchTerm('')}>
-                  Clear Search
-                </Button>
-              </>
-            ) : (
-              <>
-                <h3 className="mb-2 text-lg font-semibold text-gray-600">
-                  No recipes yet
-                </h3>
-                <p className="mb-6 text-gray-500">
-                  Start building your digital cookbook by adding your first
-                  recipe.
-                </p>
-                <Button
-                  onClick={() => navigate('/add')}
-                  className="bg-success text-success-content hover:bg-success/80"
-                >
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add Your First Recipe
-                </Button>
-              </>
-            )}
+                {!filters.searchTerm &&
+                  !filters.categories?.length &&
+                  !filters.cuisine?.length && (
+                    <Button
+                      onClick={() => navigate('/add')}
+                      className="bg-success text-success-content hover:bg-success/80"
+                    >
+                      <Plus className="mr-2 h-4 w-4" />
+                      Add Your First Recipe
+                    </Button>
+                  )}
+              </div>
+            </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {filteredRecipes.map((recipe) => (
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {recipes.map((recipe) => (
               <RecipeCard
                 key={recipe.id}
                 recipe={recipe}
-                onEdit={handleEditRecipe}
-                onView={handleViewRecipe}
-                showShareButton={true}
-                onShareToggle={(recipeId, isPublic) => {
-                  // Note: The recipe state is updated automatically by the RecipeCard component
-                  // In a real app, you might want to refetch the data or update local state
-                  console.log(
-                    `Recipe ${recipeId} sharing toggled to ${isPublic}`
-                  );
-                }}
+                onEdit={() => handleEditRecipe(recipe)}
+                onView={() => handleViewRecipe(recipe)}
               />
             ))}
           </div>
         )}
-      </div>
 
-      {/* Floating Action Button */}
-      <FloatingActionButton
-        icon={<NotebookPen className="h-5 w-5" />}
-        position="bl"
-        items={[
-          {
-            id: 'ai-create',
-            icon: <Sparkles className="h-4 w-4" />,
-            label: 'AI Recipe Creator',
-            onClick: () => navigate('/chat-recipe'),
-          },
-          {
-            id: 'manual-add',
-            icon: <Plus className="h-4 w-4" />,
-            label: 'Add Recipe',
-            onClick: () => navigate('/add'),
-          },
-        ]}
-      />
+        {/* Floating Action Button */}
+        <FloatingActionButton
+          icon={<Plus className="h-6 w-6" />}
+          items={[
+            {
+              id: 'ai-create',
+              icon: <Sparkles className="h-4 w-4" />,
+              label: 'AI Recipe Creator',
+              onClick: () => navigate('/chat-recipe'),
+            },
+            {
+              id: 'add-recipe',
+              icon: <Plus className="h-4 w-4" />,
+              label: 'Add Recipe',
+              onClick: () => navigate('/add'),
+            },
+          ]}
+        />
+      </div>
     </div>
   );
 }

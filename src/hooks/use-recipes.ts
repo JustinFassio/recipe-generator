@@ -1,12 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { recipeApi } from '@/lib/api';
-import type { Recipe } from '@/lib/types';
+import type { Recipe, RecipeFilters } from '@/lib/types';
 import { toast } from '@/hooks/use-toast';
 
-export const useRecipes = () => {
+export const useRecipes = (filters?: RecipeFilters) => {
   return useQuery({
-    queryKey: ['recipes'],
-    queryFn: recipeApi.getUserRecipes,
+    queryKey: ['recipes', filters],
+    queryFn: () => recipeApi.getUserRecipes(filters),
   });
 };
 
