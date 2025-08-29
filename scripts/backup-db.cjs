@@ -13,7 +13,8 @@ if (!fs.existsSync(backupsDir)) {
 
 // Generate timestamp in a cross-platform way
 const now = new Date();
-const timestamp = now.toISOString()
+const timestamp = now
+  .toISOString()
   .replace(/[:.]/g, '-')
   .replace('T', '_')
   .replace('Z', '');
@@ -27,13 +28,15 @@ try {
   // Create the backup
   execSync(`npx supabase db dump --local > "${backupFile}"`, {
     stdio: 'inherit',
-    cwd: path.join(__dirname, '..')
+    cwd: path.join(__dirname, '..'),
   });
-  
+
   // Verify the backup file was created and has content
   const stats = fs.statSync(backupFile);
   if (stats.size > 0) {
-    console.log(`✅ Backup created successfully! (${(stats.size / 1024).toFixed(2)} KB)`);
+    console.log(
+      `✅ Backup created successfully! (${(stats.size / 1024).toFixed(2)} KB)`
+    );
   } else {
     console.error('❌ Backup file is empty!');
     process.exit(1);

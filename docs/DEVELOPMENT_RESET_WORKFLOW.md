@@ -7,12 +7,15 @@
 ## 🚀 Quick Reset Commands
 
 ### **One-Command Full Reset**
+
 ```bash
 npm run reset
 ```
+
 This is the **recommended** way to reset your development environment. It handles everything automatically.
 
 ### **Alternative Reset Options**
+
 ```bash
 # Database-only reset (keeps dev server running)
 npm run db:fresh
@@ -49,12 +52,14 @@ The `npm run reset` command performs these steps automatically:
 ## 📊 Expected Results After Reset
 
 ### **Database State**
+
 - ✅ **6 test users** with full profiles
 - ✅ **21 recipes** with comprehensive categories
 - ✅ **8 public recipes** and 13 private recipes
 - ✅ **All recipes have categories** (100% coverage)
 
 ### **Test Accounts**
+
 ```
 alice@example.com (Password123!) - Vegetarian home cook
 bob@example.com (Password123!) - Grill enthusiast
@@ -65,6 +70,7 @@ frank@example.com (Password123!) - Spice lover
 ```
 
 ### **Services**
+
 - ✅ **App**: http://localhost:5174
 - ✅ **Supabase Studio**: http://localhost:54323
 - ✅ **Database**: PostgreSQL on port 54322
@@ -74,6 +80,7 @@ frank@example.com (Password123!) - Spice lover
 ## 🛠️ Available Scripts
 
 ### **Database Management**
+
 ```bash
 npm run db:status      # Check Supabase status
 npm run db:start       # Start Supabase services
@@ -85,6 +92,7 @@ npm run db:verify      # Verify database state
 ```
 
 ### **Development Server**
+
 ```bash
 npm run dev            # Start dev server
 npm run dev:fresh      # Reset DB + start dev server
@@ -93,6 +101,7 @@ npm run dev:restart    # Restart dev server only
 ```
 
 ### **Data Management**
+
 ```bash
 npm run seed           # Seed database with test data
 npm run reset          # Full environment reset
@@ -103,6 +112,7 @@ npm run reset          # Full environment reset
 ## 🚨 When to Use Each Command
 
 ### **Use `npm run reset` when:**
+
 - Starting development for the first time
 - After pulling new migrations
 - When database is in an unknown state
@@ -110,16 +120,19 @@ npm run reset          # Full environment reset
 - When troubleshooting database issues
 
 ### **Use `npm run db:fresh` when:**
+
 - You want to reset database but keep dev server running
 - Testing database changes
 - You're in the middle of development and just need fresh data
 
 ### **Use `npm run dev:restart` when:**
+
 - Dev server is stuck or not responding
 - You've made code changes and want to restart
 - Port conflicts or other server issues
 
 ### **Use `npm run db:verify` when:**
+
 - Checking if database is properly seeded
 - Verifying category data is present
 - Debugging data-related issues
@@ -133,31 +146,34 @@ npm run reset          # Full environment reset
 If `npm run reset` fails:
 
 1. **Check prerequisites**:
+
    ```bash
    node --version  # Should be 18+
    npx --version   # Should be available
    ```
 
 2. **Manual cleanup**:
+
    ```bash
    # Kill all processes
    pkill -f "vite\|dev\|supabase" 2>/dev/null || true
-   
+
    # Clear caches
    rm -rf node_modules/.vite .vite dist
-   
+
    # Try again
    npm run reset
    ```
 
 3. **Nuclear option** (if still failing):
+
    ```bash
    # Stop everything
    npm run db:stop
-   
+
    # Remove Supabase data (WARNING: destroys all local data)
    rm -rf ~/.supabase
-   
+
    # Start fresh
    npm run reset
    ```
@@ -167,11 +183,13 @@ If `npm run reset` fails:
 If `npm run db:verify` shows issues:
 
 1. **Check if Supabase is running**:
+
    ```bash
    npm run db:status
    ```
 
 2. **Check database connection**:
+
    ```bash
    psql postgresql://postgres:postgres@127.0.0.1:54322/postgres -c "SELECT 1;"
    ```
@@ -186,11 +204,13 @@ If `npm run db:verify` shows issues:
 If the dev server fails to start:
 
 1. **Check port conflicts**:
+
    ```bash
    lsof -i :5174
    ```
 
 2. **Kill conflicting processes**:
+
    ```bash
    npm run dev:kill
    ```
@@ -205,17 +225,20 @@ If the dev server fails to start:
 ## 📝 Best Practices
 
 ### **Before Resetting**
+
 1. **Save any important work** (commits, stashes)
 2. **Note any custom data** you want to preserve
 3. **Check if you're in the right branch**
 
 ### **After Resetting**
+
 1. **Verify the app loads** at http://localhost:5174
 2. **Test login** with one of the test accounts
 3. **Check that recipes display** with categories
 4. **Verify category filtering** works
 
 ### **During Development**
+
 1. **Use `npm run db:fresh`** for quick database resets
 2. **Use `npm run dev:restart`** for server issues
 3. **Use `npm run db:verify`** to check database state
@@ -226,6 +249,7 @@ If the dev server fails to start:
 ## 🎯 Why This Workflow Exists
 
 ### **Problems This Solves**
+
 - ❌ Manual database troubleshooting
 - ❌ Inconsistent development environments
 - ❌ Broken functionality after resets
@@ -233,6 +257,7 @@ If the dev server fails to start:
 - ❌ "Works on my machine" problems
 
 ### **Benefits**
+
 - ✅ **Consistent environment** every time
 - ✅ **No manual troubleshooting** required
 - ✅ **Complete test data** with categories
