@@ -40,6 +40,7 @@ coverage/
 # Backup files
 *.backup
 tailwind.config.js.backup
+backups/
 
 # Development/debug components
 src/components/ui/theme-debug.tsx
