@@ -171,6 +171,12 @@ describe('useUsernameAvailability', () => {
     it('should claim username successfully', async () => {
       mockClaimUsername.mockResolvedValue({ success: true });
 
+      // Mock refreshProfile to call the callback immediately
+      mockRefreshProfile.mockImplementation((callback) => {
+        callback({ id: 'test-user', username: 'testuser' });
+        return Promise.resolve();
+      });
+
       const { result } = renderHook(() => useUsernameAvailability());
 
       // Set username first
@@ -185,7 +191,7 @@ describe('useUsernameAvailability', () => {
 
       expect(claimResult!).toBe(true);
       expect(mockClaimUsername).toHaveBeenCalledWith('testuser');
-      expect(mockRefreshProfile).toHaveBeenCalled();
+      expect(mockRefreshProfile).toHaveBeenCalledWith(expect.any(Function));
       expect(mockToast).toHaveBeenCalledWith({
         title: 'Success',
         description: 'Username updated successfully!',
@@ -219,18 +225,12 @@ describe('useUsernameAvailability', () => {
 
     it('should use callback approach instead of timeout for profile refresh', async () => {
       mockClaimUsername.mockResolvedValue({ success: true });
-      
-      // Mock refreshProfile to accept callback
-      const mockRefreshProfileWithCallback = vi.fn().mockImplementation((callback) => {
-        // Simulate async profile refresh
-        setTimeout(() => {
-          callback({ id: 'test-user', username: 'newusername' });
-        }, 10);
+
+      // Mock refreshProfile to call the callback immediately
+      mockRefreshProfile.mockImplementation((callback) => {
+        callback({ id: 'test-user', username: 'newusername' });
         return Promise.resolve();
       });
-      
-      // Replace the mock to accept callback
-      mockRefreshProfile.mockImplementation(mockRefreshProfileWithCallback);
 
       const { result } = renderHook(() => useUsernameAvailability());
 
@@ -239,8 +239,8 @@ describe('useUsernameAvailability', () => {
       });
 
       // Verify refreshProfile was called with callback
-      expect(mockRefreshProfileWithCallback).toHaveBeenCalledWith(expect.any(Function));
-      
+      expect(mockRefreshProfile).toHaveBeenCalledWith(expect.any(Function));
+
       // Verify toast was called (this happens in the callback)
       expect(mockToast).toHaveBeenCalledWith({
         title: 'Success',

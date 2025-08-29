@@ -110,7 +110,7 @@ export function useUsernameAvailability(): UseUsernameAvailabilityReturn {
           await refreshProfile((updatedProfile) => {
             console.log('✅ Profile refresh completed with callback');
             console.log('🔍 Updated profile data:', updatedProfile);
-            
+
             // Show success toast after profile is confirmed updated
             toast({
               title: 'Success',
