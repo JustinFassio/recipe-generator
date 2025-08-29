@@ -209,6 +209,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     logger.auth(`Refreshing profile for user: ${user.id}`);
+
+    // Clear cache for this user to force fresh data
+    profileCache.current.delete(user.id);
+
     const profileData = await fetchProfile(user.id);
 
     if (profileData) {
