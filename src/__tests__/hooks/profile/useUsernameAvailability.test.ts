@@ -217,6 +217,37 @@ describe('useUsernameAvailability', () => {
       });
     });
 
+    it('should use callback approach instead of timeout for profile refresh', async () => {
+      mockClaimUsername.mockResolvedValue({ success: true });
+      
+      // Mock refreshProfile to accept callback
+      const mockRefreshProfileWithCallback = vi.fn().mockImplementation((callback) => {
+        // Simulate async profile refresh
+        setTimeout(() => {
+          callback({ id: 'test-user', username: 'newusername' });
+        }, 10);
+        return Promise.resolve();
+      });
+      
+      // Replace the mock to accept callback
+      mockRefreshProfile.mockImplementation(mockRefreshProfileWithCallback);
+
+      const { result } = renderHook(() => useUsernameAvailability());
+
+      await act(async () => {
+        await result.current.claimUsername('newusername');
+      });
+
+      // Verify refreshProfile was called with callback
+      expect(mockRefreshProfileWithCallback).toHaveBeenCalledWith(expect.any(Function));
+      
+      // Verify toast was called (this happens in the callback)
+      expect(mockToast).toHaveBeenCalledWith({
+        title: 'Success',
+        description: 'Username updated successfully!',
+      });
+    });
+
     it('should handle network errors during claim', async () => {
       const errorMessage = 'Network error';
       mockClaimUsername.mockRejectedValue(new Error(errorMessage));

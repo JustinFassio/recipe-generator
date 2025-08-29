@@ -23,7 +23,7 @@ interface AuthContextType {
   loading: boolean;
   error: string | null;
   signOut: () => Promise<void>;
-  refreshProfile: () => Promise<void>;
+  refreshProfile: (onComplete?: (profile: Profile | null) => void) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -214,9 +214,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   fetchProfileRef.current = fetchProfile;
 
   // Stable refresh function that won't cause loops
-  const refreshProfile = useCallback(async () => {
+  const refreshProfile = useCallback(async (onComplete?: (profile: Profile | null) => void) => {
     if (!user?.id) {
       logger.auth('No user ID, skipping profile refresh');
+      onComplete?.(null);
       return;
     }
 
@@ -246,10 +247,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       );
       setProfile(profileData);
       logger.success('Profile refreshed successfully');
+      onComplete?.(profileData);
     } else {
       logger.error('Profile refresh failed');
       console.log('❌ Profile refresh failed - no data returned');
       // Don't clear profile on refresh failure - keep existing data
+      onComplete?.(null);
     }
   }, [user?.id, fetchProfile, logger]);
 
