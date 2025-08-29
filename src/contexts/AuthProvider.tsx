@@ -23,7 +23,9 @@ interface AuthContextType {
   loading: boolean;
   error: string | null;
   signOut: () => Promise<void>;
-  refreshProfile: () => Promise<void>;
+  refreshProfile: (
+    onComplete?: (profile: Profile | null) => void
+  ) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -202,33 +204,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   fetchProfileRef.current = fetchProfile;
 
   // Stable refresh function that won't cause loops
-  const refreshProfile = useCallback(async () => {
-    if (!user?.id) {
-      logger.auth('No user ID, skipping profile refresh');
-      return;
-    }
+  const refreshProfile = useCallback(
+    async (onComplete?: (profile: Profile | null) => void) => {
+      if (!user?.id) {
+        logger.auth('No user ID, skipping profile refresh');
+        onComplete?.(null);
+        return;
+      }
 
-    logger.auth(`Refreshing profile for user: ${user.id}`);
+      logger.auth(`Refreshing profile for user: ${user.id}`);
 
-    // Clear cache for this user to force fresh data
-    profileCache.current.delete(user.id);
+      // Clear cache for this user to force fresh data
+      profileCache.current.delete(user.id);
 
-    const profileData = await fetchProfile(user.id);
+      const profileData = await fetchProfile(user.id);
 
-    if (profileData) {
-      logger.db('Profile refresh result:', {
-        userId: profileData.id,
-        username: profileData.username,
-        avatarUrl: profileData.avatar_url,
-        hasAvatar: !!profileData.avatar_url,
-      });
-      setProfile(profileData);
-      logger.success('Profile refreshed successfully');
-    } else {
-      logger.error('Profile refresh failed');
-      // Don't clear profile on refresh failure - keep existing data
-    }
-  }, [user?.id, fetchProfile, logger]);
+      if (profileData) {
+        logger.db('Profile refresh result:', {
+          userId: profileData.id,
+          username: profileData.username,
+          avatarUrl: profileData.avatar_url,
+          hasAvatar: !!profileData.avatar_url,
+        });
+        setProfile(profileData);
+        logger.success('Profile refreshed successfully');
+        onComplete?.(profileData);
+      } else {
+        logger.error('Profile refresh failed');
+        // Don't clear profile on refresh failure - keep existing data
+        onComplete?.(null);
+      }
+    },
+    [user?.id, fetchProfile, logger]
+  );
 
   const signOut = async () => {
     try {
