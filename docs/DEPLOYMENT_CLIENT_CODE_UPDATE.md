@@ -24,9 +24,10 @@ Fix the production username update functionality by deploying the updated client
 
 Production was broken because:
 
-- Database function returns: `{ success: true/false, error?: string }`
+- Database function returns: `{ success: true/false, error?: string }` but had schema errors
 - Client code expected: `boolean`
-- Result: Username updates failed silently in production
+- Production schema mismatch: Function tried to update non-existent `updated_at` column
+- Result: Username updates failed with database errors in production
 
 ---
 
@@ -138,14 +139,15 @@ await refreshProfile((updatedProfile) => {
 
 ## **🔧 Files Modified**
 
-| File                                                                 | Change Type | Description                               |
-| -------------------------------------------------------------------- | ----------- | ----------------------------------------- |
-| `src/lib/auth.ts`                                                    | Update      | JSON response handling in `claimUsername` |
-| `src/contexts/AuthProvider.tsx`                                      | Enhancement | Callback-based profile refresh            |
-| `src/hooks/profile/useUsernameAvailability.ts`                       | Refactor    | Event-driven profile refresh              |
-| `src/__tests__/database/username-functions.test.ts`                  | Update      | Test updates for JSON responses           |
-| `src/__tests__/hooks/profile/useUsernameAvailability.test.ts`        | Fix         | Update tests for callback-based approach  |
-| `supabase/migrations/20250122000001_update_username_atomic_json.sql` | Add         | Local database function update            |
+| File                                                                           | Change Type  | Description                                      |
+| ------------------------------------------------------------------------------ | ------------ | ------------------------------------------------ |
+| `src/lib/auth.ts`                                                              | Update       | JSON response handling in `claimUsername`        |
+| `src/contexts/AuthProvider.tsx`                                                | Enhancement  | Callback-based profile refresh                   |
+| `src/hooks/profile/useUsernameAvailability.ts`                                 | Refactor     | Event-driven profile refresh                     |
+| `src/__tests__/database/username-functions.test.ts`                            | Update       | Test updates for JSON responses                  |
+| `src/__tests__/hooks/profile/useUsernameAvailability.test.ts`                  | Fix          | Update tests for callback-based approach         |
+| `supabase/migrations/20250122000001_update_username_atomic_json.sql`           | Add          | Local database function update                   |
+| `supabase/migrations/20250122000002_fix_update_username_atomic_production.sql` | **CRITICAL** | Fix production database function schema mismatch |
 
 ---
 
@@ -158,6 +160,7 @@ await refreshProfile((updatedProfile) => {
 - ✅ Proper error messages for taken usernames
 - ✅ Reliable profile refresh after username changes
 - ✅ **CRITICAL FIX**: Proper `user_not_found` error handling (fixed FOUND variable bug)
+- ✅ **CRITICAL FIX**: Production database function schema compatibility (fixed `updated_at` column error)
 
 ### **User Experience Improvements**
 
