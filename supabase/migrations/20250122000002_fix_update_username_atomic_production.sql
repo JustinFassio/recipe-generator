@@ -1,5 +1,5 @@
 -- Fix update_username_atomic function to work with production schema
--- The production usernames table doesn't have updated_at column
+-- Note: usernames table intentionally has no updated_at column (only tracks ownership)
 DROP FUNCTION IF EXISTS "public"."update_username_atomic"("p_user_id" "uuid", "p_new_username" "public"."citext");
 
 CREATE OR REPLACE FUNCTION "public"."update_username_atomic"(
@@ -41,7 +41,8 @@ BEGIN
     RETURN result;
   END IF;
 
-  -- Update or insert into usernames table (production schema doesn't have updated_at)
+  -- Update or insert into usernames table
+  -- Note: usernames table intentionally has no updated_at column - only tracks ownership
   INSERT INTO usernames (username, user_id)
   VALUES (p_new_username, p_user_id)
   ON CONFLICT (user_id)
