@@ -62,10 +62,10 @@ export function RecipesPage() {
         <div className="mb-8">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h1 className="mb-2 inline-block rounded-lg px-4 py-2 text-3xl font-bold">
+              <h1 className="mb-2 inline-block rounded-lg px-4 py-2 text-xl font-bold text-neutral-600">
                 My Recipes
               </h1>
-              <p className="text-gray-600">
+              <p className="text-sm text-neutral-500">
                 {isLoading
                   ? 'Loading...'
                   : `${recipes.length} recipe${recipes.length !== 1 ? 's' : ''} found`}
