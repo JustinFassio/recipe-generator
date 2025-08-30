@@ -131,6 +131,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           attempt,
         });
 
+        // Add detailed debugging for profile data
+        if (data) {
+          console.log('🔍 Profile data returned from database:', {
+            id: data.id,
+            username: data.username,
+            full_name: data.full_name,
+            usernameType: typeof data.username,
+            usernameIsNull: data.username === null,
+            usernameIsUndefined: data.username === undefined,
+          });
+        }
+
         if (error) {
           if (error.code === 'PGRST116') {
             logger.user('Profile not found, attempting to create...');
@@ -215,6 +227,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       logger.auth(`Refreshing profile for user: ${user.id}`);
 
       // Clear cache for this user to force fresh data
+      console.log('🗑️ Clearing profile cache for user:', user.id);
       profileCache.current.delete(user.id);
 
       const profileData = await fetchProfile(user.id);
@@ -226,11 +239,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           avatarUrl: profileData.avatar_url,
           hasAvatar: !!profileData.avatar_url,
         });
+        console.log('📊 Profile data fetched:', {
+          id: profileData.id,
+          username: profileData.username,
+          fullName: profileData.full_name,
+        });
+        console.log(
+          '🔄 Setting profile state with username:',
+          profileData.username
+        );
         setProfile(profileData);
         logger.success('Profile refreshed successfully');
         onComplete?.(profileData);
       } else {
         logger.error('Profile refresh failed');
+        console.log('❌ Profile refresh failed - no data returned');
         // Don't clear profile on refresh failure - keep existing data
         onComplete?.(null);
       }
