@@ -144,6 +144,7 @@ await refreshProfile((updatedProfile) => {
 | `src/contexts/AuthProvider.tsx`                                      | Enhancement | Callback-based profile refresh            |
 | `src/hooks/profile/useUsernameAvailability.ts`                       | Refactor    | Event-driven profile refresh              |
 | `src/__tests__/database/username-functions.test.ts`                  | Update      | Test updates for JSON responses           |
+| `src/__tests__/hooks/profile/useUsernameAvailability.test.ts`        | Fix         | Update tests for callback-based approach  |
 | `supabase/migrations/20250122000001_update_username_atomic_json.sql` | Add         | Local database function update            |
 
 ---
@@ -156,6 +157,7 @@ await refreshProfile((updatedProfile) => {
 - ✅ No more silent failures
 - ✅ Proper error messages for taken usernames
 - ✅ Reliable profile refresh after username changes
+- ✅ **CRITICAL FIX**: Proper `user_not_found` error handling (fixed FOUND variable bug)
 
 ### **User Experience Improvements**
 
