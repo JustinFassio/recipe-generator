@@ -35,17 +35,20 @@ BEGIN
   SET username = p_new_username, updated_at = NOW()
   WHERE id = p_user_id;
 
+  -- Check if the user exists (FOUND is set by the UPDATE above)
+  IF NOT FOUND THEN
+    result := json_build_object('success', false, 'error', 'user_not_found');
+    RETURN result;
+  END IF;
+
   -- Update or insert into usernames table
   INSERT INTO usernames (username, user_id)
   VALUES (p_new_username, p_user_id)
   ON CONFLICT (user_id)
   DO UPDATE SET username = EXCLUDED.username;
 
-  IF FOUND THEN
-    result := json_build_object('success', true);
-  ELSE
-    result := json_build_object('success', false, 'error', 'user_not_found');
-  END IF;
+  -- If we get here, the operation was successful
+  result := json_build_object('success', true);
 
   RETURN result;
 EXCEPTION
