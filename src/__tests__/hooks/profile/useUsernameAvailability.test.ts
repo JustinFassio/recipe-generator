@@ -171,6 +171,16 @@ describe('useUsernameAvailability', () => {
     it('should claim username successfully', async () => {
       mockClaimUsername.mockResolvedValue({ success: true });
 
+      // Mock refreshProfile to accept callback and call it immediately
+      const mockRefreshProfileWithCallback = vi
+        .fn()
+        .mockImplementation((callback) => {
+          // Call the callback immediately to simulate profile refresh
+          callback({ id: 'test-user', username: 'testuser' });
+          return Promise.resolve();
+        });
+      mockRefreshProfile.mockImplementation(mockRefreshProfileWithCallback);
+
       const { result } = renderHook(() => useUsernameAvailability());
 
       // Set username first
@@ -185,7 +195,9 @@ describe('useUsernameAvailability', () => {
 
       expect(claimResult!).toBe(true);
       expect(mockClaimUsername).toHaveBeenCalledWith('testuser');
-      expect(mockRefreshProfile).toHaveBeenCalled();
+      expect(mockRefreshProfileWithCallback).toHaveBeenCalledWith(
+        expect.any(Function)
+      );
       expect(mockToast).toHaveBeenCalledWith({
         title: 'Success',
         description: 'Username updated successfully!',
@@ -220,14 +232,12 @@ describe('useUsernameAvailability', () => {
     it('should use callback approach instead of timeout for profile refresh', async () => {
       mockClaimUsername.mockResolvedValue({ success: true });
 
-      // Mock refreshProfile to accept callback
+      // Mock refreshProfile to accept callback and call it immediately
       const mockRefreshProfileWithCallback = vi
         .fn()
         .mockImplementation((callback) => {
-          // Simulate async profile refresh
-          setTimeout(() => {
-            callback({ id: 'test-user', username: 'newusername' });
-          }, 10);
+          // Call the callback immediately to simulate profile refresh
+          callback({ id: 'test-user', username: 'newusername' });
           return Promise.resolve();
         });
 
