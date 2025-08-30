@@ -102,12 +102,20 @@ export function useUsernameAvailability(): UseUsernameAvailabilityReturn {
           setUsername('');
           setIsAvailable(null);
 
-          // Refresh profile to get updated data
-          await refreshProfile();
+          console.log(
+            '🔄 Username claimed successfully, refreshing profile...'
+          );
 
-          toast({
-            title: 'Success',
-            description: 'Username updated successfully!',
+          // Refresh profile to get updated data with callback
+          await refreshProfile((updatedProfile) => {
+            console.log('✅ Profile refresh completed with callback');
+            console.log('🔍 Updated profile data:', updatedProfile);
+
+            // Show success toast after profile is confirmed updated
+            toast({
+              title: 'Success',
+              description: 'Username updated successfully!',
+            });
           });
 
           return true;
