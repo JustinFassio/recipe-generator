@@ -328,10 +328,13 @@ export async function claimUsername(
     }
 
     // Use the database function for atomic username updating
-    const { data, error } = await supabase.rpc('update_username_atomic', {
-      p_user_id: user.id,
-      p_new_username: username.toLowerCase(),
-    });
+    const { data: result, error } = await supabase.rpc(
+      'update_username_atomic',
+      {
+        p_user_id: user.id,
+        p_new_username: username.toLowerCase(),
+      }
+    );
 
     if (error) {
       return {
@@ -340,12 +343,13 @@ export async function claimUsername(
       };
     }
 
-    // Handle the boolean response from the function
-    if (data === false) {
+    // Handle the JSON response from the function
+    const success = result?.success === true;
+    if (!success) {
       return {
         success: false,
         error: createAuthError(
-          'This username is already taken',
+          result?.error || 'This username is already taken',
           'USERNAME_TAKEN'
         ),
       };

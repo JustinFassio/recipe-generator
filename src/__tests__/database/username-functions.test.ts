@@ -52,11 +52,15 @@ RUN
         const { user } = await createUserAndProfile(admin, { username: null });
         const target = uniqueUsername('update');
 
-        const { error } = await admin.rpc('update_username_atomic', {
-          p_user_id: user.id,
-          p_new_username: target,
-        });
+        const { data: result, error } = await admin.rpc(
+          'update_username_atomic',
+          {
+            p_user_id: user.id,
+            p_new_username: target,
+          }
+        );
         expect(error).toBeNull();
+        expect(result?.success).toBe(true);
 
         const { data: unameRow, error: unameErr } = await admin
           .from('usernames')
@@ -67,7 +71,7 @@ RUN
         expect(unameRow?.username).toBe(target);
       });
 
-      it('update_username_atomic: returns false when username already taken', async () => {
+      it('update_username_atomic: returns error when username already taken', async () => {
         const taken = uniqueUsername('taken');
         const { user: first } = await createUserAndProfile(admin, {
           username: taken,
@@ -77,12 +81,16 @@ RUN
         });
         expect(first.id && second.id).toBeTruthy();
 
-        const { data, error } = await admin.rpc('update_username_atomic', {
-          p_user_id: second.id,
-          p_new_username: taken,
-        });
+        const { data: result, error } = await admin.rpc(
+          'update_username_atomic',
+          {
+            p_user_id: second.id,
+            p_new_username: taken,
+          }
+        );
         expect(error).toBeNull();
-        expect(data).toBe(false);
+        expect(result?.success).toBe(false);
+        expect(result?.error).toBe('username_already_taken');
       });
 
       it('claim_username_atomic: successfully claims a free username', async () => {

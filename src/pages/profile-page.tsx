@@ -228,6 +228,13 @@ export default function ProfilePage() {
             submitting={profileSubmitting}
             className="md:col-span-2"
           />
+          {/* Debug info */}
+          {import.meta.env.DEV && (
+            <div className="mt-2 text-xs text-gray-500">
+              Debug: profile.username = "{profile.username}" (type:{' '}
+              {typeof profile.username})
+            </div>
+          )}
 
           {/* Safety Section */}
           <SafetySection className="md:col-span-2">
