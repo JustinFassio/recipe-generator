@@ -201,6 +201,7 @@ describe('useUsernameAvailability', () => {
       expect(mockToast).toHaveBeenCalledWith({
         title: 'Success',
         description: 'Username updated successfully!',
+        variant: 'success',
       });
       expect(result.current.username).toBe(''); // Should be cleared after success
       expect(result.current.isAvailable).toBe(null);
@@ -259,6 +260,7 @@ describe('useUsernameAvailability', () => {
       expect(mockToast).toHaveBeenCalledWith({
         title: 'Success',
         description: 'Username updated successfully!',
+        variant: 'success',
       });
     });
 
