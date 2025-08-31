@@ -32,10 +32,9 @@ export function RecipesPage() {
   );
 
   const handleShareToggle = useCallback(
-    (recipeId: string, isPublic: boolean) => {
+    (_recipeId: string, _isPublic: boolean) => {
       // The RecipeCard component handles the API call internally
       // This callback can be used for additional UI updates if needed
-      console.log(`Recipe ${recipeId} ${isPublic ? 'shared' : 'unshared'}`);
     },
     []
   );
