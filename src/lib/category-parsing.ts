@@ -16,7 +16,32 @@ interface CategoryObject {
 }
 
 /**
- * Main normalization function - handles all input formats
+ * Normalizes category data from various AI response formats into a consistent string array.
+ *
+ * @param input - Category data in one of the following formats:
+ *   - string[]: Array of category strings (e.g., ["Course: Main", "Cuisine: Italian"])
+ *   - string: Single category string (e.g., "Course: Main")
+ *   - object: Namespace-based object (e.g., { course: ["Main"], cuisine: ["Italian"] })
+ *   - null/undefined: Returns empty array
+ *
+ * @returns Array of normalized category strings in "Namespace: Value" format
+ *
+ * @example
+ * // Array input
+ * normalizeCategories(["Course: Main", "Cuisine: Italian"])
+ * // Returns: ["Course: Main", "Cuisine: Italian"]
+ *
+ * // Object input
+ * normalizeCategories({ course: ["Main"], cuisine: ["Italian"] })
+ * // Returns: ["Course: Main", "Cuisine: Italian"]
+ *
+ * // String input
+ * normalizeCategories("Course: Main")
+ * // Returns: ["Course: Main"]
+ *
+ * // Null/undefined input
+ * normalizeCategories(null)
+ * // Returns: []
  */
 export function normalizeCategories(input: CategoryInput): string[] {
   if (!input) return [];
@@ -49,7 +74,17 @@ export function normalizeCategories(input: CategoryInput): string[] {
 }
 
 /**
- * Normalize object-format categories to namespaced strings
+ * Converts object-format categories to normalized namespaced strings.
+ *
+ * @param input - Object with namespace keys and string/array values
+ * @returns Array of normalized category strings in "Namespace: Value" format
+ *
+ * @example
+ * normalizeObjectCategories({
+ *   course: ["Main", "Appetizer"],
+ *   cuisine: ["Italian"]
+ * })
+ * // Returns: ["Course: Main", "Course: Appetizer", "Cuisine: Italian"]
  */
 function normalizeObjectCategories(input: CategoryObject): string[] {
   const result: string[] = [];
@@ -94,7 +129,15 @@ function normalizeObjectCategories(input: CategoryObject): string[] {
 }
 
 /**
- * Normalize individual category string
+ * Normalizes a single category string to consistent format.
+ *
+ * @param category - Category string to normalize
+ * @returns Normalized category string in "Namespace: Value" format, or empty string if invalid
+ *
+ * @example
+ * normalizeCategory("course: main")     // Returns: "Course: Main"
+ * normalizeCategory("italian cuisine")  // Returns: "Italian Cuisine"
+ * normalizeCategory("")                 // Returns: ""
  */
 function normalizeCategory(category: string): string {
   if (!category || typeof category !== 'string') return '';
@@ -116,7 +159,15 @@ function normalizeCategory(category: string): string {
 }
 
 /**
- * Convert string to title case with special handling
+ * Converts a string to title case with special handling for category formatting.
+ *
+ * @param str - String to convert to title case
+ * @returns Title-cased string with underscores/hyphens converted to spaces
+ *
+ * @example
+ * toTitleCase("main_course")    // Returns: "Main Course"
+ * toTitleCase("italian-cuisine") // Returns: "Italian Cuisine"
+ * toTitleCase("dessert")        // Returns: "Dessert"
  */
 function toTitleCase(str: string): string {
   return str
@@ -127,7 +178,17 @@ function toTitleCase(str: string): string {
 }
 
 /**
- * Validate category format and content
+ * Validates a category string for proper format and content.
+ *
+ * @param category - Category string to validate
+ * @returns true if category is valid, false otherwise
+ *
+ * @example
+ * validateCategory("Course: Main")        // Returns: true
+ * validateCategory("Italian Cuisine")     // Returns: true
+ * validateCategory("")                    // Returns: false
+ * validateCategory("Course:")             // Returns: false (missing value)
+ * validateCategory("a".repeat(101))       // Returns: false (too long)
  */
 export function validateCategory(category: string): boolean {
   if (!category || typeof category !== 'string') return false;
@@ -151,7 +212,19 @@ export function validateCategory(category: string): boolean {
 }
 
 /**
- * Extract unique, valid categories from array
+ * Extracts unique, valid categories from an array of category strings.
+ *
+ * @param categories - Array of category strings to process
+ * @returns Array of unique, normalized, and validated category strings
+ *
+ * @example
+ * uniqueValidCategories([
+ *   "Course: Main",
+ *   "Course: Main",     // Duplicate
+ *   "invalid category", // Invalid
+ *   "Cuisine: Italian"
+ * ])
+ * // Returns: ["Course: Main", "Cuisine: Italian"]
  */
 export function uniqueValidCategories(categories: string[]): string[] {
   const seen = new Set<string>();
@@ -169,7 +242,19 @@ export function uniqueValidCategories(categories: string[]): string[] {
 }
 
 /**
- * Sort categories by namespace priority and alphabetically
+ * Sorts categories by namespace priority and alphabetically within each namespace.
+ *
+ * @param categories - Array of category strings to sort
+ * @returns Sorted array of category strings
+ *
+ * @example
+ * sortCategories([
+ *   "Cuisine: Italian",
+ *   "Course: Main",
+ *   "Course: Appetizer",
+ *   "Beverage: Wine"
+ * ])
+ * // Returns: ["Course: Appetizer", "Course: Main", "Beverage: Wine", "Cuisine: Italian"]
  */
 export function sortCategories(categories: string[]): string[] {
   const namespacePriority = [
@@ -205,7 +290,15 @@ export function sortCategories(categories: string[]): string[] {
 }
 
 /**
- * Parse category string into namespace and value
+ * Parses a category string into its namespace and value components.
+ *
+ * @param category - Category string to parse
+ * @returns Object with namespace (optional) and value properties
+ *
+ * @example
+ * parseCategory("Course: Main")     // Returns: { namespace: "Course", value: "Main" }
+ * parseCategory("Italian Cuisine")  // Returns: { value: "Italian Cuisine" }
+ * parseCategory("")                 // Returns: { value: "" }
  */
 export function parseCategory(category: string): {
   namespace?: string;
@@ -226,7 +319,17 @@ export function parseCategory(category: string): {
 }
 
 /**
- * Format namespace and value into category string
+ * Formats a namespace and value into a properly formatted category string.
+ *
+ * @param namespace - Category namespace
+ * @param value - Category value
+ * @returns Formatted category string in "Namespace: Value" format
+ *
+ * @example
+ * formatCategory("Course", "Main")     // Returns: "Course: Main"
+ * formatCategory("Cuisine", "Italian") // Returns: "Cuisine: Italian"
+ * formatCategory("", "Dessert")        // Returns: "Dessert"
+ * formatCategory("Course", "")         // Returns: ""
  */
 export function formatCategory(namespace: string, value: string): string {
   if (!namespace || !value) return value || '';
