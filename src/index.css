@@ -1,6 +1,6 @@
 @import 'tailwindcss';
 @plugin "daisyui" {
-  themes: caramellatte;
+  themes: caramellatte; /* Theme name defined in src/lib/theme.ts */
 }
 
 /* DaisyUI will automatically apply the configured theme when data-theme attribute is set */

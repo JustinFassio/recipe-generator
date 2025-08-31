@@ -3,7 +3,7 @@ import { Toaster as Sonner } from 'sonner';
 type ToasterProps = React.ComponentProps<typeof Sonner>;
 
 const Toaster = ({ ...props }: ToasterProps) => {
-  // Map DaisyUI theme to Sonner theme (caramellatte is light-based)
+  // Map DaisyUI theme to Sonner theme (current theme is light-based)
   const theme = 'light';
 
   return (
