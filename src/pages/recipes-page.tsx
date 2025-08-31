@@ -31,6 +31,15 @@ export function RecipesPage() {
     [navigate]
   );
 
+  const handleShareToggle = useCallback(
+    (recipeId: string, isPublic: boolean) => {
+      // The RecipeCard component handles the API call internally
+      // This callback can be used for additional UI updates if needed
+      console.log(`Recipe ${recipeId} ${isPublic ? 'shared' : 'unshared'}`);
+    },
+    []
+  );
+
   if (error) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50 p-4">
@@ -159,6 +168,8 @@ export function RecipesPage() {
                 recipe={recipe}
                 onEdit={handleEditRecipe}
                 onView={handleViewRecipe}
+                showShareButton={true}
+                onShareToggle={handleShareToggle}
               />
             ))}
           </div>
