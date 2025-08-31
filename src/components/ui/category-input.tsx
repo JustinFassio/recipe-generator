@@ -122,6 +122,8 @@ export function CategoryInput({
 
   // Handle click outside
   useEffect(() => {
+    if (!isDropdownOpen) return;
+
     const handleClickOutside = (event: MouseEvent) => {
       if (
         dropdownRef.current &&
@@ -135,7 +137,7 @@ export function CategoryInput({
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  }, [isDropdownOpen]);
 
   const isAtMaxCategories = value.length >= maxCategories;
 
