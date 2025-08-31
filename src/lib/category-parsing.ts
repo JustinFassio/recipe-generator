@@ -49,10 +49,15 @@ export function normalizeCategories(input: CategoryInput): string[] {
   try {
     // Case 1: Array of strings (most common)
     if (Array.isArray(input)) {
-      return input
-        .filter((item) => typeof item === 'string' && item.trim())
-        .map((item) => normalizeCategory(item.trim()))
-        .filter(Boolean);
+      return input.reduce<string[]>((acc, item) => {
+        if (typeof item === 'string' && item.trim()) {
+          const normalized = normalizeCategory(item.trim());
+          if (normalized) {
+            acc.push(normalized);
+          }
+        }
+        return acc;
+      }, []);
     }
 
     // Case 2: Single string
