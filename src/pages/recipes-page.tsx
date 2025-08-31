@@ -32,8 +32,7 @@ export function RecipesPage() {
   );
 
   const handleShareToggle = useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    (recipeId: string, isPublic: boolean) => {
+    (_recipeId: string, _isPublic: boolean) => {
       // The RecipeCard component handles the API call internally
       // This callback can be used for additional UI updates if needed
     },
