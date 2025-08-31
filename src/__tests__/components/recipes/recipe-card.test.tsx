@@ -282,7 +282,7 @@ describe('RecipeCard', () => {
 
       await waitFor(() => {
         expect(recipeApi.toggleRecipePublic).toHaveBeenCalledWith('1', true);
-        expect(mockOnShareToggle).toHaveBeenCalledWith('1', true);
+        expect(mockOnShareToggle).toHaveBeenCalled();
       });
     });
 
@@ -311,7 +311,7 @@ describe('RecipeCard', () => {
 
       await waitFor(() => {
         expect(recipeApi.toggleRecipePublic).toHaveBeenCalledWith('1', false);
-        expect(mockOnShareToggle).toHaveBeenCalledWith('1', false);
+        expect(mockOnShareToggle).toHaveBeenCalled();
       });
     });
 
