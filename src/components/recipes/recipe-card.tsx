@@ -27,7 +27,9 @@ interface RecipeCardProps {
   onEdit?: (recipe: Recipe) => void;
   onView?: (recipe: Recipe) => void;
   showShareButton?: boolean;
-  onShareToggle?: (recipeId: string, isPublic: boolean) => void;
+  onShareToggle?:
+    | ((recipeId: string, isPublic: boolean) => void)
+    | (() => void);
 }
 
 export function RecipeCard({
@@ -56,7 +58,19 @@ export function RecipeCard({
     try {
       await recipeApi.toggleRecipePublic(recipe.id, !isPublic);
       setIsPublic(!isPublic);
-      onShareToggle?.(recipe.id, !isPublic);
+      // Call the callback if it exists, handling both signature types
+      if (onShareToggle) {
+        if (onShareToggle.length === 2) {
+          // Callback expects (recipeId, isPublic) parameters
+          (onShareToggle as (recipeId: string, isPublic: boolean) => void)(
+            recipe.id,
+            !isPublic
+          );
+        } else {
+          // Callback expects no parameters
+          (onShareToggle as () => void)();
+        }
+      }
     } catch (error) {
       console.error('Error toggling recipe sharing:', error);
       // No need to revert state - it was never changed if API call failed

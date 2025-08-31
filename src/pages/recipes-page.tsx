@@ -31,13 +31,10 @@ export function RecipesPage() {
     [navigate]
   );
 
-  const handleShareToggle = useCallback(
-    (_recipeId: string, _isPublic: boolean) => {
-      // The RecipeCard component handles the API call internally
-      // This callback can be used for additional UI updates if needed
-    },
-    []
-  );
+  const handleShareToggle = useCallback(() => {
+    // The RecipeCard component handles the API call internally
+    // This callback can be used for additional UI updates if needed
+  }, []);
 
   if (error) {
     return (
