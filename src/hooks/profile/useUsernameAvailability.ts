@@ -115,6 +115,7 @@ export function useUsernameAvailability(): UseUsernameAvailabilityReturn {
             toast({
               title: 'Success',
               description: 'Username updated successfully!',
+              variant: 'success',
             });
           });
 
