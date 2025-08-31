@@ -81,14 +81,14 @@ export function CategoryFilter({
           break;
         case 'Tab':
           // Allow Tab navigation but close dropdown if focus moves outside
-          setTimeout(() => {
+          requestAnimationFrame(() => {
             if (
               dropdownRef.current &&
               !dropdownRef.current.contains(document.activeElement)
             ) {
               setIsOpen(false);
             }
-          }, 0);
+          });
           break;
       }
     };
