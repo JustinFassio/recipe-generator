@@ -3,30 +3,7 @@
   themes: caramellatte;
 }
 
-/* Force apply caramellatte theme as default */
-:root {
-  color-scheme: light;
-  --color-base-100: oklch(98% 0.016 73.684);
-  --color-base-200: oklch(95% 0.038 75.164);
-  --color-base-300: oklch(90% 0.076 70.697);
-  --color-base-content: oklch(40% 0.123 38.172);
-  --color-primary: oklch(0% 0 0);
-  --color-primary-content: oklch(100% 0 0);
-  --color-secondary: oklch(22.45% 0.075 37.85);
-  --color-secondary-content: oklch(90% 0.076 70.697);
-  --color-accent: oklch(46.44% 0.111 37.85);
-  --color-accent-content: oklch(40% 0.123 38.172);
-  --color-neutral: oklch(22.45% 0.075 37.85);
-  --color-neutral-content: oklch(90% 0.076 70.697);
-  --color-info: oklch(54.12% 0.178 229.03);
-  --color-info-content: oklch(90% 0.076 70.697);
-  --color-success: oklch(54.12% 0.178 142.5);
-  --color-success-content: oklch(90% 0.076 70.697);
-  --color-warning: oklch(54.12% 0.178 77.5);
-  --color-warning-content: oklch(40% 0.123 38.172);
-  --color-error: oklch(54.12% 0.178 27.5);
-  --color-error-content: oklch(40% 0.123 38.172);
-}
+/* DaisyUI will automatically apply the caramellatte theme when data-theme="caramellatte" is set */
 
 /* Custom component variants */
 @layer components {
