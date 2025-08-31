@@ -10,10 +10,6 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    <script>
-      // Apply caramellatte theme immediately before React loads
-      document.documentElement.setAttribute('data-theme', 'caramellatte');
-      localStorage.setItem('theme', 'caramellatte');
-    </script>
+    <!-- Theme is applied by ThemeProvider component -->
   </body>
 </html>

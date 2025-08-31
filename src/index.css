@@ -3,7 +3,7 @@
   themes: caramellatte;
 }
 
-/* DaisyUI will automatically apply the caramellatte theme when data-theme="caramellatte" is set */
+/* DaisyUI will automatically apply the configured theme when data-theme attribute is set */
 
 /* Custom component variants */
 @layer components {
