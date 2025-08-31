@@ -27,7 +27,7 @@ export function Header() {
 
   return (
     <div className="relative">
-      <header className="navbar bg-neutral text-neutral-content border-b shadow-sm">
+      <header className="navbar bg-base-300 text-base-content border-b shadow-sm">
         <div className="navbar-start">
           <div className="flex items-center space-x-4">
             <img
@@ -35,7 +35,7 @@ export function Header() {
               alt="Recipe Generator Logo"
               className="h-12 w-12 rounded-full object-cover"
             />
-            <AppTitle size="sm" className="text-neutral-content" />
+            <AppTitle size="sm" className="text-accent" />
           </div>
         </div>
 

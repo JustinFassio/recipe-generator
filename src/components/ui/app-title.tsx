@@ -11,9 +11,7 @@ export function AppTitle({ className = '', size = 'md' }: AppTitleProps) {
   };
 
   return (
-    <h1
-      className={`text-neutral-content font-bold ${sizeClasses[size]} ${className}`}
-    >
+    <h1 className={`font-bold ${sizeClasses[size]} ${className}`}>
       Recipe Generator
     </h1>
   );
