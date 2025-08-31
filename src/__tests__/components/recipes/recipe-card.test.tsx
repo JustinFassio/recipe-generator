@@ -12,6 +12,19 @@ vi.mock('@/lib/api', () => ({
   },
 }));
 
+// Mock the auth context
+vi.mock('@/contexts/AuthProvider', () => ({
+  AuthProvider: ({ children }: { children: React.ReactNode }) => (
+    <div>{children}</div>
+  ),
+  useAuth: () => ({
+    user: { id: 'user1', email: 'test@example.com' },
+    profile: null,
+    loading: false,
+    refreshProfile: vi.fn(),
+  }),
+}));
+
 const mockRecipe: Recipe = {
   id: '1',
   title: 'Test Recipe',
@@ -24,12 +37,6 @@ const mockRecipe: Recipe = {
   created_at: '2023-12-31T00:00:00Z',
   updated_at: '2023-12-31T00:00:00Z',
 };
-
-// Mock user context (for future use if needed)
-// const mockUser = {
-//   id: 'user1',
-//   email: 'test@example.com',
-// };
 
 // Wrapper component for testing with auth context
 const TestWrapper = ({ children }: { children: React.ReactNode }) => (
