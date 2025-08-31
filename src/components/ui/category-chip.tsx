@@ -86,7 +86,7 @@ export function CategoryChip({
         <button
           type="button"
           onClick={handleRemove}
-          className="ml-1 hover:bg-black hover:bg-opacity-20 rounded-full p-0.5 transition-colors"
+          className="ml-1 hover:bg-base-content hover:bg-opacity-20 rounded-full p-0.5 transition-colors"
           aria-label={`Remove ${category}`}
           tabIndex={-1}
         >
