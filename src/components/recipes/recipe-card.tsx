@@ -102,7 +102,7 @@ export function RecipeCard({
                   ) : isPublic ? (
                     <>
                       <Check className="mr-1 h-4 w-4" />
-                      Shared
+                      Unshare
                     </>
                   ) : (
                     <>
