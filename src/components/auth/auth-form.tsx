@@ -95,6 +95,7 @@ export function AuthForm() {
         title: 'Success',
         description:
           'Account created successfully! Please check your email for verification.',
+        variant: 'success',
       });
       // Clear form
       setEmail('');
@@ -123,6 +124,7 @@ export function AuthForm() {
       toast({
         title: 'Success',
         description: 'Signed in successfully!',
+        variant: 'success',
       });
     }
 
@@ -145,6 +147,7 @@ export function AuthForm() {
       toast({
         title: 'Success',
         description: 'Check your email for a magic link to sign in!',
+        variant: 'success',
       });
     }
 
@@ -167,6 +170,7 @@ export function AuthForm() {
       toast({
         title: 'Success',
         description: 'Check your email for password reset instructions!',
+        variant: 'success',
       });
       setActiveTab('signin');
     }

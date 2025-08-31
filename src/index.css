@@ -1,10 +1,9 @@
 @import 'tailwindcss';
 @plugin "daisyui" {
-  themes:
-    light --default,
-    dark --prefersdark,
-    caramellatte;
+  themes: caramellatte; /* Theme name defined in src/lib/theme.ts */
 }
+
+/* DaisyUI will automatically apply the configured theme when data-theme attribute is set */
 
 /* Custom component variants */
 @layer components {
@@ -17,7 +16,7 @@
   }
 
   .card-recipe {
-    @apply bg-base-100 border-primary border-2 shadow-lg;
+    @apply bg-base-100 border-primary border-2;
   }
 }
 

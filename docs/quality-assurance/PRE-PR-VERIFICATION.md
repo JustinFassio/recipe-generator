@@ -24,7 +24,7 @@ export default {
   printWidth: 80,
   tabWidth: 2,
   useTabs: false,
-  plugins: ['prettier-plugin-tailwindcss'],
+  plugins: [],
 };
 ```
 
@@ -263,7 +263,7 @@ jobs:
   "husky": "^9.0.11",
   "jsdom": "^24.0.0",
   "prettier": "^3.2.5",
-  "prettier-plugin-tailwindcss": "^0.5.11",
+
   "vitest": "^1.3.0"
 }
 ```

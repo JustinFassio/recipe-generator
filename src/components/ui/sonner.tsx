@@ -1,10 +1,10 @@
-import { useTheme } from 'next-themes';
 import { Toaster as Sonner } from 'sonner';
 
 type ToasterProps = React.ComponentProps<typeof Sonner>;
 
 const Toaster = ({ ...props }: ToasterProps) => {
-  const { theme = 'system' } = useTheme();
+  // Map DaisyUI theme to Sonner theme (current theme is light-based)
+  const theme = 'light';
 
   return (
     <Sonner
@@ -19,6 +19,10 @@ const Toaster = ({ ...props }: ToasterProps) => {
             'group-[.toast]:bg-primary group-[.toast]:text-primary-foreground',
           cancelButton:
             'group-[.toast]:bg-muted group-[.toast]:text-muted-foreground',
+          error:
+            'group-[.toast]:bg-destructive group-[.toast]:text-destructive-foreground group-[.toast]:border-destructive',
+          success:
+            'group-[.toast]:bg-success group-[.toast]:text-success-foreground group-[.toast]:border-success',
         },
       }}
       {...props}

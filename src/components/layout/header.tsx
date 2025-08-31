@@ -1,7 +1,7 @@
 import { LogOut, Menu, X, User, Settings } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthProvider';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { AccessibilityProvider } from '@/components/ui/accessibility-provider';
+// AccessibilityProvider removed to prevent duplicate theme application
 import { AppTitle } from '@/components/ui/app-title';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
@@ -60,7 +60,7 @@ export function Header() {
               Explore
             </Button>
 
-            <AccessibilityProvider />
+            {/* AccessibilityProvider removed to prevent duplicate theme application */}
 
             {/* User Profile Dropdown */}
             <div className="dropdown dropdown-end">
@@ -89,11 +89,14 @@ export function Header() {
               >
                 <li className="menu-title">
                   <span className="text-xs">
-                    {profile?.full_name || user?.email || 'User'}
-                    {profile?.username && (
+                    {profile?.username ? (
                       <span className="text-base-content/60">
                         @{profile.username}
                       </span>
+                    ) : profile?.full_name ? (
+                      profile.full_name
+                    ) : (
+                      user?.email || 'User'
                     )}
                   </span>
                 </li>
@@ -121,7 +124,7 @@ export function Header() {
 
           {/* Mobile Navigation */}
           <div className="flex items-center space-x-2 md:hidden">
-            <AccessibilityProvider />
+            {/* AccessibilityProvider removed to prevent duplicate theme application */}
             <Button
               variant="ghost"
               size="sm"
@@ -159,13 +162,16 @@ export function Header() {
               </div>
               <div className="flex flex-col">
                 <span className="text-sm font-medium">
-                  {profile?.full_name || user?.email || 'User'}
+                  {profile?.username ? (
+                    <span className="text-base-content/60">
+                      @{profile.username}
+                    </span>
+                  ) : profile?.full_name ? (
+                    profile.full_name
+                  ) : (
+                    user?.email || 'User'
+                  )}
                 </span>
-                {profile?.username && (
-                  <span className="text-base-content/60 text-xs">
-                    @{profile.username}
-                  </span>
-                )}
               </div>
             </div>
 

@@ -1,11 +1,8 @@
-import { useEffect } from 'react';
-import { initializeTheme, THEME_NAME } from '@/lib/theme';
-
 /**
  * AccessibilityProvider - Manages accessibility settings for older adults
  *
  * Currently:
- * - Ensures consistent caramellatte theme is applied
+ * - Theme is handled by ThemeProvider to prevent conflicts
  *
  * Future enhancements for 60+ users:
  * - Font size controls (small, medium, large, extra-large)
@@ -14,14 +11,10 @@ import { initializeTheme, THEME_NAME } from '@/lib/theme';
  * - Touch target size adjustments
  */
 export function AccessibilityProvider() {
-  useEffect(() => {
-    // Initialize theme using centralized utility
-    initializeTheme(THEME_NAME);
-
-    // TODO: Future font size initialization
-    // const savedFontSize = localStorage.getItem('font-size') || 'medium';
-    // applyFontSize(savedFontSize);
-  }, []);
+  // Theme is now handled by ThemeProvider to prevent duplicate applications
+  // TODO: Future font size initialization
+  // const savedFontSize = localStorage.getItem('font-size') || 'medium';
+  // applyFontSize(savedFontSize);
 
   // Currently renders nothing - future versions may render font size controls
   return null;
