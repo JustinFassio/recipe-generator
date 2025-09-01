@@ -30,7 +30,7 @@ export async function standardizeRecipeWithAI(
     if (!response.ok) {
       const errorData = await response.json();
       console.error('AI standardization API error:', errorData);
-      
+
       // Fallback to local parsing if AI processing fails
       console.warn(
         'AI recipe standardization failed. Using local parsing as fallback.'
@@ -39,15 +39,13 @@ export async function standardizeRecipeWithAI(
     }
 
     const data = await response.json();
-    
+
     if (data.success && data.standardizedText) {
       // Parse the AI-standardized text
       return parseStandardizedRecipe(data.standardizedText);
     } else {
       throw new Error('Invalid response from AI standardization API');
     }
-
-
   } catch (error) {
     console.error('Recipe standardization failed:', error);
     throw new Error(
