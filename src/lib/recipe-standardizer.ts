@@ -126,6 +126,38 @@ function parseStandardizedRecipe(text: string): StandardizedRecipe {
 
   let currentSection = '';
 
+  // Extract categories from the entire text first
+  const categories: string[] = [];
+
+  // Look for category patterns in the text
+  const categoryPatterns = [
+    /(?:^|\n)(?:Categories?|Tags?|Type):\s*(.+?)(?:\n|$)/gi,
+    /(?:^|\n)(?:Course|Cuisine|Technique):\s*(.+?)(?:\n|$)/gi,
+    /(?:^|\n)(?:#+\s*)?(?:Course|Cuisine|Technique):\s*(.+?)(?:\n|$)/gi,
+  ];
+
+  for (const pattern of categoryPatterns) {
+    let match;
+    while ((match = pattern.exec(text)) !== null) {
+      const categoryList = match[1].trim();
+      if (categoryList) {
+        // Split by comma and clean up each category
+        const categoryArray = categoryList.split(',').map((cat) => cat.trim());
+        categories.push(...categoryArray);
+      }
+    }
+  }
+
+  // Also look for inline category mentions
+  const inlineCategoryPattern = /(?:Course|Cuisine|Technique):\s*([^,\n]+)/gi;
+  let inlineMatch;
+  while ((inlineMatch = inlineCategoryPattern.exec(text)) !== null) {
+    const category = inlineMatch[1].trim();
+    if (category && !categories.includes(category)) {
+      categories.push(category);
+    }
+  }
+
   for (const line of lines) {
     // Extract title
     if (line.startsWith('# ') && !title) {
@@ -162,6 +194,11 @@ function parseStandardizedRecipe(text: string): StandardizedRecipe {
     } else if (currentSection === 'notes' && line.startsWith('- ')) {
       notes.push(line.substring(2).trim());
     }
+  }
+
+  // Add categories to notes if found
+  if (categories.length > 0) {
+    notes.unshift(`Categories: ${categories.join(', ')}`);
   }
 
   return {
