@@ -8,7 +8,7 @@ export const recipeSchema = z.object({
     .min(1, 'At least one ingredient is required'),
   instructions: z.string().min(1, 'Instructions are required'),
   notes: z.string(),
-  image_url: z.string().optional(),
+  image_url: z.string().nullable().optional(),
   categories: z
     .array(
       z
@@ -35,7 +35,8 @@ export const recipeFormSchema = z.object({
     .min(1, 'At least one ingredient is required'),
   instructions: z.string().min(1, 'Instructions are required'),
   notes: z.string(),
-  image_url: z.string().optional(),
+  image_url: z.string().nullable().optional(),
+  setup: z.array(z.string().min(1, 'Setup item cannot be empty')),
   categories: z
     .array(
       z

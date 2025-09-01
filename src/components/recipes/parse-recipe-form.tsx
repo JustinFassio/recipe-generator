@@ -49,8 +49,9 @@ export function ParseRecipeForm({ onParsed }: ParseRecipeFormProps) {
         ingredients: parsed.ingredients,
         instructions: parsed.instructions,
         notes: parsed.notes || '',
-        image_url: '',
+        image_url: null,
         categories: parsed.categories || [],
+        setup: parsed.setup || [],
       };
       onParsed(recipeFormData);
     } catch (error) {

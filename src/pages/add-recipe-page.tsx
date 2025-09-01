@@ -27,8 +27,9 @@ export function AddRecipePage() {
         ingredients: existingRecipe.ingredients,
         instructions: existingRecipe.instructions,
         notes: existingRecipe.notes || '',
-        image_url: existingRecipe.image_url || '',
+        image_url: existingRecipe.image_url || null,
         categories: existingRecipe.categories || [],
+        setup: existingRecipe.setup || [],
       });
     }
 

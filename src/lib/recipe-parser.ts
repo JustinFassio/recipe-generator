@@ -6,6 +6,10 @@ import {
   sortCategories,
 } from './category-parsing';
 import type { CategoryObject } from './category-parsing';
+import {
+  standardizeRecipeWithAI,
+  convertToParsedRecipe,
+} from './recipe-standardizer';
 
 // Convert markdown formatting to plain text
 function convertMarkdownToPlainText(text: string): string {
@@ -36,8 +40,8 @@ function convertMarkdownToPlainText(text: string): string {
   );
 }
 
-// Parse recipe from text using external API
-export function parseRecipeFromText(text: string): ParsedRecipe {
+// Parse recipe from text using AI standardization
+export async function parseRecipeFromText(text: string): Promise<ParsedRecipe> {
   // Input validation
   if (!text || typeof text !== 'string') {
     throw new Error('Recipe text must be a non-empty string');
@@ -70,15 +74,41 @@ export function parseRecipeFromText(text: string): ParsedRecipe {
 
       // Try to parse as JSON first
       const parsed = JSON.parse(jsonText);
+      const jsonRecipe = parseJsonRecipe(parsed);
 
-      return parseJsonRecipe(parsed);
+      // Ensure setup field exists for JSON recipes
+      return {
+        ...jsonRecipe,
+        setup: jsonRecipe.setup || [],
+      };
     } catch (err) {
-      console.error('JSON parsing failed, trying flexible parsing:', err);
+      console.error('JSON parsing failed, trying AI standardization:', err);
     }
   }
 
-  // Use flexible parsing for markdown and other text formats
-  return parseFlexibleRecipe(cleanedText);
+  // Use AI standardization for all other formats
+  try {
+    const standardized = await standardizeRecipeWithAI(cleanedText);
+    const parsedRecipe = convertToParsedRecipe(standardized);
+
+    // Add setup field from standardized recipe
+    return {
+      ...parsedRecipe,
+      setup: standardized.setup,
+    };
+  } catch (error) {
+    console.error(
+      'AI standardization failed, falling back to flexible parsing:',
+      error
+    );
+
+    // Fallback to original flexible parsing
+    const fallbackRecipe = parseFlexibleRecipe(cleanedText);
+    return {
+      ...fallbackRecipe,
+      setup: [], // No setup info in fallback
+    };
+  }
 }
 
 function parseJsonRecipe(parsed: Record<string, unknown>): ParsedRecipe {
@@ -103,8 +133,9 @@ function parseJsonRecipe(parsed: Record<string, unknown>): ParsedRecipe {
   const instructions = parseInstructions(parsed);
   const notes = parseNotes(parsed);
   const categories = parseCategories(parsed);
+  const setup = parseSetup(parsed);
 
-  return { title, ingredients, instructions, notes, categories };
+  return { title, ingredients, instructions, notes, categories, setup };
 }
 
 function parseIngredients(ingredients: unknown): string[] {
@@ -298,6 +329,57 @@ function parseNotes(parsed: Record<string, unknown>): string {
   }
 
   return notesParts.join('\n').trim();
+}
+
+function parseSetup(parsed: Record<string, unknown>): string[] {
+  const setupItems: string[] = [];
+
+  // Handle setup array
+  if (parsed.setup && Array.isArray(parsed.setup)) {
+    parsed.setup.forEach((item: unknown) => {
+      if (typeof item === 'string' && item.trim()) {
+        setupItems.push(item.trim());
+      }
+    });
+  }
+
+  // Handle prep array
+  if (parsed.prep && Array.isArray(parsed.prep)) {
+    parsed.prep.forEach((item: unknown) => {
+      if (typeof item === 'string' && item.trim()) {
+        setupItems.push(item.trim());
+      }
+    });
+  }
+
+  // Handle prep_time as a setup item
+  if (
+    parsed.prep_time &&
+    typeof parsed.prep_time === 'string' &&
+    parsed.prep_time.trim()
+  ) {
+    setupItems.push(`Prep time: ${parsed.prep_time.trim()}`);
+  }
+
+  // Handle soak_time as a setup item
+  if (
+    parsed.soak_time &&
+    typeof parsed.soak_time === 'string' &&
+    parsed.soak_time.trim()
+  ) {
+    setupItems.push(`Soak time: ${parsed.soak_time.trim()}`);
+  }
+
+  // Handle marinate_time as a setup item
+  if (
+    parsed.marinate_time &&
+    typeof parsed.marinate_time === 'string' &&
+    parsed.marinate_time.trim()
+  ) {
+    setupItems.push(`Marinate time: ${parsed.marinate_time.trim()}`);
+  }
+
+  return setupItems;
 }
 
 function parseCategories(parsed: Record<string, unknown>): string[] {
@@ -611,6 +693,7 @@ function parseFlexibleRecipe(text: string): ParsedRecipe {
     instructions: instructions.join('\n'),
     notes: notes.join('\n'),
     categories,
+    setup: [], // No setup info in flexible parsing
   };
 }
 
@@ -674,6 +757,7 @@ function extractFromUnstructuredText(text: string): ParsedRecipe {
     instructions: instructions.join('\n'),
     notes: '',
     categories,
+    setup: [], // No setup info in unstructured text
   };
 }
 
