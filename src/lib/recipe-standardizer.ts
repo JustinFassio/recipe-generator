@@ -21,14 +21,14 @@ export async function standardizeRecipeWithAI(
     // SECURITY FIX: AI processing temporarily disabled to prevent API key exposure
     // TODO: Implement proper backend API endpoint for AI processing
     // Current implementation: Use local parsing as fallback
-    
+
     console.warn(
       'AI standardization temporarily disabled for security. Using local parsing instead.'
     );
-    
+
     // Use local parsing as fallback until backend API is implemented
     return parseStandardizedRecipe(recipeText);
-    
+
     /* 
     // FUTURE IMPLEMENTATION: Backend API call
     // const response = await fetch('/api/standardize-recipe', {
@@ -196,7 +196,30 @@ function parseStandardizedRecipe(text: string): StandardizedRecipe {
 }
 
 /**
- * Extract categories from notes and return cleaned notes without categories
+ * Extract categories from recipe notes and separate them from regular notes
+ *
+ * This function processes recipe notes to identify and extract category information
+ * that was previously embedded in the notes array. It looks for notes that start
+ * with "Categories:" and parses the comma-separated category list.
+ *
+ * @param notes - Array of recipe notes, potentially containing category information
+ * @returns An object containing:
+ *   - categories: Array of extracted category strings (e.g., ["Italian", "Pasta", "Quick"])
+ *   - notesWithoutCategories: Array of notes with category information removed
+ *
+ * @example
+ * ```typescript
+ * const result = extractCategoriesFromNotes([
+ *   "Categories: Italian, Pasta, Quick",
+ *   "Serve with fresh basil",
+ *   "Can be made ahead"
+ * ]);
+ * // Returns:
+ * // {
+ * //   categories: ["Italian", "Pasta", "Quick"],
+ * //   notesWithoutCategories: ["Serve with fresh basil", "Can be made ahead"]
+ * // }
+ * ```
  */
 function extractCategoriesFromNotes(notes: string[]): {
   categories: string[];
