@@ -125,7 +125,7 @@ export function RecipeForm({
     if (!file) return;
 
     const result = await processImageFile(file);
-    
+
     if (result.success) {
       setImageFile(result.compressedFile);
       setImagePreview(result.previewUrl);

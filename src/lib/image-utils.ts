@@ -98,17 +98,17 @@ export function validateImageFile(file: File): {
 
 /**
  * Process an image file with validation, compression, and preview generation
- * 
+ *
  * This utility function handles the complete image processing workflow:
  * 1. Validates the file type and size
  * 2. Compresses the image if needed
  * 3. Generates a preview URL
  * 4. Returns processed data or validation errors
- * 
+ *
  * @param file - The image file to process
  * @param options - Optional configuration for image processing
  * @returns Promise resolving to processed image data or validation error
- * 
+ *
  * @example
  * ```typescript
  * const result = await processImageFile(file);
@@ -159,10 +159,10 @@ export async function processImageFile(
       options.maxHeight,
       options.quality
     );
-    
+
     // Generate preview URL
     const previewUrl = URL.createObjectURL(compressedFile);
-    
+
     return {
       success: true,
       compressedFile,
