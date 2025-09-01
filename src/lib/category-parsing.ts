@@ -11,7 +11,7 @@ type CategoryInput =
   | null
   | undefined;
 
-interface CategoryObject {
+export interface CategoryObject {
   [namespace: string]: string | string[];
 }
 

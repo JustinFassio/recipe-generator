@@ -1,5 +1,11 @@
 import type { ParsedRecipe, IngredientItem } from './types';
 import { MAX_CATEGORIES_PER_RECIPE } from './constants';
+import {
+  normalizeCategories,
+  uniqueValidCategories,
+  sortCategories,
+} from './category-parsing';
+import type { CategoryObject } from './category-parsing';
 
 // Convert markdown formatting to plain text
 function convertMarkdownToPlainText(text: string): string {
@@ -290,47 +296,125 @@ function parseNotes(parsed: Record<string, unknown>): string {
 }
 
 function parseCategories(parsed: Record<string, unknown>): string[] {
-  const categories: string[] = [];
+  try {
+    const allCategories: string[] = [];
 
-  // Handle categories field
-  if (parsed.categories && Array.isArray(parsed.categories)) {
-    parsed.categories.forEach((category: unknown) => {
-      if (typeof category === 'string' && category.trim()) {
-        categories.push(category.trim());
+    // Handle categories array or object
+    if (parsed.categories) {
+      if (Array.isArray(parsed.categories)) {
+        parsed.categories.forEach((category: unknown) => {
+          if (typeof category === 'string' && category.trim()) {
+            allCategories.push(category.trim());
+          }
+        });
+      } else if (
+        typeof parsed.categories === 'object' &&
+        parsed.categories !== null
+      ) {
+        // Handle object format categories
+        const objectCategories = normalizeCategories(
+          parsed.categories as CategoryObject
+        );
+        allCategories.push(...objectCategories);
       }
+    }
+
+    // Handle category string
+    if (
+      parsed.category &&
+      typeof parsed.category === 'string' &&
+      parsed.category.trim()
+    ) {
+      allCategories.push(parsed.category.trim());
+    }
+
+    // Handle tags array
+    if (parsed.tags && Array.isArray(parsed.tags)) {
+      parsed.tags.forEach((tag: unknown) => {
+        if (typeof tag === 'string' && tag.trim()) {
+          allCategories.push(tag.trim());
+        }
+      });
+    }
+
+    // Handle labels array
+    if (parsed.labels && Array.isArray(parsed.labels)) {
+      parsed.labels.forEach((label: unknown) => {
+        if (typeof label === 'string' && label.trim()) {
+          allCategories.push(label.trim());
+        }
+      });
+    }
+
+    // Handle classification array
+    if (parsed.classification && Array.isArray(parsed.classification)) {
+      parsed.classification.forEach((item: unknown) => {
+        if (typeof item === 'string' && item.trim()) {
+          allCategories.push(item.trim());
+        }
+      });
+    }
+
+    // Handle individual fields
+    if (
+      parsed.cuisine &&
+      typeof parsed.cuisine === 'string' &&
+      parsed.cuisine.trim()
+    ) {
+      allCategories.push(parsed.cuisine.trim());
+    }
+
+    if (parsed.type && typeof parsed.type === 'string' && parsed.type.trim()) {
+      allCategories.push(parsed.type.trim());
+    }
+
+    if (
+      parsed.dish_type &&
+      typeof parsed.dish_type === 'string' &&
+      parsed.dish_type.trim()
+    ) {
+      allCategories.push(parsed.dish_type.trim());
+    }
+
+    if (
+      parsed.course &&
+      typeof parsed.course === 'string' &&
+      parsed.course.trim()
+    ) {
+      allCategories.push(parsed.course.trim());
+    }
+
+    if (
+      parsed.technique &&
+      typeof parsed.technique === 'string' &&
+      parsed.technique.trim()
+    ) {
+      allCategories.push(parsed.technique.trim());
+    }
+
+    // Use advanced category parsing utilities
+    const normalizedCategories = normalizeCategories(allCategories);
+    const uniqueCategories = uniqueValidCategories(normalizedCategories);
+    const sortedCategories = sortCategories(uniqueCategories);
+
+    // Limit to MAX_CATEGORIES_PER_RECIPE
+    const limitedCategories = sortedCategories.slice(
+      0,
+      MAX_CATEGORIES_PER_RECIPE
+    );
+
+    console.log('Category parsing result:', {
+      raw: allCategories,
+      normalized: normalizedCategories,
+      unique: uniqueCategories,
+      final: limitedCategories,
     });
+
+    return limitedCategories;
+  } catch (error) {
+    console.warn('Category parsing error:', error);
+    return [];
   }
-
-  // Handle tags field (alternative to categories)
-  if (parsed.tags && Array.isArray(parsed.tags)) {
-    parsed.tags.forEach((tag: unknown) => {
-      if (typeof tag === 'string' && tag.trim()) {
-        categories.push(tag.trim());
-      }
-    });
-  }
-
-  // Handle cuisine field
-  if (
-    parsed.cuisine &&
-    typeof parsed.cuisine === 'string' &&
-    parsed.cuisine.trim()
-  ) {
-    categories.push(parsed.cuisine.trim());
-  }
-
-  // Handle type field
-  if (parsed.type && typeof parsed.type === 'string' && parsed.type.trim()) {
-    categories.push(parsed.type.trim());
-  }
-
-  // Remove duplicates and limit to MAX_CATEGORIES_PER_RECIPE
-  const uniqueCategories = [...new Set(categories)].slice(
-    0,
-    MAX_CATEGORIES_PER_RECIPE
-  );
-
-  return uniqueCategories;
 }
 
 function parseFlexibleRecipe(text: string): ParsedRecipe {
@@ -525,12 +609,15 @@ function parseFlexibleRecipe(text: string): ParsedRecipe {
     );
   }
 
+  // Extract categories from markdown text
+  const categories = extractCategoriesFromMarkdown(text);
+
   return {
     title,
     ingredients,
     instructions: instructions.join('\n'),
     notes: notes.join('\n'),
-    categories: [],
+    categories,
   };
 }
 
@@ -587,11 +674,88 @@ function extractFromUnstructuredText(text: string): ParsedRecipe {
     }
   }
 
+  // Extract categories from unstructured text
+  const categories = extractCategoriesFromMarkdown(text);
+
   return {
     title: 'Recipe from Text',
     ingredients,
     instructions: instructions.join('\n'),
     notes: '',
-    categories: [],
+    categories,
   };
+}
+
+/**
+ * Extract categories from markdown text using various patterns
+ */
+function extractCategoriesFromMarkdown(text: string): string[] {
+  const categories: string[] = [];
+  const lines = text.split('\n');
+
+  for (const line of lines) {
+    const trimmed = line.trim().toLowerCase();
+
+    // Look for explicit category lines
+    if (
+      trimmed.startsWith('categories:') ||
+      trimmed.startsWith('tags:') ||
+      trimmed.startsWith('type:') ||
+      trimmed.startsWith('cuisine:') ||
+      trimmed.startsWith('course:') ||
+      trimmed.startsWith('dish type:') ||
+      trimmed.startsWith('technique:')
+    ) {
+      const content = line.substring(line.indexOf(':') + 1).trim();
+
+      // Handle comma-separated values
+      if (content.includes(',')) {
+        const items = content
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean);
+        categories.push(...items);
+      } else if (content) {
+        categories.push(content);
+      }
+    }
+
+    // Look for inline category mentions with simpler patterns
+    const categoryPatterns = [
+      /(course):\s*([^,.\n]+?)(?=\s|$|,|\.)/gi,
+      /(cuisine):\s*([^,.\n]+?)(?=\s|$|,|\.)/gi,
+      /(type):\s*([^,.\n]+?)(?=\s|$|,|\.)/gi,
+      /(technique):\s*([^,.\n]+?)(?=\s|$|,|\.)/gi,
+      /(dish type):\s*([^,.\n]+?)(?=\s|$|,|\.)/gi,
+    ];
+
+    categoryPatterns.forEach((pattern) => {
+      const matches = line.matchAll(pattern);
+      for (const match of matches) {
+        const namespace = match[1];
+        const value = match[2];
+        if (namespace && value) {
+          categories.push(`${namespace}: ${value.trim()}`);
+        }
+      }
+    });
+  }
+
+  // Use category parsing utilities to normalize and validate
+  try {
+    const normalizedCategories = normalizeCategories(categories);
+    const uniqueCategories = uniqueValidCategories(normalizedCategories);
+    const sortedCategories = sortCategories(uniqueCategories);
+
+    console.log('Markdown category extraction:', {
+      raw: categories,
+      normalized: normalizedCategories,
+      final: sortedCategories,
+    });
+
+    return sortedCategories;
+  } catch (error) {
+    console.warn('Category extraction error:', error);
+    return [];
+  }
 }

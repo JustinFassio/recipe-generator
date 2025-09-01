@@ -8,7 +8,7 @@ import {
   createDaisyUICardTitleClasses,
 } from '@/lib/card-migration';
 import { createDaisyUILabelClasses } from '@/lib/label-migration';
-import { recipeSchema, type RecipeFormData } from '@/lib/schemas';
+import { recipeFormSchema, type RecipeFormData } from '@/lib/schemas';
 import {
   useCreateRecipe,
   useUpdateRecipe,
@@ -56,7 +56,7 @@ export function RecipeForm({
     setValue,
     watch,
   } = useForm<RecipeFormData>({
-    resolver: zodResolver(recipeSchema),
+    resolver: zodResolver(recipeFormSchema),
     defaultValues: editRecipe
       ? {
           title: editRecipe.title,
