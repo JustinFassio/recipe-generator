@@ -159,9 +159,14 @@ function parseStandardizedRecipe(text: string): StandardizedRecipe {
   }
 
   for (const line of lines) {
-    // Extract title
-    if (line.startsWith('# ') && !title) {
-      title = line.substring(2).trim();
+    // Extract title from any markdown header (1-6 # symbols)
+    if (line.match(/^#{1,6}\s+/) && !title) {
+      // Remove markdown header symbols and clean up
+      title = line.replace(/^#{1,6}\s+/, '').trim();
+      // Remove any markdown formatting like **bold** or *italic*
+      title = title.replace(/\*\*(.*?)\*\*/g, '$1'); // Remove **bold**
+      title = title.replace(/\*(.*?)\*/g, '$1'); // Remove *italic*
+      title = title.replace(/`(.*?)`/g, '$1'); // Remove `code`
       continue;
     }
 
