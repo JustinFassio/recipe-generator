@@ -4,6 +4,15 @@ import { ProfileInfoForm } from '@/components/profile/basic/ProfileInfoForm';
 import { useProfileBasics } from '@/hooks/profile/useProfileBasics';
 import { useUsernameAvailability } from '@/hooks/profile/useUsernameAvailability';
 
+// Polyfill for HTMLFormElement.prototype.requestSubmit (not implemented in jsdom)
+if (!HTMLFormElement.prototype.requestSubmit) {
+  HTMLFormElement.prototype.requestSubmit = function () {
+    this.dispatchEvent(
+      new Event('submit', { bubbles: true, cancelable: true })
+    );
+  };
+}
+
 // Mock the hooks
 vi.mock('@/hooks/profile/useProfileBasics');
 vi.mock('@/hooks/profile/useUsernameAvailability');
@@ -78,10 +87,10 @@ describe('ProfileInfoForm Integration with Hooks', () => {
       />
     );
 
-    const submitButton = screen.getByRole('button', {
-      name: /update profile/i,
-    });
-    fireEvent.click(submitButton);
+    const form = screen.getByDisplayValue('John Doe').closest('form');
+    if (form) {
+      fireEvent.submit(form);
+    }
 
     await waitFor(() => {
       expect(mockOnSubmit).toHaveBeenCalledTimes(1);

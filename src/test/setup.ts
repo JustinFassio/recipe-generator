@@ -1,3 +1,12 @@
+// Polyfill for HTMLFormElement.prototype.requestSubmit (not implemented in jsdom)
+if (typeof window !== 'undefined' && !HTMLFormElement.prototype.requestSubmit) {
+  HTMLFormElement.prototype.requestSubmit = function () {
+    this.dispatchEvent(
+      new Event('submit', { bubbles: true, cancelable: true })
+    );
+  };
+}
+
 import '@testing-library/jest-dom';
 import { vi } from 'vitest';
 

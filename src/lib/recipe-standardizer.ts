@@ -182,20 +182,36 @@ function parseStandardizedRecipe(text: string): StandardizedRecipe {
       const sectionName = line.substring(3).toLowerCase();
       if (sectionName.includes('setup') || sectionName.includes('prep')) {
         currentSection = 'setup';
-      } else if (sectionName.includes('ingredient')) {
+      } else if (
+        sectionName.includes('ingredient') ||
+        sectionName.includes('vinaigrette') ||
+        sectionName.includes('dressing')
+      ) {
         currentSection = 'ingredients';
-      } else if (sectionName.includes('instruction')) {
+      } else if (
+        sectionName.includes('instruction') ||
+        sectionName.includes('assembly')
+      ) {
         currentSection = 'instructions';
-      } else if (sectionName.includes('note')) {
+      } else if (
+        sectionName.includes('note') ||
+        sectionName.includes('healing')
+      ) {
         currentSection = 'notes';
       }
       continue;
     }
 
     // Parse content based on current section
-    if (currentSection === 'setup' && line.startsWith('- ')) {
+    if (
+      currentSection === 'setup' &&
+      (line.startsWith('- ') || line.startsWith('* '))
+    ) {
       setup.push(line.substring(2).trim());
-    } else if (currentSection === 'ingredients' && line.startsWith('- ')) {
+    } else if (
+      currentSection === 'ingredients' &&
+      (line.startsWith('- ') || line.startsWith('* '))
+    ) {
       ingredients.push(line.substring(2).trim());
     } else if (currentSection === 'instructions' && /^\d+\./.test(line)) {
       // Extract numbered instruction
@@ -203,7 +219,10 @@ function parseStandardizedRecipe(text: string): StandardizedRecipe {
       if (instruction) {
         instructions.push(instruction);
       }
-    } else if (currentSection === 'notes' && line.startsWith('- ')) {
+    } else if (
+      currentSection === 'notes' &&
+      (line.startsWith('- ') || line.startsWith('* '))
+    ) {
       notes.push(line.substring(2).trim());
     }
   }
