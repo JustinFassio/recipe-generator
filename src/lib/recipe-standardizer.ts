@@ -180,7 +180,11 @@ function parseStandardizedRecipe(text: string): StandardizedRecipe {
     // Detect section headers
     if (line.startsWith('## ')) {
       const sectionName = line.substring(3).toLowerCase();
-      if (sectionName.includes('setup') || sectionName.includes('prep')) {
+      if (
+        sectionName.includes('setup') ||
+        sectionName.includes('prep') ||
+        sectionName.includes('assembly')
+      ) {
         currentSection = 'setup';
       } else if (
         sectionName.includes('ingredient') ||
@@ -189,8 +193,8 @@ function parseStandardizedRecipe(text: string): StandardizedRecipe {
       ) {
         currentSection = 'ingredients';
       } else if (
-        sectionName.includes('instruction') ||
-        sectionName.includes('assembly')
+        sectionName.includes('instruction') &&
+        !sectionName.includes('assembly')
       ) {
         currentSection = 'instructions';
       } else if (
@@ -203,11 +207,16 @@ function parseStandardizedRecipe(text: string): StandardizedRecipe {
     }
 
     // Parse content based on current section
-    if (
-      currentSection === 'setup' &&
-      (line.startsWith('- ') || line.startsWith('* '))
-    ) {
-      setup.push(line.substring(2).trim());
+    if (currentSection === 'setup') {
+      if (line.startsWith('- ') || line.startsWith('* ')) {
+        setup.push(line.substring(2).trim());
+      } else if (/^\d+\./.test(line)) {
+        // Extract numbered setup step
+        const setupStep = line.replace(/^\d+\.\s*/, '').trim();
+        if (setupStep) {
+          setup.push(setupStep);
+        }
+      }
     } else if (
       currentSection === 'ingredients' &&
       (line.startsWith('- ') || line.startsWith('* '))
