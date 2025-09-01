@@ -18,34 +18,36 @@ export async function standardizeRecipeWithAI(
   recipeText: string
 ): Promise<StandardizedRecipe> {
   try {
-    // SECURITY FIX: AI processing temporarily disabled to prevent API key exposure
-    // TODO: Implement proper backend API endpoint for AI processing
-    // Current implementation: Use local parsing as fallback
+    // Call the secure backend API for AI processing
+    const response = await fetch('/api/recipe-standardize', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ recipeText }),
+    });
 
-    console.warn(
-      'AI standardization temporarily disabled for security. Using local parsing instead.'
-    );
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('AI standardization API error:', errorData);
+      
+      // Fallback to local parsing if AI processing fails
+      console.warn(
+        'AI recipe standardization failed. Using local parsing as fallback.'
+      );
+      return parseStandardizedRecipe(recipeText);
+    }
 
-    // Use local parsing as fallback until backend API is implemented
-    return parseStandardizedRecipe(recipeText);
+    const data = await response.json();
+    
+    if (data.success && data.standardizedText) {
+      // Parse the AI-standardized text
+      return parseStandardizedRecipe(data.standardizedText);
+    } else {
+      throw new Error('Invalid response from AI standardization API');
+    }
 
-    /* 
-    // FUTURE IMPLEMENTATION: Backend API call
-    // const response = await fetch('/api/standardize-recipe', {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //   },
-    //   body: JSON.stringify({ recipeText }),
-    // });
-    // 
-    // if (!response.ok) {
-    //   throw new Error(`Backend API error: ${response.status}`);
-    // }
-    // 
-    // const data = await response.json();
-    // return parseStandardizedRecipe(data.standardizedText);
-    */
+
   } catch (error) {
     console.error('Recipe standardization failed:', error);
     throw new Error(
