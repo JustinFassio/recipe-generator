@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/lib/supabase';
+
 import { signUp, signIn, signInWithMagicLink, resetPassword } from '@/lib/auth';
 import { useAuth } from '@/contexts/AuthProvider';
 
@@ -9,7 +9,6 @@ import { toast } from '@/hooks/use-toast';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Divider } from '@/components/ui/divider';
 import { AppTitle } from '@/components/ui/app-title';
-import type { Recipe } from '@/lib/types';
 
 export function AuthForm() {
   const { user } = useAuth();
@@ -23,8 +22,6 @@ export function AuthForm() {
   const [activeTab, setActiveTab] = useState<
     'signin' | 'signup' | 'magic-link' | 'reset'
   >('signin');
-  const [userRecipes, setUserRecipes] = useState<Recipe[]>([]);
-  const [recipesLoading, setRecipesLoading] = useState(true);
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -33,35 +30,8 @@ export function AuthForm() {
     }
   }, [user, navigate]);
 
-  // Fetch recipes with images from the database
-  useEffect(() => {
-    const fetchRecipes = async () => {
-      try {
-        setRecipesLoading(true);
-
-        const { data, error } = await supabase
-          .from('recipes')
-          .select('*')
-          .filter('image_url', 'not.is', null)
-          .order('created_at', { ascending: false })
-          .limit(5);
-
-        if (error) {
-          console.error('Error fetching recipes:', error);
-          setUserRecipes([]);
-        } else {
-          setUserRecipes(data || []);
-        }
-      } catch (error) {
-        console.error('Exception fetching recipes:', error);
-        setUserRecipes([]);
-      } finally {
-        setRecipesLoading(false);
-      }
-    };
-
-    fetchRecipes();
-  }, []);
+  // Removed recipe fetching to avoid CI/CD issues
+  // Recipe showcase was a nice-to-have feature but not essential
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -535,7 +505,7 @@ export function AuthForm() {
           <Divider className="divider-horizontal text-gray-500">AND</Divider>
         </div>
 
-        {/* Right Side - User Recipes Showcase */}
+        {/* Right Side - App Info */}
         <div className="card rounded-box flex min-h-[400px] flex-1 flex-col border border-gray-200 bg-white p-8 shadow-xl lg:min-h-[600px]">
           <div className="flex flex-1 flex-col justify-center text-center">
             <h3 className="mb-4 text-2xl font-bold text-gray-900">
@@ -546,54 +516,18 @@ export function AuthForm() {
               family and friends
             </p>
 
-            {recipesLoading ? (
-              <div className="mb-6 flex items-center justify-center">
-                <span className="loading loading-spinner loading-lg text-green-600"></span>
-              </div>
-            ) : userRecipes.length > 0 ? (
-              <>
-                {/* Stacked Recipe Images */}
-                <div className="stack mx-auto mb-6 w-48">
-                  {userRecipes.slice(0, 3).map((recipe) => (
-                    <img
-                      key={recipe.id}
-                      src={recipe.image_url!}
-                      className="rounded-box"
-                      alt={recipe.title}
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.style.display = 'none';
-                      }}
-                    />
-                  ))}
-                </div>
-
-                {/* Recipe Titles and Users */}
-                <div className="space-y-3">
-                  {userRecipes.slice(0, 3).map((recipe) => (
-                    <div key={recipe.id} className="text-sm">
-                      <div className="font-semibold text-gray-900">
-                        {recipe.title}
-                      </div>
-                      <div className="text-gray-600">by {recipe.user_id}</div>
-                    </div>
-                  ))}
-                </div>
-              </>
-            ) : (
-              <div className="text-center">
-                <p className="mb-4 text-gray-500">No recipes with images yet</p>
-                <p className="text-sm text-gray-600">
-                  Be the first to share your favorite recipes!
-                </p>
-              </div>
-            )}
+            <div className="text-center">
+              <p className="mb-4 text-gray-500">
+                Join our community of home chefs
+              </p>
+              <p className="text-sm text-gray-600">
+                Share your favorite recipes with the community
+              </p>
+            </div>
 
             <div className="mt-6">
               <p className="text-xs text-gray-500">
-                {userRecipes.length > 0
-                  ? `Join thousands of home chefs sharing their favorite recipes`
-                  : `Be the first to share your favorite recipes with the community`}
+                Be the first to share your favorite recipes with the community
               </p>
             </div>
           </div>

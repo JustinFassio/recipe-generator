@@ -9,6 +9,7 @@ export type Recipe = {
   notes: string | null;
   image_url: string | null;
   categories: string[];
+  setup: string[];
   user_id: string;
   is_public: boolean;
   created_at: string;
@@ -114,6 +115,7 @@ export interface IngredientItem {
 
 export type ParsedRecipe = {
   title: string;
+  setup: string[];
   ingredients: string[];
   instructions: string;
   notes: string | null;
