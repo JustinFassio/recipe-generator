@@ -20,6 +20,8 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import CategoryInput from '@/components/ui/CategoryInput';
 import { MAX_CATEGORIES_PER_RECIPE } from '@/lib/constants';
+import { validateImageFile, compressImage } from '@/lib/image-utils';
+import { toast } from '@/hooks/use-toast';
 
 import type { Recipe } from '@/lib/types';
 
@@ -63,25 +65,37 @@ export function RecipeForm({
           ingredients: editRecipe.ingredients,
           instructions: editRecipe.instructions,
           notes: editRecipe.notes || '',
-          image_url: editRecipe.image_url || '',
+          image_url: editRecipe.image_url || null,
           categories: editRecipe.categories || [],
+          setup: editRecipe.setup || [],
         }
       : {
           title: '',
           ingredients: [''],
           instructions: '',
           notes: '',
-          image_url: '',
+          image_url: null,
           categories: [],
+          setup: [],
         },
   });
 
-  const { fields, append, remove } = useFieldArray<
-    RecipeFormData,
-    FieldArrayPath<RecipeFormData>
-  >({
+  const {
+    fields: ingredientFields,
+    append: appendIngredient,
+    remove: removeIngredient,
+  } = useFieldArray<RecipeFormData, FieldArrayPath<RecipeFormData>>({
     control,
     name: 'ingredients' as FieldArrayPath<RecipeFormData>,
+  });
+
+  const {
+    fields: setupFields,
+    append: appendSetup,
+    remove: removeSetup,
+  } = useFieldArray<RecipeFormData, FieldArrayPath<RecipeFormData>>({
+    control,
+    name: 'setup' as FieldArrayPath<RecipeFormData>,
   });
 
   useEffect(() => {
@@ -93,8 +107,9 @@ export function RecipeForm({
           : [''],
         instructions: initialData.instructions || '',
         notes: initialData.notes || '',
-        image_url: initialData.image_url || '',
+        image_url: initialData.image_url || null,
         categories: initialData.categories || [],
+        setup: initialData.setup || [],
       });
     }
   }, [initialData, reset]);
@@ -105,23 +120,39 @@ export function RecipeForm({
     }
   }, [existingRecipe?.image_url]);
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setImageFile(file);
-      const previewUrl = URL.createObjectURL(file);
+    if (!file) return;
+
+    // Validate the file
+    const validation = validateImageFile(file);
+    if (!validation.valid) {
+      toast({
+        title: 'Invalid Image',
+        description: validation.error,
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    try {
+      // Compress the image if needed
+      const compressedFile = await compressImage(file);
+      setImageFile(compressedFile);
+      const previewUrl = URL.createObjectURL(compressedFile);
       setImagePreview(previewUrl);
+    } catch (error) {
+      console.error('Error processing image:', error);
+      toast({
+        title: 'Image Processing Error',
+        description: 'Failed to process the image. Please try again.',
+        variant: 'destructive',
+      });
     }
   };
 
   const addIngredient = () => {
-    append('');
-  };
-
-  const removeIngredient = (index: number) => {
-    if (fields.length > 1) {
-      remove(index);
-    }
+    appendIngredient('');
   };
 
   const onSubmit = async (data: RecipeFormData) => {
@@ -139,7 +170,7 @@ export function RecipeForm({
 
       const recipeData = {
         ...data,
-        image_url: imageUrl || null,
+        image_url: imageUrl && imageUrl.trim() !== '' ? imageUrl : null,
       };
 
       if (existingRecipe) {
@@ -204,7 +235,7 @@ export function RecipeForm({
                       onClick={() => {
                         setImagePreview('');
                         setImageFile(null);
-                        setValue('image_url', '');
+                        setValue('image_url', null);
                       }}
                     >
                       <X className="h-4 w-4" />
@@ -241,6 +272,52 @@ export function RecipeForm({
           <h3
             className={`${createDaisyUICardTitleClasses()} flex items-center justify-between`}
           >
+            Setup (Prep Ahead)
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="border-green-600 text-green-600 hover:bg-green-50"
+              onClick={() => appendSetup('')}
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Add Setup Item
+            </Button>
+          </h3>
+          <div className="space-y-2">
+            {setupFields.map((field, index) => (
+              <div key={field.id} className="flex items-center space-x-2">
+                <input
+                  type="text"
+                  {...register(`setup.${index}` as const)}
+                  placeholder={`Setup item ${index + 1} (e.g., soak beans overnight)`}
+                  className={`${createDaisyUIInputClasses('bordered')} flex-1`}
+                />
+                {setupFields.length > 1 && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="text-red-500 hover:text-red-700"
+                    onClick={() => removeSetup(index)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            ))}
+          </div>
+          {errors.setup && (
+            <p className="mt-2 text-sm text-red-500">{errors.setup.message}</p>
+          )}
+        </div>
+      </div>
+
+      <div className={createDaisyUICardClasses('bordered')}>
+        <div className="card-body">
+          <h3
+            className={`${createDaisyUICardTitleClasses()} flex items-center justify-between`}
+          >
             Ingredients *
             <Button
               type="button"
@@ -254,7 +331,7 @@ export function RecipeForm({
             </Button>
           </h3>
           <div className="space-y-2">
-            {fields.map((field, index) => (
+            {ingredientFields.map((field, index) => (
               <div key={field.id} className="flex items-center space-x-2">
                 <input
                   type="text"
@@ -262,7 +339,7 @@ export function RecipeForm({
                   placeholder={`Ingredient ${index + 1}`}
                   className={`${createDaisyUIInputClasses('bordered')} flex-1`}
                 />
-                {fields.length > 1 && (
+                {ingredientFields.length > 1 && (
                   <Button
                     type="button"
                     variant="ghost"

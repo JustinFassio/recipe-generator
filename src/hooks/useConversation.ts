@@ -290,12 +290,13 @@ export function useConversation(): ConversationState & ConversationActions {
         ingredients: parsedRecipe.ingredients,
         instructions: parsedRecipe.instructions,
         notes: parsedRecipe.notes || '',
-        image_url: '',
+        image_url: null,
       };
 
       setGeneratedRecipe({
         ...recipe,
         categories: parsedRecipe.categories || [],
+        setup: parsedRecipe.setup || [],
       });
 
       toast({
