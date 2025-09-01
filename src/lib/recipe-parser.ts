@@ -52,24 +52,33 @@ export function parseRecipeFromText(text: string): ParsedRecipe {
   // Clean up the text first
   const cleanedText = text.trim();
 
-  // Try JSON first (most structured)
-  try {
-    let jsonText = cleanedText;
+  // Check if the content looks like JSON before attempting to parse
+  const trimmedText = cleanedText.trim();
+  const looksLikeJson =
+    trimmedText.startsWith('{') || trimmedText.includes('```json');
 
-    // Check if JSON is wrapped in markdown code blocks
-    const jsonBlockMatch = cleanedText.match(/```json\s*([\s\S]*?)\s*```/);
-    if (jsonBlockMatch) {
-      jsonText = jsonBlockMatch[1];
+  // Try JSON first (most structured) - but only if it looks like JSON
+  if (looksLikeJson) {
+    try {
+      let jsonText = cleanedText;
+
+      // Check if JSON is wrapped in markdown code blocks
+      const jsonBlockMatch = cleanedText.match(/```json\s*([\s\S]*?)\s*```/);
+      if (jsonBlockMatch) {
+        jsonText = jsonBlockMatch[1];
+      }
+
+      // Try to parse as JSON first
+      const parsed = JSON.parse(jsonText);
+
+      return parseJsonRecipe(parsed);
+    } catch (err) {
+      console.error('JSON parsing failed, trying flexible parsing:', err);
     }
-
-    // Try to parse as JSON first
-    const parsed = JSON.parse(jsonText);
-
-    return parseJsonRecipe(parsed);
-  } catch (err) {
-    console.error('JSON parsing failed, trying flexible parsing:', err);
-    return parseFlexibleRecipe(cleanedText);
   }
+
+  // Use flexible parsing for markdown and other text formats
+  return parseFlexibleRecipe(cleanedText);
 }
 
 function parseJsonRecipe(parsed: Record<string, unknown>): ParsedRecipe {
