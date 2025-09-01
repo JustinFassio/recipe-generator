@@ -62,13 +62,13 @@ RUN
         expect(error).toBeNull();
         expect(result?.success).toBe(true);
 
-        const { data: unameRow, error: unameErr } = await admin
-          .from('usernames')
-          .select('*')
-          .eq('user_id', user.id)
+        const { data: profileRow, error: profileErr } = await admin
+          .from('profiles')
+          .select('username')
+          .eq('id', user.id)
           .single();
-        expect(unameErr).toBeNull();
-        expect(unameRow?.username).toBe(target);
+        expect(profileErr).toBeNull();
+        expect(profileRow?.username).toBe(target);
       });
 
       it('update_username_atomic: returns error when username already taken', async () => {

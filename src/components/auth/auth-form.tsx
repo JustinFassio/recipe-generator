@@ -42,7 +42,7 @@ export function AuthForm() {
         const { data, error } = await supabase
           .from('recipes')
           .select('*')
-          .not('image_url', 'is', null)
+          .filter('image_url', 'not.is', null)
           .order('created_at', { ascending: false })
           .limit(5);
 

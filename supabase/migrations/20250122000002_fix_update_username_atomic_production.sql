@@ -19,10 +19,13 @@ BEGIN
     RETURN result;
   END IF;
 
-  -- Check if username is already taken by another user
+  -- Check if username is already taken by another user (check both tables)
   SELECT EXISTS(
     SELECT 1 FROM usernames
     WHERE username = p_new_username AND user_id != p_user_id
+    UNION
+    SELECT 1 FROM profiles
+    WHERE username = p_new_username AND id != p_user_id
   ) INTO username_exists;
 
   IF username_exists THEN
