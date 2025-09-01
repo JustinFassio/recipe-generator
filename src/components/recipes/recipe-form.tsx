@@ -293,7 +293,8 @@ export function RecipeForm({
                   placeholder={`Setup item ${index + 1} (e.g., soak beans overnight)`}
                   className={`${createDaisyUIInputClasses('bordered')} flex-1`}
                 />
-                {setupFields.length > 1 && (
+                {/* Setup fields can be completely removed (optional field) */}
+                {setupFields.length > 0 && (
                   <Button
                     type="button"
                     variant="ghost"
@@ -339,6 +340,7 @@ export function RecipeForm({
                   placeholder={`Ingredient ${index + 1}`}
                   className={`${createDaisyUIInputClasses('bordered')} flex-1`}
                 />
+                {/* Ingredients require at least one item (required field) */}
                 {ingredientFields.length > 1 && (
                   <Button
                     type="button"

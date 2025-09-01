@@ -5,15 +5,11 @@ export async function compressImage(
   file: File,
   maxWidth: number = 1200,
   maxHeight: number = 1200,
-  quality: number = 0.8,
-  maxSizeMB: number = 5
+  quality: number = 0.8
 ): Promise<File> {
   return new Promise((resolve, reject) => {
-    // Check if file is already small enough
-    if (file.size <= maxSizeMB * 1024 * 1024) {
-      resolve(file);
-      return;
-    }
+    // Always process the image to apply dimension constraints
+    // File size check is handled by validateImageFile before calling this function
 
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
@@ -37,21 +33,22 @@ export async function compressImage(
       canvas.width = width;
       canvas.height = height;
 
-      // Draw and compress image
+      // Draw image (resized if needed)
       ctx?.drawImage(img, 0, 0, width, height);
 
       // Convert to blob with compression
+      // This will apply quality compression even if dimensions don't need resizing
       canvas.toBlob(
         (blob) => {
           if (blob) {
-            // Create new file with compressed data
-            const compressedFile = new File([blob], file.name, {
+            // Create new file with processed data
+            const processedFile = new File([blob], file.name, {
               type: file.type,
               lastModified: Date.now(),
             });
-            resolve(compressedFile);
+            resolve(processedFile);
           } else {
-            reject(new Error('Failed to compress image'));
+            reject(new Error('Failed to process image'));
           }
         },
         file.type,
