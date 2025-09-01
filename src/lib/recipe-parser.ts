@@ -54,20 +54,16 @@ export function parseRecipeFromText(text: string): ParsedRecipe {
 
   // Try JSON first (most structured)
   try {
-    console.log('Attempting to parse as JSON...');
-
     let jsonText = cleanedText;
 
     // Check if JSON is wrapped in markdown code blocks
     const jsonBlockMatch = cleanedText.match(/```json\s*([\s\S]*?)\s*```/);
     if (jsonBlockMatch) {
       jsonText = jsonBlockMatch[1];
-      console.log('Extracted JSON from markdown code block');
     }
 
     // Try to parse as JSON first
     const parsed = JSON.parse(jsonText);
-    console.log('Successfully parsed JSON format');
 
     return parseJsonRecipe(parsed);
   } catch (err) {
@@ -403,13 +399,6 @@ function parseCategories(parsed: Record<string, unknown>): string[] {
       MAX_CATEGORIES_PER_RECIPE
     );
 
-    console.log('Category parsing result:', {
-      raw: allCategories,
-      normalized: normalizedCategories,
-      unique: uniqueCategories,
-      final: limitedCategories,
-    });
-
     return limitedCategories;
   } catch (error) {
     console.warn('Category parsing error:', error);
@@ -418,11 +407,6 @@ function parseCategories(parsed: Record<string, unknown>): string[] {
 }
 
 function parseFlexibleRecipe(text: string): ParsedRecipe {
-  console.log(
-    'Using flexible parser for text preview:',
-    text.substring(0, 200) + '...'
-  );
-
   const lines = text
     .split('\n')
     .map((line) => line.trim())
@@ -622,8 +606,6 @@ function parseFlexibleRecipe(text: string): ParsedRecipe {
 }
 
 function extractFromUnstructuredText(text: string): ParsedRecipe {
-  console.log('Extracting from unstructured text');
-
   const lines = text
     .split('\n')
     .map((line) => line.trim())
@@ -746,12 +728,6 @@ function extractCategoriesFromMarkdown(text: string): string[] {
     const normalizedCategories = normalizeCategories(categories);
     const uniqueCategories = uniqueValidCategories(normalizedCategories);
     const sortedCategories = sortCategories(uniqueCategories);
-
-    console.log('Markdown category extraction:', {
-      raw: categories,
-      normalized: normalizedCategories,
-      final: sortedCategories,
-    });
 
     return sortedCategories;
   } catch (error) {
