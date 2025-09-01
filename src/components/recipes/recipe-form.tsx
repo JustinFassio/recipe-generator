@@ -20,7 +20,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import CategoryInput from '@/components/ui/CategoryInput';
 import { MAX_CATEGORIES_PER_RECIPE } from '@/lib/constants';
-import { validateImageFile, compressImage } from '@/lib/image-utils';
+import { processImageFile } from '@/lib/image-utils';
 import { toast } from '@/hooks/use-toast';
 
 import type { Recipe } from '@/lib/types';
@@ -124,28 +124,15 @@ export function RecipeForm({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate the file
-    const validation = validateImageFile(file);
-    if (!validation.valid) {
+    const result = await processImageFile(file);
+    
+    if (result.success) {
+      setImageFile(result.compressedFile);
+      setImagePreview(result.previewUrl);
+    } else {
       toast({
         title: 'Invalid Image',
-        description: validation.error,
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    try {
-      // Compress the image if needed
-      const compressedFile = await compressImage(file);
-      setImageFile(compressedFile);
-      const previewUrl = URL.createObjectURL(compressedFile);
-      setImagePreview(previewUrl);
-    } catch (error) {
-      console.error('Error processing image:', error);
-      toast({
-        title: 'Image Processing Error',
-        description: 'Failed to process the image. Please try again.',
+        description: result.error,
         variant: 'destructive',
       });
     }

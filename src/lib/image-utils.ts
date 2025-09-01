@@ -95,3 +95,84 @@ export function validateImageFile(file: File): {
 
   return { valid: true };
 }
+
+/**
+ * Process an image file with validation, compression, and preview generation
+ * 
+ * This utility function handles the complete image processing workflow:
+ * 1. Validates the file type and size
+ * 2. Compresses the image if needed
+ * 3. Generates a preview URL
+ * 4. Returns processed data or validation errors
+ * 
+ * @param file - The image file to process
+ * @param options - Optional configuration for image processing
+ * @returns Promise resolving to processed image data or validation error
+ * 
+ * @example
+ * ```typescript
+ * const result = await processImageFile(file);
+ * if (result.success) {
+ *   setImageFile(result.compressedFile);
+ *   setImagePreview(result.previewUrl);
+ * } else {
+ *   toast({
+ *     title: 'Invalid Image',
+ *     description: result.error,
+ *     variant: 'destructive',
+ *   });
+ * }
+ * ```
+ */
+export async function processImageFile(
+  file: File,
+  options: {
+    maxWidth?: number;
+    maxHeight?: number;
+    quality?: number;
+  } = {}
+): Promise<
+  | {
+      success: true;
+      compressedFile: File;
+      previewUrl: string;
+    }
+  | {
+      success: false;
+      error: string;
+    }
+> {
+  // Validate the file first
+  const validation = validateImageFile(file);
+  if (!validation.valid) {
+    return {
+      success: false,
+      error: validation.error || 'Invalid image file',
+    };
+  }
+
+  try {
+    // Compress the image
+    const compressedFile = await compressImage(
+      file,
+      options.maxWidth,
+      options.maxHeight,
+      options.quality
+    );
+    
+    // Generate preview URL
+    const previewUrl = URL.createObjectURL(compressedFile);
+    
+    return {
+      success: true,
+      compressedFile,
+      previewUrl,
+    };
+  } catch (error) {
+    console.error('Error processing image:', error);
+    return {
+      success: false,
+      error: 'Failed to process the image. Please try again.',
+    };
+  }
+}
