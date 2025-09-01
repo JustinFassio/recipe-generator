@@ -1,6 +1,4 @@
 // Standardized recipe format interface
-
-// Standardized recipe format interface
 export interface StandardizedRecipe {
   title: string;
   setup: string[];
@@ -172,14 +170,16 @@ function parseStandardizedRecipe(text: string): StandardizedRecipe {
 }
 
 /**
- * Convert standardized recipe to ParsedRecipe format
+ * Extract categories from notes and return cleaned notes without categories
  */
-export function convertToParsedRecipe(standardized: StandardizedRecipe) {
-  // Extract categories from notes if they're in "Categories:" format
+function extractCategoriesFromNotes(notes: string[]): {
+  categories: string[];
+  notesWithoutCategories: string[];
+} {
   const categories: string[] = [];
   const notesWithoutCategories: string[] = [];
 
-  for (const note of standardized.notes) {
+  for (const note of notes) {
     if (note.startsWith('Categories:')) {
       const categoryList = note.replace('Categories:', '').trim();
       if (categoryList) {
@@ -191,6 +191,17 @@ export function convertToParsedRecipe(standardized: StandardizedRecipe) {
       notesWithoutCategories.push(note);
     }
   }
+
+  return { categories, notesWithoutCategories };
+}
+
+/**
+ * Convert standardized recipe to ParsedRecipe format
+ */
+export function convertToParsedRecipe(standardized: StandardizedRecipe) {
+  const { categories, notesWithoutCategories } = extractCategoriesFromNotes(
+    standardized.notes
+  );
 
   return {
     title: standardized.title,
