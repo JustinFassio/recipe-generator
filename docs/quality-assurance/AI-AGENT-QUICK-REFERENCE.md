@@ -31,12 +31,12 @@ npm run verify
 
 ```typescript
 // Import the comprehensive cuisine system
-import { 
-  CUISINE_REGIONS, 
-  ALL_CUISINES, 
+import {
+  CUISINE_REGIONS,
+  ALL_CUISINES,
   getCuisinesByRegion,
   getCuisineRegion,
-  getAvailableRegions 
+  getAvailableRegions,
 } from '@/lib/cuisines';
 
 // Get all available regions
@@ -79,14 +79,14 @@ interface CuisineRegion {
 
 ### **Complete Regional Coverage**
 
-| **Region** | **Cuisines** | **Coverage** | **Key Examples** |
-|------------|---------------|--------------|------------------|
-| **Americas** | 26 | 15.5% | Mexican, Brazilian, Caribbean |
-| **Europe** | 30 | 17.9% | Italian, French, Ukrainian |
-| **Asia** | 31 | 18.5% | Chinese, Thai, Kazakh |
-| **Africa** | 19 | 11.3% | Moroccan, Ethiopian, Ugandan |
-| **Middle East** | 10 | 6.0% | Lebanese, Turkish, Israeli |
-| **Oceania** | 10 | 6.0% | Hawaiian, Polynesian, Papuan |
+| **Region**      | **Cuisines** | **Coverage** | **Key Examples**              |
+| --------------- | ------------ | ------------ | ----------------------------- |
+| **Americas**    | 26           | 15.5%        | Mexican, Brazilian, Caribbean |
+| **Europe**      | 30           | 17.9%        | Italian, French, Ukrainian    |
+| **Asia**        | 31           | 18.5%        | Chinese, Thai, Kazakh         |
+| **Africa**      | 19           | 11.3%        | Moroccan, Ethiopian, Ugandan  |
+| **Middle East** | 10           | 6.0%         | Lebanese, Turkish, Israeli    |
+| **Oceania**     | 10           | 6.0%         | Hawaiian, Polynesian, Papuan  |
 
 **Total Coverage: 134 cuisines (79.8% of world countries)**
 
@@ -209,8 +209,8 @@ export const CUISINE_REGIONS: CuisineData = {
       'Existing Cuisine 1',
       'Existing Cuisine 2',
       'New Cuisine', // Add here
-    ]
-  }
+    ],
+  },
 };
 ```
 
@@ -222,7 +222,7 @@ const recipeCategories = [
   'Course: Main',
   'Cuisine: Brazilian', // Use exact cuisine name from cuisines.ts
   'Technique: Grilling',
-  'Collection: Quick & Easy'
+  'Collection: Quick & Easy',
 ];
 ```
 
@@ -367,35 +367,41 @@ npm run test:run src/__tests__/components/ui/cuisine-filter.test.tsx
 ## 🌍 **Regional Cuisine Quick Reference**
 
 ### **Americas (26 cuisines)**
+
 - **North**: American, Canadian
 - **Central**: Mexican, Guatemalan, Honduran, Salvadoran, Nicaraguan, Costa Rican, Panamanian, Belizean
 - **South**: Brazilian, Peruvian, Argentine, Chilean, Colombian, Venezuelan, Ecuadorian, Uruguayan, Paraguayan
 - **Caribbean**: Caribbean, Jamaican, Trinidadian, Barbadian, Bahamian, Cuban, Dominican, Haitian
 
 ### **Europe (30 cuisines)**
+
 - **Western**: Italian, French, Spanish, British, German, Dutch, Belgian, Swiss, Austrian
 - **Eastern**: Ukrainian, Belarusian, Lithuanian, Latvian, Estonian, Romanian, Bulgarian, Serbian, Croatian, Slovenian, Slovak, Moldovan
 - **Northern**: Swedish, Norwegian, Danish, Finnish
 - **Southern**: Greek, Polish, Hungarian, Czech, Russian
 
 ### **Asia (31 cuisines)**
+
 - **East**: Chinese, Japanese, Korean, Mongolian
 - **South**: Indian, Pakistani, Bangladeshi, Sri Lankan, Nepalese, Afghan
 - **Southeast**: Thai, Vietnamese, Indonesian, Malaysian, Filipino, Cambodian, Laotian, Myanmar, Bruneian, Timorese, Singaporean
 - **Central**: Kazakh, Uzbek, Kyrgyz, Tajik, Turkmen, Azerbaijani
 
 ### **Africa (19 cuisines)**
+
 - **North**: Moroccan, Egyptian, Tunisian, Algerian
 - **West**: Nigerian, Ghanaian, Senegalese
 - **East**: Ethiopian, Kenyan, Ugandan, Tanzanian
 - **South**: South African, Zimbabwean, Zambian, Malawian, Mozambican, Angolan, Namibian, Botswanan
 
 ### **Middle East (10 cuisines)**
+
 - **Levant**: Lebanese, Syrian, Jordanian, Palestinian, Israeli
 - **Persian Gulf**: Iranian, Iraqi, Yemeni
 - **Cross-regional**: Turkish, Middle Eastern
 
 ### **Oceania (10 cuisines)**
+
 - **Australia/NZ**: Australian, Maori
 - **Pacific Islands**: Hawaiian, Polynesian, Fijian, Samoan, Papuan, Solomon Islander, Vanuatuan, New Caledonian
 

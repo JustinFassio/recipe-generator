@@ -13,9 +13,9 @@ import { CuisineFilter } from '@/components/ui/cuisine-filter';
 import { MoodFilter } from '@/components/ui/mood-filter';
 import CategoryChip from '@/components/ui/CategoryChip';
 // Domain-specific data imports - each from their specialized source
-import { CUISINE_OPTIONS, CUISINE_LABELS } from '@/lib/cuisines';        // Regional cuisine definitions
-import { CANONICAL_CATEGORIES } from '@/lib/categories';                  // Namespaced category system
-import { MOOD_OPTIONS } from '@/lib/moods';                              // Flavor and mood definitions
+import { CUISINE_OPTIONS, CUISINE_LABELS } from '@/lib/cuisines'; // Regional cuisine definitions
+import { CANONICAL_CATEGORIES } from '@/lib/categories'; // Namespaced category system
+import { MOOD_OPTIONS } from '@/lib/moods'; // Flavor and mood definitions
 
 // Type definitions
 import type { RecipeFilters, Cuisine, Mood, SortOption } from '@/lib/types';
@@ -31,15 +31,9 @@ export function FilterBar({
   onFiltersChange,
   className = '',
 }: FilterBarProps) {
-
-
   const updateFilters = (updates: Partial<RecipeFilters>) => {
     onFiltersChange({ ...filters, ...updates });
   };
-
-
-
-
 
   const clearAllFilters = () => {
     onFiltersChange({
@@ -50,7 +44,9 @@ export function FilterBar({
   };
 
   const hasActiveFilters = !!(
-    filters.categories?.length || filters.cuisine?.length || filters.moods?.length
+    filters.categories?.length ||
+    filters.cuisine?.length ||
+    filters.moods?.length
   );
 
   return (
@@ -67,8 +63,8 @@ export function FilterBar({
         />
       </div>
 
-              {/* Filter Controls */}
-        <div className="flex items-center gap-2">
+      {/* Filter Controls */}
+      <div className="flex items-center gap-2">
         {/* Left side - All filters grouped together */}
         <div className="flex gap-2">
           {/* Categories Filter */}
@@ -83,7 +79,9 @@ export function FilterBar({
           {/* Cuisine Filter */}
           <CuisineFilter
             selectedCuisines={filters.cuisine || []}
-            onCuisinesChange={(cuisines) => updateFilters({ cuisine: cuisines })}
+            onCuisinesChange={(cuisines) =>
+              updateFilters({ cuisine: cuisines })
+            }
             availableCuisines={CUISINE_OPTIONS}
             placeholder="Filter by cuisine..."
             className="w-48"
@@ -150,7 +148,9 @@ export function FilterBar({
       </div>
 
       {/* Active Filters Display */}
-      {(filters.categories?.length || filters.cuisine?.length || filters.moods?.length) && (
+      {(filters.categories?.length ||
+        filters.cuisine?.length ||
+        filters.moods?.length) && (
         <div className="flex flex-wrap gap-2">
           {/* Category Chips */}
           {filters.categories?.map((category: string) => (
@@ -158,7 +158,8 @@ export function FilterBar({
               key={category}
               category={category}
               onRemove={() => {
-                const newCategories = filters.categories?.filter(c => c !== category) || [];
+                const newCategories =
+                  filters.categories?.filter((c) => c !== category) || [];
                 updateFilters({ categories: newCategories });
               }}
               variant="removable"
@@ -171,7 +172,8 @@ export function FilterBar({
               key={cuisine}
               category={CUISINE_LABELS[cuisine]}
               onRemove={() => {
-                const newCuisines = filters.cuisine?.filter(c => c !== cuisine) || [];
+                const newCuisines =
+                  filters.cuisine?.filter((c) => c !== cuisine) || [];
                 updateFilters({ cuisine: newCuisines });
               }}
               variant="removable"
@@ -184,7 +186,7 @@ export function FilterBar({
               key={mood}
               category={mood}
               onRemove={() => {
-                const newMoods = filters.moods?.filter(m => m !== mood) || [];
+                const newMoods = filters.moods?.filter((m) => m !== mood) || [];
                 updateFilters({ moods: newMoods });
               }}
               variant="removable"

@@ -7,7 +7,7 @@ import {
   CUISINE_REGIONS,
   ALL_CUISINES,
   getCuisinesByRegion,
-  getCuisineRegion
+  getCuisineRegion,
 } from '@/lib/cuisines';
 
 // Configuration constants
@@ -44,7 +44,7 @@ export class CuisineAgent {
       includeRegionalContext: true,
       maxSuggestions: 10,
       filterByAccessibility: false,
-      ...options
+      ...options,
     };
   }
 
@@ -56,7 +56,7 @@ export class CuisineAgent {
     const suggestions: CuisineSuggestion[] = [];
 
     Object.entries(CUISINE_REGIONS).forEach(([region, data]) => {
-      data.cuisines.forEach(cuisine => {
+      data.cuisines.forEach((cuisine) => {
         const cuisineLower = cuisine.toLowerCase();
         let confidence = 0;
         let reasoning = '';
@@ -88,7 +88,7 @@ export class CuisineAgent {
             region,
             description: data.description,
             confidence,
-            reasoning
+            reasoning,
           });
         }
       });
@@ -116,7 +116,7 @@ export class CuisineAgent {
       cuisines: [...regionData.cuisines],
       culturalNotes: this.getCulturalNotes(region, cuisine),
       commonIngredients: this.getCommonIngredients(region, cuisine),
-      cookingTechniques: this.getCookingTechniques(region, cuisine)
+      cookingTechniques: this.getCookingTechniques(region, cuisine),
     };
   }
 
@@ -125,12 +125,12 @@ export class CuisineAgent {
    */
   suggestCuisinesByIngredients(ingredients: string[]): CuisineSuggestion[] {
     const suggestions: CuisineSuggestion[] = [];
-    const ingredientSet = new Set(ingredients.map(i => i.toLowerCase()));
+    const ingredientSet = new Set(ingredients.map((i) => i.toLowerCase()));
 
     Object.entries(CUISINE_REGIONS).forEach(([region, data]) => {
-      data.cuisines.forEach(cuisine => {
+      data.cuisines.forEach((cuisine) => {
         const commonIngredients = this.getCommonIngredients(region, cuisine);
-        const matches = commonIngredients.filter(ingredient => 
+        const matches = commonIngredients.filter((ingredient) =>
           ingredientSet.has(ingredient.toLowerCase())
         );
 
@@ -141,7 +141,7 @@ export class CuisineAgent {
             region,
             description: data.description,
             confidence,
-            reasoning: `Matches ${matches.length} ingredients: ${matches.join(', ')}`
+            reasoning: `Matches ${matches.length} ingredients: ${matches.join(', ')}`,
           });
         }
       });
@@ -165,16 +165,21 @@ export class CuisineAgent {
     Object.entries(CUISINE_REGIONS).forEach(([region, data]) => {
       if (region === currentRegion) return; // Skip same region
 
-      data.cuisines.forEach(otherCuisine => {
-        const confidence = this.calculateComplementaryScore(cuisine, otherCuisine, region);
-        
+      data.cuisines.forEach((otherCuisine) => {
+        const confidence = this.calculateComplementaryScore(
+          cuisine,
+          otherCuisine,
+          region
+        );
+
         if (confidence > 0.3) {
           suggestions.push({
             cuisine: otherCuisine,
             region,
             description: data.description,
             confidence,
-            reasoning: 'Complementary cuisine based on cultural exchange and ingredient compatibility'
+            reasoning:
+              'Complementary cuisine based on cultural exchange and ingredient compatibility',
           });
         }
       });
@@ -195,7 +200,7 @@ export class CuisineAgent {
     const categories = [
       `Course: ${course}`,
       `Cuisine: ${cuisine}`,
-      `Collection: Regional Specialties`
+      `Collection: Regional Specialties`,
     ];
 
     // Add regional context
@@ -230,100 +235,155 @@ export class CuisineAgent {
     const totalCuisines = ALL_CUISINES.length;
     const coveragePercentage = (totalCuisines / totalCountries) * 100;
 
-    const regionalStats = Object.entries(CUISINE_REGIONS).map(([region, data]) => ({
-      region,
-      cuisineCount: data.cuisines.length,
-      percentage: (data.cuisines.length / totalCountries) * 100
-    }));
+    const regionalStats = Object.entries(CUISINE_REGIONS).map(
+      ([region, data]) => ({
+        region,
+        cuisineCount: data.cuisines.length,
+        percentage: (data.cuisines.length / totalCountries) * 100,
+      })
+    );
 
     return {
       totalCuisines,
       totalCountries,
       coveragePercentage: Math.round(coveragePercentage * 100) / 100,
-      regionalBreakdown: regionalStats
+      regionalBreakdown: regionalStats,
     };
   }
 
   // Private helper methods
   private getCulturalNotes(region: string, cuisine: string): string[] {
     const culturalNotes: Record<string, Record<string, string[]>> = {
-      'Americas': {
-        'Mexican': ['Rich in corn, beans, and chili peppers', 'Influenced by indigenous and Spanish traditions'],
-        'Brazilian': ['Diverse regional variations', 'Heavy use of cassava and tropical fruits'],
-        'Caribbean': ['Fusion of African, European, and indigenous influences', 'Bold spices and tropical ingredients']
+      Americas: {
+        Mexican: [
+          'Rich in corn, beans, and chili peppers',
+          'Influenced by indigenous and Spanish traditions',
+        ],
+        Brazilian: [
+          'Diverse regional variations',
+          'Heavy use of cassava and tropical fruits',
+        ],
+        Caribbean: [
+          'Fusion of African, European, and indigenous influences',
+          'Bold spices and tropical ingredients',
+        ],
       },
-      'Europe': {
-        'Italian': ['Regional diversity from north to south', 'Emphasis on fresh, seasonal ingredients'],
-        'French': ['Sophisticated techniques and presentation', 'Wine and dairy prominent'],
-        'Ukrainian': ['Hearty, comfort food traditions', 'Heavy use of grains and root vegetables']
+      Europe: {
+        Italian: [
+          'Regional diversity from north to south',
+          'Emphasis on fresh, seasonal ingredients',
+        ],
+        French: [
+          'Sophisticated techniques and presentation',
+          'Wine and dairy prominent',
+        ],
+        Ukrainian: [
+          'Hearty, comfort food traditions',
+          'Heavy use of grains and root vegetables',
+        ],
       },
-      'Asia': {
-        'Chinese': ['Eight major regional cuisines', 'Balance of flavors and textures'],
-        'Thai': ['Harmony of sweet, sour, salty, and spicy', 'Fresh herbs and aromatic ingredients'],
-        'Japanese': ['Seasonal ingredients and minimalism', 'Umami-rich flavors']
-      }
+      Asia: {
+        Chinese: [
+          'Eight major regional cuisines',
+          'Balance of flavors and textures',
+        ],
+        Thai: [
+          'Harmony of sweet, sour, salty, and spicy',
+          'Fresh herbs and aromatic ingredients',
+        ],
+        Japanese: ['Seasonal ingredients and minimalism', 'Umami-rich flavors'],
+      },
     };
 
-    return culturalNotes[region]?.[cuisine] || [
-      `Traditional ${cuisine} cuisine from ${region}`,
-      'Rich in regional flavors and cooking methods'
-    ];
+    return (
+      culturalNotes[region]?.[cuisine] || [
+        `Traditional ${cuisine} cuisine from ${region}`,
+        'Rich in regional flavors and cooking methods',
+      ]
+    );
   }
 
   private getCommonIngredients(region: string, cuisine: string): string[] {
     const ingredients: Record<string, Record<string, string[]>> = {
-      'Americas': {
-        'Mexican': ['corn', 'beans', 'chili peppers', 'tomatoes', 'lime', 'cilantro'],
-        'Brazilian': ['cassava', 'black beans', 'rice', 'coconut', 'palm oil'],
-        'Caribbean': ['plantains', 'yams', 'coconut', 'allspice', 'rum']
+      Americas: {
+        Mexican: [
+          'corn',
+          'beans',
+          'chili peppers',
+          'tomatoes',
+          'lime',
+          'cilantro',
+        ],
+        Brazilian: ['cassava', 'black beans', 'rice', 'coconut', 'palm oil'],
+        Caribbean: ['plantains', 'yams', 'coconut', 'allspice', 'rum'],
       },
-      'Europe': {
-        'Italian': ['olive oil', 'basil', 'tomatoes', 'parmesan', 'balsamic'],
-        'French': ['butter', 'wine', 'shallots', 'herbs de provence', 'dijon mustard'],
-        'Ukrainian': ['potatoes', 'beets', 'cabbage', 'dill', 'sour cream']
+      Europe: {
+        Italian: ['olive oil', 'basil', 'tomatoes', 'parmesan', 'balsamic'],
+        French: [
+          'butter',
+          'wine',
+          'shallots',
+          'herbs de provence',
+          'dijon mustard',
+        ],
+        Ukrainian: ['potatoes', 'beets', 'cabbage', 'dill', 'sour cream'],
       },
-      'Asia': {
-        'Chinese': ['soy sauce', 'ginger', 'garlic', 'rice wine', 'five spice'],
-        'Thai': ['fish sauce', 'coconut milk', 'lemongrass', 'kaffir lime', 'galangal'],
-        'Japanese': ['miso', 'dashi', 'mirin', 'natto', 'wasabi']
-      }
+      Asia: {
+        Chinese: ['soy sauce', 'ginger', 'garlic', 'rice wine', 'five spice'],
+        Thai: [
+          'fish sauce',
+          'coconut milk',
+          'lemongrass',
+          'kaffir lime',
+          'galangal',
+        ],
+        Japanese: ['miso', 'dashi', 'mirin', 'natto', 'wasabi'],
+      },
     };
 
-    return ingredients[region]?.[cuisine] || [
-      'regional spices',
-      'local vegetables',
-      'traditional grains',
-      'cultural seasonings'
-    ];
+    return (
+      ingredients[region]?.[cuisine] || [
+        'regional spices',
+        'local vegetables',
+        'traditional grains',
+        'cultural seasonings',
+      ]
+    );
   }
 
   private getCookingTechniques(region: string, cuisine: string): string[] {
     const techniques: Record<string, Record<string, string[]>> = {
-      'Americas': {
-        'Mexican': ['grilling', 'braising', 'steaming', 'frying'],
-        'Brazilian': ['grilling', 'slow cooking', 'deep frying', 'smoking'],
-        'Caribbean': ['grilling', 'stewing', 'pickling', 'smoking']
+      Americas: {
+        Mexican: ['grilling', 'braising', 'steaming', 'frying'],
+        Brazilian: ['grilling', 'slow cooking', 'deep frying', 'smoking'],
+        Caribbean: ['grilling', 'stewing', 'pickling', 'smoking'],
       },
-      'Europe': {
-        'Italian': ['braising', 'sautéing', 'roasting', 'pasta making'],
-        'French': ['sautéing', 'braising', 'poaching', 'sauce making'],
-        'Ukrainian': ['braising', 'slow cooking', 'pickling', 'fermenting']
+      Europe: {
+        Italian: ['braising', 'sautéing', 'roasting', 'pasta making'],
+        French: ['sautéing', 'braising', 'poaching', 'sauce making'],
+        Ukrainian: ['braising', 'slow cooking', 'pickling', 'fermenting'],
       },
-      'Asia': {
-        'Chinese': ['stir-frying', 'steaming', 'braising', 'deep frying'],
-        'Thai': ['stir-frying', 'curry making', 'grilling', 'steaming'],
-        'Japanese': ['steaming', 'grilling', 'tempura frying', 'sushi making']
-      }
+      Asia: {
+        Chinese: ['stir-frying', 'steaming', 'braising', 'deep frying'],
+        Thai: ['stir-frying', 'curry making', 'grilling', 'steaming'],
+        Japanese: ['steaming', 'grilling', 'tempura frying', 'sushi making'],
+      },
     };
 
-    return techniques[region]?.[cuisine] || [
-      'traditional cooking methods',
-      'regional preparation techniques',
-      'cultural cooking styles'
-    ];
+    return (
+      techniques[region]?.[cuisine] || [
+        'traditional cooking methods',
+        'regional preparation techniques',
+        'cultural cooking styles',
+      ]
+    );
   }
 
-  private calculateComplementaryScore(cuisine1: string, cuisine2: string, region2: string): number {
+  private calculateComplementaryScore(
+    cuisine1: string,
+    cuisine2: string,
+    region2: string
+  ): number {
     // Simple scoring based on cultural proximity and ingredient compatibility
     let score = 0.5; // Base score
 
@@ -343,18 +403,22 @@ export class CuisineAgent {
     return Math.min(score, 1.0);
   }
 
-  private areRegionsProximate(region1: string | null, region2: string): boolean {
+  private areRegionsProximate(
+    region1: string | null,
+    region2: string
+  ): boolean {
     if (!region1) return false;
-    
+
     const proximatePairs = [
       ['Europe', 'Middle East'],
       ['Asia', 'Oceania'],
       ['Americas', 'Oceania'],
-      ['Africa', 'Middle East']
+      ['Africa', 'Middle East'],
     ];
 
-    return proximatePairs.some(([r1, r2]) => 
-      (region1 === r1 && region2 === r2) || (region1 === r2 && region2 === r1)
+    return proximatePairs.some(
+      ([r1, r2]) =>
+        (region1 === r1 && region2 === r2) || (region1 === r2 && region2 === r1)
     );
   }
 
@@ -365,11 +429,13 @@ export class CuisineAgent {
       ['Chinese', 'Japanese'],
       ['Mexican', 'American'],
       ['Turkish', 'Greek'],
-      ['Indian', 'Pakistani']
+      ['Indian', 'Pakistani'],
     ];
 
-    return exchangePairs.some(([c1, c2]) => 
-      (cuisine1 === c1 && cuisine2 === c2) || (cuisine1 === c2 && cuisine2 === c1)
+    return exchangePairs.some(
+      ([c1, c2]) =>
+        (cuisine1 === c1 && cuisine2 === c2) ||
+        (cuisine1 === c2 && cuisine2 === c1)
     );
   }
 }
@@ -378,9 +444,14 @@ export class CuisineAgent {
 export const cuisineAgent = new CuisineAgent();
 
 // Export convenience functions
-export const searchCuisines = (query: string) => cuisineAgent.searchCuisines(query);
-export const getCuisineContext = (cuisine: string) => cuisineAgent.getCuisineContext(cuisine);
-export const suggestCuisinesByIngredients = (ingredients: string[]) => cuisineAgent.suggestCuisinesByIngredients(ingredients);
-export const getComplementaryCuisines = (cuisine: string) => cuisineAgent.getComplementaryCuisines(cuisine);
-export const generateRecipeCategories = (cuisine: string, course?: string) => cuisineAgent.generateRecipeCategories(cuisine, course);
+export const searchCuisines = (query: string) =>
+  cuisineAgent.searchCuisines(query);
+export const getCuisineContext = (cuisine: string) =>
+  cuisineAgent.getCuisineContext(cuisine);
+export const suggestCuisinesByIngredients = (ingredients: string[]) =>
+  cuisineAgent.suggestCuisinesByIngredients(ingredients);
+export const getComplementaryCuisines = (cuisine: string) =>
+  cuisineAgent.getComplementaryCuisines(cuisine);
+export const generateRecipeCategories = (cuisine: string, course?: string) =>
+  cuisineAgent.generateRecipeCategories(cuisine, course);
 export const getCoverageStats = () => cuisineAgent.getCoverageStats();

@@ -81,8 +81,6 @@ export function CategoryFilter({
     onCategoriesChange([]);
   };
 
-
-
   return (
     <div className={`relative ${className}`}>
       <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
@@ -99,86 +97,84 @@ export function CategoryFilter({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-80 p-4">
-            <div className="card-body p-0 space-y-4">
-              {/* Search input */}
-              <div className="form-control">
-                <input
-                  ref={searchInputRef}
-                  type="text"
-                  placeholder={placeholder}
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="input input-bordered input-sm"
-                />
-              </div>
+          <div className="card-body p-0 space-y-4">
+            {/* Search input */}
+            <div className="form-control">
+              <input
+                ref={searchInputRef}
+                type="text"
+                placeholder={placeholder}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="input input-bordered input-sm"
+              />
+            </div>
 
-              {/* Selected categories */}
-              {selectedCategories.length > 0 && (
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Selected</span>
-                    <button
-                      type="button"
-                      onClick={clearAllFilters}
-                      className="btn btn-ghost btn-xs gap-1"
-                    >
-                      <X className="h-3 w-3" />
-                      Clear all
-                    </button>
-                  </div>
+            {/* Selected categories */}
+            {selectedCategories.length > 0 && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Selected</span>
+                  <button
+                    type="button"
+                    onClick={clearAllFilters}
+                    className="btn btn-ghost btn-xs gap-1"
+                  >
+                    <X className="h-3 w-3" />
+                    Clear all
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  {selectedCategories.map((category, index) => (
+                    <CategoryChip
+                      key={`selected-${category}-${index}`}
+                      category={category}
+                      variant="selected"
+                      size="sm"
+                      onClick={() => toggleCategory(category)}
+                      onRemove={() => toggleCategory(category)}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Available categories grouped by namespace */}
+            <div className="space-y-3 max-h-60 overflow-y-auto">
+              {Object.entries(filteredGroups).map(([namespace, categories]) => (
+                <div key={namespace} className="space-y-2">
+                  <h4 className="text-xs font-semibold text-base-content opacity-70 uppercase tracking-wide">
+                    {namespace}
+                  </h4>
                   <div className="flex flex-wrap gap-1">
-                    {selectedCategories.map((category, index) => (
+                    {categories.map((category, index) => (
                       <CategoryChip
-                        key={`selected-${category}-${index}`}
+                        key={`${namespace}-${category}-${index}`}
                         category={category}
-                        variant="selected"
+                        variant={
+                          selectedCategories.includes(category)
+                            ? 'selected'
+                            : 'clickable'
+                        }
                         size="sm"
                         onClick={() => toggleCategory(category)}
-                        onRemove={() => toggleCategory(category)}
                       />
                     ))}
                   </div>
                 </div>
-              )}
-
-              {/* Available categories grouped by namespace */}
-              <div className="space-y-3 max-h-60 overflow-y-auto">
-                {Object.entries(filteredGroups).map(
-                  ([namespace, categories]) => (
-                    <div key={namespace} className="space-y-2">
-                      <h4 className="text-xs font-semibold text-base-content opacity-70 uppercase tracking-wide">
-                        {namespace}
-                      </h4>
-                      <div className="flex flex-wrap gap-1">
-                        {categories.map((category, index) => (
-                          <CategoryChip
-                            key={`${namespace}-${category}-${index}`}
-                            category={category}
-                            variant={
-                              selectedCategories.includes(category)
-                                ? 'selected'
-                                : 'clickable'
-                            }
-                            size="sm"
-                            onClick={() => toggleCategory(category)}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  )
-                )}
-              </div>
-
-              {Object.keys(filteredGroups).length === 0 && (
-                <div className="text-center py-4">
-                  <p className="text-sm text-base-content opacity-50">
-                    No categories found
-                  </p>
-                </div>
-              )}
+              ))}
             </div>
-          </DropdownMenuContent>
-        </DropdownMenu>
+
+            {Object.keys(filteredGroups).length === 0 && (
+              <div className="text-center py-4">
+                <p className="text-sm text-base-content opacity-50">
+                  No categories found
+                </p>
+              </div>
+            )}
+          </div>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 }

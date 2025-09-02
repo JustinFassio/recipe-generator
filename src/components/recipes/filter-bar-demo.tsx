@@ -37,8 +37,8 @@ export function FilterBarDemo() {
       <div className="text-center">
         <h1 className="text-3xl font-bold mb-2">Enhanced Filter Bar Demo</h1>
         <p className="text-gray-600">
-          Showcasing all the enhanced features: category-based filtering, 
-          filter persistence, active filter display, and filter analytics.
+          Showcasing all the enhanced features: category-based filtering, filter
+          persistence, active filter display, and filter analytics.
         </p>
       </div>
 
@@ -70,16 +70,15 @@ export function FilterBarDemo() {
           </h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {categoryStats.map((stat, index) => (
-              <div key={index} className="text-center bg-white p-3 rounded border">
+              <div
+                key={index}
+                className="text-center bg-white p-3 rounded border"
+              >
                 <div className="text-2xl font-bold text-blue-600">
                   {stat.count}
                 </div>
-                <div className="text-sm text-gray-600">
-                  {stat.category}
-                </div>
-                <div className="text-xs text-gray-500">
-                  {stat.percentage}%
-                </div>
+                <div className="text-sm text-gray-600">{stat.category}</div>
+                <div className="text-xs text-gray-500">{stat.percentage}%</div>
               </div>
             ))}
           </div>
@@ -92,12 +91,29 @@ export function FilterBarDemo() {
           How to Use
         </h3>
         <ul className="space-y-2 text-sm text-green-700">
-          <li>• <strong>Search:</strong> Type to search with 300ms debouncing</li>
-          <li>• <strong>Categories:</strong> Use the enhanced category filter with search and grouping</li>
-          <li>• <strong>Cuisine:</strong> Select multiple cuisines with visual indicators</li>
-          <li>• <strong>Advanced:</strong> Access sorting options in the advanced dropdown</li>
-          <li>• <strong>Analytics:</strong> Toggle analytics view to see filter impact</li>
-          <li>• <strong>Persistence:</strong> All filters are automatically saved to URL</li>
+          <li>
+            • <strong>Search:</strong> Type to search with 300ms debouncing
+          </li>
+          <li>
+            • <strong>Categories:</strong> Use the enhanced category filter with
+            search and grouping
+          </li>
+          <li>
+            • <strong>Cuisine:</strong> Select multiple cuisines with visual
+            indicators
+          </li>
+          <li>
+            • <strong>Advanced:</strong> Access sorting options in the advanced
+            dropdown
+          </li>
+          <li>
+            • <strong>Analytics:</strong> Toggle analytics view to see filter
+            impact
+          </li>
+          <li>
+            • <strong>Persistence:</strong> All filters are automatically saved
+            to URL
+          </li>
         </ul>
       </div>
     </div>

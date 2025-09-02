@@ -1,5 +1,13 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Search, Filter, X, ChevronDown, BarChart3, TrendingUp, RefreshCw } from 'lucide-react';
+import {
+  Search,
+  Filter,
+  X,
+  ChevronDown,
+  BarChart3,
+  TrendingUp,
+  RefreshCw,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -29,7 +37,11 @@ interface EnhancedFilterBarProps {
   // Analytics props
   totalRecipes?: number;
   filteredCount?: number;
-  categoryStats?: Array<{ category: string; count: number; percentage: number }>;
+  categoryStats?: Array<{
+    category: string;
+    count: number;
+    percentage: number;
+  }>;
   onShowAnalytics?: () => void;
   showAnalytics?: boolean;
 }
@@ -85,7 +97,7 @@ export function EnhancedFilterBar({
   };
 
   const hasActiveFilters = !!(
-    filters.categories?.length || 
+    filters.categories?.length ||
     filters.cuisine?.length ||
     (filters.searchTerm && filters.searchTerm.trim() !== '')
   );
@@ -94,12 +106,12 @@ export function EnhancedFilterBar({
   const filterAnalytics = useMemo(() => {
     const activeFilters = [
       ...(filters.categories || []),
-      ...(filters.cuisine || []).map(c => `Cuisine: ${c}`),
+      ...(filters.cuisine || []).map((c) => `Cuisine: ${c}`),
     ];
 
     const totalActiveFilters = activeFilters.length;
     const searchActive = filters.searchTerm && filters.searchTerm.trim() !== '';
-    
+
     return {
       totalActiveFilters,
       searchActive,
@@ -108,15 +120,17 @@ export function EnhancedFilterBar({
         categories: filters.categories?.length || 0,
         cuisines: filters.cuisine?.length || 0,
         search: searchActive ? 1 : 0,
-      }
+      },
     };
   }, [filters]);
 
   // Get available categories for the category filter
   const availableCategories = useMemo(() => {
     // Combine predefined categories with canonical categories
-    const allCategories = [...new Set([...PREDEFINED_CATEGORIES, ...CANONICAL_CATEGORIES])];
-    
+    const allCategories = [
+      ...new Set([...PREDEFINED_CATEGORIES, ...CANONICAL_CATEGORIES]),
+    ];
+
     // Filter out any that might conflict with current filters
     return allCategories;
   }, []);
@@ -133,7 +147,7 @@ export function EnhancedFilterBar({
           onChange={(e) => setSearchTerm(e.target.value)}
           className="pl-10 pr-20"
         />
-        
+
         {/* Search Actions */}
         <div className="absolute top-1/2 right-2 flex items-center gap-1">
           {searchTerm && (
@@ -146,11 +160,11 @@ export function EnhancedFilterBar({
               <X className="h-3 w-3" />
             </Button>
           )}
-          
+
           {/* Analytics Toggle */}
           {onShowAnalytics && (
             <Button
-              variant={showAnalytics ? "default" : "outline"}
+              variant={showAnalytics ? 'default' : 'outline'}
               size="sm"
               onClick={onShowAnalytics}
               className="h-6 px-2 text-xs gap-1"
@@ -170,10 +184,11 @@ export function EnhancedFilterBar({
               <Filter className="h-4 w-4 text-primary" />
               <span className="text-sm font-medium">Active Filters</span>
               <span className="badge badge-primary badge-sm">
-                {filterAnalytics.totalActiveFilters + (filterAnalytics.searchActive ? 1 : 0)}
+                {filterAnalytics.totalActiveFilters +
+                  (filterAnalytics.searchActive ? 1 : 0)}
               </span>
             </div>
-            
+
             {/* Filter Breakdown */}
             <div className="flex items-center gap-2 text-xs text-base-content opacity-70">
               {filterAnalytics.filterBreakdown.categories > 0 && (
@@ -199,7 +214,7 @@ export function EnhancedFilterBar({
             <div className="text-xs text-base-content opacity-70">
               {filteredCount} of {totalRecipes} recipes
             </div>
-            
+
             <Button
               variant="ghost"
               size="sm"
@@ -341,7 +356,8 @@ export function EnhancedFilterBar({
                 variant="removable"
                 size="sm"
                 onRemove={() => {
-                  const newCategories = filters.categories?.filter(c => c !== category) || [];
+                  const newCategories =
+                    filters.categories?.filter((c) => c !== category) || [];
                   updateFilters({ categories: newCategories });
                 }}
               />
@@ -355,7 +371,8 @@ export function EnhancedFilterBar({
                 variant="removable"
                 size="sm"
                 onRemove={() => {
-                  const newCuisines = filters.cuisine?.filter(c => c !== cuisine) || [];
+                  const newCuisines =
+                    filters.cuisine?.filter((c) => c !== cuisine) || [];
                   updateFilters({ cuisine: newCuisines });
                 }}
               />
@@ -384,7 +401,7 @@ export function EnhancedFilterBar({
                   {filteredCount} results
                 </span>
               </div>
-              
+
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {categoryStats.slice(0, 4).map((stat, index) => (
                   <div key={index} className="text-center">

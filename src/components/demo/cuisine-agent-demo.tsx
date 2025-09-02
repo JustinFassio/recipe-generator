@@ -10,7 +10,7 @@ import {
   generateRecipeCategories,
   getCoverageStats,
   type CuisineSuggestion,
-  type RegionalCuisineContext
+  type RegionalCuisineContext,
 } from '@/lib/ai-agents/cuisine-agent';
 
 // Define types for the demo component
@@ -30,11 +30,18 @@ export function CuisineAgentDemo() {
   const [ingredients, setIngredients] = useState('');
   const [selectedCuisine, setSelectedCuisine] = useState('');
   const [searchResults, setSearchResults] = useState<CuisineSuggestion[]>([]);
-  const [cuisineContext, setCuisineContext] = useState<RegionalCuisineContext | null>(null);
-  const [ingredientSuggestions, setIngredientSuggestions] = useState<CuisineSuggestion[]>([]);
-  const [complementaryCuisines, setComplementaryCuisines] = useState<CuisineSuggestion[]>([]);
+  const [cuisineContext, setCuisineContext] =
+    useState<RegionalCuisineContext | null>(null);
+  const [ingredientSuggestions, setIngredientSuggestions] = useState<
+    CuisineSuggestion[]
+  >([]);
+  const [complementaryCuisines, setComplementaryCuisines] = useState<
+    CuisineSuggestion[]
+  >([]);
   const [recipeCategories, setRecipeCategories] = useState<string[]>([]);
-  const [coverageStats, setCoverageStats] = useState<CoverageStats | null>(null);
+  const [coverageStats, setCoverageStats] = useState<CoverageStats | null>(
+    null
+  );
 
   const handleSearch = () => {
     if (searchQuery.trim()) {
@@ -51,7 +58,7 @@ export function CuisineAgentDemo() {
 
   const handleIngredientSearch = () => {
     if (ingredients.trim()) {
-      const ingredientList = ingredients.split(',').map(i => i.trim());
+      const ingredientList = ingredients.split(',').map((i) => i.trim());
       const suggestions = suggestCuisinesByIngredients(ingredientList);
       setIngredientSuggestions(suggestions);
     }
@@ -80,9 +87,10 @@ export function CuisineAgentDemo() {
         </div>
         <div>
           <p className="text-gray-600 mb-4">
-            This demo showcases the AI agent's ability to work with the comprehensive regional cuisine system.
+            This demo showcases the AI agent's ability to work with the
+            comprehensive regional cuisine system.
           </p>
-          
+
           {/* Coverage Stats */}
           <div className="mb-6">
             <Button onClick={handleGetStats} variant="outline" className="mb-2">
@@ -91,19 +99,27 @@ export function CuisineAgentDemo() {
             {coverageStats && (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
                 <div className="text-center p-3 bg-blue-50 rounded-lg">
-                  <div className="text-2xl font-bold text-blue-600">{coverageStats.totalCuisines}</div>
+                  <div className="text-2xl font-bold text-blue-600">
+                    {coverageStats.totalCuisines}
+                  </div>
                   <div className="text-sm text-blue-800">Total Cuisines</div>
                 </div>
                 <div className="text-center p-3 bg-green-50 rounded-lg">
-                  <div className="text-2xl font-bold text-green-600">{coverageStats.coveragePercentage}%</div>
+                  <div className="text-2xl font-bold text-green-600">
+                    {coverageStats.coveragePercentage}%
+                  </div>
                   <div className="text-sm text-green-800">World Coverage</div>
                 </div>
                 <div className="text-center p-3 bg-purple-50 rounded-lg">
-                  <div className="text-2xl font-bold text-purple-600">{coverageStats.totalCountries}</div>
+                  <div className="text-2xl font-bold text-purple-600">
+                    {coverageStats.totalCountries}
+                  </div>
                   <div className="text-sm text-purple-800">Total Countries</div>
                 </div>
                 <div className="text-center p-3 bg-orange-50 rounded-lg">
-                  <div className="text-2xl font-bold text-orange-600">{coverageStats.regionalBreakdown.length}</div>
+                  <div className="text-2xl font-bold text-orange-600">
+                    {coverageStats.regionalBreakdown.length}
+                  </div>
                   <div className="text-sm text-orange-800">Regions</div>
                 </div>
               </div>
@@ -129,31 +145,40 @@ export function CuisineAgentDemo() {
                     <div className="flex justify-between items-start mb-2">
                       <div>
                         <span className="font-semibold">{result.cuisine}</span>
-                        <CategoryChip category={result.region} variant="default" size="sm" className="ml-2" />
+                        <CategoryChip
+                          category={result.region}
+                          variant="default"
+                          size="sm"
+                          className="ml-2"
+                        />
                       </div>
                       <div className="text-sm text-muted-foreground">
                         Confidence: {(result.confidence * 100).toFixed(0)}%
                       </div>
                     </div>
-                    <p className="text-sm text-muted-foreground mb-2">{result.description}</p>
-                    <p className="text-xs text-muted-foreground">{result.reasoning}</p>
+                    <p className="text-sm text-muted-foreground mb-2">
+                      {result.description}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {result.reasoning}
+                    </p>
                     <div className="flex gap-2 mt-2">
-                      <Button 
-                        size="sm" 
+                      <Button
+                        size="sm"
                         variant="outline"
                         onClick={() => handleGetContext(result.cuisine)}
                       >
                         Get Context
                       </Button>
-                      <Button 
-                        size="sm" 
+                      <Button
+                        size="sm"
                         variant="outline"
                         onClick={() => handleGetComplementary(result.cuisine)}
                       >
                         Complementary
                       </Button>
-                      <Button 
-                        size="sm" 
+                      <Button
+                        size="sm"
                         variant="outline"
                         onClick={() => handleGenerateCategories(result.cuisine)}
                       >
@@ -168,7 +193,9 @@ export function CuisineAgentDemo() {
 
           {/* Ingredient-based Suggestions */}
           <div className="mb-6">
-            <h3 className="text-lg font-semibold mb-3">🥘 Find Cuisines by Ingredients</h3>
+            <h3 className="text-lg font-semibold mb-3">
+              🥘 Find Cuisines by Ingredients
+            </h3>
             <div className="flex gap-2 mb-3">
               <Input
                 placeholder="Enter ingredients (comma-separated)..."
@@ -184,14 +211,23 @@ export function CuisineAgentDemo() {
                   <div key={index} className="p-3 border rounded-lg">
                     <div className="flex justify-between items-start">
                       <div>
-                        <span className="font-semibold">{suggestion.cuisine}</span>
-                        <CategoryChip category={suggestion.region} variant="default" size="sm" className="ml-2" />
+                        <span className="font-semibold">
+                          {suggestion.cuisine}
+                        </span>
+                        <CategoryChip
+                          category={suggestion.region}
+                          variant="default"
+                          size="sm"
+                          className="ml-2"
+                        />
                       </div>
                       <div className="text-sm text-muted-foreground">
                         Match: {(suggestion.confidence * 100).toFixed(0)}%
                       </div>
                     </div>
-                    <p className="text-sm text-muted-foreground mt-1">{suggestion.reasoning}</p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {suggestion.reasoning}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -201,30 +237,50 @@ export function CuisineAgentDemo() {
           {/* Cuisine Context */}
           {cuisineContext && (
             <div className="mb-6">
-              <h3 className="text-lg font-semibold mb-3">📚 Cuisine Context: {selectedCuisine}</h3>
+              <h3 className="text-lg font-semibold mb-3">
+                📚 Cuisine Context: {selectedCuisine}
+              </h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="p-4 border rounded-lg">
                   <h4 className="font-semibold mb-2">Cultural Notes</h4>
                   <ul className="text-sm space-y-1">
-                    {cuisineContext.culturalNotes.map((note: string, index: number) => (
-                      <li key={index} className="text-muted-foreground">• {note}</li>
-                    ))}
+                    {cuisineContext.culturalNotes.map(
+                      (note: string, index: number) => (
+                        <li key={index} className="text-muted-foreground">
+                          • {note}
+                        </li>
+                      )
+                    )}
                   </ul>
                 </div>
                 <div className="p-4 border rounded-lg">
                   <h4 className="font-semibold mb-2">Common Ingredients</h4>
                   <div className="flex flex-wrap gap-1">
-                    {cuisineContext.commonIngredients.map((ingredient: string, index: number) => (
-                      <CategoryChip key={index} category={ingredient} variant="default" size="sm" />
-                    ))}
+                    {cuisineContext.commonIngredients.map(
+                      (ingredient: string, index: number) => (
+                        <CategoryChip
+                          key={index}
+                          category={ingredient}
+                          variant="default"
+                          size="sm"
+                        />
+                      )
+                    )}
                   </div>
                 </div>
                 <div className="p-4 border rounded-lg">
                   <h4 className="font-semibold mb-2">Cooking Techniques</h4>
                   <div className="flex flex-wrap gap-1">
-                    {cuisineContext.cookingTechniques.map((technique: string, index: number) => (
-                      <CategoryChip key={index} category={technique} variant="default" size="sm" />
-                    ))}
+                    {cuisineContext.cookingTechniques.map(
+                      (technique: string, index: number) => (
+                        <CategoryChip
+                          key={index}
+                          category={technique}
+                          variant="default"
+                          size="sm"
+                        />
+                      )
+                    )}
                   </div>
                 </div>
               </div>
@@ -234,20 +290,29 @@ export function CuisineAgentDemo() {
           {/* Complementary Cuisines */}
           {complementaryCuisines.length > 0 && (
             <div className="mb-6">
-              <h3 className="text-lg font-semibold mb-3">🔄 Complementary Cuisines</h3>
+              <h3 className="text-lg font-semibold mb-3">
+                🔄 Complementary Cuisines
+              </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                 {complementaryCuisines.map((cuisine, index) => (
                   <div key={index} className="p-3 border rounded-lg">
                     <div className="flex justify-between items-start">
                       <div>
                         <span className="font-semibold">{cuisine.cuisine}</span>
-                        <CategoryChip category={cuisine.region} variant="default" size="sm" className="ml-2" />
+                        <CategoryChip
+                          category={cuisine.region}
+                          variant="default"
+                          size="sm"
+                          className="ml-2"
+                        />
                       </div>
                       <div className="text-sm text-muted-foreground">
                         {(cuisine.confidence * 100).toFixed(0)}%
                       </div>
                     </div>
-                    <p className="text-sm text-muted-foreground mt-1">{cuisine.reasoning}</p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {cuisine.reasoning}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -257,10 +322,17 @@ export function CuisineAgentDemo() {
           {/* Generated Recipe Categories */}
           {recipeCategories.length > 0 && (
             <div className="mb-6">
-              <h3 className="text-lg font-semibold mb-3">🏷️ Generated Recipe Categories</h3>
+              <h3 className="text-lg font-semibold mb-3">
+                🏷️ Generated Recipe Categories
+              </h3>
               <div className="flex flex-wrap gap-2">
                 {recipeCategories.map((category, index) => (
-                  <CategoryChip key={index} category={category} variant="default" size="sm" />
+                  <CategoryChip
+                    key={index}
+                    category={category}
+                    variant="default"
+                    size="sm"
+                  />
                 ))}
               </div>
             </div>

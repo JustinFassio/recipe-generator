@@ -54,7 +54,7 @@ export function CuisineCategorySelector({
   };
 
   const removeCategory = (category: string) => {
-    const newCategories = selectedCategories.filter(c => c !== category);
+    const newCategories = selectedCategories.filter((c) => c !== category);
     setSelectedCategories(newCategories);
     onSelectionChange({
       categories: newCategories,
@@ -64,7 +64,7 @@ export function CuisineCategorySelector({
   };
 
   const removeCuisine = (cuisine: string) => {
-    const newCuisines = selectedCuisines.filter(c => c !== cuisine);
+    const newCuisines = selectedCuisines.filter((c) => c !== cuisine);
     setSelectedCuisines(newCuisines);
     onSelectionChange({
       categories: selectedCategories,
@@ -74,7 +74,7 @@ export function CuisineCategorySelector({
   };
 
   const removeMood = (mood: string) => {
-    const newMoods = selectedMoods.filter(m => m !== mood);
+    const newMoods = selectedMoods.filter((m) => m !== mood);
     setSelectedMoods(newMoods);
     onSelectionChange({
       categories: selectedCategories,
@@ -94,7 +94,10 @@ export function CuisineCategorySelector({
     });
   };
 
-  const hasSelections = selectedCategories.length > 0 || selectedCuisines.length > 0 || selectedMoods.length > 0;
+  const hasSelections =
+    selectedCategories.length > 0 ||
+    selectedCuisines.length > 0 ||
+    selectedMoods.length > 0;
 
   return (
     <div className={`space-y-4 ${className}`}>
@@ -179,31 +182,35 @@ export function CuisineCategorySelector({
         </div>
       )}
 
-              {/* Selection Summary */}
-        {hasSelections && (
-          <div className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
-            <p>
-              <strong>Recipe will include:</strong>
-              {selectedCategories.length > 0 && (
-                <span className="ml-2">
-                  {selectedCategories.length} categor{selectedCategories.length === 1 ? 'y' : 'ies'}
-                  {(selectedCuisines.length > 0 || selectedMoods.length > 0) && ' and '}
-                </span>
-              )}
-              {selectedCuisines.length > 0 && (
-                <span className="ml-2">
-                  {selectedCuisines.length} cuisin{selectedCuisines.length === 1 ? 'e' : 'es'}
-                  {selectedMoods.length > 0 && ' and '}
-                </span>
-              )}
-              {selectedMoods.length > 0 && (
-                <span className="ml-2">
-                  {selectedMoods.length} mood{selectedMoods.length === 1 ? '' : 's'}
-                </span>
-              )}
-            </p>
-          </div>
-        )}
+      {/* Selection Summary */}
+      {hasSelections && (
+        <div className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
+          <p>
+            <strong>Recipe will include:</strong>
+            {selectedCategories.length > 0 && (
+              <span className="ml-2">
+                {selectedCategories.length} categor
+                {selectedCategories.length === 1 ? 'y' : 'ies'}
+                {(selectedCuisines.length > 0 || selectedMoods.length > 0) &&
+                  ' and '}
+              </span>
+            )}
+            {selectedCuisines.length > 0 && (
+              <span className="ml-2">
+                {selectedCuisines.length} cuisin
+                {selectedCuisines.length === 1 ? 'e' : 'es'}
+                {selectedMoods.length > 0 && ' and '}
+              </span>
+            )}
+            {selectedMoods.length > 0 && (
+              <span className="ml-2">
+                {selectedMoods.length} mood
+                {selectedMoods.length === 1 ? '' : 's'}
+              </span>
+            )}
+          </p>
+        </div>
+      )}
     </div>
   );
 }

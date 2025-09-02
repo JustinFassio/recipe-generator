@@ -1,18 +1,18 @@
 /**
  * REGIONAL CUISINE DEFINITIONS
- * 
+ *
  * This file contains all cuisine-related data and definitions.
  * It is the SINGLE SOURCE OF TRUTH for cuisine information in the application.
- * 
+ *
  * IMPORTANT: Do NOT import cuisine data from other files (e.g., constants.ts).
  * All cuisine definitions, options, and labels are centralized here.
- * 
+ *
  * Architecture:
  * - CUISINE_REGIONS: Organized by continents/major regions
  * - ALL_CUISINES: Flattened list with const assertions for type safety
  * - CUISINE_OPTIONS: Type-safe options for filtering and selection
  * - CUISINE_LABELS: Display labels for UI components
- * 
+ *
  * Enhanced cuisine definitions organized by continents and major regions
  * Provides comprehensive global coverage with intuitive navigation
  */
@@ -31,61 +31,159 @@ export interface CuisineData {
 
 // Comprehensive cuisine organization by continents and major regions
 export const CUISINE_REGIONS: CuisineData = {
-  'Americas': {
+  Americas: {
     description: 'American culinary traditions',
     cuisines: [
-      'Mexican', 'American', 'Brazilian', 'Peruvian', 'Caribbean',
-      'Argentine', 'Chilean', 'Colombian', 'Venezuelan', 'Canadian',
-      'Ecuadorian', 'Uruguayan', 'Paraguayan', 'Guatemalan', 'Honduran',
-      'Salvadoran', 'Nicaraguan', 'Costa Rican', 'Panamanian', 'Belizean',
-      'Jamaican', 'Trinidadian', 'Barbadian', 'Bahamian', 'Cuban',
-      'Dominican', 'Haitian'
-    ]
+      'Mexican',
+      'American',
+      'Brazilian',
+      'Peruvian',
+      'Caribbean',
+      'Argentine',
+      'Chilean',
+      'Colombian',
+      'Venezuelan',
+      'Canadian',
+      'Ecuadorian',
+      'Uruguayan',
+      'Paraguayan',
+      'Guatemalan',
+      'Honduran',
+      'Salvadoran',
+      'Nicaraguan',
+      'Costa Rican',
+      'Panamanian',
+      'Belizean',
+      'Jamaican',
+      'Trinidadian',
+      'Barbadian',
+      'Bahamian',
+      'Cuban',
+      'Dominican',
+      'Haitian',
+    ],
   },
-  'Europe': {
+  Europe: {
     description: 'European culinary traditions',
     cuisines: [
-      'Italian', 'French', 'Greek', 'Spanish', 'British', 'German', 
-      'Russian', 'Polish', 'Hungarian', 'Czech', 'Dutch', 'Belgian',
-      'Swedish', 'Norwegian', 'Danish', 'Finnish', 'Swiss', 'Austrian',
-      'Ukrainian', 'Belarusian', 'Lithuanian', 'Latvian', 'Estonian',
-      'Romanian', 'Bulgarian', 'Serbian', 'Croatian', 'Slovenian',
-      'Slovak', 'Moldovan'
-    ]
+      'Italian',
+      'French',
+      'Greek',
+      'Spanish',
+      'British',
+      'German',
+      'Russian',
+      'Polish',
+      'Hungarian',
+      'Czech',
+      'Dutch',
+      'Belgian',
+      'Swedish',
+      'Norwegian',
+      'Danish',
+      'Finnish',
+      'Swiss',
+      'Austrian',
+      'Ukrainian',
+      'Belarusian',
+      'Lithuanian',
+      'Latvian',
+      'Estonian',
+      'Romanian',
+      'Bulgarian',
+      'Serbian',
+      'Croatian',
+      'Slovenian',
+      'Slovak',
+      'Moldovan',
+    ],
   },
-  'Asia': {
-    description: 'Asian culinary traditions', 
+  Asia: {
+    description: 'Asian culinary traditions',
     cuisines: [
-      'Chinese', 'Japanese', 'Thai', 'Korean', 'Vietnamese', 'Indian',
-      'Indonesian', 'Malaysian', 'Filipino', 'Cambodian', 'Laotian',
-      'Nepalese', 'Sri Lankan', 'Bangladeshi', 'Pakistani', 'Myanmar',
-      'Bruneian', 'Timorese', 'Singaporean', 'Kazakh', 'Uzbek',
-      'Kyrgyz', 'Tajik', 'Turkmen', 'Mongolian', 'Afghan', 'Azerbaijani'
-    ]
+      'Chinese',
+      'Japanese',
+      'Thai',
+      'Korean',
+      'Vietnamese',
+      'Indian',
+      'Indonesian',
+      'Malaysian',
+      'Filipino',
+      'Cambodian',
+      'Laotian',
+      'Nepalese',
+      'Sri Lankan',
+      'Bangladeshi',
+      'Pakistani',
+      'Myanmar',
+      'Bruneian',
+      'Timorese',
+      'Singaporean',
+      'Kazakh',
+      'Uzbek',
+      'Kyrgyz',
+      'Tajik',
+      'Turkmen',
+      'Mongolian',
+      'Afghan',
+      'Azerbaijani',
+    ],
   },
-  'Africa': {
+  Africa: {
     description: 'African culinary traditions',
     cuisines: [
-      'Moroccan', 'Ethiopian', 'Nigerian', 'South African', 'Kenyan',
-      'Senegalese', 'Ghanaian', 'Egyptian', 'Tunisian', 'Algerian',
-      'Ugandan', 'Tanzanian', 'Zimbabwean', 'Zambian', 'Malawian',
-      'Mozambican', 'Angolan', 'Namibian', 'Botswanan'
-    ]
+      'Moroccan',
+      'Ethiopian',
+      'Nigerian',
+      'South African',
+      'Kenyan',
+      'Senegalese',
+      'Ghanaian',
+      'Egyptian',
+      'Tunisian',
+      'Algerian',
+      'Ugandan',
+      'Tanzanian',
+      'Zimbabwean',
+      'Zambian',
+      'Malawian',
+      'Mozambican',
+      'Angolan',
+      'Namibian',
+      'Botswanan',
+    ],
   },
   'Middle East': {
     description: 'Middle Eastern culinary traditions',
     cuisines: [
-      'Lebanese', 'Turkish', 'Middle Eastern', 'Israeli', 'Iranian',
-      'Iraqi', 'Syrian', 'Jordanian', 'Palestinian', 'Yemeni'
-    ]
+      'Lebanese',
+      'Turkish',
+      'Middle Eastern',
+      'Israeli',
+      'Iranian',
+      'Iraqi',
+      'Syrian',
+      'Jordanian',
+      'Palestinian',
+      'Yemeni',
+    ],
   },
-  'Oceania': {
+  Oceania: {
     description: 'Oceanic culinary traditions',
     cuisines: [
-      'Hawaiian', 'Polynesian', 'Fijian', 'Maori', 'Australian',
-      'Papuan', 'Solomon Islander', 'Vanuatuan', 'New Caledonian', 'Samoan'
-    ]
-  }
+      'Hawaiian',
+      'Polynesian',
+      'Fijian',
+      'Maori',
+      'Australian',
+      'Papuan',
+      'Solomon Islander',
+      'Vanuatuan',
+      'New Caledonian',
+      'Samoan',
+    ],
+  },
 };
 
 // Flattened list of all available cuisines
@@ -130,7 +228,7 @@ export function getAvailableRegions(): readonly string[] {
 
 export function searchCuisines(query: string): Cuisine[] {
   const lowerQuery = query.toLowerCase();
-  return ALL_CUISINES.filter(cuisine => 
+  return ALL_CUISINES.filter((cuisine) =>
     cuisine.toLowerCase().includes(lowerQuery)
   );
 }

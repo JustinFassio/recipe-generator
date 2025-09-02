@@ -1,18 +1,18 @@
 /**
  * FLAVOR AND MOOD SYSTEM
- * 
+ *
  * This file contains all mood-related definitions and logic.
  * It is the SINGLE SOURCE OF TRUTH for mood information in the application.
- * 
+ *
  * IMPORTANT: Do NOT import mood data from other files (e.g., constants.ts).
  * All mood definitions, regions, and options are centralized here.
- * 
+ *
  * Architecture:
  * - MOOD_REGIONS: Organized by mood categories (Flavor, Emotional, Energy, etc.)
  * - ALL_MOODS: Flattened list with const assertions for type safety
  * - MOOD_OPTIONS: Type-safe options for filtering and selection
  * - MOOD_LABELS: Display labels for UI components
- * 
+ *
  * Comprehensive mood system for recipe filtering and AI guidance
  * Organized by flavor profiles, emotional states, and culinary preferences
  */
@@ -29,7 +29,7 @@ export const MOOD_REGIONS: MoodData = {
     description: 'Taste and texture preferences',
     moods: [
       'Savory',
-      'Sweet', 
+      'Sweet',
       'Spicy',
       'Tangy',
       'Creamy',
@@ -37,8 +37,8 @@ export const MOOD_REGIONS: MoodData = {
       'Umami',
       'Bitter',
       'Smoky',
-      'Fresh'
-    ]
+      'Fresh',
+    ],
   },
   'Emotional States': {
     description: 'How food makes you feel',
@@ -52,8 +52,8 @@ export const MOOD_REGIONS: MoodData = {
       'Cozy',
       'Refreshing',
       'Uplifting',
-      'Soothing'
-    ]
+      'Soothing',
+    ],
   },
   'Energy Levels': {
     description: 'Food weight and timing preferences',
@@ -65,8 +65,8 @@ export const MOOD_REGIONS: MoodData = {
       'Substantial',
       'Airy',
       'Immediate',
-      'Patient'
-    ]
+      'Patient',
+    ],
   },
   'Seasonal Vibes': {
     description: 'Weather and time-based preferences',
@@ -80,8 +80,8 @@ export const MOOD_REGIONS: MoodData = {
       'Spring',
       'Autumn',
       'Holiday',
-      'Weekend'
-    ]
+      'Weekend',
+    ],
   },
   'Social Context': {
     description: 'Dining situation preferences',
@@ -93,8 +93,8 @@ export const MOOD_REGIONS: MoodData = {
       'Family',
       'Intimate',
       'Communal',
-      'Personal'
-    ]
+      'Personal',
+    ],
   },
   'Culinary Style': {
     description: 'Cooking approach and presentation',
@@ -108,9 +108,9 @@ export const MOOD_REGIONS: MoodData = {
       'Artisanal',
       'Home-style',
       'Fusion',
-      'Classic'
-    ]
-  }
+      'Classic',
+    ],
+  },
 };
 
 // Flatten all moods into a single array for easy access
@@ -128,7 +128,7 @@ export const MOOD_OPTIONS = [...ALL_MOODS] as const;
 
 // Create labels for display (same as values for now, but can be customized)
 export const MOOD_LABELS: Record<string, string> = Object.fromEntries(
-  ALL_MOODS.map(mood => [mood, mood])
+  ALL_MOODS.map((mood) => [mood, mood])
 );
 
 // Helper functions
@@ -151,10 +151,10 @@ export function getAvailableRegions(): string[] {
 
 export function searchMoods(query: string): string[] {
   const lowercaseQuery = query.toLowerCase();
-  return ALL_MOODS.filter(mood => 
+  return ALL_MOODS.filter((mood) =>
     mood.toLowerCase().includes(lowercaseQuery)
   );
 }
 
 // Type for mood values
-export type Mood = typeof ALL_MOODS[number];
+export type Mood = (typeof ALL_MOODS)[number];

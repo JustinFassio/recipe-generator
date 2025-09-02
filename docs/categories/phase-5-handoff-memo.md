@@ -2,13 +2,14 @@
 
 **Date**: December 29, 2024  
 **Phase**: Phase 5 - Integration Points  
-**Status**: 🔴 **BLOCKED** - Critical Case Mismatch Issue Identified  
+**Status**: 🔴 **BLOCKED** - Critical Case Mismatch Issue Identified
 
 ---
 
 ## 📋 **Current Status Summary**
 
 ### ✅ **Completed Phases**
+
 - **Phase 1**: Core Data Layer ✅ (Database schema, types, validation)
 - **Phase 2**: Parsing Infrastructure ✅ (Category parsing, recipe parser integration)
 - **Phase 3**: AI Integration ✅ (Already implemented per handoff)
@@ -26,11 +27,12 @@
 **Root Cause**: There are **two different cuisine definitions** in the codebase:
 
 1. **`src/lib/constants.ts`** (used by filter bar):
+
    ```typescript
    export const CUISINE_OPTIONS = [
-     'italian',      // ← lowercase
-     'mexican',      // ← lowercase  
-     'chinese',      // ← lowercase
+     'italian', // ← lowercase
+     'mexican', // ← lowercase
+     'chinese', // ← lowercase
      // ... etc
    ];
    ```
@@ -49,13 +51,16 @@
    ```
 
 ### **What Happens**:
+
 1. User selects "Italian" in filter bar → sends `'italian'` to API
-2. API converts to `'Cuisine: italian'` 
+2. API converts to `'Cuisine: italian'`
 3. Database stores `'Cuisine: Italian'` (proper case)
 4. **Result**: `'Cuisine: italian'` ≠ `'Cuisine: Italian'` → **Filter fails**
 
 ### **Why Collections Work**:
+
 Collections use consistent case between both files:
+
 - Filter bar: `'Collection: Quick & Easy'`
 - Database: `'Collection: Quick & Easy'`
 - **Result**: ✅ **Filter works**
@@ -65,49 +70,51 @@ Collections use consistent case between both files:
 ## 🔧 **Required Fixes Before Phase 5 Can Proceed**
 
 ### **Option 1: Align Constants with Categories (RECOMMENDED)**
+
 Update `src/lib/constants.ts` to match `src/lib/categories.ts`:
 
 ```typescript
 // src/lib/constants.ts - UPDATE THIS
 export const CUISINE_OPTIONS = [
-  'Italian',        // ← Changed from 'italian'
-  'Mexican',        // ← Changed from 'mexican'
-  'Chinese',        // ← Changed from 'chinese'
-  'Indian',         // ← Changed from 'indian'
-  'Japanese',       // ← Changed from 'japanese'
-  'Thai',           // ← Changed from 'thai'
-  'French',         // ← Changed from 'french'
-  'Mediterranean',  // ← Changed from 'mediterranean'
-  'American',       // ← Changed from 'american'
-  'Greek',          // ← Changed from 'greek'
-  'Spanish',        // ← Changed from 'spanish'
-  'Korean',         // ← Changed from 'korean'
-  'Vietnamese',     // ← Changed from 'vietnamese'
-  'Lebanese',       // ← Changed from 'lebanese'
-  'Turkish',        // ← Changed from 'turkish'
-  'Moroccan',       // ← Changed from 'moroccan'
-  'Ethiopian',      // ← Changed from 'ethiopian'
-  'Caribbean',      // ← Changed from 'caribbean'
-  'Brazilian',      // ← Changed from 'brazilian'
-  'Peruvian',       // ← Changed from 'peruvian'
+  'Italian', // ← Changed from 'italian'
+  'Mexican', // ← Changed from 'mexican'
+  'Chinese', // ← Changed from 'chinese'
+  'Indian', // ← Changed from 'indian'
+  'Japanese', // ← Changed from 'japanese'
+  'Thai', // ← Changed from 'thai'
+  'French', // ← Changed from 'french'
+  'Mediterranean', // ← Changed from 'mediterranean'
+  'American', // ← Changed from 'american'
+  'Greek', // ← Changed from 'greek'
+  'Spanish', // ← Changed from 'spanish'
+  'Korean', // ← Changed from 'korean'
+  'Vietnamese', // ← Changed from 'vietnamese'
+  'Lebanese', // ← Changed from 'lebanese'
+  'Turkish', // ← Changed from 'turkish'
+  'Moroccan', // ← Changed from 'moroccan'
+  'Ethiopian', // ← Changed from 'ethiopian'
+  'Caribbean', // ← Changed from 'caribbean'
+  'Brazilian', // ← Changed from 'brazilian'
+  'Peruvian', // ← Changed from 'peruvian'
 ] as const;
 
 export const CUISINE_LABELS: Record<string, string> = {
-  Italian: 'Italian',           // ← Updated keys
-  Mexican: 'Mexican',           // ← Updated keys
-  Chinese: 'Chinese',           // ← Updated keys
+  Italian: 'Italian', // ← Updated keys
+  Mexican: 'Mexican', // ← Updated keys
+  Chinese: 'Chinese', // ← Updated keys
   // ... etc
 };
 ```
 
 ### **Option 2: Update API to Handle Case Conversion**
+
 Modify `src/lib/api.ts` to normalize case:
 
 ```typescript
 // Apply cuisine filter (cuisine is stored as a category)
 if (filters?.cuisine?.length) {
-  const cuisineCategories = filters.cuisine.map((c) => 
-    `Cuisine: ${c.charAt(0).toUpperCase() + c.slice(1).toLowerCase()}`
+  const cuisineCategories = filters.cuisine.map(
+    (c) => `Cuisine: ${c.charAt(0).toUpperCase() + c.slice(1).toLowerCase()}`
   );
   query = query.overlaps('categories', cuisineCategories);
 }
@@ -120,6 +127,7 @@ if (filters?.cuisine?.length) {
 ## 📋 **Phase 5 Deliverables Status**
 
 ### ✅ **Already Implemented** (from previous phases)
+
 - Recipe view integration with categories
 - Recipe form integration with CategoryInput
 - Recipe card updates with CategoryChip
@@ -128,6 +136,7 @@ if (filters?.cuisine?.length) {
 - State management with useRecipeFilters
 
 ### 🚧 **Blocked Until Fix Applied**
+
 - **Advanced filtering system** (cuisine filtering broken)
 - **Filter persistence** (filters don't work properly)
 - **Category-based navigation** (clicking categories to filter)
@@ -138,11 +147,13 @@ if (filters?.cuisine?.length) {
 ## 🎯 **Next Steps After Fix**
 
 ### **Immediate (After Case Fix)**
+
 1. **Test cuisine filtering** - Verify it now works
 2. **Test collection filtering** - Confirm it still works
 3. **Run full test suite** - Ensure no regressions
 
 ### **Phase 5 Implementation Tasks**
+
 1. **Enhanced Filter Bar** (`src/components/recipes/filter-bar.tsx`)
    - Add category-based filtering
    - Implement filter persistence
@@ -169,12 +180,14 @@ if (filters?.cuisine?.length) {
 ## 🧪 **Testing Requirements**
 
 ### **Before Phase 5 Can Proceed**
+
 - [ ] Cuisine filtering works with proper case
 - [ ] Collection filtering still works
 - [ ] No regressions in existing functionality
 - [ ] All tests pass
 
 ### **Phase 5 Testing**
+
 - [ ] Filter persistence across page reloads
 - [ ] Category-based navigation
 - [ ] Filter analytics and counts
@@ -197,7 +210,7 @@ if (filters?.cuisine?.length) {
 ## 🚀 **Estimated Timeline After Fix**
 
 - **Fix Implementation**: 1-2 hours
-- **Testing & Validation**: 1 hour  
+- **Testing & Validation**: 1 hour
 - **Phase 5 Implementation**: 2-3 days
 - **Total**: 3-4 days
 

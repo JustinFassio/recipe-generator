@@ -45,7 +45,7 @@ export function CuisineFilter({
       if (matchingCuisines.length > 0) {
         filtered[region] = {
           ...data,
-          cuisines: matchingCuisines
+          cuisines: matchingCuisines,
         };
       }
 
@@ -126,30 +126,28 @@ export function CuisineFilter({
 
             {/* Available cuisines grouped by region */}
             <div className="space-y-3 max-h-60 overflow-y-auto">
-              {Object.entries(filteredRegions).map(
-                ([region, data]) => (
-                  <div key={region} className="space-y-2">
-                    <h4 className="text-xs font-semibold text-base-content opacity-70 uppercase tracking-wide">
-                      {region}
-                    </h4>
-                    <div className="flex flex-wrap gap-1">
-                      {data.cuisines.map((cuisine) => (
-                        <CategoryChip
-                          key={cuisine}
-                          category={cuisine}
-                          variant={
-                            selectedCuisines.includes(cuisine)
-                              ? 'selected'
-                              : 'clickable'
-                          }
-                          size="sm"
-                          onClick={() => toggleCuisine(cuisine)}
-                        />
-                      ))}
-                    </div>
+              {Object.entries(filteredRegions).map(([region, data]) => (
+                <div key={region} className="space-y-2">
+                  <h4 className="text-xs font-semibold text-base-content opacity-70 uppercase tracking-wide">
+                    {region}
+                  </h4>
+                  <div className="flex flex-wrap gap-1">
+                    {data.cuisines.map((cuisine) => (
+                      <CategoryChip
+                        key={cuisine}
+                        category={cuisine}
+                        variant={
+                          selectedCuisines.includes(cuisine)
+                            ? 'selected'
+                            : 'clickable'
+                        }
+                        size="sm"
+                        onClick={() => toggleCuisine(cuisine)}
+                      />
+                    ))}
                   </div>
-                )
-              )}
+                </div>
+              ))}
             </div>
 
             {Object.keys(filteredRegions).length === 0 && (

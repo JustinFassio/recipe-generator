@@ -1,21 +1,19 @@
 /**
  * GENERAL APPLICATION CONSTANTS
- * 
+ *
  * This file contains general constants used across the application.
- * 
+ *
  * IMPORTANT: This file does NOT contain:
  * - Cuisine definitions (see @/lib/cuisines.ts)
- * - Category definitions (see @/lib/categories.ts) 
+ * - Category definitions (see @/lib/categories.ts)
  * - Mood definitions (see @/lib/moods.ts)
- * 
+ *
  * Each domain has its own specialized file for maintainability and clarity.
  */
 
 // Recipe-related constants
 export const MAX_CATEGORIES_PER_RECIPE = 6;
 export const MAX_CATEGORY_LENGTH = 50;
-
-
 
 // Predefined categories for filtering
 export const PREDEFINED_CATEGORIES = [

@@ -166,27 +166,35 @@ These test accounts are created by the local seeding script and are intended for
 ## Comprehensive Category Coverage for Testing
 
 ### **Course Categories**
+
 - Breakfast, Appetizer, Main, Side, Dessert, Beverage, Snack
 
 ### **Cuisine Categories**
+
 - Italian, Mexican, Chinese, Indian, Japanese, Thai, French, Mediterranean, American, Greek, Spanish, Korean, Vietnamese, Lebanese, Turkish, Moroccan, Ethiopian, Caribbean, Brazilian, Peruvian, Asian, European, African, Latin American, Fusion
 
 ### **Collection Categories**
+
 - Vegetarian, Quick & Easy, Fresh & Light, Healthy, Comfort Food, One-Pot, Classic, High-Protein, Lean Protein, Meat Lover, BBQ, Spicy, Exotic, Traditional, Sweet Treats, Homemade, Artisan, Superfood, Dairy-Free, Low-Carb, Street Food, Noodle Dishes, Rice Dishes, Side Dishes, Post-Workout
 
 ### **Technique Categories**
+
 - No-Cook, Sauté, Simmer, Bake, Grill, Smoke, Fry, Roast, Stir, Blend, Air Fryer, Slow Cooker, Yeast, Pastry, Laminated Dough, Sourdough, Paella, Spice Blend, Marinate, Quick Cook
 
 ### **Occasion Categories**
+
 - Weekday, Summer, Weeknight, Date Night, Dinner, Lunch, Any, Morning, Special Occasion, Weekend, Party, Brunch, Afternoon Tea, Cold Weather, Late Night, Meal Prep
 
 ### **Dietary Categories**
+
 - Plant-Based, High-Protein, Gluten-Free, Low-Carb, Dairy-Free, Vegetarian
 
 ### **Time Categories**
+
 - Under 10 Minutes, Under 15 Minutes, Under 20 Minutes, Under 30 Minutes, 30-60 Minutes, 45-60 Minutes, 1-2 Hours, 2-3 Hours, Over 8 Hours, Over 12 Hours, Overnight, 24-48 Hours
 
 ### **Dish Type Categories**
+
 - Salad, Pasta, Stir-Fry, Bowl, Risotto, Soup, Omelette, Curry, Stew, Casserole, Noodle Soup, Pastry, Bread, Cake, Mousse, Noodles, Pudding, Muffins, Energy Balls, Fried Rice, Sandwich, Taco, Vegetables, Rice
 
 ## How to reseed locally

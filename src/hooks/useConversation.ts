@@ -23,7 +23,10 @@ export interface ConversationState {
 
 export interface ConversationActions {
   selectPersona: (persona: PersonaType) => void;
-  sendMessage: (content: string, preferences?: { categories: string[]; cuisines: string[]; moods: string[] }) => Promise<void>;
+  sendMessage: (
+    content: string,
+    preferences?: { categories: string[]; cuisines: string[]; moods: string[] }
+  ) => Promise<void>;
   startNewRecipe: () => void;
   changePersona: () => void;
   saveRecipe: (recipe: RecipeFormData) => void;
@@ -69,12 +72,24 @@ export function useConversation(): ConversationState & ConversationActions {
   }, []);
 
   const sendMessage = useCallback(
-    async (content: string, preferences?: { categories: string[]; cuisines: string[]; moods: string[] }) => {
+    async (
+      content: string,
+      preferences?: {
+        categories: string[];
+        cuisines: string[];
+        moods: string[];
+      }
+    ) => {
       if (!content.trim() || isLoading || !persona) return;
 
       // Enhance message with preferences if provided
       let enhancedContent = content.trim();
-      if (preferences && (preferences.categories.length > 0 || preferences.cuisines.length > 0 || preferences.moods.length > 0)) {
+      if (
+        preferences &&
+        (preferences.categories.length > 0 ||
+          preferences.cuisines.length > 0 ||
+          preferences.moods.length > 0)
+      ) {
         let preferenceText = '\n\n**Recipe Preferences:**\n';
         if (preferences.cuisines.length > 0) {
           preferenceText += `• **Cuisines:** ${preferences.cuisines.join(', ')}\n`;
