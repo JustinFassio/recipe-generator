@@ -197,7 +197,8 @@ export function RecipeForm({
 
       if (isMobile) {
         console.log('Recipe data prepared:', recipeData);
-        console.log('User authenticated:', !!supabase.auth.getUser());
+        const { data: userData } = await supabase.auth.getUser();
+        console.log('User authenticated:', !!userData?.user);
       }
 
       if (existingRecipe) {

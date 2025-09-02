@@ -160,7 +160,7 @@ export const recipeApi = {
   async createRecipe(
     recipe: Omit<Recipe, 'id' | 'user_id' | 'created_at' | 'updated_at'>
   ): Promise<Recipe> {
-    // Check network connectivity for mobile devices
+    // Check network connectivity
     if (!navigator.onLine) {
       throw new Error(
         'No internet connection. Please check your network and try again.'
