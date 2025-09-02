@@ -158,3 +158,9 @@ export function searchMoods(query: string): string[] {
 
 // Type for mood values
 export type Mood = (typeof ALL_MOODS)[number];
+
+// Convert a Mood value to a namespaced category tag used in recipes.categories
+// Example: 'Savory' -> 'Mood: Savory'
+export function toMoodCategory(mood: string): string {
+  return `Mood: ${mood}`;
+}
