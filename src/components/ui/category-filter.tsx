@@ -1,8 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
-import { Filter, X } from 'lucide-react';
+import { Filter, X, ChevronDown } from 'lucide-react';
+import { Button } from './button';
 import { CategoryChip } from './category-chip';
 import { parseCategory } from '@/lib/category-parsing';
 import { CANONICAL_CATEGORIES } from '@/lib/categories';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from './dropdown-menu';
 
 export interface CategoryFilterProps {
   selectedCategories: string[];
@@ -21,8 +27,15 @@ export function CategoryFilter({
 }: CategoryFilterProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const dropdownRef = useRef<HTMLDivElement>(null);
-  const triggerRef = useRef<HTMLLabelElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // Focus search input when dropdown opens
+  useEffect(() => {
+    if (isOpen && searchInputRef.current) {
+      // Small delay to ensure dropdown is fully rendered
+      setTimeout(() => searchInputRef.current?.focus(), 100);
+    }
+  }, [isOpen]);
 
   // Group categories by namespace for better organization
   const groupedCategories = availableCategories.reduce(
@@ -68,83 +81,29 @@ export function CategoryFilter({
     onCategoriesChange([]);
   };
 
-  // Keyboard event handlers for accessibility
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (!isOpen) return;
 
-      switch (event.key) {
-        case 'Escape':
-          event.preventDefault();
-          setIsOpen(false);
-          triggerRef.current?.focus();
-          break;
-        case 'Tab':
-          // Allow Tab navigation but close dropdown if focus moves outside
-          requestAnimationFrame(() => {
-            if (
-              dropdownRef.current &&
-              !dropdownRef.current.contains(document.activeElement)
-            ) {
-              setIsOpen(false);
-            }
-          });
-          break;
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener('keydown', handleKeyDown);
-      // Focus the search input when dropdown opens
-      const searchInput = dropdownRef.current?.querySelector('input');
-      if (searchInput) {
-        (searchInput as HTMLInputElement).focus();
-      }
-    }
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [isOpen]);
 
   return (
     <div className={`relative ${className}`}>
-      {/* Filter button */}
-      <div className="dropdown dropdown-end">
-        <label
-          ref={triggerRef}
-          tabIndex={0}
-          className="btn btn-outline btn-sm gap-2"
-          onClick={() => setIsOpen(!isOpen)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              setIsOpen(!isOpen);
-            }
-          }}
-        >
-          <Filter className="h-4 w-4" />
-          Categories
-          {selectedCategories.length > 0 && (
-            <span className="badge badge-primary badge-sm">
-              {selectedCategories.length}
-            </span>
-          )}
-        </label>
-
-        {/* Dropdown content */}
-        {isOpen && (
-          <div
-            ref={dropdownRef}
-            tabIndex={0}
-            className="dropdown-content z-50 card card-compact w-80 p-4 border border-base-300 bg-base-100 text-base-content shadow-lg"
-            role="dialog"
-            aria-label="Category filter"
-          >
+      <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline" size="sm" className="justify-start">
+            <Filter className="mr-2 h-4 w-4" />
+            Categories
+            {selectedCategories.length > 0 && (
+              <span className="ml-1 badge badge-primary badge-xs">
+                {selectedCategories.length}
+              </span>
+            )}
+            <ChevronDown className="ml-2 h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" className="w-80 p-4">
             <div className="card-body p-0 space-y-4">
               {/* Search input */}
               <div className="form-control">
                 <input
+                  ref={searchInputRef}
                   type="text"
                   placeholder={placeholder}
                   value={searchTerm}
@@ -218,25 +177,8 @@ export function CategoryFilter({
                 </div>
               )}
             </div>
-          </div>
-        )}
-      </div>
-
-      {/* Click outside handler */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 z-40"
-          onClick={() => setIsOpen(false)}
-          onKeyDown={(e) => {
-            if (e.key === 'Escape') {
-              e.preventDefault();
-              setIsOpen(false);
-              triggerRef.current?.focus();
-            }
-          }}
-          aria-hidden="true"
-        />
-      )}
+          </DropdownMenuContent>
+        </DropdownMenu>
     </div>
   );
 }

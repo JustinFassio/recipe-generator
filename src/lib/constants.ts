@@ -2,52 +2,7 @@
 export const MAX_CATEGORIES_PER_RECIPE = 6;
 export const MAX_CATEGORY_LENGTH = 50;
 
-// Filter options - only include what exists in the database
-export const CUISINE_OPTIONS = [
-  'italian',
-  'mexican',
-  'chinese',
-  'indian',
-  'japanese',
-  'thai',
-  'french',
-  'mediterranean',
-  'american',
-  'greek',
-  'spanish',
-  'korean',
-  'vietnamese',
-  'lebanese',
-  'turkish',
-  'moroccan',
-  'ethiopian',
-  'caribbean',
-  'brazilian',
-  'peruvian',
-] as const;
 
-export const CUISINE_LABELS: Record<string, string> = {
-  italian: 'Italian',
-  mexican: 'Mexican',
-  chinese: 'Chinese',
-  indian: 'Indian',
-  japanese: 'Japanese',
-  thai: 'Thai',
-  french: 'French',
-  mediterranean: 'Mediterranean',
-  american: 'American',
-  greek: 'Greek',
-  spanish: 'Spanish',
-  korean: 'Korean',
-  vietnamese: 'Vietnamese',
-  lebanese: 'Lebanese',
-  turkish: 'Turkish',
-  moroccan: 'Moroccan',
-  ethiopian: 'Ethiopian',
-  caribbean: 'Caribbean',
-  brazilian: 'Brazilian',
-  peruvian: 'Peruvian',
-};
 
 // Predefined categories for filtering
 export const PREDEFINED_CATEGORIES = [
