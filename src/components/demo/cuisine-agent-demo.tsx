@@ -8,19 +8,33 @@ import {
   suggestCuisinesByIngredients,
   getComplementaryCuisines,
   generateRecipeCategories,
-  getCoverageStats
+  getCoverageStats,
+  type CuisineSuggestion,
+  type RegionalCuisineContext
 } from '@/lib/ai-agents/cuisine-agent';
+
+// Define types for the demo component
+interface CoverageStats {
+  totalCuisines: number;
+  totalCountries: number;
+  coveragePercentage: number;
+  regionalBreakdown: Array<{
+    region: string;
+    cuisineCount: number;
+    percentage: number;
+  }>;
+}
 
 export function CuisineAgentDemo() {
   const [searchQuery, setSearchQuery] = useState('');
   const [ingredients, setIngredients] = useState('');
   const [selectedCuisine, setSelectedCuisine] = useState('');
-  const [searchResults, setSearchResults] = useState<any[]>([]);
-  const [cuisineContext, setCuisineContext] = useState<any>(null);
-  const [ingredientSuggestions, setIngredientSuggestions] = useState<any[]>([]);
-  const [complementaryCuisines, setComplementaryCuisines] = useState<any[]>([]);
+  const [searchResults, setSearchResults] = useState<CuisineSuggestion[]>([]);
+  const [cuisineContext, setCuisineContext] = useState<RegionalCuisineContext | null>(null);
+  const [ingredientSuggestions, setIngredientSuggestions] = useState<CuisineSuggestion[]>([]);
+  const [complementaryCuisines, setComplementaryCuisines] = useState<CuisineSuggestion[]>([]);
   const [recipeCategories, setRecipeCategories] = useState<string[]>([]);
-  const [coverageStats, setCoverageStats] = useState<any>(null);
+  const [coverageStats, setCoverageStats] = useState<CoverageStats | null>(null);
 
   const handleSearch = () => {
     if (searchQuery.trim()) {
