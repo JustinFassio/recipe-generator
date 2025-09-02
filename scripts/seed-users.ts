@@ -27,6 +27,7 @@ const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
 
 // Constants
 const DEFAULT_MOOD = 'Mood: Simple';
+const MAX_MOODS_PER_RECIPE = 2;
 
 type SeedUser = {
   email: string;
@@ -2154,9 +2155,9 @@ async function seedRecipes() {
       // Default mood if none detected
       if (moodGuesses.length === 0) moodGuesses.push(DEFAULT_MOOD);
 
-      // Limit to max 2 moods and ensure no duplicates
+      // Limit to max MAX_MOODS_PER_RECIPE moods and ensure no duplicates
       moodAugmented = Array.from(
-        new Set([...existing, ...moodGuesses.slice(0, 2)])
+        new Set([...existing, ...moodGuesses.slice(0, MAX_MOODS_PER_RECIPE)])
       );
     }
 
