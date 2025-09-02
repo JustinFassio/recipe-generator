@@ -172,7 +172,6 @@ export function RecipeForm({
   const onSubmit = async (data: RecipeFormData) => {
     try {
       // Mobile-specific debugging
-      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
       if (isMobile) {
         console.log('Mobile device detected, submitting recipe...');
         console.log('Form data:', data);
@@ -218,7 +217,6 @@ export function RecipeForm({
       if (isMobile) console.log('Recipe operation completed successfully');
       onSuccess?.();
     } catch (error) {
-      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
       console.error('Error saving recipe:', error);
 
       // Enhanced error logging for mobile
