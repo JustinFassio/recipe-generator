@@ -170,7 +170,7 @@ export function RecipeCard({
           <div
             className={`flex items-center space-x-1 transition-opacity ${
               isMobile
-                ? 'opacity-100' // Always show on mobile for now
+                ? 'opacity-100' // Always show on mobile
                 : 'opacity-0 group-hover:opacity-100'
             }`}
           >
