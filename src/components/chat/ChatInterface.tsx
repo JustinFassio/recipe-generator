@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { createDaisyUIInputClasses } from '@/lib/input-migration';
 import { createDaisyUICardClasses } from '@/lib/card-migration';
 import { createDaisyUIScrollAreaClasses } from '@/lib/scroll-area-migration';
@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { PersonaSelector } from './PersonaSelector';
 import { ChatHeader } from './ChatHeader';
+import { CuisineCategorySelector } from './cuisine-category-selector';
 import { Button } from '@/components/ui/button';
 import { useConversation } from '@/hooks/useConversation';
 import { RECIPE_BOT_PERSONAS, type PersonaType } from '@/lib/openai';
@@ -41,6 +42,11 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [inputValue, setInputValue] = React.useState('');
+  const [cuisineCategorySelection, setCuisineCategorySelection] = useState<{
+    categories: string[];
+    cuisines: string[];
+    moods: string[];
+  }>({ categories: [], cuisines: [], moods: [] });
 
   useEffect(() => {
     // Auto-scroll to bottom when new messages are added
@@ -62,7 +68,7 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
     const messageContent = inputValue.trim();
     setInputValue('');
 
-    await sendMessage(messageContent);
+    await sendMessage(messageContent, cuisineCategorySelection);
     inputRef.current?.focus();
   };
 
@@ -77,6 +83,14 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
     if (generatedRecipe) {
       onRecipeGenerated(generatedRecipe);
     }
+  };
+
+  const handleCuisineCategoryChange = (selection: {
+    categories: string[];
+    cuisines: string[];
+    moods: string[];
+  }) => {
+    setCuisineCategorySelection(selection);
   };
 
   const getPersonaIcon = (personaType: PersonaType) => {
@@ -131,6 +145,23 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
         onNewRecipe={startNewRecipe}
         onChangeAssistant={changePersona}
       />
+
+      {/* Cuisine & Category Selector */}
+      <div className="bg-base-100 border-t border-b p-4">
+        <div className="max-w-4xl mx-auto">
+          <h3 className="text-sm font-medium text-gray-700 mb-3">
+            🎯 Recipe Preferences (Optional)
+          </h3>
+          <p className="text-xs text-gray-500 mb-3">
+            Select categories, cuisines, and moods to help guide your AI
+            assistant in creating the perfect recipe
+          </p>
+          <CuisineCategorySelector
+            onSelectionChange={handleCuisineCategoryChange}
+            className=""
+          />
+        </div>
+      </div>
 
       {/* Chat Messages */}
       <div

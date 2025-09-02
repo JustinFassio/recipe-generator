@@ -2,29 +2,27 @@ import { useState, useEffect, useRef } from 'react';
 import { Filter, X, ChevronDown } from 'lucide-react';
 import { Button } from './button';
 import { CategoryChip } from './category-chip';
-import { parseCategory } from '@/lib/category-parsing';
-import { CANONICAL_CATEGORIES } from '@/lib/categories';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from './dropdown-menu';
+import { CUISINE_REGIONS } from '@/lib/cuisines';
 
-export interface CategoryFilterProps {
-  selectedCategories: string[];
-  onCategoriesChange: (categories: string[]) => void;
-  availableCategories?: string[];
+export interface CuisineFilterProps {
+  selectedCuisines: readonly string[];
+  onCuisinesChange: (cuisines: string[]) => void;
+  availableCuisines?: readonly string[];
   placeholder?: string;
   className?: string;
 }
 
-export function CategoryFilter({
-  selectedCategories,
-  onCategoriesChange,
-  availableCategories = CANONICAL_CATEGORIES,
-  placeholder = 'Filter by category...',
+export function CuisineFilter({
+  selectedCuisines,
+  onCuisinesChange,
+  placeholder = 'Filter by cuisine...',
   className = '',
-}: CategoryFilterProps) {
+}: CuisineFilterProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -37,48 +35,35 @@ export function CategoryFilter({
     }
   }, [isOpen]);
 
-  // Group categories by namespace for better organization
-  const groupedCategories = availableCategories.reduce(
-    (groups, category) => {
-      const { namespace } = parseCategory(category);
-      const groupKey = namespace || 'Other';
-
-      if (!groups[groupKey]) {
-        groups[groupKey] = [];
-      }
-      groups[groupKey].push(category);
-
-      return groups;
-    },
-    {} as Record<string, string[]>
-  );
-
-  // Filter categories based on search term
-  const filteredGroups = Object.entries(groupedCategories).reduce(
-    (filtered, [namespace, categories]) => {
-      const matchingCategories = categories.filter((category) =>
-        category.toLowerCase().includes(searchTerm.toLowerCase())
+  // Filter cuisines based on search term
+  const filteredRegions = Object.entries(CUISINE_REGIONS).reduce(
+    (filtered, [region, data]) => {
+      const matchingCuisines = data.cuisines.filter((cuisine) =>
+        cuisine.toLowerCase().includes(searchTerm.toLowerCase())
       );
 
-      if (matchingCategories.length > 0) {
-        filtered[namespace] = matchingCategories;
+      if (matchingCuisines.length > 0) {
+        filtered[region] = {
+          ...data,
+          cuisines: matchingCuisines,
+        };
       }
 
       return filtered;
     },
-    {} as Record<string, string[]>
+    {} as typeof CUISINE_REGIONS
   );
 
-  const toggleCategory = (category: string) => {
-    if (selectedCategories.includes(category)) {
-      onCategoriesChange(selectedCategories.filter((c) => c !== category));
+  const toggleCuisine = (cuisine: string) => {
+    if (selectedCuisines.includes(cuisine)) {
+      onCuisinesChange(selectedCuisines.filter((c) => c !== cuisine));
     } else {
-      onCategoriesChange([...selectedCategories, category]);
+      onCuisinesChange([...selectedCuisines, cuisine]);
     }
   };
 
   const clearAllFilters = () => {
-    onCategoriesChange([]);
+    onCuisinesChange([]);
   };
 
   return (
@@ -87,17 +72,17 @@ export function CategoryFilter({
         <DropdownMenuTrigger asChild>
           <Button variant="outline" size="sm" className="justify-start">
             <Filter className="mr-2 h-4 w-4" />
-            Categories
-            {selectedCategories.length > 0 && (
+            Cuisine
+            {selectedCuisines.length > 0 && (
               <span className="ml-1 badge badge-primary badge-xs">
-                {selectedCategories.length}
+                {selectedCuisines.length}
               </span>
             )}
             <ChevronDown className="ml-2 h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-80 p-4">
-          <div className="card-body p-0 space-y-4">
+          <div className="space-y-4">
             {/* Search input */}
             <div className="form-control">
               <input
@@ -110,8 +95,8 @@ export function CategoryFilter({
               />
             </div>
 
-            {/* Selected categories */}
-            {selectedCategories.length > 0 && (
+            {/* Selected cuisines */}
+            {selectedCuisines.length > 0 && (
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">Selected</span>
@@ -125,39 +110,39 @@ export function CategoryFilter({
                   </button>
                 </div>
                 <div className="flex flex-wrap gap-1">
-                  {selectedCategories.map((category, index) => (
+                  {selectedCuisines.map((cuisine, index) => (
                     <CategoryChip
-                      key={`selected-${category}-${index}`}
-                      category={category}
+                      key={`selected-${cuisine}-${index}`}
+                      category={cuisine}
                       variant="selected"
                       size="sm"
-                      onClick={() => toggleCategory(category)}
-                      onRemove={() => toggleCategory(category)}
+                      onClick={() => toggleCuisine(cuisine)}
+                      onRemove={() => toggleCuisine(cuisine)}
                     />
                   ))}
                 </div>
               </div>
             )}
 
-            {/* Available categories grouped by namespace */}
+            {/* Available cuisines grouped by region */}
             <div className="space-y-3 max-h-60 overflow-y-auto">
-              {Object.entries(filteredGroups).map(([namespace, categories]) => (
-                <div key={namespace} className="space-y-2">
+              {Object.entries(filteredRegions).map(([region, data]) => (
+                <div key={region} className="space-y-2">
                   <h4 className="text-xs font-semibold text-base-content opacity-70 uppercase tracking-wide">
-                    {namespace}
+                    {region}
                   </h4>
                   <div className="flex flex-wrap gap-1">
-                    {categories.map((category, index) => (
+                    {data.cuisines.map((cuisine) => (
                       <CategoryChip
-                        key={`${namespace}-${category}-${index}`}
-                        category={category}
+                        key={cuisine}
+                        category={cuisine}
                         variant={
-                          selectedCategories.includes(category)
+                          selectedCuisines.includes(cuisine)
                             ? 'selected'
                             : 'clickable'
                         }
                         size="sm"
-                        onClick={() => toggleCategory(category)}
+                        onClick={() => toggleCuisine(cuisine)}
                       />
                     ))}
                   </div>
@@ -165,10 +150,10 @@ export function CategoryFilter({
               ))}
             </div>
 
-            {Object.keys(filteredGroups).length === 0 && (
+            {Object.keys(filteredRegions).length === 0 && (
               <div className="text-center py-4">
                 <p className="text-sm text-base-content opacity-50">
-                  No categories found
+                  No cuisines found
                 </p>
               </div>
             )}
