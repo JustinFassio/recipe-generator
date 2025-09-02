@@ -12,9 +12,12 @@ import { CategoryFilter } from '@/components/ui/category-filter';
 import { CuisineFilter } from '@/components/ui/cuisine-filter';
 import { MoodFilter } from '@/components/ui/mood-filter';
 import CategoryChip from '@/components/ui/CategoryChip';
-import { CUISINE_OPTIONS, CUISINE_LABELS } from '@/lib/cuisines';
-import { CANONICAL_CATEGORIES } from '@/lib/categories';
-import { MOOD_OPTIONS } from '@/lib/moods';
+// Domain-specific data imports - each from their specialized source
+import { CUISINE_OPTIONS, CUISINE_LABELS } from '@/lib/cuisines';        // Regional cuisine definitions
+import { CANONICAL_CATEGORIES } from '@/lib/categories';                  // Namespaced category system
+import { MOOD_OPTIONS } from '@/lib/moods';                              // Flavor and mood definitions
+
+// Type definitions
 import type { RecipeFilters, Cuisine, Mood, SortOption } from '@/lib/types';
 
 interface FilterBarProps {

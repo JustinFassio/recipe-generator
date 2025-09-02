@@ -1,4 +1,17 @@
 /**
+ * NAMESPACED CATEGORY SYSTEM
+ * 
+ * This file contains all category-related definitions and logic.
+ * It is the SINGLE SOURCE OF TRUTH for category information in the application.
+ * 
+ * IMPORTANT: Do NOT import category data from other files (e.g., constants.ts).
+ * All category definitions, namespaces, and validation logic are centralized here.
+ * 
+ * Architecture:
+ * - CATEGORY_DEFINITIONS: Structured category definitions with namespaces
+ * - CANONICAL_CATEGORIES: Flattened list of all valid categories
+ * - Helper functions for category management and validation
+ * 
  * Canonical category definitions for recipe organization
  * Structured as namespaced strings for flexibility and future hierarchy support
  */

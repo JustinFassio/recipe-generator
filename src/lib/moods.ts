@@ -1,3 +1,22 @@
+/**
+ * FLAVOR AND MOOD SYSTEM
+ * 
+ * This file contains all mood-related definitions and logic.
+ * It is the SINGLE SOURCE OF TRUTH for mood information in the application.
+ * 
+ * IMPORTANT: Do NOT import mood data from other files (e.g., constants.ts).
+ * All mood definitions, regions, and options are centralized here.
+ * 
+ * Architecture:
+ * - MOOD_REGIONS: Organized by mood categories (Flavor, Emotional, Energy, etc.)
+ * - ALL_MOODS: Flattened list with const assertions for type safety
+ * - MOOD_OPTIONS: Type-safe options for filtering and selection
+ * - MOOD_LABELS: Display labels for UI components
+ * 
+ * Comprehensive mood system for recipe filtering and AI guidance
+ * Organized by flavor profiles, emotional states, and culinary preferences
+ */
+
 export interface MoodData {
   [region: string]: {
     description: string;

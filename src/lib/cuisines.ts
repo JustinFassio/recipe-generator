@@ -1,4 +1,18 @@
 /**
+ * REGIONAL CUISINE DEFINITIONS
+ * 
+ * This file contains all cuisine-related data and definitions.
+ * It is the SINGLE SOURCE OF TRUTH for cuisine information in the application.
+ * 
+ * IMPORTANT: Do NOT import cuisine data from other files (e.g., constants.ts).
+ * All cuisine definitions, options, and labels are centralized here.
+ * 
+ * Architecture:
+ * - CUISINE_REGIONS: Organized by continents/major regions
+ * - ALL_CUISINES: Flattened list with const assertions for type safety
+ * - CUISINE_OPTIONS: Type-safe options for filtering and selection
+ * - CUISINE_LABELS: Display labels for UI components
+ * 
  * Enhanced cuisine definitions organized by continents and major regions
  * Provides comprehensive global coverage with intuitive navigation
  */
