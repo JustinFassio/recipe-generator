@@ -178,9 +178,9 @@ export function RecipeCard({
           >
             {canShare && (
               <Button
-                variant={isPublic ? 'default' : 'outline'}
+                variant={isPublic ? 'default' : 'outline'} // Keep variant for public/private state
                 size="sm"
-                className="h-8 px-2"
+                className="h-8 px-2 bg-white/90 hover:bg-white border-2 border-gray-200 hover:border-gray-300 shadow-sm"
                 onClick={handleShareToggle}
                 disabled={isSharing}
                 aria-label={isPublic ? 'Unshare recipe' : 'Share recipe'}
@@ -201,27 +201,27 @@ export function RecipeCard({
               </Button>
             )}
             <Button
-              variant="ghost"
+              variant="ghost" // Keep ghost variant for icon buttons
               size="sm"
-              className="h-8 w-8 p-0"
+              className="h-8 w-8 p-0 bg-white/90 hover:bg-white border border-gray-200 hover:border-gray-300 shadow-sm"
               onClick={() => onView?.(recipe)}
               aria-label="View recipe"
             >
               <Eye className="h-4 w-4" />
             </Button>
             <Button
-              variant="ghost"
+              variant="ghost" // Keep ghost variant for icon buttons
               size="sm"
-              className="h-8 w-8 p-0"
+              className="h-8 w-8 p-0 bg-white/90 hover:bg-white border border-gray-200 hover:border-gray-300 shadow-sm"
               onClick={() => onEdit?.(recipe)}
               aria-label="Edit recipe"
             >
               <Edit className="h-4 w-4" />
             </Button>
             <Button
-              variant="ghost"
+              variant="ghost" // Keep ghost variant for icon buttons
               size="sm"
-              className="h-8 w-8 p-0 text-red-500 hover:text-red-700"
+              className="h-8 w-8 p-0 text-red-500 hover:text-red-700 bg-white/90 hover:bg-white border border-gray-200 hover:border-gray-300 shadow-sm"
               onClick={() => setShowDeleteDialog(true)}
               aria-label="Delete recipe"
             >
