@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { Search, Filter, X, ChevronDown } from 'lucide-react';
+import { Search, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -9,19 +8,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuCheckboxItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { CategoryFilter } from '@/components/ui/category-filter';
+import { CuisineFilter } from '@/components/ui/cuisine-filter';
+import { MoodFilter } from '@/components/ui/mood-filter';
 import CategoryChip from '@/components/ui/CategoryChip';
-import {
-  CUISINE_OPTIONS,
-  CUISINE_LABELS,
-  PREDEFINED_CATEGORIES,
-} from '@/lib/constants';
-import type { RecipeFilters, Cuisine, SortOption } from '@/lib/types';
+import { CUISINE_OPTIONS, CUISINE_LABELS } from '@/lib/cuisines';
+import { CANONICAL_CATEGORIES } from '@/lib/categories';
+import { MOOD_OPTIONS } from '@/lib/moods';
+import type { RecipeFilters, Cuisine, Mood, SortOption } from '@/lib/types';
 
 interface FilterBarProps {
   filters: RecipeFilters;
@@ -34,28 +28,15 @@ export function FilterBar({
   onFiltersChange,
   className = '',
 }: FilterBarProps) {
-  const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
-  const [isCuisineDropdownOpen, setIsCuisineDropdownOpen] = useState(false);
+
 
   const updateFilters = (updates: Partial<RecipeFilters>) => {
     onFiltersChange({ ...filters, ...updates });
   };
 
-  const toggleCategory = (category: string) => {
-    const currentCategories = filters.categories || [];
-    const newCategories = currentCategories.includes(category)
-      ? currentCategories.filter((c: string) => c !== category)
-      : [...currentCategories, category];
-    updateFilters({ categories: newCategories });
-  };
 
-  const toggleCuisine = (cuisine: Cuisine) => {
-    const currentCuisines = filters.cuisine || [];
-    const newCuisines = currentCuisines.includes(cuisine)
-      ? currentCuisines.filter((c: Cuisine) => c !== cuisine)
-      : [...currentCuisines, cuisine];
-    updateFilters({ cuisine: newCuisines });
-  };
+
+
 
   const clearAllFilters = () => {
     onFiltersChange({
@@ -66,7 +47,7 @@ export function FilterBar({
   };
 
   const hasActiveFilters = !!(
-    filters.categories?.length || filters.cuisine?.length
+    filters.categories?.length || filters.cuisine?.length || filters.moods?.length
   );
 
   return (
@@ -83,114 +64,100 @@ export function FilterBar({
         />
       </div>
 
-      {/* Filter Controls */}
-      <div className="flex flex-wrap gap-2">
-        {/* Categories Filter */}
-        <DropdownMenu
-          open={isCategoryDropdownOpen}
-          onOpenChange={setIsCategoryDropdownOpen}
-        >
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm">
-              <Filter className="mr-2 h-4 w-4" />
-              Categories
-              <ChevronDown className="ml-2 h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-64">
-            {PREDEFINED_CATEGORIES.map((category) => (
-              <DropdownMenuCheckboxItem
-                key={category}
-                checked={filters.categories?.includes(category) || false}
-                onCheckedChange={() => toggleCategory(category)}
-              >
-                {category}
-              </DropdownMenuCheckboxItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
+              {/* Filter Controls */}
+        <div className="flex items-center gap-2">
+        {/* Left side - All filters grouped together */}
+        <div className="flex gap-2">
+          {/* Categories Filter */}
+          <CategoryFilter
+            selectedCategories={filters.categories || []}
+            onCategoriesChange={(categories) => updateFilters({ categories })}
+            availableCategories={CANONICAL_CATEGORIES}
+            placeholder="Filter by categories..."
+            className="w-48"
+          />
 
-        {/* Cuisine Filter */}
-        <DropdownMenu
-          open={isCuisineDropdownOpen}
-          onOpenChange={setIsCuisineDropdownOpen}
-        >
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm">
-              <Filter className="mr-2 h-4 w-4" />
-              Cuisine
-              <ChevronDown className="ml-2 h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-48">
-            {CUISINE_OPTIONS.map((cuisine) => (
-              <DropdownMenuCheckboxItem
-                key={cuisine}
-                checked={filters.cuisine?.includes(cuisine) || false}
-                onCheckedChange={() => toggleCuisine(cuisine)}
-              >
-                {CUISINE_LABELS[cuisine]}
-              </DropdownMenuCheckboxItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
+          {/* Cuisine Filter */}
+          <CuisineFilter
+            selectedCuisines={filters.cuisine || []}
+            onCuisinesChange={(cuisines) => updateFilters({ cuisine: cuisines })}
+            availableCuisines={CUISINE_OPTIONS}
+            placeholder="Filter by cuisine..."
+            className="w-48"
+          />
 
-        {/* Sort Options */}
-        <Select
-          value={filters.sortBy || 'date'}
-          onValueChange={(value: SortOption) =>
-            updateFilters({ sortBy: value })
-          }
-        >
-          <SelectTrigger className="w-32">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="date">Date</SelectItem>
-            <SelectItem value="title">Title</SelectItem>
-            <SelectItem value="popularity">Popularity</SelectItem>
-          </SelectContent>
-        </Select>
+          {/* Mood Filter */}
+          <MoodFilter
+            selectedMoods={filters.moods || []}
+            onMoodsChange={(moods) => updateFilters({ moods })}
+            availableMoods={MOOD_OPTIONS}
+            placeholder="Filter by mood..."
+            className="w-48"
+          />
+        </div>
 
-        {/* Sort Order */}
-        <Select
-          value={filters.sortOrder || 'desc'}
-          onValueChange={(value: 'asc' | 'desc') =>
-            updateFilters({ sortOrder: value })
-          }
-        >
-          <SelectTrigger className="w-20">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="desc">↓</SelectItem>
-            <SelectItem value="asc">↑</SelectItem>
-          </SelectContent>
-        </Select>
-
-        {/* Clear Filters */}
-        {hasActiveFilters && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={clearAllFilters}
-            className="text-gray-500 hover:text-gray-700"
+        {/* Right side - Sort options and clear filters */}
+        <div className="flex gap-2 ml-auto">
+          {/* Sort Options */}
+          <Select
+            value={filters.sortBy || 'date'}
+            onValueChange={(value: SortOption) =>
+              updateFilters({ sortBy: value })
+            }
           >
-            <X className="mr-1 h-4 w-4" />
-            Clear Filters
-          </Button>
-        )}
+            <SelectTrigger className="w-32">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="date">Date</SelectItem>
+              <SelectItem value="title">Title</SelectItem>
+              <SelectItem value="popularity">Popularity</SelectItem>
+            </SelectContent>
+          </Select>
+
+          {/* Sort Order */}
+          <Select
+            value={filters.sortOrder || 'desc'}
+            onValueChange={(value: 'asc' | 'desc') =>
+              updateFilters({ sortOrder: value })
+            }
+          >
+            <SelectTrigger className="w-20">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="desc">↓</SelectItem>
+              <SelectItem value="asc">↑</SelectItem>
+            </SelectContent>
+          </Select>
+
+          {/* Clear Filters */}
+          {hasActiveFilters && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={clearAllFilters}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              <X className="mr-1 h-4 w-4" />
+              Clear Filters
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Active Filters Display */}
-      {(filters.categories?.length || filters.cuisine?.length) && (
+      {(filters.categories?.length || filters.cuisine?.length || filters.moods?.length) && (
         <div className="flex flex-wrap gap-2">
           {/* Category Chips */}
           {filters.categories?.map((category: string) => (
             <CategoryChip
               key={category}
               category={category}
-              onRemove={() => toggleCategory(category)}
+              onRemove={() => {
+                const newCategories = filters.categories?.filter(c => c !== category) || [];
+                updateFilters({ categories: newCategories });
+              }}
               variant="removable"
             />
           ))}
@@ -200,7 +167,23 @@ export function FilterBar({
             <CategoryChip
               key={cuisine}
               category={CUISINE_LABELS[cuisine]}
-              onRemove={() => toggleCuisine(cuisine)}
+              onRemove={() => {
+                const newCuisines = filters.cuisine?.filter(c => c !== cuisine) || [];
+                updateFilters({ cuisine: newCuisines });
+              }}
+              variant="removable"
+            />
+          ))}
+
+          {/* Mood Chips */}
+          {filters.moods?.map((mood: Mood) => (
+            <CategoryChip
+              key={mood}
+              category={mood}
+              onRemove={() => {
+                const newMoods = filters.moods?.filter(m => m !== mood) || [];
+                updateFilters({ moods: newMoods });
+              }}
               variant="removable"
             />
           ))}

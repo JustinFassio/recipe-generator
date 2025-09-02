@@ -21,13 +21,15 @@ export type PublicRecipe = Recipe & {
 };
 
 // Recipe filtering types - only include what exists in the database
-export type Cuisine = (typeof import('./constants').CUISINE_OPTIONS)[number];
+export type Cuisine = (typeof import('./cuisines').CUISINE_OPTIONS)[number];
+export type Mood = (typeof import('./moods').MOOD_OPTIONS)[number];
 export type SortOption = 'date' | 'title' | 'popularity';
 
 export type RecipeFilters = {
   searchTerm?: string;
   categories?: string[];
   cuisine?: Cuisine[];
+  moods?: Mood[];
   sortBy?: SortOption;
   sortOrder?: 'asc' | 'desc';
 };
