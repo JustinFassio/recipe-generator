@@ -160,19 +160,37 @@ export const recipeApi = {
   async createRecipe(
     recipe: Omit<Recipe, 'id' | 'user_id' | 'created_at' | 'updated_at'>
   ): Promise<Recipe> {
+    // Check network connectivity
+    if (!navigator.onLine) {
+      throw new Error(
+        'No internet connection. Please check your network and try again.'
+      );
+    }
+
     const {
       data: { user },
     } = await supabase.auth.getUser();
     if (!user) throw new Error('User not authenticated');
 
-    const { data, error } = await supabase
-      .from('recipes')
-      .insert({ ...recipe, user_id: user.id, is_public: false })
-      .select()
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('recipes')
+        .insert({ ...recipe, user_id: user.id, is_public: false })
+        .select()
+        .single();
 
-    if (error) handleError(error, 'Create recipe');
-    return data;
+      if (error) {
+        console.error('Supabase create recipe error:', error);
+        throw new Error(`Database error: ${error.message}`);
+      }
+
+      return data;
+    } catch (error) {
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error('Failed to create recipe. Please try again.');
+    }
   },
 
   // Update an existing recipe

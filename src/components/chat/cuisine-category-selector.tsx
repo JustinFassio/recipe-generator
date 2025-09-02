@@ -101,26 +101,26 @@ export function CuisineCategorySelector({
 
   return (
     <div className={`space-y-4 ${className}`}>
-      {/* Selection Controls - Same layout as FilterBar */}
-      <div className="flex justify-between items-center gap-2">
-        {/* Left side - Categories Filter */}
-        <CategoryFilter
-          selectedCategories={selectedCategories}
-          onCategoriesChange={handleCategoriesChange}
-          availableCategories={CANONICAL_CATEGORIES}
-          placeholder="Select categories..."
-          className="flex-1"
-        />
+      {/* Selection Controls - Mobile responsive layout matching FilterBar */}
+      <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:space-y-0 sm:gap-4">
+        {/* Left side - All selectors grouped together */}
+        <div className="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:gap-4">
+          {/* Categories Filter */}
+          <CategoryFilter
+            selectedCategories={selectedCategories}
+            onCategoriesChange={handleCategoriesChange}
+            availableCategories={CANONICAL_CATEGORIES}
+            placeholder="Select categories..."
+            className="w-full sm:w-48"
+          />
 
-        {/* Right side - Other selectors grouped together */}
-        <div className="flex gap-2">
           {/* Cuisine Filter */}
           <CuisineFilter
             selectedCuisines={selectedCuisines}
             onCuisinesChange={handleCuisinesChange}
             availableCuisines={CUISINE_OPTIONS}
             placeholder="Select cuisines..."
-            className="w-48"
+            className="w-full sm:w-48"
           />
 
           {/* Mood Filter */}
@@ -129,16 +129,18 @@ export function CuisineCategorySelector({
             onMoodsChange={handleMoodsChange}
             availableMoods={MOOD_OPTIONS}
             placeholder="Select moods..."
-            className="w-48"
+            className="w-full sm:w-48"
           />
+        </div>
 
-          {/* Clear Selections */}
+        {/* Right side - Clear selections button */}
+        <div className="flex justify-end sm:ml-auto">
           {hasSelections && (
             <Button
               variant="ghost"
               size="sm"
               onClick={clearAllSelections}
-              className="text-gray-500 hover:text-gray-700"
+              className="w-full sm:w-auto text-gray-500 hover:text-gray-700"
             >
               <X className="mr-1 h-4 w-4" />
               Clear All

@@ -134,7 +134,7 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
   }
 
   return (
-    <div className="mx-auto flex h-[calc(100vh-8rem)] max-w-4xl flex-col">
+    <div className="mx-auto flex max-w-4xl flex-col">
       {/* Chat Header */}
       <ChatHeader
         selectedPersona={persona}
@@ -163,14 +163,46 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
         </div>
       </div>
 
-      {/* Chat Messages */}
+      {/* Chat Messages - Responsive height */}
       <div
         ref={scrollAreaRef}
-        className={createDaisyUIScrollAreaClasses(
+        className={`${createDaisyUIScrollAreaClasses(
           'default',
-          'flex-1 bg-gray-50 p-4'
-        )}
+          'bg-gray-50 p-4'
+        )} ${
+          messages.length === 0
+            ? 'min-h-[150px] max-h-[250px] sm:min-h-[200px] sm:max-h-[300px]' // Compact when empty
+            : 'min-h-[250px] max-h-[50vh] sm:min-h-[300px] sm:max-h-[60vh]' // Expand based on content
+        } overflow-y-auto`}
       >
+        {/* Welcome Message - Always visible when no conversation */}
+        {messages.length === 0 && (
+          <div className="flex items-center justify-center h-full">
+            <div className="text-center space-y-3">
+              <div className="flex justify-center">
+                <div
+                  className={`flex h-16 w-16 items-center justify-center rounded-full border-2 border-white shadow-sm ${getPersonaColor(persona)}`}
+                >
+                  {getPersonaIcon(persona)}
+                </div>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-800">
+                  Welcome! I'm {RECIPE_BOT_PERSONAS[persona].name}
+                </h3>
+                <p className="text-sm text-gray-600 max-w-md">
+                  {RECIPE_BOT_PERSONAS[persona].description}
+                </p>
+              </div>
+              <p className="text-xs text-gray-500">
+                Start by telling me what kind of recipe you'd like to create, or
+                use the preferences above to guide me.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Messages */}
         <div className="space-y-4">
           {messages.map((message) => (
             <div
@@ -255,8 +287,8 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
         </div>
       </div>
 
-      {/* Chat Input */}
-      <div className="bg-base-100 rounded-b-lg border-t p-4">
+      {/* Chat Input - Always visible and accessible */}
+      <div className="bg-base-100 rounded-b-lg border-t p-4 sticky bottom-0 shadow-lg">
         <div className="flex items-center space-x-2">
           <input
             ref={inputRef}
@@ -268,13 +300,13 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
             onKeyPress={handleKeyPress}
             placeholder="Type your message here..."
             disabled={isLoading}
-            className={`${createDaisyUIInputClasses('bordered')} flex-1`}
+            className={`${createDaisyUIInputClasses('bordered')} flex-1 min-h-[44px]`}
           />
           <Button
             onClick={handleSendMessage}
             disabled={!inputValue.trim() || isLoading}
             size="sm"
-            className="bg-green-600 hover:bg-green-700"
+            className="bg-green-600 hover:bg-green-700 min-h-[44px] px-4"
           >
             <Send className="h-4 w-4" />
           </Button>
