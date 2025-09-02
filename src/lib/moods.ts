@@ -95,7 +95,14 @@ export const MOOD_REGIONS: MoodData = {
 };
 
 // Flatten all moods into a single array for easy access
-export const ALL_MOODS = Object.values(MOOD_REGIONS).flatMap(region => region.moods);
+export const ALL_MOODS = [
+  ...MOOD_REGIONS['Flavor Profiles'].moods,
+  ...MOOD_REGIONS['Emotional States'].moods,
+  ...MOOD_REGIONS['Energy Levels'].moods,
+  ...MOOD_REGIONS['Seasonal Vibes'].moods,
+  ...MOOD_REGIONS['Social Context'].moods,
+  ...MOOD_REGIONS['Culinary Style'].moods,
+] as const;
 
 // For backward compatibility and consistency with existing patterns
 export const MOOD_OPTIONS = [...ALL_MOODS] as const;

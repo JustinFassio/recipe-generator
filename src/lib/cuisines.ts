@@ -72,8 +72,14 @@ export const CUISINE_REGIONS: CuisineData = {
 };
 
 // Flattened list of all available cuisines
-export const ALL_CUISINES: string[] = Object.values(CUISINE_REGIONS)
-  .flatMap(region => region.cuisines);
+export const ALL_CUISINES = [
+  ...CUISINE_REGIONS['Americas'].cuisines,
+  ...CUISINE_REGIONS['Europe'].cuisines,
+  ...CUISINE_REGIONS['Asia'].cuisines,
+  ...CUISINE_REGIONS['Africa'].cuisines,
+  ...CUISINE_REGIONS['Middle East'].cuisines,
+  ...CUISINE_REGIONS['Oceania'].cuisines,
+] as const;
 
 // Legacy support - maintain existing CUISINE_OPTIONS for backward compatibility
 export const CUISINE_OPTIONS = [...ALL_CUISINES] as const;
