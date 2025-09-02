@@ -22,6 +22,7 @@ import CategoryInput from '@/components/ui/CategoryInput';
 import { MAX_CATEGORIES_PER_RECIPE } from '@/lib/constants';
 import { processImageFile } from '@/lib/image-utils';
 import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/lib/supabase';
 
 import type { Recipe } from '@/lib/types';
 
@@ -48,6 +49,32 @@ export function RecipeForm({
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [isMobile, setIsMobile] = useState(false);
+  const [lastError, setLastError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
+
+  // Mobile detection and network status monitoring
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
+    };
+    
+    const updateOnlineStatus = () => {
+      setIsOnline(navigator.onLine);
+    };
+
+    checkMobile();
+    updateOnlineStatus();
+
+    window.addEventListener('online', updateOnlineStatus);
+    window.addEventListener('offline', updateOnlineStatus);
+
+    return () => {
+      window.removeEventListener('online', updateOnlineStatus);
+      window.removeEventListener('offline', updateOnlineStatus);
+    };
+  }, []);
 
   const {
     register,
@@ -144,15 +171,24 @@ export function RecipeForm({
 
   const onSubmit = async (data: RecipeFormData) => {
     try {
+      // Mobile-specific debugging
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      if (isMobile) {
+        console.log('Mobile device detected, submitting recipe...');
+        console.log('Form data:', data);
+      }
+
       let imageUrl = data.image_url;
 
       // Upload image if there's a new file
       if (imageFile) {
+        if (isMobile) console.log('Uploading image on mobile...');
         const uploadedUrl = await uploadImage.mutateAsync(imageFile);
         if (!uploadedUrl) {
           throw new Error('Failed to upload image');
         }
         imageUrl = uploadedUrl;
+        if (isMobile) console.log('Image uploaded successfully:', uploadedUrl);
       }
 
       const recipeData = {
@@ -160,21 +196,61 @@ export function RecipeForm({
         image_url: imageUrl && imageUrl.trim() !== '' ? imageUrl : null,
       };
 
+      if (isMobile) {
+        console.log('Recipe data prepared:', recipeData);
+        console.log('User authenticated:', !!supabase.auth.getUser());
+      }
+
       if (existingRecipe) {
+        if (isMobile) console.log('Updating existing recipe...');
         await updateRecipe.mutateAsync({
           id: existingRecipe.id,
           updates: recipeData,
         });
       } else {
+        if (isMobile) console.log('Creating new recipe...');
         await createRecipe.mutateAsync({
           ...recipeData,
           is_public: false,
         });
       }
 
+      if (isMobile) console.log('Recipe operation completed successfully');
       onSuccess?.();
     } catch (error) {
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
       console.error('Error saving recipe:', error);
+      
+      // Enhanced error logging for mobile
+      if (isMobile) {
+        console.error('Mobile recipe creation failed. Details:');
+        console.error('Error type:', typeof error);
+        console.error('Error message:', error instanceof Error ? error.message : error);
+        console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+        
+        // Check authentication status
+        try {
+          const { data: { user } } = await supabase.auth.getUser();
+          console.error('User authenticated:', !!user);
+          console.error('User ID:', user?.id);
+        } catch (authError) {
+          console.error('Auth check failed:', authError);
+        }
+      }
+
+      // Show more specific error message to user
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      
+      // Set error state for mobile display
+      if (isMobile) {
+        setLastError(errorMessage);
+      }
+      
+      toast({
+        title: 'Recipe Creation Failed',
+        description: `Failed to create recipe: ${errorMessage}. Please check your connection and try again.`,
+        variant: 'destructive',
+      });
     }
   };
 
@@ -402,6 +478,58 @@ export function RecipeForm({
         </div>
       </div>
 
+      {/* Network Status Indicator for Mobile */}
+      {isMobile && !isOnline && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
+          <div className="flex items-center space-x-2">
+            <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+            <span className="text-sm text-yellow-800">
+              You're offline. Please check your connection and try again.
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* Error Display and Retry for Mobile */}
+      {isMobile && lastError && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+          <div className="space-y-2">
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+              <span className="text-sm font-medium text-red-800">
+                Recipe creation failed
+              </span>
+            </div>
+            <p className="text-sm text-red-700">{lastError}</p>
+            <div className="flex space-x-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setLastError(null);
+                  setRetryCount(prev => prev + 1);
+                  // Retry the last submission
+                  handleSubmit(onSubmit)();
+                }}
+                className="text-red-700 border-red-300 hover:bg-red-100"
+              >
+                Retry ({retryCount + 1})
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => setLastError(null)}
+                className="text-red-600 hover:text-red-800"
+              >
+                Dismiss
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex justify-end space-x-2">
         <Button
           type="submit"
@@ -409,7 +537,8 @@ export function RecipeForm({
           disabled={
             createRecipe.isPending ||
             updateRecipe.isPending ||
-            uploadImage.isPending
+            uploadImage.isPending ||
+            !isOnline
           }
         >
           {createRecipe.isPending ||
@@ -418,9 +547,11 @@ export function RecipeForm({
             ? existingRecipe
               ? 'Updating...'
               : 'Creating...'
+            : !isOnline
+            ? 'No Connection'
             : existingRecipe
-              ? 'Update Recipe'
-              : 'Create Recipe'}
+            ? 'Update Recipe'
+            : 'Create Recipe'}
         </Button>
       </div>
     </form>
