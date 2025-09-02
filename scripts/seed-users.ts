@@ -25,6 +25,10 @@ if (!SERVICE_ROLE_KEY) {
 // Service role client bypasses RLS for seeding
 const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
 
+// Constants
+const DEFAULT_MOOD = 'Mood: Simple';
+const MAX_MOODS_PER_RECIPE = 2;
+
 type SeedUser = {
   email: string;
   password: string;
@@ -2057,6 +2061,106 @@ async function seedRecipes() {
       continue;
     }
 
+    // Ensure at least one Mood tag based on existing category hints
+    const existing = (recipe.categories || []) as string[];
+    const hasMood = existing.some((c) => c.startsWith('Mood:'));
+    let moodAugmented = existing;
+    if (!hasMood) {
+      const lower = existing.map((c) => c.toLowerCase());
+      const moodGuesses: string[] = [];
+
+      // Flavor-based moods
+      if (lower.some((c) => c.includes('spicy') || c.includes('hot')))
+        moodGuesses.push('Mood: Spicy');
+      if (lower.some((c) => c.includes('sweet') || c.includes('dessert')))
+        moodGuesses.push('Mood: Sweet');
+      if (lower.some((c) => c.includes('savory') || c.includes('umami')))
+        moodGuesses.push('Mood: Savory');
+      if (lower.some((c) => c.includes('tangy') || c.includes('citrus')))
+        moodGuesses.push('Mood: Tangy');
+
+      // Emotional/comfort moods
+      if (lower.some((c) => c.includes('comfort') || c.includes('cozy')))
+        moodGuesses.push('Mood: Comfort');
+      if (
+        lower.some(
+          (c) => c.includes('energizing') || c.includes('post-workout')
+        )
+      )
+        moodGuesses.push('Mood: Energizing');
+      if (lower.some((c) => c.includes('refreshing') || c.includes('fresh')))
+        moodGuesses.push('Mood: Refreshing');
+      if (
+        lower.some(
+          (c) => c.includes('celebratory') || c.includes('special occasion')
+        )
+      )
+        moodGuesses.push('Mood: Celebratory');
+
+      // Energy/time moods
+      if (
+        lower.some(
+          (c) =>
+            c.includes('quick') || c.includes('under') || c.includes('fast')
+        )
+      )
+        moodGuesses.push('Mood: Quick');
+      if (
+        lower.some(
+          (c) =>
+            c.includes('slow') ||
+            c.includes('over 2 hours') ||
+            c.includes('patience')
+        )
+      )
+        moodGuesses.push('Mood: Patient');
+      if (lower.some((c) => c.includes('light') || c.includes('airy')))
+        moodGuesses.push('Mood: Light');
+      if (lower.some((c) => c.includes('heavy') || c.includes('substantial')))
+        moodGuesses.push('Mood: Substantial');
+
+      // Seasonal moods
+      if (lower.some((c) => c.includes('summer') || c.includes('refreshing')))
+        moodGuesses.push('Mood: Refreshing');
+      if (
+        lower.some(
+          (c) =>
+            c.includes('winter') || c.includes('cozy') || c.includes('comfort')
+        )
+      )
+        moodGuesses.push('Mood: Cozy');
+      if (lower.some((c) => c.includes('holiday') || c.includes('festive')))
+        moodGuesses.push('Mood: Festive');
+
+      // Social moods
+      if (lower.some((c) => c.includes('party') || c.includes('sharing')))
+        moodGuesses.push('Mood: Sharing');
+      if (lower.some((c) => c.includes('romantic') || c.includes('date night')))
+        moodGuesses.push('Mood: Romantic');
+      if (lower.some((c) => c.includes('family') || c.includes('communal')))
+        moodGuesses.push('Mood: Communal');
+
+      // Culinary style moods
+      if (lower.some((c) => c.includes('traditional') || c.includes('classic')))
+        moodGuesses.push('Mood: Traditional');
+      if (lower.some((c) => c.includes('simple') || c.includes('basic')))
+        moodGuesses.push(DEFAULT_MOOD);
+      if (lower.some((c) => c.includes('gourmet') || c.includes('elegant')))
+        moodGuesses.push('Mood: Elegant');
+      if (lower.some((c) => c.includes('rustic') || c.includes('home-style')))
+        moodGuesses.push('Mood: Rustic');
+      if (lower.some((c) => c.includes('fusion') || c.includes('exotic')))
+        moodGuesses.push('Mood: Adventurous');
+
+      // Default mood if none detected
+      if (moodGuesses.length === 0) moodGuesses.push(DEFAULT_MOOD);
+
+      // Limit to max MAX_MOODS_PER_RECIPE moods and ensure no duplicates
+      moodAugmented = Array.from(
+        new Set([...existing, ...moodGuesses.slice(0, MAX_MOODS_PER_RECIPE)])
+      );
+    }
+
     // Insert recipe
     const { error } = await admin.from('recipes').upsert(
       {
@@ -2068,7 +2172,7 @@ async function seedRecipes() {
         image_url: recipe.image_url,
         user_id: userMatch.id,
         is_public: recipe.is_public,
-        categories: recipe.categories || [],
+        categories: moodAugmented,
       },
       { onConflict: 'id' }
     );

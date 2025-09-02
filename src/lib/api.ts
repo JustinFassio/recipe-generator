@@ -47,6 +47,16 @@ export const recipeApi = {
       query = query.overlaps('categories', cuisineCategories);
     }
 
+    // Apply mood filter (moods are stored as namespaced categories)
+    if (filters?.moods?.length) {
+      // Backward-compatible: match both namespaced and plain mood tags
+      const moodCategories = [
+        ...filters.moods.map((m) => `Mood: ${m}`),
+        ...filters.moods,
+      ];
+      query = query.overlaps('categories', moodCategories);
+    }
+
     // Apply sorting
     const sortBy = filters?.sortBy || 'date';
     const sortOrder = filters?.sortOrder || 'desc';

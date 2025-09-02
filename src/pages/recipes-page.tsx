@@ -138,13 +138,15 @@ export function RecipesPage() {
                 <p className="mb-4 text-gray-600">
                   {filters.searchTerm ||
                   filters.categories?.length ||
-                  filters.cuisine?.length
+                  filters.cuisine?.length ||
+                  filters.moods?.length
                     ? 'Try adjusting your filters or search terms.'
                     : 'Start by adding your first recipe!'}
                 </p>
                 {!filters.searchTerm &&
                   !filters.categories?.length &&
-                  !filters.cuisine?.length && (
+                  !filters.cuisine?.length &&
+                  !filters.moods?.length && (
                     <Button
                       onClick={() => navigate('/add')}
                       className="bg-success text-success-content hover:bg-success/80"

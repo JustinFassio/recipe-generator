@@ -6,6 +6,7 @@ import { createDaisyUIBadgeClasses } from '@/lib/badge-migration';
 import { createDaisyUISeparatorClasses } from '@/lib/separator-migration';
 import { ArrowLeft, Clock, Users, Edit, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import CategoryChip from '@/components/ui/CategoryChip';
 import type { Recipe } from '@/lib/types';
 
 interface RecipeViewProps {
@@ -74,6 +75,22 @@ export function RecipeView({ recipe, onEdit, onBack }: RecipeViewProps) {
                   </div>
                 )}
               </div>
+
+              {/* Recipe Tags */}
+              {recipe.categories && recipe.categories.length > 0 && (
+                <div className="mt-4">
+                  <div className="flex flex-wrap gap-2">
+                    {recipe.categories.map((category, index) => (
+                      <CategoryChip
+                        key={`${category}-${index}`}
+                        category={category}
+                        variant="readonly"
+                        size="sm"
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
