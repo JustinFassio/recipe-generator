@@ -11,6 +11,12 @@ ALTER TABLE recipes
 ALTER COLUMN categories SET NOT NULL;
 
 -- Add constraint to limit number of categories (max 6 categories)
+-- Business Rule: Maximum 6 categories per recipe
+-- Rationale: 
+-- 1. Prevents recipe categorization from becoming too granular
+-- 2. Maintains UI simplicity in category selection
+-- 3. Balances flexibility with usability
+-- 4. Aligns with application layer MAX_CATEGORIES_PER_RECIPE constant
 -- NOTE: The maximum number of categories (6) must be kept in sync with the application layer
 ALTER TABLE recipes 
 ADD CONSTRAINT check_category_count 

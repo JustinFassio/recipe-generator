@@ -111,6 +111,12 @@ BEGIN
     ) THEN
         ALTER TABLE recipes 
         ADD CONSTRAINT check_category_count 
+        -- Business Rule: Maximum 6 categories per recipe
+        -- Rationale: 
+        -- 1. Prevents recipe categorization from becoming too granular
+        -- 2. Maintains UI simplicity in category selection
+        -- 3. Balances flexibility with usability
+        -- 4. Aligns with application layer MAX_CATEGORIES_PER_RECIPE constant
         CHECK (array_length(categories, 1) IS NULL OR array_length(categories, 1) <= 6);
         RAISE NOTICE 'Added category count constraint';
     END IF;
