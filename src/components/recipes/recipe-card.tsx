@@ -60,7 +60,24 @@ export function RecipeCard({
       const isTouchDevice =
         'ontouchstart' in window || navigator.maxTouchPoints > 0;
       const isMobileScreen = window.innerWidth < 768;
-      setIsMobile(isTouchDevice && isMobileScreen);
+      const isMobileUserAgent = /iPhone|iPad|iPod|Android|Mobile|Tablet/i.test(navigator.userAgent);
+      
+      // More robust mobile detection - use user agent as primary indicator
+      const mobile = isMobileUserAgent || (isTouchDevice && isMobileScreen);
+      
+      // Debug logging for production troubleshooting
+      console.log('🔍 Device Detection:', {
+        isTouchDevice,
+        isMobileScreen,
+        isMobileUserAgent,
+        windowWidth: window.innerWidth,
+        maxTouchPoints: navigator.maxTouchPoints,
+        hasOntouchstart: 'ontouchstart' in window,
+        finalMobile: mobile,
+        userAgent: navigator.userAgent
+      });
+      
+      setIsMobile(mobile);
     };
 
     detectDevice();
@@ -71,20 +88,27 @@ export function RecipeCard({
 
   // Touch event handlers
   const handleTouchStart = () => {
+    console.log('🔍 Touch Start:', { isMobile, isTouched });
     if (isMobile) {
       setIsTouched(true);
+      console.log('✅ Touch detected, showing buttons');
     }
   };
 
   const handleTouchEnd = (e: React.TouchEvent) => {
+    console.log('🔍 Touch End:', { isMobile, isTouched });
     if (isMobile) {
       e.preventDefault();
     }
   };
 
-  const handleCardTap = () => {
+  const handleCardTap = (e: React.MouseEvent) => {
+    console.log('🔍 Card Tap:', { isMobile, isTouched, eventType: e.type });
     if (isMobile) {
+      e.preventDefault();
+      e.stopPropagation();
       setIsTouched(!isTouched);
+      console.log('✅ Card tapped, toggling buttons:', !isTouched);
     }
   };
 
@@ -173,6 +197,11 @@ export function RecipeCard({
                 ? 'opacity-100' // Always show on mobile
                 : 'opacity-0 group-hover:opacity-100'
             }`}
+            style={{
+              // Fallback: ensure buttons are always clickable on mobile
+              pointerEvents: isMobile ? 'auto' : undefined,
+              zIndex: 20, // Ensure buttons are above other elements
+            }}
           >
             {canShare && (
               <Button
