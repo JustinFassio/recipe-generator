@@ -10,6 +10,9 @@ import {
   getCuisineRegion
 } from '@/lib/cuisines';
 
+// Configuration constants
+const TOTAL_WORLD_COUNTRIES = 168; // Total number of recognized world countries
+
 export interface CuisineAgentOptions {
   includeRegionalContext?: boolean;
   maxSuggestions?: number;
@@ -223,7 +226,7 @@ export class CuisineAgent {
    * Get statistics about cuisine coverage
    */
   getCoverageStats() {
-    const totalCountries = 168; // World countries
+    const totalCountries = TOTAL_WORLD_COUNTRIES;
     const totalCuisines = ALL_CUISINES.length;
     const coveragePercentage = (totalCuisines / totalCountries) * 100;
 
