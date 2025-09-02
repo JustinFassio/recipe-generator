@@ -7,7 +7,7 @@ import { Trash2, Edit, Eye, Share, Check, Loader2 } from 'lucide-react';
 import CategoryChip from '@/components/ui/CategoryChip';
 import type { Recipe } from '@/lib/types';
 import { useDeleteRecipe } from '@/hooks/use-recipes';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { recipeApi } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthProvider';
@@ -42,11 +42,63 @@ export function RecipeCard({
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
   const [isPublic, setIsPublic] = useState(recipe.is_public);
+  const [isTouched, setIsTouched] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
   const deleteRecipe = useDeleteRecipe();
   const { user } = useAuth();
 
   // Only show share button if explicitly requested and user owns the recipe
   const canShare = showShareButton && user?.id === recipe.user_id;
+
+  // Touch detection and device capabilities
+  useEffect(() => {
+    const detectDevice = () => {
+      const isTouchDevice =
+        'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      const isMobileScreen = window.innerWidth < 768;
+      setIsMobile(isTouchDevice && isMobileScreen);
+    };
+
+    detectDevice();
+    window.addEventListener('resize', detectDevice);
+
+    return () => window.removeEventListener('resize', detectDevice);
+  }, []);
+
+  // Touch event handlers
+  const handleTouchStart = () => {
+    if (isMobile) {
+      setIsTouched(true);
+    }
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (isMobile) {
+      e.preventDefault();
+    }
+  };
+
+  const handleCardTap = () => {
+    if (isMobile) {
+      setIsTouched(!isTouched);
+    }
+  };
+
+  // Click outside handler to hide buttons
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (cardRef.current && !cardRef.current.contains(event.target as Node)) {
+        setIsTouched(false);
+      }
+    };
+
+    if (isMobile && isTouched) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () =>
+        document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [isMobile, isTouched]);
 
   const handleDelete = () => {
     deleteRecipe.mutate(recipe.id);
@@ -82,7 +134,11 @@ export function RecipeCard({
   return (
     <>
       <div
-        className={`${createDaisyUICardClasses('bordered')} group overflow-hidden border border-gray-200 transition-all duration-200 hover:border-gray-300 hover:shadow-lg`}
+        ref={cardRef}
+        className={`${createDaisyUICardClasses('bordered')} group relative overflow-hidden border border-gray-200 transition-all duration-200 hover:border-gray-300 hover:shadow-lg`}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        onClick={handleCardTap}
       >
         {recipe.image_url && (
           <div className="aspect-video overflow-hidden">
@@ -94,68 +150,84 @@ export function RecipeCard({
           </div>
         )}
 
-        <div className="card-body pb-3">
-          <div className="flex items-start justify-between">
-            <h3
-              className={`${createDaisyUICardTitleClasses()} line-clamp-2 text-lg font-semibold`}
-            >
-              {recipe.title}
-            </h3>
-            <div className="flex items-center space-x-1 opacity-0 transition-opacity group-hover:opacity-100 sm:opacity-0 sm:group-hover:opacity-100">
-              {canShare && (
-                <Button
-                  variant={isPublic ? 'default' : 'outline'}
-                  size="sm"
-                  className="h-8 px-2"
-                  onClick={handleShareToggle}
-                  disabled={isSharing}
-                  aria-label={isPublic ? 'Unshare recipe' : 'Share recipe'}
-                >
-                  {isSharing ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : isPublic ? (
-                    <>
-                      <Check className="mr-1 h-4 w-4" />
-                      Unshare
-                    </>
-                  ) : (
-                    <>
-                      <Share className="mr-1 h-4 w-4" />
-                      Share
-                    </>
-                  )}
-                </Button>
-              )}
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 w-8 p-0"
-                onClick={() => onView?.(recipe)}
-                aria-label="View recipe"
-              >
-                <Eye className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 w-8 p-0"
-                onClick={() => onEdit?.(recipe)}
-                aria-label="Edit recipe"
-              >
-                <Edit className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 w-8 p-0 text-red-500 hover:text-red-700"
-                onClick={() => setShowDeleteDialog(true)}
-                aria-label="Delete recipe"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
+        {/* Recipe Title - Above Image */}
+        <div className="px-4 pt-4 pb-2">
+          <h3
+            className={`${createDaisyUICardTitleClasses()} text-lg font-semibold leading-tight text-gray-800`}
+            title={recipe.title}
+          >
+            {recipe.title.length > 45
+              ? `${recipe.title.substring(0, 45).trim()}...`
+              : recipe.title}
+          </h3>
+        </div>
 
+        {/* Action Buttons - Top Right */}
+        <div className="absolute top-2 right-2 z-10">
+          <div
+            className={`flex items-center space-x-1 transition-opacity ${
+              isMobile
+                ? isTouched
+                  ? 'opacity-100'
+                  : 'opacity-0'
+                : 'opacity-0 group-hover:opacity-100'
+            }`}
+          >
+            {canShare && (
+              <Button
+                variant={isPublic ? 'default' : 'outline'}
+                size="sm"
+                className="h-8 px-2"
+                onClick={handleShareToggle}
+                disabled={isSharing}
+                aria-label={isPublic ? 'Unshare recipe' : 'Share recipe'}
+              >
+                {isSharing ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : isPublic ? (
+                  <>
+                    <Check className="mr-1 h-4 w-4" />
+                    Unshare
+                  </>
+                ) : (
+                  <>
+                    <Share className="mr-1 h-4 w-4" />
+                    Share
+                  </>
+                )}
+              </Button>
+            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0"
+              onClick={() => onView?.(recipe)}
+              aria-label="View recipe"
+            >
+              <Eye className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0"
+              onClick={() => onEdit?.(recipe)}
+              aria-label="Edit recipe"
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0 text-red-500 hover:text-red-700"
+              onClick={() => setShowDeleteDialog(true)}
+              aria-label="Delete recipe"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+
+        <div className="card-body pb-3 pt-0">
           <div className="space-y-3">
             <div className="flex items-center justify-between text-sm text-gray-500">
               <span
@@ -170,7 +242,7 @@ export function RecipeCard({
 
             {recipe.categories && recipe.categories.length > 0 && (
               <div className="flex flex-wrap gap-1">
-                {recipe.categories.slice(0, 3).map((category, index) => (
+                {recipe.categories.map((category, index) => (
                   <CategoryChip
                     key={`${category}-${index}`}
                     category={category}
@@ -178,11 +250,6 @@ export function RecipeCard({
                     size="sm"
                   />
                 ))}
-                {recipe.categories.length > 3 && (
-                  <span className="text-xs text-gray-500">
-                    +{recipe.categories.length - 3} more
-                  </span>
-                )}
               </div>
             )}
 

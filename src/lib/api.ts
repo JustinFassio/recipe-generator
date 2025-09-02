@@ -49,7 +49,11 @@ export const recipeApi = {
 
     // Apply mood filter (moods are stored as namespaced categories)
     if (filters?.moods?.length) {
-      const moodCategories = filters.moods.map((m) => `Mood: ${m}`);
+      // Backward-compatible: match both namespaced and plain mood tags
+      const moodCategories = [
+        ...filters.moods.map((m) => `Mood: ${m}`),
+        ...filters.moods,
+      ];
       query = query.overlaps('categories', moodCategories);
     }
 

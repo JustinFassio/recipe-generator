@@ -64,16 +64,16 @@ export function FilterBar({
       </div>
 
       {/* Filter Controls */}
-      <div className="flex items-center gap-2">
+      <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:space-y-0 sm:gap-4">
         {/* Left side - All filters grouped together */}
-        <div className="flex gap-2">
+        <div className="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:gap-4">
           {/* Categories Filter */}
           <CategoryFilter
             selectedCategories={filters.categories || []}
             onCategoriesChange={(categories) => updateFilters({ categories })}
             availableCategories={CANONICAL_CATEGORIES}
             placeholder="Filter by categories..."
-            className="w-48"
+            className="w-full sm:w-48"
           />
 
           {/* Cuisine Filter */}
@@ -84,7 +84,7 @@ export function FilterBar({
             }
             availableCuisines={CUISINE_OPTIONS}
             placeholder="Filter by cuisine..."
-            className="w-48"
+            className="w-full sm:w-48"
           />
 
           {/* Mood Filter */}
@@ -93,12 +93,12 @@ export function FilterBar({
             onMoodsChange={(moods) => updateFilters({ moods })}
             availableMoods={MOOD_OPTIONS}
             placeholder="Filter by mood..."
-            className="w-48"
+            className="w-full sm:w-48"
           />
         </div>
 
         {/* Right side - Sort options and clear filters */}
-        <div className="flex gap-2 ml-auto">
+        <div className="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:gap-3 sm:ml-auto">
           {/* Sort Options */}
           <Select
             value={filters.sortBy || 'date'}
@@ -106,7 +106,7 @@ export function FilterBar({
               updateFilters({ sortBy: value })
             }
           >
-            <SelectTrigger className="w-32">
+            <SelectTrigger className="w-full sm:w-32">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -123,7 +123,7 @@ export function FilterBar({
               updateFilters({ sortOrder: value })
             }
           >
-            <SelectTrigger className="w-20">
+            <SelectTrigger className="w-full sm:w-20">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -138,7 +138,7 @@ export function FilterBar({
               variant="ghost"
               size="sm"
               onClick={clearAllFilters}
-              className="text-gray-500 hover:text-gray-700"
+              className="w-full sm:w-auto text-gray-500 hover:text-gray-700"
             >
               <X className="mr-1 h-4 w-4" />
               Clear Filters
@@ -151,7 +151,7 @@ export function FilterBar({
       {(filters.categories?.length ||
         filters.cuisine?.length ||
         filters.moods?.length) && (
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 sm:gap-3">
           {/* Category Chips */}
           {filters.categories?.map((category: string) => (
             <CategoryChip
