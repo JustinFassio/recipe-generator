@@ -110,7 +110,7 @@ export class CuisineAgent {
     return {
       region,
       description: regionData.description,
-      cuisines: regionData.cuisines,
+      cuisines: [...regionData.cuisines],
       culturalNotes: this.getCulturalNotes(region, cuisine),
       commonIngredients: this.getCommonIngredients(region, cuisine),
       cookingTechniques: this.getCookingTechniques(region, cuisine)
@@ -216,7 +216,7 @@ export class CuisineAgent {
    * Get all cuisines in a specific region
    */
   getCuisinesInRegion(region: string): string[] {
-    return getCuisinesByRegion(region);
+    return [...getCuisinesByRegion(region)];
   }
 
   /**

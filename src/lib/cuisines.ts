@@ -3,9 +3,12 @@
  * Provides comprehensive global coverage with intuitive navigation
  */
 
+// Import the Cuisine type for proper typing
+import type { Cuisine } from './types';
+
 export interface CuisineRegion {
   description: string;
-  cuisines: string[];
+  cuisines: readonly string[];
 }
 
 export interface CuisineData {
@@ -85,20 +88,20 @@ export const ALL_CUISINES = [
 export const CUISINE_OPTIONS = [...ALL_CUISINES] as const;
 
 // Cuisine labels mapping (for display purposes)
-export const CUISINE_LABELS: Record<string, string> = ALL_CUISINES.reduce(
+export const CUISINE_LABELS: Record<Cuisine, string> = ALL_CUISINES.reduce(
   (acc, cuisine) => {
     acc[cuisine] = cuisine;
     return acc;
   },
-  {} as Record<string, string>
+  {} as Record<Cuisine, string>
 );
 
 // Helper functions
-export function getCuisinesByRegion(region: string): string[] {
+export function getCuisinesByRegion(region: string): readonly string[] {
   return CUISINE_REGIONS[region]?.cuisines || [];
 }
 
-export function getCuisineRegion(cuisine: string): string | null {
+export function getCuisineRegion(cuisine: Cuisine): string | null {
   for (const [region, data] of Object.entries(CUISINE_REGIONS)) {
     if (data.cuisines.includes(cuisine)) {
       return region;
@@ -107,11 +110,11 @@ export function getCuisineRegion(cuisine: string): string | null {
   return null;
 }
 
-export function getAvailableRegions(): string[] {
+export function getAvailableRegions(): readonly string[] {
   return Object.keys(CUISINE_REGIONS);
 }
 
-export function searchCuisines(query: string): string[] {
+export function searchCuisines(query: string): Cuisine[] {
   const lowerQuery = query.toLowerCase();
   return ALL_CUISINES.filter(cuisine => 
     cuisine.toLowerCase().includes(lowerQuery)
