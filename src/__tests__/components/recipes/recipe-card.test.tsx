@@ -164,11 +164,11 @@ describe('RecipeCard', () => {
       </TestWrapper>
     );
 
-    // Check that the truncated title is displayed (first 45 characters + "...")
+    // Check that the truncated title is displayed (first RECIPE_TITLE_MAX_LENGTH characters + "...")
     const truncatedTitle = 'This is a very long recipe title that should...';
     const titleElement = screen.getByText(truncatedTitle);
     expect(titleElement).toBeInTheDocument();
-    
+
     // Check that the full title is in the title attribute
     const titleHeading = screen.getByRole('heading', { level: 3 });
     expect(titleHeading).toHaveAttribute('title', longTitleRecipe.title);

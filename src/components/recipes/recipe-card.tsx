@@ -22,6 +22,9 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 
+// Constants
+const RECIPE_TITLE_MAX_LENGTH = 45;
+
 interface RecipeCardProps {
   recipe: Recipe;
   onEdit?: (recipe: Recipe) => void;
@@ -156,8 +159,8 @@ export function RecipeCard({
             className={`${createDaisyUICardTitleClasses()} text-lg font-semibold leading-tight text-gray-800`}
             title={recipe.title}
           >
-            {recipe.title.length > 45
-              ? `${recipe.title.substring(0, 45).trim()}...`
+            {recipe.title.length > RECIPE_TITLE_MAX_LENGTH
+              ? `${recipe.title.substring(0, RECIPE_TITLE_MAX_LENGTH).trim()}...`
               : recipe.title}
           </h3>
         </div>
