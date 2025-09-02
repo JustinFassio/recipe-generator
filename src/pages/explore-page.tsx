@@ -1,17 +1,24 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { RecipeCard } from '../components/recipes/recipe-card';
 import { recipeApi } from '../lib/api';
-import type { PublicRecipe } from '@/lib/types';
+import type { PublicRecipe, RecipeFilters } from '@/lib/types';
 import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
-import { Search, Save } from 'lucide-react';
+import { Save } from 'lucide-react';
 import { useToast } from '../hooks/use-toast';
+import { FilterBar } from '../components/recipes/filter-bar';
 
 export default function ExplorePage() {
   const [recipes, setRecipes] = useState<PublicRecipe[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
   const [savingRecipeId, setSavingRecipeId] = useState<string | null>(null);
+  const [filters, setFilters] = useState<RecipeFilters>({
+    searchTerm: '',
+    categories: [],
+    cuisine: [],
+    moods: [],
+    sortBy: 'date',
+    sortOrder: 'desc',
+  });
   const { toast } = useToast();
 
   const loadPublicRecipes = useCallback(async () => {
@@ -55,9 +62,80 @@ export default function ExplorePage() {
     }
   };
 
-  const filteredRecipes = recipes.filter((recipe) =>
-    recipe.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const handleFiltersChange = (newFilters: RecipeFilters) => {
+    setFilters(newFilters);
+  };
+
+  // Comprehensive filtering logic for public recipes
+  const filteredRecipes = useMemo(() => {
+    let filtered = [...recipes];
+
+    // Search filter
+    if (filters.searchTerm) {
+      const searchTerm = filters.searchTerm.toLowerCase();
+      filtered = filtered.filter((recipe) =>
+        recipe.title.toLowerCase().includes(searchTerm) ||
+        recipe.instructions.toLowerCase().includes(searchTerm) ||
+        recipe.ingredients.some(ingredient => 
+          ingredient.toLowerCase().includes(searchTerm)
+        )
+      );
+    }
+
+    // Categories filter
+    if (filters.categories && filters.categories.length > 0) {
+      filtered = filtered.filter((recipe) =>
+        recipe.categories && recipe.categories.some(category =>
+          filters.categories!.includes(category)
+        )
+      );
+    }
+
+    // Cuisine filter
+    if (filters.cuisine && filters.cuisine.length > 0) {
+      filtered = filtered.filter((recipe) =>
+        recipe.categories && recipe.categories.some(category =>
+          filters.cuisine!.some(cuisine => 
+            category === `Cuisine: ${cuisine}`
+          )
+        )
+      );
+    }
+
+    // Moods filter
+    if (filters.moods && filters.moods.length > 0) {
+      filtered = filtered.filter((recipe) =>
+        recipe.categories && recipe.categories.some(category =>
+          filters.moods!.some(mood => 
+            category === `Mood: ${mood}` || category === mood
+          )
+        )
+      );
+    }
+
+    // Sorting
+    const sorted = [...filtered].sort((a, b) => {
+      let comparison = 0;
+      
+      switch (filters.sortBy) {
+        case 'title':
+          comparison = a.title.localeCompare(b.title);
+          break;
+        case 'popularity':
+          // Use updated_at as a proxy for popularity
+          comparison = new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime();
+          break;
+        case 'date':
+        default:
+          comparison = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+          break;
+      }
+      
+      return filters.sortOrder === 'asc' ? comparison : -comparison;
+    });
+
+    return sorted;
+  }, [recipes, filters]);
 
   const getAuthorName = (recipe: PublicRecipe) => {
     if (recipe.author_name && recipe.author_name.trim() !== '') {
@@ -88,24 +166,32 @@ export default function ExplorePage() {
           Discover recipes shared by our community
         </p>
 
-        {/* Search */}
-        <div className="relative mb-6 max-w-md">
-          <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform" />
-          <Input
-            type="text"
-            placeholder="Search recipes..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
+        {/* Comprehensive Filter Bar */}
+        <FilterBar
+          filters={filters}
+          onFiltersChange={handleFiltersChange}
+          className="mb-6"
+        />
+
+        {/* Results Count */}
+        <div className="mb-4 text-sm text-muted-foreground">
+          {loading ? (
+            'Loading recipes...'
+          ) : (
+            `${filteredRecipes.length} recipe${filteredRecipes.length !== 1 ? 's' : ''} found${
+              filters.searchTerm || filters.categories?.length || filters.cuisine?.length || filters.moods?.length
+                ? ' matching your filters'
+                : ''
+            }`
+          )}
         </div>
       </div>
 
       {filteredRecipes.length === 0 ? (
         <div className="py-12 text-center">
           <p className="text-muted-foreground">
-            {searchTerm
-              ? 'No recipes found matching your search.'
+            {filters.searchTerm || filters.categories?.length || filters.cuisine?.length || filters.moods?.length
+              ? 'No recipes found matching your filters. Try adjusting your search criteria.'
               : 'No public recipes available yet.'}
           </p>
         </div>
