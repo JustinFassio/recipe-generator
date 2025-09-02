@@ -59,7 +59,7 @@ export function RecipeForm({
     const checkMobile = () => {
       setIsMobile(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
     };
-    
+
     const updateOnlineStatus = () => {
       setIsOnline(navigator.onLine);
     };
@@ -220,17 +220,25 @@ export function RecipeForm({
     } catch (error) {
       const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
       console.error('Error saving recipe:', error);
-      
+
       // Enhanced error logging for mobile
       if (isMobile) {
         console.error('Mobile recipe creation failed. Details:');
         console.error('Error type:', typeof error);
-        console.error('Error message:', error instanceof Error ? error.message : error);
-        console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
-        
+        console.error(
+          'Error message:',
+          error instanceof Error ? error.message : error
+        );
+        console.error(
+          'Error stack:',
+          error instanceof Error ? error.stack : 'No stack trace'
+        );
+
         // Check authentication status
         try {
-          const { data: { user } } = await supabase.auth.getUser();
+          const {
+            data: { user },
+          } = await supabase.auth.getUser();
           console.error('User authenticated:', !!user);
           console.error('User ID:', user?.id);
         } catch (authError) {
@@ -239,13 +247,14 @@ export function RecipeForm({
       }
 
       // Show more specific error message to user
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-      
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error occurred';
+
       // Set error state for mobile display
       if (isMobile) {
         setLastError(errorMessage);
       }
-      
+
       toast({
         title: 'Recipe Creation Failed',
         description: `Failed to create recipe: ${errorMessage}. Please check your connection and try again.`,
@@ -508,7 +517,7 @@ export function RecipeForm({
                 size="sm"
                 onClick={() => {
                   setLastError(null);
-                  setRetryCount(prev => prev + 1);
+                  setRetryCount((prev) => prev + 1);
                   // Retry the last submission
                   handleSubmit(onSubmit)();
                 }}
@@ -548,10 +557,10 @@ export function RecipeForm({
               ? 'Updating...'
               : 'Creating...'
             : !isOnline
-            ? 'No Connection'
-            : existingRecipe
-            ? 'Update Recipe'
-            : 'Create Recipe'}
+              ? 'No Connection'
+              : existingRecipe
+                ? 'Update Recipe'
+                : 'Create Recipe'}
         </Button>
       </div>
     </form>

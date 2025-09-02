@@ -180,7 +180,9 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
           <div className="flex items-center justify-center h-full">
             <div className="text-center space-y-3">
               <div className="flex justify-center">
-                <div className={`flex h-16 w-16 items-center justify-center rounded-full border-2 border-white shadow-sm ${getPersonaColor(persona)}`}>
+                <div
+                  className={`flex h-16 w-16 items-center justify-center rounded-full border-2 border-white shadow-sm ${getPersonaColor(persona)}`}
+                >
                   {getPersonaIcon(persona)}
                 </div>
               </div>
@@ -193,7 +195,8 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
                 </p>
               </div>
               <p className="text-xs text-gray-500">
-                Start by telling me what kind of recipe you'd like to create, or use the preferences above to guide me.
+                Start by telling me what kind of recipe you'd like to create, or
+                use the preferences above to guide me.
               </p>
             </div>
           </div>

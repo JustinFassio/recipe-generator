@@ -162,7 +162,9 @@ export const recipeApi = {
   ): Promise<Recipe> {
     // Check network connectivity for mobile devices
     if (!navigator.onLine) {
-      throw new Error('No internet connection. Please check your network and try again.');
+      throw new Error(
+        'No internet connection. Please check your network and try again.'
+      );
     }
 
     const {
@@ -181,7 +183,7 @@ export const recipeApi = {
         console.error('Supabase create recipe error:', error);
         throw new Error(`Database error: ${error.message}`);
       }
-      
+
       return data;
     } catch (error) {
       if (error instanceof Error) {

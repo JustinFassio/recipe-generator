@@ -73,64 +73,73 @@ export default function ExplorePage() {
     // Search filter
     if (filters.searchTerm) {
       const searchTerm = filters.searchTerm.toLowerCase();
-      filtered = filtered.filter((recipe) =>
-        recipe.title.toLowerCase().includes(searchTerm) ||
-        recipe.instructions.toLowerCase().includes(searchTerm) ||
-        recipe.ingredients.some(ingredient => 
-          ingredient.toLowerCase().includes(searchTerm)
-        )
+      filtered = filtered.filter(
+        (recipe) =>
+          recipe.title.toLowerCase().includes(searchTerm) ||
+          recipe.instructions.toLowerCase().includes(searchTerm) ||
+          recipe.ingredients.some((ingredient) =>
+            ingredient.toLowerCase().includes(searchTerm)
+          )
       );
     }
 
     // Categories filter
     if (filters.categories && filters.categories.length > 0) {
-      filtered = filtered.filter((recipe) =>
-        recipe.categories && recipe.categories.some(category =>
-          filters.categories!.includes(category)
-        )
+      filtered = filtered.filter(
+        (recipe) =>
+          recipe.categories &&
+          recipe.categories.some((category) =>
+            filters.categories!.includes(category)
+          )
       );
     }
 
     // Cuisine filter
     if (filters.cuisine && filters.cuisine.length > 0) {
-      filtered = filtered.filter((recipe) =>
-        recipe.categories && recipe.categories.some(category =>
-          filters.cuisine!.some(cuisine => 
-            category === `Cuisine: ${cuisine}`
+      filtered = filtered.filter(
+        (recipe) =>
+          recipe.categories &&
+          recipe.categories.some((category) =>
+            filters.cuisine!.some(
+              (cuisine) => category === `Cuisine: ${cuisine}`
+            )
           )
-        )
       );
     }
 
     // Moods filter
     if (filters.moods && filters.moods.length > 0) {
-      filtered = filtered.filter((recipe) =>
-        recipe.categories && recipe.categories.some(category =>
-          filters.moods!.some(mood => 
-            category === `Mood: ${mood}` || category === mood
+      filtered = filtered.filter(
+        (recipe) =>
+          recipe.categories &&
+          recipe.categories.some((category) =>
+            filters.moods!.some(
+              (mood) => category === `Mood: ${mood}` || category === mood
+            )
           )
-        )
       );
     }
 
     // Sorting
     const sorted = [...filtered].sort((a, b) => {
       let comparison = 0;
-      
+
       switch (filters.sortBy) {
         case 'title':
           comparison = a.title.localeCompare(b.title);
           break;
         case 'popularity':
           // Use updated_at as a proxy for popularity
-          comparison = new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime();
+          comparison =
+            new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime();
           break;
         case 'date':
         default:
-          comparison = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+          comparison =
+            new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
           break;
       }
-      
+
       return filters.sortOrder === 'asc' ? comparison : -comparison;
     });
 
@@ -175,22 +184,26 @@ export default function ExplorePage() {
 
         {/* Results Count */}
         <div className="mb-4 text-sm text-muted-foreground">
-          {loading ? (
-            'Loading recipes...'
-          ) : (
-            `${filteredRecipes.length} recipe${filteredRecipes.length !== 1 ? 's' : ''} found${
-              filters.searchTerm || filters.categories?.length || filters.cuisine?.length || filters.moods?.length
-                ? ' matching your filters'
-                : ''
-            }`
-          )}
+          {loading
+            ? 'Loading recipes...'
+            : `${filteredRecipes.length} recipe${filteredRecipes.length !== 1 ? 's' : ''} found${
+                filters.searchTerm ||
+                filters.categories?.length ||
+                filters.cuisine?.length ||
+                filters.moods?.length
+                  ? ' matching your filters'
+                  : ''
+              }`}
         </div>
       </div>
 
       {filteredRecipes.length === 0 ? (
         <div className="py-12 text-center">
           <p className="text-muted-foreground">
-            {filters.searchTerm || filters.categories?.length || filters.cuisine?.length || filters.moods?.length
+            {filters.searchTerm ||
+            filters.categories?.length ||
+            filters.cuisine?.length ||
+            filters.moods?.length
               ? 'No recipes found matching your filters. Try adjusting your search criteria.'
               : 'No public recipes available yet.'}
           </p>
