@@ -25,6 +25,9 @@ if (!SERVICE_ROLE_KEY) {
 // Service role client bypasses RLS for seeding
 const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
 
+// Constants
+const DEFAULT_MOOD = 'Mood: Simple';
+
 type SeedUser = {
   email: string;
   password: string;
@@ -2140,7 +2143,7 @@ async function seedRecipes() {
       if (lower.some((c) => c.includes('traditional') || c.includes('classic')))
         moodGuesses.push('Mood: Traditional');
       if (lower.some((c) => c.includes('simple') || c.includes('basic')))
-        moodGuesses.push('Mood: Simple');
+        moodGuesses.push(DEFAULT_MOOD);
       if (lower.some((c) => c.includes('gourmet') || c.includes('elegant')))
         moodGuesses.push('Mood: Elegant');
       if (lower.some((c) => c.includes('rustic') || c.includes('home-style')))
@@ -2149,7 +2152,7 @@ async function seedRecipes() {
         moodGuesses.push('Mood: Adventurous');
 
       // Default mood if none detected
-      if (moodGuesses.length === 0) moodGuesses.push('Mood: Simple');
+      if (moodGuesses.length === 0) moodGuesses.push(DEFAULT_MOOD);
 
       // Limit to max 2 moods and ensure no duplicates
       moodAugmented = Array.from(
