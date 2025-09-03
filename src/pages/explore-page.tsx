@@ -5,7 +5,7 @@ import type { PublicRecipe, RecipeFilters, Recipe } from '@/lib/types';
 import { Button } from '../components/ui/button';
 import { Save } from 'lucide-react';
 import { useToast } from '../hooks/use-toast';
-import { FilterBar } from '../components/recipes/filter-bar';
+import { HybridFilterBar } from '../components/recipes/hybrid-filter-bar';
 
 export default function ExplorePage() {
   const [recipes, setRecipes] = useState<PublicRecipe[]>([]);
@@ -201,9 +201,11 @@ export default function ExplorePage() {
         </p>
 
         {/* Comprehensive Filter Bar */}
-        <FilterBar
+        <HybridFilterBar
           filters={filters}
           onFiltersChange={handleFiltersChange}
+          totalRecipes={recipes.length}
+          filteredCount={filteredRecipes.length}
           className="mb-6"
         />
 
