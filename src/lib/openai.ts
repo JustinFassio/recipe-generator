@@ -227,25 +227,34 @@ When generating a complete recipe, structure it as a JSON object with:
 export type PersonaType = keyof typeof RECIPE_BOT_PERSONAS;
 
 class OpenAIAPI {
-  private apiKey: string;
+  private apiKey: string | null = null;
   private model: string;
   private baseURL = 'https://api.openai.com/v1';
   private maxRetries = 3;
   private maxConversationTurns = 10;
-  private assistantAPI: AssistantAPI;
+  private assistantAPI: AssistantAPI | null = null;
 
   constructor() {
-    this.apiKey = import.meta.env.VITE_OPENAI_API_KEY;
     this.model = import.meta.env.VITE_OPENAI_MODEL || 'gpt-4o-mini';
+  }
 
+  private getApiKey(): string {
     if (!this.apiKey) {
-      throw new Error(
-        'OpenAI API key not found. Please set VITE_OPENAI_API_KEY in your environment variables.'
-      );
+      this.apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+      if (!this.apiKey) {
+        throw new Error(
+          'OpenAI API key not found. Please set VITE_OPENAI_API_KEY in your environment variables.'
+        );
+      }
     }
+    return this.apiKey;
+  }
 
-    // Initialize Assistant API
-    this.assistantAPI = new AssistantAPI(this.apiKey);
+  private getAssistantAPI(): AssistantAPI {
+    if (!this.assistantAPI) {
+      this.assistantAPI = new AssistantAPI(this.getApiKey());
+    }
+    return this.assistantAPI;
   }
 
   private async requestWithRetry(
@@ -320,7 +329,7 @@ class OpenAIAPI {
         {
           method: 'POST',
           headers: {
-            Authorization: `Bearer ${this.apiKey}`,
+            Authorization: `Bearer ${this.getApiKey()}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
@@ -424,7 +433,7 @@ class OpenAIAPI {
         {
           method: 'POST',
           headers: {
-            Authorization: `Bearer ${this.apiKey}`,
+            Authorization: `Bearer ${this.getApiKey()}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
@@ -503,7 +512,7 @@ class OpenAIAPI {
     message: string
   ): Promise<{ response: ChatResponse; threadId: string }> {
     try {
-      const result = await this.assistantAPI.sendMessage(
+      const result = await this.getAssistantAPI().sendMessage(
         threadId,
         assistantId,
         message
