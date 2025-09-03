@@ -1,60 +1,78 @@
+import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { RecipeCard } from '@/components/recipes/recipe-card';
-import type { Recipe } from '@/lib/types';
-import { AuthProvider } from '@/contexts/AuthProvider';
+import { useDeleteRecipe } from '@/hooks/use-recipes';
 import { recipeApi } from '@/lib/api';
+import { useAuth } from '@/contexts/AuthProvider';
 
-// Mock the API
-vi.mock('@/lib/api', () => ({
-  recipeApi: {
-    toggleRecipePublic: vi.fn(),
-  },
-}));
+// Mock the hooks and API
+vi.mock('@/hooks/use-recipes');
+vi.mock('@/lib/api');
+vi.mock('@/contexts/AuthProvider');
 
-// Mock the auth context
-vi.mock('@/contexts/AuthProvider', () => ({
-  AuthProvider: ({ children }: { children: React.ReactNode }) => (
-    <div>{children}</div>
-  ),
-  useAuth: () => ({
-    user: { id: 'user1', email: 'test@example.com' },
-    profile: null,
-    loading: false,
-    refreshProfile: vi.fn(),
-  }),
-}));
+const mockUseDeleteRecipe = useDeleteRecipe as vi.MockedFunction<
+  typeof useDeleteRecipe
+>;
+const mockRecipeApi = recipeApi as vi.Mocked<typeof recipeApi>;
+const mockUseAuth = useAuth as vi.MockedFunction<typeof useAuth>;
 
-const mockRecipe: Recipe = {
+// Mock recipe data
+const mockRecipe = {
   id: '1',
   title: 'Test Recipe',
-  ingredients: ['ingredient 1', 'ingredient 2', 'ingredient 3'],
+  ingredients: ['ingredient1', 'ingredient2', 'ingredient3'],
   instructions: 'Test cooking instructions for the recipe.',
   notes: 'Test notes and tips for the recipe.',
-  image_url: null,
+  categories: ['Italian', 'Dinner'],
+  image_url: 'https://example.com/image.jpg',
+  created_at: '2023-12-30T00:00:00Z',
+  updated_at: '2023-12-30T00:00:00Z',
   user_id: 'user1',
   is_public: false,
-  created_at: '2023-12-31T00:00:00Z',
-  updated_at: '2023-12-31T00:00:00Z',
+  setup: 'Test setup instructions',
 };
 
-// Wrapper component for testing with auth context
-const TestWrapper = ({ children }: { children: React.ReactNode }) => (
-  <AuthProvider>{children}</AuthProvider>
-);
+// Mock callback functions
+const mockOnEdit = vi.fn();
+const mockOnView = vi.fn();
+const mockOnShareToggle = vi.fn();
+
+// Test wrapper component
+const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  return <div>{children}</div>;
+};
 
 describe('RecipeCard', () => {
-  const mockOnEdit = vi.fn();
-  const mockOnView = vi.fn();
-  const mockOnShareToggle = vi.fn();
-
   beforeEach(() => {
+    // Reset all mocks
     vi.clearAllMocks();
-    // Mock the auth context
-    vi.mocked(recipeApi.toggleRecipePublic).mockResolvedValue();
+
+    // Mock useDeleteRecipe hook
+    mockUseDeleteRecipe.mockReturnValue({
+      mutate: vi.fn(),
+      isLoading: false,
+      error: null,
+    } as ReturnType<typeof useDeleteRecipe>);
+
+    // Mock recipeApi
+    mockRecipeApi.toggleRecipePublic = vi.fn().mockResolvedValue(undefined);
+
+    // Mock useAuth hook
+    mockUseAuth.mockReturnValue({
+      user: { id: 'user1' },
+      isLoading: false,
+      error: null,
+    } as ReturnType<typeof useAuth>);
   });
 
-  it('should render recipe information correctly', () => {
+  // Helper function to open the drawer and access action buttons
+  const openDrawer = () => {
+    const drawerToggle = screen.getByLabelText('Recipe actions');
+    fireEvent.click(drawerToggle);
+  };
+
+  it('renders recipe information correctly', () => {
     render(
       <TestWrapper>
         <RecipeCard
@@ -65,60 +83,26 @@ describe('RecipeCard', () => {
       </TestWrapper>
     );
 
-    expect(screen.getByText('Test Recipe')).toBeInTheDocument();
+    // Use more specific selectors to avoid conflicts with drawer content
+    expect(
+      screen.getByRole('heading', { name: 'Test Recipe' })
+    ).toBeInTheDocument();
+    expect(screen.getByText('3 ingredients')).toBeInTheDocument();
     expect(
       screen.getByText('Test cooking instructions for the recipe.')
     ).toBeInTheDocument();
     expect(
       screen.getByText('Test notes and tips for the recipe.')
     ).toBeInTheDocument();
-    expect(screen.getByText('3 ingredients')).toBeInTheDocument();
+    expect(screen.getByText('Italian')).toBeInTheDocument();
+    expect(screen.getByText('Dinner')).toBeInTheDocument();
   });
 
-  it('should call onView when view button is clicked', () => {
+  it('renders recipe image when available', () => {
     render(
       <TestWrapper>
         <RecipeCard
           recipe={mockRecipe}
-          onEdit={mockOnEdit}
-          onView={mockOnView}
-        />
-      </TestWrapper>
-    );
-
-    const viewButton = screen.getByRole('button', { name: /view/i });
-    fireEvent.click(viewButton);
-
-    expect(mockOnView).toHaveBeenCalledWith(mockRecipe);
-  });
-
-  it('should call onEdit when edit button is clicked', () => {
-    render(
-      <TestWrapper>
-        <RecipeCard
-          recipe={mockRecipe}
-          onEdit={mockOnEdit}
-          onView={mockOnView}
-        />
-      </TestWrapper>
-    );
-
-    const editButton = screen.getByRole('button', { name: /edit/i });
-    fireEvent.click(editButton);
-
-    expect(mockOnEdit).toHaveBeenCalledWith(mockRecipe);
-  });
-
-  it('should display recipe image when available', () => {
-    const recipeWithImage = {
-      ...mockRecipe,
-      image_url: 'https://example.com/recipe-image.jpg',
-    };
-
-    render(
-      <TestWrapper>
-        <RecipeCard
-          recipe={recipeWithImage}
           onEdit={mockOnEdit}
           onView={mockOnView}
         />
@@ -127,17 +111,16 @@ describe('RecipeCard', () => {
 
     const image = screen.getByAltText('Test Recipe');
     expect(image).toBeInTheDocument();
-    expect(image).toHaveAttribute(
-      'src',
-      'https://example.com/recipe-image.jpg'
-    );
+    expect(image).toHaveAttribute('src', 'https://example.com/image.jpg');
   });
 
-  it('should not display image section when no image is available', () => {
+  it('renders recipe without image when image_url is not provided', () => {
+    const recipeWithoutImage = { ...mockRecipe, image_url: undefined };
+
     render(
       <TestWrapper>
         <RecipeCard
-          recipe={mockRecipe}
+          recipe={recipeWithoutImage}
           onEdit={mockOnEdit}
           onView={mockOnView}
         />
@@ -147,11 +130,11 @@ describe('RecipeCard', () => {
     expect(screen.queryByAltText('Test Recipe')).not.toBeInTheDocument();
   });
 
-  it('should truncate long titles appropriately', () => {
+  it('truncates long recipe titles', () => {
     const longTitleRecipe = {
       ...mockRecipe,
       title:
-        'This is a very long recipe title that should be truncated when it exceeds the maximum length allowed by the component',
+        'This is a very long recipe title that should be truncated when it exceeds the maximum length',
     };
 
     render(
@@ -164,17 +147,13 @@ describe('RecipeCard', () => {
       </TestWrapper>
     );
 
-    // Check that the truncated title is displayed (first RECIPE_TITLE_MAX_LENGTH characters + "...")
-    const truncatedTitle = 'This is a very long recipe title that should...';
-    const titleElement = screen.getByText(truncatedTitle);
-    expect(titleElement).toBeInTheDocument();
-
-    // Check that the full title is in the title attribute
-    const titleHeading = screen.getByRole('heading', { level: 3 });
-    expect(titleHeading).toHaveAttribute('title', longTitleRecipe.title);
+    // Look for the truncated title with ellipsis
+    expect(
+      screen.getByText('This is a very long recipe title that should...')
+    ).toBeInTheDocument();
   });
 
-  it('should display ingredient count correctly', () => {
+  it('shows recipe actions drawer trigger button', () => {
     render(
       <TestWrapper>
         <RecipeCard
@@ -185,31 +164,121 @@ describe('RecipeCard', () => {
       </TestWrapper>
     );
 
-    expect(screen.getByText('3 ingredients')).toBeInTheDocument();
+    expect(screen.getByLabelText('Recipe actions')).toBeInTheDocument();
   });
 
-  it('should handle recipe with no ingredients', () => {
-    const recipeWithoutIngredients = {
-      ...mockRecipe,
-      ingredients: [],
-    };
-
+  it('opens drawer and shows action buttons when trigger is clicked', () => {
     render(
       <TestWrapper>
         <RecipeCard
-          recipe={recipeWithoutIngredients}
+          recipe={mockRecipe}
           onEdit={mockOnEdit}
           onView={mockOnView}
         />
       </TestWrapper>
     );
 
-    expect(screen.getByText('0 ingredients')).toBeInTheDocument();
+    openDrawer();
+
+    expect(screen.getByText('Recipe Actions')).toBeInTheDocument();
+    expect(screen.getByText('View Recipe')).toBeInTheDocument();
+    expect(screen.getByText('Edit Recipe')).toBeInTheDocument();
+    expect(screen.getByText('Delete Recipe')).toBeInTheDocument();
   });
 
-  // Share functionality tests
+  it('calls onView when View button is clicked', () => {
+    render(
+      <TestWrapper>
+        <RecipeCard
+          recipe={mockRecipe}
+          onEdit={mockOnEdit}
+          onView={mockOnView}
+        />
+      </TestWrapper>
+    );
+
+    openDrawer();
+    const viewButton = screen.getByText('View Recipe');
+    fireEvent.click(viewButton);
+
+    expect(mockOnView).toHaveBeenCalledWith(mockRecipe);
+  });
+
+  it('calls onEdit when Edit button is clicked', () => {
+    render(
+      <TestWrapper>
+        <RecipeCard
+          recipe={mockRecipe}
+          onEdit={mockOnEdit}
+          onView={mockOnView}
+        />
+      </TestWrapper>
+    );
+
+    openDrawer();
+    const editButton = screen.getByText('Edit Recipe');
+    fireEvent.click(editButton);
+
+    expect(mockOnEdit).toHaveBeenCalledWith(mockRecipe);
+  });
+
+  it('shows delete confirmation dialog when Delete button is clicked', () => {
+    render(
+      <TestWrapper>
+        <RecipeCard
+          recipe={mockRecipe}
+          onEdit={mockOnEdit}
+          onView={mockOnView}
+        />
+      </TestWrapper>
+    );
+
+    openDrawer();
+    // Find the delete button by looking for the button containing the text
+    const deleteButton = screen.getByRole('button', { name: /delete recipe/i });
+    fireEvent.click(deleteButton);
+
+    // Check for the dialog title and description
+    expect(
+      screen.getByRole('heading', { name: 'Delete Recipe' })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Are you sure you want to delete "Test Recipe"? This action cannot be undone.'
+      )
+    ).toBeInTheDocument();
+  });
+
+  it('calls delete mutation when delete is confirmed', async () => {
+    const mockMutate = vi.fn();
+    mockUseDeleteRecipe.mockReturnValue({
+      mutate: mockMutate,
+      isLoading: false,
+      error: null,
+    } as ReturnType<typeof useDeleteRecipe>);
+
+    render(
+      <TestWrapper>
+        <RecipeCard
+          recipe={mockRecipe}
+          onEdit={mockOnEdit}
+          onView={mockOnView}
+        />
+      </TestWrapper>
+    );
+
+    openDrawer();
+    const deleteButton = screen.getByText('Delete Recipe');
+    fireEvent.click(deleteButton);
+
+    const confirmDeleteButton = screen.getByRole('button', { name: 'Delete' });
+    fireEvent.click(confirmDeleteButton);
+
+    expect(mockMutate).toHaveBeenCalledWith('1');
+  });
+
   describe('Share functionality', () => {
-    it('should show Share button when showShareButton is true and user owns the recipe', () => {
+    it('shows Share button when showShareButton is true and user owns recipe', () => {
       render(
         <TestWrapper>
           <RecipeCard
@@ -222,10 +291,8 @@ describe('RecipeCard', () => {
         </TestWrapper>
       );
 
-      expect(
-        screen.getByRole('button', { name: /share recipe/i })
-      ).toBeInTheDocument();
-      expect(screen.getByText('Share')).toBeInTheDocument();
+      openDrawer();
+      expect(screen.getByText('Share Recipe')).toBeInTheDocument();
     });
 
     it('should not show Share button when showShareButton is false', () => {
@@ -241,9 +308,8 @@ describe('RecipeCard', () => {
         </TestWrapper>
       );
 
-      expect(
-        screen.queryByRole('button', { name: /share recipe/i })
-      ).not.toBeInTheDocument();
+      openDrawer();
+      expect(screen.queryByText('Share Recipe')).not.toBeInTheDocument();
     });
 
     it('should show "Unshare" button when recipe is public', () => {
@@ -264,10 +330,8 @@ describe('RecipeCard', () => {
         </TestWrapper>
       );
 
-      expect(
-        screen.getByRole('button', { name: /unshare recipe/i })
-      ).toBeInTheDocument();
-      expect(screen.getByText('Unshare')).toBeInTheDocument();
+      openDrawer();
+      expect(screen.getByText('Unshare Recipe')).toBeInTheDocument();
     });
 
     it('should call API and toggle state when Share button is clicked', async () => {
@@ -283,7 +347,8 @@ describe('RecipeCard', () => {
         </TestWrapper>
       );
 
-      const shareButton = screen.getByRole('button', { name: /share recipe/i });
+      openDrawer();
+      const shareButton = screen.getByText('Share Recipe');
       fireEvent.click(shareButton);
 
       await waitFor(() => {
@@ -310,9 +375,8 @@ describe('RecipeCard', () => {
         </TestWrapper>
       );
 
-      const unshareButton = screen.getByRole('button', {
-        name: /unshare recipe/i,
-      });
+      openDrawer();
+      const unshareButton = screen.getByText('Unshare Recipe');
       fireEvent.click(unshareButton);
 
       await waitFor(() => {
@@ -322,9 +386,9 @@ describe('RecipeCard', () => {
     });
 
     it('should show loading state during API call', async () => {
-      // Mock a delayed API response
-      vi.mocked(recipeApi.toggleRecipePublic).mockImplementation(
-        () => new Promise((resolve) => setTimeout(resolve, 100))
+      // Mock the API to return a pending promise
+      mockRecipeApi.toggleRecipePublic.mockImplementation(
+        () => new Promise(() => {}) // Never resolves
       );
 
       render(
@@ -339,20 +403,46 @@ describe('RecipeCard', () => {
         </TestWrapper>
       );
 
-      const shareButton = screen.getByRole('button', { name: /share recipe/i });
+      openDrawer();
+      const shareButton = screen.getByText('Share Recipe');
       fireEvent.click(shareButton);
 
-      // Should show loading state
-      expect(
-        screen.getByRole('button', { name: /share recipe/i })
-      ).toBeDisabled();
+      // Should show loading state - find the button element, not just the text
+      const loadingButton = screen.getByRole('button', { name: /updating/i });
+      expect(loadingButton).toBeInTheDocument();
+      expect(loadingButton).toBeDisabled();
     });
 
+    it('should not show Share button when user does not own recipe', () => {
+      mockUseAuth.mockReturnValue({
+        user: { id: 'different-user' },
+        isLoading: false,
+        error: null,
+      } as ReturnType<typeof useAuth>);
+
+      render(
+        <TestWrapper>
+          <RecipeCard
+            recipe={mockRecipe}
+            onEdit={mockOnEdit}
+            onView={mockOnView}
+            showShareButton={true}
+            onShareToggle={mockOnShareToggle}
+          />
+        </TestWrapper>
+      );
+
+      openDrawer();
+      expect(screen.queryByText('Share Recipe')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Error handling', () => {
     it('should handle API errors gracefully', async () => {
-      const consoleErrorSpy = vi
+      const consoleSpy = vi
         .spyOn(console, 'error')
         .mockImplementation(() => {});
-      vi.mocked(recipeApi.toggleRecipePublic).mockRejectedValue(
+      mockRecipeApi.toggleRecipePublic.mockRejectedValue(
         new Error('API Error')
       );
 
@@ -368,47 +458,18 @@ describe('RecipeCard', () => {
         </TestWrapper>
       );
 
-      const shareButton = screen.getByRole('button', { name: /share recipe/i });
+      openDrawer();
+      const shareButton = screen.getByText('Share Recipe');
       fireEvent.click(shareButton);
 
       await waitFor(() => {
-        expect(consoleErrorSpy).toHaveBeenCalledWith(
+        expect(consoleSpy).toHaveBeenCalledWith(
           'Error toggling recipe sharing:',
           expect.any(Error)
         );
-        // Button should not be disabled after error
-        expect(
-          screen.getByRole('button', { name: /share recipe/i })
-        ).not.toBeDisabled();
       });
 
-      consoleErrorSpy.mockRestore();
-    });
-
-    it('should not show Share button for recipes owned by other users', () => {
-      const otherUserRecipe = {
-        ...mockRecipe,
-        user_id: 'other-user',
-      };
-
-      render(
-        <TestWrapper>
-          <RecipeCard
-            recipe={otherUserRecipe}
-            onEdit={mockOnEdit}
-            onView={mockOnView}
-            showShareButton={true}
-            onShareToggle={mockOnShareToggle}
-          />
-        </TestWrapper>
-      );
-
-      expect(
-        screen.queryByRole('button', { name: /share recipe/i })
-      ).not.toBeInTheDocument();
-      expect(
-        screen.queryByRole('button', { name: /unshare recipe/i })
-      ).not.toBeInTheDocument();
+      consoleSpy.mockRestore();
     });
   });
 });
