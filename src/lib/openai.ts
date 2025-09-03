@@ -57,6 +57,7 @@ When generating a complete recipe, structure it as a JSON object with:
   "categories": ["Course: Main", "Cuisine: Type", "Technique: Method"],
   "notes": "Tips, variations, and additional notes"
 }`,
+    description: 'Master Italian chef with 20+ years of Mediterranean culinary expertise, specializing in traditional techniques and fresh ingredients',
   },
 
   nutritionist: {
@@ -92,6 +93,7 @@ When generating a complete recipe, structure it as a JSON object with:
   "categories": ["Course: Main", "Cuisine: Type", "Technique: Method"],
   "notes": "Nutritional info, tips, and healthy variations"
 }`,
+    description: 'Registered dietitian and nutrition expert focused on creating healthy, balanced meals that are both nutritious and delicious',
   },
 
   homeCook: {
@@ -127,6 +129,7 @@ When generating a complete recipe, structure it as a JSON object with:
   "categories": ["Course: Main", "Cuisine: Type", "Technique: Method"],
   "notes": "Family tips, variations, and serving suggestions"
 }`,
+    description: 'Beloved home cook with decades of experience creating comforting, family-friendly recipes that bring joy to every meal',
   },
 
   assistantNutritionist: {
@@ -172,7 +175,7 @@ Note: This is fallback mode - use this prompt if Assistant API is unavailable.`,
     assistantId: 'asst_o3VGUZBpdYTdKEyKYoKua8ys',
     isAssistantPowered: true,
     description:
-      'Advanced AI nutritionist with personalized meal planning and health insights',
+      '🌟 PREMIUM: Master of Integrative Culinary Medicine with 30+ years merging ancient healing wisdom with cutting-edge nutritional science. Expert in TCM, Ayurveda, functional medicine, and microbiome optimization. Transform your kitchen into a healing pharmacy with personalized protocols targeting root health imbalances.',
   },
 
   jamieBrightwell: {
@@ -214,7 +217,7 @@ When generating a complete recipe, structure it as a JSON object with:
     assistantId: 'asst_IdO6vmnUW6tDOKu7rraLPCWJ',
     isAssistantPowered: true,
     description:
-      'Pediatric culinary wellness expert specializing in kid-friendly, nutritionally optimized recipes and family cooking guidance',
+      '🌟 PREMIUM: Revolutionary Pediatric Culinary Wellness Expert with dual Stanford medicine + Le Cordon Bleu training. Transform "picky eaters" into food explorers with 25+ years of evidence-based, play-based nutrition. Master of sensory food education, behavioral psychology, and family-centered approaches that make healthy eating an adventure kids genuinely embrace.',
   },
 };
 

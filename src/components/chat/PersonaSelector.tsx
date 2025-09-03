@@ -18,6 +18,7 @@ export function PersonaSelector({ onPersonaSelect }: PersonaSelectorProps) {
       case 'homeCook':
         return <Home className="h-5 w-5" />;
       case 'assistantNutritionist':
+      case 'jamieBrightwell':
         return <Brain className="h-5 w-5" />;
       default:
         return <Bot className="h-5 w-5" />;
@@ -33,6 +34,7 @@ export function PersonaSelector({ onPersonaSelect }: PersonaSelectorProps) {
       case 'homeCook':
         return 'bg-blue-100 text-blue-600';
       case 'assistantNutritionist':
+      case 'jamieBrightwell':
         return 'bg-gradient-to-br from-purple-100 to-blue-100 text-purple-600';
       default:
         return 'bg-gray-100 text-gray-600';
@@ -40,18 +42,8 @@ export function PersonaSelector({ onPersonaSelect }: PersonaSelectorProps) {
   };
 
   const getPersonaDescription = (persona: PersonaType) => {
-    switch (persona) {
-      case 'chef':
-        return 'Expert culinary guidance with traditional techniques';
-      case 'nutritionist':
-        return 'Healthy, balanced meals with nutritional insights';
-      case 'homeCook':
-        return 'Comforting family recipes with practical tips';
-      case 'assistantNutritionist':
-        return 'Advanced AI nutritionist with personalized meal planning and health insights';
-      default:
-        return '';
-    }
+    const personaConfig = RECIPE_BOT_PERSONAS[persona];
+    return personaConfig.description || '';
   };
 
   return (
