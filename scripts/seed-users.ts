@@ -27,6 +27,7 @@ const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
 
 // Constants
 const DEFAULT_MOOD = 'Mood: Simple';
+const MAX_CATEGORIES_PER_RECIPE = 6; // Database constraint: maximum categories per recipe
 
 type SeedUser = {
   email: string;
@@ -1929,8 +1930,11 @@ async function seedRecipes() {
       if (moodGuesses.length === 0) moodGuesses.push(DEFAULT_MOOD);
 
       // Limit to max MAX_MOODS_PER_RECIPE moods and ensure no duplicates
-      // Also ensure total categories never exceed 6 to respect database constraint
-      const maxMoodsToAdd = Math.max(0, 6 - existing.length);
+      // Also ensure total categories never exceed MAX_CATEGORIES_PER_RECIPE to respect database constraint
+      const maxMoodsToAdd = Math.max(
+        0,
+        MAX_CATEGORIES_PER_RECIPE - existing.length
+      );
       moodAugmented = Array.from(
         new Set([...existing, ...moodGuesses.slice(0, maxMoodsToAdd)])
       );
