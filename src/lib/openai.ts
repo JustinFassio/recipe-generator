@@ -57,7 +57,8 @@ When generating a complete recipe, structure it as a JSON object with:
   "categories": ["Course: Main", "Cuisine: Type", "Technique: Method"],
   "notes": "Tips, variations, and additional notes"
 }`,
-    description: 'Master Italian chef with 20+ years of Mediterranean culinary expertise, specializing in traditional techniques and fresh ingredients',
+    description:
+      'Master Italian chef with 20+ years of Mediterranean culinary expertise, specializing in traditional techniques and fresh ingredients',
   },
 
   nutritionist: {
@@ -93,7 +94,8 @@ When generating a complete recipe, structure it as a JSON object with:
   "categories": ["Course: Main", "Cuisine: Type", "Technique: Method"],
   "notes": "Nutritional info, tips, and healthy variations"
 }`,
-    description: 'Registered dietitian and nutrition expert focused on creating healthy, balanced meals that are both nutritious and delicious',
+    description:
+      'Registered dietitian and nutrition expert focused on creating healthy, balanced meals that are both nutritious and delicious',
   },
 
   homeCook: {
@@ -129,7 +131,8 @@ When generating a complete recipe, structure it as a JSON object with:
   "categories": ["Course: Main", "Cuisine: Type", "Technique: Method"],
   "notes": "Family tips, variations, and serving suggestions"
 }`,
-    description: 'Beloved home cook with decades of experience creating comforting, family-friendly recipes that bring joy to every meal',
+    description:
+      'Beloved home cook with decades of experience creating comforting, family-friendly recipes that bring joy to every meal',
   },
 
   assistantNutritionist: {
@@ -586,3 +589,4 @@ class OpenAIAPI {
 }
 
 export const openaiAPI = new OpenAIAPI();
+// Force rebuild Wed Sep  3 13:28:56 PDT 2025
