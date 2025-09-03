@@ -30,8 +30,8 @@ export default defineConfig({
         unknownGlobalSideEffects: true,
       },
     },
-    // Use Terser instead of esbuild to better preserve touch events
-    minify: 'terser',
+    // Use esbuild which is available everywhere
+    minify: 'esbuild',
     target: 'es2020', // Ensure modern touch event support
     // Force preserve touch event code
     sourcemap: false,
@@ -39,5 +39,12 @@ export default defineConfig({
   // Force preserve touch event code
   define: {
     __TOUCH_EVENTS__: true,
+  },
+  // Configure esbuild to preserve touch events
+  esbuild: {
+    // Prevent aggressive tree-shaking
+    treeShaking: false,
+    // Keep touch event handling
+    keepNames: true,
   },
 });
