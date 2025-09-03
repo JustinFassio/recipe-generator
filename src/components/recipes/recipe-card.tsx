@@ -45,7 +45,7 @@ export function RecipeCard({
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
   const [isPublic, setIsPublic] = useState(recipe.is_public);
-  const [isTouched, setIsTouched] = useState(false);
+  const [showButtons, setShowButtons] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const deleteRecipe = useDeleteRecipe();
@@ -54,20 +54,34 @@ export function RecipeCard({
   // Only show share button if explicitly requested and user owns the recipe
   const canShare = showShareButton && user?.id === recipe.user_id;
 
-  // Touch detection and device capabilities
+  // Simplified and reliable mobile detection
   useEffect(() => {
     const detectDevice = () => {
-      const isTouchDevice =
-        'ontouchstart' in window || navigator.maxTouchPoints > 0;
-      const isMobileScreen = window.innerWidth < 768;
+      // Primary: Check user agent for mobile devices
       const isMobileUserAgent = /iPhone|iPad|iPod|Android|Mobile|Tablet/i.test(
         navigator.userAgent
       );
 
-      // More robust mobile detection - use user agent as primary indicator
-      const mobile = isMobileUserAgent || (isTouchDevice && isMobileScreen);
+      // Secondary: Check for touch capability and small screen
+      const isTouchDevice =
+        'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      const isSmallScreen = window.innerWidth < 768;
+
+      // Mobile = mobile user agent OR (touch device + small screen)
+      const mobile = isMobileUserAgent || (isTouchDevice && isSmallScreen);
 
       setIsMobile(mobile);
+
+      // Debug logging for troubleshooting
+      console.log('🔍 Mobile Detection:', {
+        userAgent: navigator.userAgent,
+        isMobileUserAgent,
+        isTouchDevice,
+        isSmallScreen,
+        windowWidth: window.innerWidth,
+        maxTouchPoints: navigator.maxTouchPoints,
+        finalMobile: mobile,
+      });
     };
 
     detectDevice();
@@ -76,41 +90,56 @@ export function RecipeCard({
     return () => window.removeEventListener('resize', detectDevice);
   }, []);
 
-  // Touch event handlers
+  // Touch event handlers for mobile
   const handleTouchStart = () => {
     if (isMobile) {
-      setIsTouched(true);
+      console.log('📱 Touch Start - Showing buttons');
+      setShowButtons(true);
     }
   };
 
   const handleTouchEnd = (e: React.TouchEvent) => {
     if (isMobile) {
       e.preventDefault();
-    }
-  };
-
-  const handleCardTap = (e: React.MouseEvent) => {
-    if (isMobile) {
-      e.preventDefault();
-      e.stopPropagation();
-      setIsTouched(!isTouched);
+      // Don't hide buttons immediately on touch end
+      // Let the click outside handler manage hiding
     }
   };
 
   // Click outside handler to hide buttons
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    const handleClickOutside = (event: MouseEvent | TouchEvent) => {
       if (cardRef.current && !cardRef.current.contains(event.target as Node)) {
-        setIsTouched(false);
+        if (isMobile) {
+          console.log('📱 Click outside - Hiding buttons');
+          setShowButtons(false);
+        }
       }
     };
 
-    if (isMobile && isTouched) {
+    if (isMobile && showButtons) {
       document.addEventListener('mousedown', handleClickOutside);
-      return () =>
+      document.addEventListener('touchstart', handleClickOutside);
+
+      return () => {
         document.removeEventListener('mousedown', handleClickOutside);
+        document.removeEventListener('touchstart', handleClickOutside);
+      };
     }
-  }, [isMobile, isTouched]);
+  }, [isMobile, showButtons]);
+
+  // Desktop hover behavior
+  const handleMouseEnter = () => {
+    if (!isMobile) {
+      setShowButtons(true);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (!isMobile) {
+      setShowButtons(false);
+    }
+  };
 
   const handleDelete = () => {
     deleteRecipe.mutate(recipe.id);
@@ -150,7 +179,8 @@ export function RecipeCard({
         className={`${createDaisyUICardClasses('bordered')} group relative overflow-hidden border border-gray-200 transition-all duration-200 hover:border-gray-300 hover:shadow-lg`}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
-        onClick={handleCardTap}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
       >
         {recipe.image_url && (
           <div className="aspect-video overflow-hidden">
@@ -175,24 +205,23 @@ export function RecipeCard({
         </div>
 
         {/* Action Buttons - Top Right */}
-        <div className="absolute top-2 right-2 z-10">
+        <div className="absolute top-2 right-2 z-20">
           <div
-            className={`flex items-center space-x-1 transition-opacity ${
-              isMobile
-                ? 'opacity-100' // Always show on mobile
-                : 'opacity-0 group-hover:opacity-100'
+            className={`flex items-center space-x-1 transition-all duration-200 ${
+              showButtons
+                ? 'opacity-100 scale-100'
+                : 'opacity-0 scale-95 pointer-events-none'
             }`}
             style={{
-              // Fallback: ensure buttons are always clickable on mobile
-              pointerEvents: isMobile ? 'auto' : undefined,
-              zIndex: 20, // Ensure buttons are above other elements
+              // Ensure buttons are always clickable when visible
+              pointerEvents: showButtons ? 'auto' : 'none',
             }}
           >
             {canShare && (
               <Button
-                variant={isPublic ? 'default' : 'outline'} // Keep variant for public/private state
+                variant={isPublic ? 'default' : 'outline'}
                 size="sm"
-                className="h-8 px-2 bg-white/90 hover:bg-white border-2 border-gray-200 hover:border-gray-300 shadow-sm"
+                className="h-8 px-2 bg-white/95 hover:bg-white border-2 border-gray-200 hover:border-gray-300 shadow-lg"
                 onClick={handleShareToggle}
                 disabled={isSharing}
                 aria-label={isPublic ? 'Unshare recipe' : 'Share recipe'}
@@ -213,27 +242,27 @@ export function RecipeCard({
               </Button>
             )}
             <Button
-              variant="ghost" // Keep ghost variant for icon buttons
+              variant="ghost"
               size="sm"
-              className="h-8 w-8 p-0 bg-white/90 hover:bg-white border border-gray-200 hover:border-gray-300 shadow-sm"
+              className="h-8 w-8 p-0 bg-white/95 hover:bg-white border border-gray-200 hover:border-gray-300 shadow-lg"
               onClick={() => onView?.(recipe)}
               aria-label="View recipe"
             >
               <Eye className="h-4 w-4" />
             </Button>
             <Button
-              variant="ghost" // Keep ghost variant for icon buttons
+              variant="ghost"
               size="sm"
-              className="h-8 w-8 p-0 bg-white/90 hover:bg-white border border-gray-200 hover:border-gray-300 shadow-sm"
+              className="h-8 w-8 p-0 bg-white/95 hover:bg-white border border-gray-200 hover:border-gray-300 shadow-lg"
               onClick={() => onEdit?.(recipe)}
               aria-label="Edit recipe"
             >
               <Edit className="h-4 w-4" />
             </Button>
             <Button
-              variant="ghost" // Keep ghost variant for icon buttons
+              variant="ghost"
               size="sm"
-              className="h-8 w-8 p-0 text-red-500 hover:text-red-700 bg-white/90 hover:bg-white border border-gray-200 hover:border-gray-300 shadow-sm"
+              className="h-8 w-8 p-0 text-red-500 hover:text-red-700 bg-white/95 hover:bg-white border border-gray-200 hover:border-gray-300 shadow-lg"
               onClick={() => setShowDeleteDialog(true)}
               aria-label="Delete recipe"
             >
