@@ -60,7 +60,14 @@ export function RecipeCard({
       const isTouchDevice =
         'ontouchstart' in window || navigator.maxTouchPoints > 0;
       const isMobileScreen = window.innerWidth < 768;
-      setIsMobile(isTouchDevice && isMobileScreen);
+      const isMobileUserAgent = /iPhone|iPad|iPod|Android|Mobile|Tablet/i.test(
+        navigator.userAgent
+      );
+
+      // More robust mobile detection - use user agent as primary indicator
+      const mobile = isMobileUserAgent || (isTouchDevice && isMobileScreen);
+
+      setIsMobile(mobile);
     };
 
     detectDevice();
@@ -82,8 +89,10 @@ export function RecipeCard({
     }
   };
 
-  const handleCardTap = () => {
+  const handleCardTap = (e: React.MouseEvent) => {
     if (isMobile) {
+      e.preventDefault();
+      e.stopPropagation();
       setIsTouched(!isTouched);
     }
   };
@@ -173,6 +182,11 @@ export function RecipeCard({
                 ? 'opacity-100' // Always show on mobile
                 : 'opacity-0 group-hover:opacity-100'
             }`}
+            style={{
+              // Fallback: ensure buttons are always clickable on mobile
+              pointerEvents: isMobile ? 'auto' : undefined,
+              zIndex: 20, // Ensure buttons are above other elements
+            }}
           >
             {canShare && (
               <Button

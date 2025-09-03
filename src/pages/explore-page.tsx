@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { RecipeCard } from '../components/recipes/recipe-card';
 import { recipeApi } from '../lib/api';
-import type { PublicRecipe, RecipeFilters } from '@/lib/types';
+import type { PublicRecipe, RecipeFilters, Recipe } from '@/lib/types';
 import { Button } from '../components/ui/button';
 import { Save } from 'lucide-react';
 import { useToast } from '../hooks/use-toast';
@@ -60,6 +60,31 @@ export default function ExplorePage() {
     } finally {
       setSavingRecipeId(null);
     }
+  };
+
+  // Add handlers for RecipeCard functionality
+  const handleViewRecipe = (recipe: Recipe) => {
+    // Navigate to recipe view page
+    window.open(`/recipe/${recipe.id}`, '_blank');
+  };
+
+  const handleEditRecipe = (recipe: Recipe) => {
+    // For public recipes, we can't edit them directly
+    // Instead, save them to user's collection first
+    toast({
+      title: 'Info',
+      description:
+        'Public recipes must be saved to your collection before editing',
+    });
+    handleSaveRecipe(recipe.id);
+  };
+
+  const handleShareToggle = () => {
+    // For public recipes, sharing is already enabled
+    toast({
+      title: 'Info',
+      description: 'This recipe is already public',
+    });
   };
 
   const handleFiltersChange = (newFilters: RecipeFilters) => {
@@ -212,7 +237,13 @@ export default function ExplorePage() {
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {filteredRecipes.map((recipe) => (
             <div key={recipe.id} className="relative">
-              <RecipeCard recipe={recipe} />
+              <RecipeCard
+                recipe={recipe}
+                onView={handleViewRecipe}
+                onEdit={handleEditRecipe}
+                showShareButton={false}
+                onShareToggle={handleShareToggle}
+              />
 
               {/* Author info and save button */}
               <div className="mt-3 flex items-center justify-between">
