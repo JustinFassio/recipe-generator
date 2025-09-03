@@ -68,19 +68,32 @@ export function RecipeCard({
       const isSmallScreen = window.innerWidth < 768;
 
       // Mobile = mobile user agent OR (touch device + small screen)
-      const mobile = isMobileUserAgent || (isTouchDevice && isSmallScreen);
+      // Fallback: if we detect touch capability, treat as mobile regardless of screen size
+      const mobile =
+        isMobileUserAgent || (isTouchDevice && isSmallScreen) || isTouchDevice;
 
       setIsMobile(mobile);
 
-      // Debug logging for troubleshooting
-      console.log('🔍 Mobile Detection:', {
+      // Enhanced debug logging for production troubleshooting
+      console.log('🔍 Mobile Detection (Production Debug):', {
         userAgent: navigator.userAgent,
         isMobileUserAgent,
         isTouchDevice,
         isSmallScreen,
         windowWidth: window.innerWidth,
         maxTouchPoints: navigator.maxTouchPoints,
+        hasOntouchstart: 'ontouchstart' in window,
         finalMobile: mobile,
+        // Additional iPhone-specific checks
+        isIPhone: /iPhone/i.test(navigator.userAgent),
+        isIPad: /iPad/i.test(navigator.userAgent),
+        isSafari: /Safari/i.test(navigator.userAgent),
+        // Touch capability checks
+        touchEvents: {
+          ontouchstart: 'ontouchstart' in window,
+          ontouchmove: 'ontouchmove' in window,
+          ontouchend: 'ontouchend' in window,
+        },
       });
     };
 
@@ -95,6 +108,12 @@ export function RecipeCard({
     if (isMobile) {
       console.log('📱 Touch Start - Showing buttons');
       setShowButtons(true);
+    } else {
+      // Fallback: if mobile detection failed, still try to handle touch
+      console.log(
+        '📱 Touch Start (Fallback) - Mobile detection may have failed'
+      );
+      setShowButtons(true);
     }
   };
 
@@ -103,6 +122,9 @@ export function RecipeCard({
       e.preventDefault();
       // Don't hide buttons immediately on touch end
       // Let the click outside handler manage hiding
+    } else {
+      // Fallback: handle touch even if mobile detection failed
+      e.preventDefault();
     }
   };
 
