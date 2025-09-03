@@ -243,10 +243,10 @@ class OpenAIAPI {
       );
     }
 
-    // Validate API key format (should start with 'sk-')
-    if (!apiKey.startsWith('sk-')) {
+    // Basic validation - ensure API key is not empty and has reasonable length
+    if (apiKey.trim().length < 10) {
       throw new Error(
-        'Invalid OpenAI API key format. API key should start with "sk-".'
+        'Invalid OpenAI API key. API key appears to be too short or empty.'
       );
     }
 
