@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import type { RecipeFilters, Cuisine, Mood } from '@/lib/types';
 
 export interface FilterDrawerState {
@@ -28,24 +28,34 @@ export function useFilterDrawer(
   initialFilters: RecipeFilters,
   onFiltersChange: (filters: RecipeFilters) => void
 ) {
+  // Store initial sort values to restore them when clearing filters
+  const initialSortValues = useRef({
+    sortBy: initialFilters.sortBy || 'date',
+    sortOrder: initialFilters.sortOrder || 'desc',
+  });
+
   const [localState, setLocalState] = useState<FilterDrawerState>({
     searchTerm: initialFilters.searchTerm || '',
     selectedCategories: initialFilters.categories || [],
     selectedCuisines: initialFilters.cuisine || [],
     selectedMoods: initialFilters.moods || [],
-    sortBy: initialFilters.sortBy || 'date',
-    sortOrder: initialFilters.sortOrder || 'desc',
+    sortBy: initialSortValues.current.sortBy,
+    sortOrder: initialSortValues.current.sortOrder,
   });
 
   // Sync local state with incoming filters
   useEffect(() => {
+    // Update initial sort values if they change
+    const newInitialSortBy = initialFilters.sortBy || 'date';
+    const newInitialSortOrder = initialFilters.sortOrder || 'desc';
+
     setLocalState({
       searchTerm: initialFilters.searchTerm || '',
       selectedCategories: initialFilters.categories || [],
       selectedCuisines: initialFilters.cuisine || [],
       selectedMoods: initialFilters.moods || [],
-      sortBy: initialFilters.sortBy || 'date',
-      sortOrder: initialFilters.sortOrder || 'desc',
+      sortBy: newInitialSortBy,
+      sortOrder: newInitialSortOrder,
     });
   }, [
     initialFilters.searchTerm,
@@ -104,8 +114,8 @@ export function useFilterDrawer(
       selectedCategories: [],
       selectedCuisines: [],
       selectedMoods: [],
-      sortBy: localState.sortBy,
-      sortOrder: localState.sortOrder,
+      sortBy: initialSortValues.current.sortBy,
+      sortOrder: initialSortValues.current.sortOrder,
     };
 
     setLocalState((prev) => ({
@@ -119,12 +129,12 @@ export function useFilterDrawer(
       categories: undefined,
       cuisine: undefined,
       moods: undefined,
-      sortBy: localState.sortBy,
-      sortOrder: localState.sortOrder,
+      sortBy: initialSortValues.current.sortBy,
+      sortOrder: initialSortValues.current.sortOrder,
     };
 
     onFiltersChange(clearedFilters);
-  }, [localState.sortBy, localState.sortOrder, onFiltersChange]);
+  }, [onFiltersChange]);
 
   const clearSearch = useCallback(() => {
     setLocalState((prev) => ({ ...prev, searchTerm: '' }));
