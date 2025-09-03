@@ -26,6 +26,7 @@ export function MoodSelectionDrawer({
   className = '',
 }: MoodSelectionDrawerProps) {
   const [searchTerm, setSearchTerm] = useState('');
+  const [isApplyFeedback, setIsApplyFeedback] = useState(false);
 
   // Filter moods based on search term
   const filteredRegions = useMemo(() => {
@@ -221,27 +222,25 @@ export function MoodSelectionDrawer({
       <div className="sticky bottom-0 left-0 right-0 bg-base-100 border-t pt-4 pb-4 px-4 -mx-4 space-y-3">
         {/* Apply Button - Provides feedback that selections are applied */}
         <Button
-          className="w-full"
+          className={`w-full transition-all duration-300 ${
+            isApplyFeedback
+              ? 'bg-green-600 hover:bg-green-700 cursor-not-allowed'
+              : ''
+          }`}
           onClick={() => {
             // Moods are applied immediately, just show feedback
-            const button = document.activeElement as HTMLButtonElement;
-            if (button) {
-              button.textContent = '✓ Applied';
-              button.disabled = true;
-              button.className =
-                'w-full bg-green-600 hover:bg-green-700 cursor-not-allowed transition-all duration-300';
+            setIsApplyFeedback(true);
 
-              setTimeout(() => {
-                button.textContent = 'Apply';
-                button.disabled = false;
-                button.className = 'w-full transition-all duration-300';
-              }, 2000);
-            }
+            // Reset feedback state after 2 seconds
+            setTimeout(() => {
+              setIsApplyFeedback(false);
+            }, 2000);
           }}
           size="lg"
           variant="default"
+          disabled={isApplyFeedback}
         >
-          Apply
+          {isApplyFeedback ? '✓ Applied' : 'Apply'}
         </Button>
 
         {/* Done Button - Closes the current drawer */}
