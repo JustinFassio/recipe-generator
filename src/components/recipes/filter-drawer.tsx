@@ -253,13 +253,9 @@ export function FilterDrawer({
         <Button
           onClick={handleApplyFilters}
           size="lg"
-          variant={isApplied ? 'default' : 'default'}
+          variant={isApplied ? 'secondary' : 'default'}
           disabled={isApplied}
-          className={`w-full transition-all duration-300 ${
-            isApplied
-              ? 'bg-green-600 hover:bg-green-700 cursor-not-allowed'
-              : ''
-          }`}
+          className="w-full transition-all duration-300"
         >
           {isApplied ? '✓ Applied' : 'Apply'}
         </Button>
