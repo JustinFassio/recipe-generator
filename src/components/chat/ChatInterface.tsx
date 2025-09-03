@@ -159,14 +159,14 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
           guidance:
             "Transform your kitchen into a healing pharmacy! Tell me about your health goals, dietary needs, or what you'd like to heal through food.",
         };
-              case 'jamieBrightwell':
-          return {
-            title: "Welcome! I'm Dr. Jamie Brightwell",
-            description:
-              "🌟 PREMIUM: Revolutionary Pediatric Culinary Wellness Expert with dual Stanford medicine + Le Cordon Bleu training. Transform 'picky eaters' into food explorers with 25+ years of evidence-based, play-based nutrition.",
-            guidance:
-              "Hi! I'm Dr. Jamie Brightwell, your Pediatric Culinary Wellness Expert! I'll help you create delicious, nutritionally-optimized meals that your children will actually want to eat. Tell me about your child's age, any picky eating challenges, dietary restrictions, or what you'd like to achieve. I can help with sensory-friendly foods, hidden nutrition techniques, and making healthy eating an adventure!",
-          };
+      case 'jamieBrightwell':
+        return {
+          title: "Welcome! I'm Dr. Jamie Brightwell",
+          description:
+            "🌟 PREMIUM: Revolutionary Pediatric Culinary Wellness Expert with dual Stanford medicine + Le Cordon Bleu training. Transform 'picky eaters' into food explorers with 25+ years of evidence-based, play-based nutrition.",
+          guidance:
+            "Hi! I'm Dr. Jamie Brightwell, your Pediatric Culinary Wellness Expert! I'll help you create delicious, nutritionally-optimized meals that your children will actually want to eat. Tell me about your child's age, any picky eating challenges, dietary restrictions, or what you'd like to achieve. I can help with sensory-friendly foods, hidden nutrition techniques, and making healthy eating an adventure!",
+        };
       default:
         return {
           title: `Welcome! I'm ${RECIPE_BOT_PERSONAS[personaType].name}`,
