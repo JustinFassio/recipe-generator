@@ -37,6 +37,7 @@ export function ChatHeader({
       case 'homeCook':
         return <Home className="h-5 w-5" />;
       case 'assistantNutritionist':
+      case 'jamieBrightwell':
         return <Brain className="h-5 w-5" />;
       default:
         return <Bot className="h-5 w-5" />;
@@ -52,6 +53,7 @@ export function ChatHeader({
       case 'homeCook':
         return 'bg-blue-100 text-blue-600';
       case 'assistantNutritionist':
+      case 'jamieBrightwell':
         return 'bg-gradient-to-br from-purple-100 to-blue-100 text-purple-600';
       default:
         return 'bg-gray-100 text-gray-600';

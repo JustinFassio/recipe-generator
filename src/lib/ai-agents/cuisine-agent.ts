@@ -221,6 +221,57 @@ export class CuisineAgent {
   }
 
   /**
+   * Generate a complete recipe JSON with prep field for a specific cuisine
+   */
+  generateRecipeJSON(
+    cuisine: string,
+    course: string = 'Main'
+  ): {
+    title: string;
+    ingredients: Array<{
+      item: string;
+      amount?: string;
+      prep?: string;
+    }>;
+    instructions: string[];
+    setup: string[];
+    categories: string[];
+    notes: string;
+  } {
+    const context = this.getCuisineContext(cuisine);
+    if (!context) {
+      throw new Error(`No context found for cuisine: ${cuisine}`);
+    }
+
+    // Generate a sample recipe based on cuisine and regional context
+    const title = `${cuisine} ${course} Recipe`;
+
+    // Generate ingredients with prep instructions
+    const ingredients = this.generateIngredientsWithPrep(context);
+
+    // Generate cooking instructions
+    const instructions = this.generateCookingInstructions(context, cuisine);
+
+    // Generate setup/prep steps
+    const setup = this.generateSetupSteps(context, cuisine);
+
+    // Generate categories
+    const categories = this.generateRecipeCategories(cuisine, course);
+
+    // Generate notes
+    const notes = this.generateRecipeNotes(context, cuisine);
+
+    return {
+      title,
+      ingredients,
+      instructions,
+      setup,
+      categories,
+      notes,
+    };
+  }
+
+  /**
    * Get all cuisines in a specific region
    */
   getCuisinesInRegion(region: string): string[] {
@@ -403,6 +454,156 @@ export class CuisineAgent {
     return Math.min(score, 1.0);
   }
 
+  /**
+   * Generate ingredients with prep instructions for a cuisine
+   */
+  private generateIngredientsWithPrep(context: RegionalCuisineContext): Array<{
+    item: string;
+    amount?: string;
+    prep?: string;
+  }> {
+    const ingredients: Array<{
+      item: string;
+      amount?: string;
+      prep?: string;
+    }> = [];
+
+    // Add common ingredients with typical prep instructions
+    context.commonIngredients.forEach((ingredient) => {
+      const prepInstructions =
+        this.getPrepInstructionsForIngredient(ingredient);
+
+      ingredients.push({
+        item: ingredient,
+        amount: this.getTypicalAmount(ingredient),
+        prep: prepInstructions,
+      });
+    });
+
+    // Add some regional staples
+    const regionalStaples = this.getRegionalStaples(context.region);
+    regionalStaples.forEach((staple) => {
+      if (!ingredients.some((ing) => ing.item === staple.item)) {
+        ingredients.push({
+          item: staple.item,
+          amount: staple.amount,
+          prep: staple.prep,
+        });
+      }
+    });
+
+    return ingredients;
+  }
+
+  /**
+   * Generate cooking instructions for a cuisine
+   */
+  private generateCookingInstructions(
+    context: RegionalCuisineContext,
+    cuisine: string
+  ): string[] {
+    const instructions: string[] = [];
+    const techniques = context.cookingTechniques;
+
+    // Start with prep instructions
+    instructions.push(
+      `Prepare all ingredients according to their prep instructions.`
+    );
+
+    // Add technique-specific instructions
+    if (techniques.includes('grilling')) {
+      instructions.push(`Preheat your grill to medium-high heat.`);
+    }
+    if (techniques.includes('braising')) {
+      instructions.push(
+        `Heat oil in a large, heavy-bottomed pot over medium heat.`
+      );
+    }
+    if (techniques.includes('stir-frying')) {
+      instructions.push(
+        `Heat a wok or large skillet over high heat until very hot.`
+      );
+    }
+    if (techniques.includes('steaming')) {
+      instructions.push(`Set up a steamer basket over boiling water.`);
+    }
+
+    // Add cuisine-specific instructions
+    const cuisineInstructions = this.getCuisineSpecificInstructions(cuisine);
+    instructions.push(...cuisineInstructions);
+
+    // Add finishing instructions
+    instructions.push(`Taste and adjust seasoning as needed.`);
+    instructions.push(`Serve hot and enjoy your ${cuisine} creation!`);
+
+    return instructions;
+  }
+
+  /**
+   * Generate setup/prep steps for a cuisine
+   */
+  private generateSetupSteps(
+    context: RegionalCuisineContext,
+    cuisine: string
+  ): string[] {
+    const setup: string[] = [];
+
+    // Add prep time estimate
+    setup.push(`Prep time: 15-20 minutes`);
+
+    // Add cooking time estimate
+    setup.push(`Cook time: 30-45 minutes`);
+
+    // Add serving size
+    setup.push(`Serves: 4-6 people`);
+
+    // Add equipment needed
+    const equipment = this.getRequiredEquipment(context.region, cuisine);
+    if (equipment.length > 0) {
+      setup.push(`Equipment needed: ${equipment.join(', ')}`);
+    }
+
+    // Add special notes
+    const specialNotes = this.getSpecialPrepNotes(cuisine);
+    setup.push(...specialNotes);
+
+    return setup;
+  }
+
+  /**
+   * Generate recipe notes for a cuisine
+   */
+  private generateRecipeNotes(
+    context: RegionalCuisineContext,
+    cuisine: string
+  ): string {
+    const notes: string[] = [];
+
+    // Add cultural context
+    notes.push(
+      `This recipe celebrates the rich traditions of ${context.region} cuisine.`
+    );
+
+    // Add ingredient tips
+    notes.push(
+      `For authentic flavor, try to use fresh, local ingredients when possible.`
+    );
+
+    // Add variation suggestions
+    const variations = this.getRecipeVariations(cuisine);
+    if (variations.length > 0) {
+      notes.push(`Variations: ${variations.join('; ')}`);
+    }
+
+    // Add serving suggestions
+    const servingSuggestions = this.getServingSuggestions(cuisine);
+    if (servingSuggestions.length > 0) {
+      notes.push(`Serving suggestions: ${servingSuggestions.join('; ')}`);
+    }
+
+    return notes.join(' ');
+  }
+
   private areRegionsProximate(
     region1: string | null,
     region2: string
@@ -438,6 +639,292 @@ export class CuisineAgent {
         (cuisine1 === c2 && cuisine2 === c1)
     );
   }
+
+  /**
+   * Get prep instructions for a specific ingredient
+   */
+  private getPrepInstructionsForIngredient(ingredient: string): string {
+    const prepInstructions: Record<string, string> = {
+      corn: 'Remove husk and silk, rinse thoroughly',
+      beans: 'Rinse and drain, remove any debris',
+      'chili peppers': 'Remove stems and seeds, finely chop',
+      tomatoes: 'Core and dice, or blanch and peel if needed',
+      lime: 'Wash, zest if needed, then juice',
+      cilantro: 'Wash and finely chop, discard stems',
+      cassava: 'Peel, cut into chunks, remove woody center',
+      'black beans': 'Rinse thoroughly, soak overnight if using dried',
+      coconut: 'Crack open, extract meat, grate or chop',
+      plantains: 'Peel and slice, choose ripeness based on recipe',
+      'olive oil': 'Use extra virgin for finishing, regular for cooking',
+      basil: 'Wash and tear leaves, avoid chopping to preserve flavor',
+      parmesan: 'Grate fresh, avoid pre-grated for best flavor',
+      butter: 'Bring to room temperature for baking, use cold for cooking',
+      shallots: 'Peel and finely dice, milder than regular onions',
+      potatoes: 'Scrub clean, peel if desired, cut to uniform size',
+      beets: 'Scrub thoroughly, trim tops, can be roasted whole',
+      'soy sauce': 'Use light for seasoning, dark for color and depth',
+      ginger: 'Peel and grate or mince, use fresh for best flavor',
+      'fish sauce': "Use sparingly as it's very salty and pungent",
+      'coconut milk': 'Shake well before opening, use full-fat for richness',
+      lemongrass: 'Remove outer layers, bruise and slice, or use paste',
+      miso: 'Dissolve in warm liquid before adding to prevent clumping',
+      dashi: 'Prepare fresh or use instant, forms base of many dishes',
+    };
+
+    return (
+      prepInstructions[ingredient.toLowerCase()] || 'Wash and prepare as needed'
+    );
+  }
+
+  /**
+   * Get typical amount for an ingredient
+   */
+  private getTypicalAmount(ingredient: string): string {
+    const amounts: Record<string, string> = {
+      corn: '2 ears',
+      beans: '1 cup',
+      'chili peppers': '2-3 peppers',
+      tomatoes: '4 medium',
+      lime: '2 limes',
+      cilantro: '1 bunch',
+      cassava: '1 pound',
+      'black beans': '2 cups',
+      coconut: '1 whole',
+      plantains: '3-4 medium',
+      'olive oil': '2 tablespoons',
+      basil: '1 cup packed',
+      parmesan: '1/2 cup grated',
+      butter: '4 tablespoons',
+      shallots: '2 medium',
+      potatoes: '1 pound',
+      beets: '4 medium',
+      'soy sauce': '2 tablespoons',
+      ginger: '2-inch piece',
+      'fish sauce': '1 tablespoon',
+      'coconut milk': '1 can (13.5 oz)',
+      lemongrass: '2 stalks',
+      miso: '2 tablespoons',
+      dashi: '2 cups',
+    };
+
+    return amounts[ingredient.toLowerCase()] || 'as needed';
+  }
+
+  /**
+   * Get regional staples with prep instructions
+   */
+  private getRegionalStaples(region: string): Array<{
+    item: string;
+    amount: string;
+    prep: string;
+  }> {
+    const staples: Record<
+      string,
+      Array<{
+        item: string;
+        amount: string;
+        prep: string;
+      }>
+    > = {
+      Americas: [
+        { item: 'onion', amount: '1 large', prep: 'Peel and dice' },
+        { item: 'garlic', amount: '4 cloves', prep: 'Peel and mince' },
+        { item: 'salt', amount: 'to taste', prep: 'Season as needed' },
+        { item: 'black pepper', amount: 'to taste', prep: 'Freshly ground' },
+      ],
+      Europe: [
+        { item: 'onion', amount: '1 medium', prep: 'Peel and finely dice' },
+        { item: 'garlic', amount: '3 cloves', prep: 'Peel and mince' },
+        {
+          item: 'olive oil',
+          amount: '3 tablespoons',
+          prep: 'Extra virgin for finishing',
+        },
+        {
+          item: 'herbs',
+          amount: '2 tablespoons',
+          prep: 'Fresh, finely chopped',
+        },
+      ],
+      Asia: [
+        { item: 'onion', amount: '1 medium', prep: 'Peel and slice' },
+        { item: 'garlic', amount: '6 cloves', prep: 'Peel and mince' },
+        { item: 'ginger', amount: '1-inch piece', prep: 'Peel and grate' },
+        { item: 'green onions', amount: '4 stalks', prep: 'Trim and slice' },
+      ],
+    };
+
+    return staples[region] || [];
+  }
+
+  /**
+   * Get cuisine-specific cooking instructions
+   */
+  private getCuisineSpecificInstructions(cuisine: string): string[] {
+    const instructions: Record<string, string[]> = {
+      Mexican: [
+        'Layer flavors by cooking aromatics first',
+        'Add spices to bloom their flavors in oil',
+        'Finish with fresh herbs and lime juice',
+      ],
+      Italian: [
+        'Cook pasta al dente, reserve pasta water',
+        'Build sauce in the same pan as pasta',
+        'Finish with pasta water to create creamy sauce',
+      ],
+      Chinese: [
+        'Prepare all ingredients before starting to cook',
+        'Cook over high heat for authentic wok flavor',
+        'Add ingredients in order of cooking time',
+      ],
+      Thai: [
+        'Balance sweet, sour, salty, and spicy flavors',
+        'Add coconut milk gradually to prevent curdling',
+        'Finish with fresh herbs and lime juice',
+      ],
+      Japanese: [
+        'Use dashi as the base for authentic flavor',
+        'Respect the seasonality of ingredients',
+        'Present dishes with attention to aesthetics',
+      ],
+    };
+
+    return (
+      instructions[cuisine] || [
+        'Cook ingredients according to traditional methods',
+        'Respect the cultural cooking techniques',
+      ]
+    );
+  }
+
+  /**
+   * Get required equipment for a cuisine
+   */
+  private getRequiredEquipment(region: string, cuisine: string): string[] {
+    const equipment: Record<string, Record<string, string[]>> = {
+      Americas: {
+        Mexican: ['large skillet', 'grater', 'citrus juicer'],
+        Brazilian: ['grill', 'heavy pot', 'mortar and pestle'],
+        Caribbean: ['grill', 'dutch oven', 'spice grinder'],
+      },
+      Europe: {
+        Italian: ['pasta pot', 'large skillet', 'grater'],
+        French: ['heavy pot', 'whisk', 'fine mesh strainer'],
+        Ukrainian: ['large pot', 'mandoline', 'fermentation vessel'],
+      },
+      Asia: {
+        Chinese: ['wok', 'spider strainer', 'cleaver'],
+        Thai: ['wok', 'mortar and pestle', 'steamer'],
+        Japanese: ['rice cooker', 'bamboo mat', 'fine grater'],
+      },
+    };
+
+    return equipment[region]?.[cuisine] || ['basic cooking utensils'];
+  }
+
+  /**
+   * Get special prep notes for a cuisine
+   */
+  private getSpecialPrepNotes(cuisine: string): string[] {
+    const notes: Record<string, string[]> = {
+      Mexican: [
+        'Soak dried chilies in hot water for 30 minutes',
+        'Toast spices in a dry pan to enhance flavor',
+      ],
+      Italian: [
+        'Bring cheese to room temperature for best flavor',
+        'Use pasta water to adjust sauce consistency',
+      ],
+      Chinese: [
+        'Marinate meat for at least 30 minutes',
+        'Prepare sauce mixture before starting to cook',
+      ],
+      Thai: [
+        'Soak rice noodles in warm water for 30 minutes',
+        'Prepare curry paste or use high-quality store-bought',
+      ],
+      Japanese: [
+        'Rinse rice until water runs clear',
+        'Prepare dashi stock in advance',
+      ],
+    };
+
+    return notes[cuisine] || ['Follow traditional preparation methods'];
+  }
+
+  /**
+   * Get recipe variations for a cuisine
+   */
+  private getRecipeVariations(cuisine: string): string[] {
+    const variations: Record<string, string[]> = {
+      Mexican: [
+        'Add more chilies for extra heat',
+        'Substitute black beans for pinto beans',
+        'Use corn tortillas instead of flour',
+      ],
+      Italian: [
+        'Add mushrooms for vegetarian option',
+        'Use different pasta shapes',
+        'Substitute pecorino for parmesan',
+      ],
+      Chinese: [
+        'Add more vegetables for vegetarian version',
+        'Use different protein (chicken, beef, tofu)',
+        'Adjust spice level to preference',
+      ],
+      Thai: [
+        'Add more coconut milk for creamier texture',
+        'Use different curry pastes',
+        'Add more vegetables for nutrition',
+      ],
+      Japanese: [
+        'Use different types of miso',
+        'Add more vegetables for variety',
+        'Adjust seasoning to taste',
+      ],
+    };
+
+    return variations[cuisine] || ['Experiment with ingredient substitutions'];
+  }
+
+  /**
+   * Get serving suggestions for a cuisine
+   */
+  private getServingSuggestions(cuisine: string): string[] {
+    const suggestions: Record<string, string[]> = {
+      Mexican: [
+        'Serve with warm tortillas',
+        'Garnish with fresh cilantro and lime wedges',
+        'Accompany with rice and beans',
+      ],
+      Italian: [
+        'Serve with crusty bread',
+        'Garnish with fresh basil',
+        'Pair with a simple green salad',
+      ],
+      Chinese: [
+        'Serve with steamed rice',
+        'Garnish with green onions',
+        'Accompany with pickled vegetables',
+      ],
+      Thai: [
+        'Serve with jasmine rice',
+        'Garnish with fresh herbs',
+        'Accompany with cucumber salad',
+      ],
+      Japanese: [
+        'Serve with steamed rice',
+        'Garnish with green onions',
+        'Accompany with pickled vegetables',
+      ],
+    };
+
+    return (
+      suggestions[cuisine] || [
+        'Serve hot and enjoy with traditional accompaniments',
+      ]
+    );
+  }
 }
 
 // Export singleton instance for easy use
@@ -454,4 +941,6 @@ export const getComplementaryCuisines = (cuisine: string) =>
   cuisineAgent.getComplementaryCuisines(cuisine);
 export const generateRecipeCategories = (cuisine: string, course?: string) =>
   cuisineAgent.generateRecipeCategories(cuisine, course);
+export const generateRecipeJSON = (cuisine: string, course?: string) =>
+  cuisineAgent.generateRecipeJSON(cuisine, course);
 export const getCoverageStats = () => cuisineAgent.getCoverageStats();

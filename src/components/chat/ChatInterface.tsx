@@ -102,6 +102,7 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
       case 'homeCook':
         return <Home className="h-4 w-4" />;
       case 'assistantNutritionist':
+      case 'jamieBrightwell':
         return <Brain className="h-4 w-4" />;
       default:
         return <Bot className="h-4 w-4" />;
@@ -117,9 +118,62 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
       case 'homeCook':
         return 'bg-blue-100 text-blue-600';
       case 'assistantNutritionist':
+      case 'jamieBrightwell':
         return 'bg-gradient-to-br from-purple-100 to-blue-100 text-purple-600';
       default:
         return 'bg-gray-100 text-gray-600';
+    }
+  };
+
+  const getPersonaIntroduction = (personaType: PersonaType) => {
+    switch (personaType) {
+      case 'chef':
+        return {
+          title: "Welcome! I'm Chef Marco",
+          description:
+            'Master Italian chef with 20+ years of Mediterranean culinary expertise, specializing in traditional techniques and fresh ingredients',
+          guidance:
+            "Start by telling me what kind of recipe you'd like to create, or use the preferences above to guide me.",
+        };
+      case 'nutritionist':
+        return {
+          title: "Welcome! I'm Dr. Sarah",
+          description:
+            'Registered dietitian and nutrition expert focused on creating healthy, balanced meals that are both nutritious and delicious',
+          guidance:
+            "Start by telling me what kind of recipe you'd like to create, or use the preferences above to guide me.",
+        };
+      case 'homeCook':
+        return {
+          title: "Welcome! I'm Aunt Jenny",
+          description:
+            'Beloved home cook with decades of experience creating comforting, family-friendly recipes that bring joy to every meal',
+          guidance:
+            "Start by telling me what kind of recipe you'd like to create, or use the preferences above to guide me.",
+        };
+      case 'assistantNutritionist':
+        return {
+          title: "Welcome! I'm Dr. Sage Vitalis",
+          description:
+            '🌟 PREMIUM: Master of Integrative Culinary Medicine with 30+ years merging ancient healing wisdom with cutting-edge nutritional science. Expert in TCM, Ayurveda, functional medicine, and microbiome optimization.',
+          guidance:
+            "Transform your kitchen into a healing pharmacy! Tell me about your health goals, dietary needs, or what you'd like to heal through food.",
+        };
+      case 'jamieBrightwell':
+        return {
+          title: "Welcome! I'm Dr. Jamie Brightwell",
+          description:
+            "🌟 PREMIUM: Revolutionary Pediatric Culinary Wellness Expert with dual Stanford medicine + Le Cordon Bleu training. Transform 'picky eaters' into food explorers with 25+ years of evidence-based, play-based nutrition.",
+          guidance:
+            "Hi! I'm Dr. Jamie Brightwell, your Pediatric Culinary Wellness Expert! I'll help you create delicious, nutritionally-optimized meals that your children will actually want to eat. Tell me about your child's age, any picky eating challenges, dietary restrictions, or what you'd like to achieve. I can help with sensory-friendly foods, hidden nutrition techniques, and making healthy eating an adventure!",
+        };
+      default:
+        return {
+          title: `Welcome! I'm ${RECIPE_BOT_PERSONAS[personaType].name}`,
+          description: RECIPE_BOT_PERSONAS[personaType].description,
+          guidance:
+            "Start by telling me what kind of recipe you'd like to create, or use the preferences above to guide me.",
+        };
     }
   };
 
@@ -188,15 +242,14 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-gray-800">
-                  Welcome! I'm {RECIPE_BOT_PERSONAS[persona].name}
+                  {getPersonaIntroduction(persona).title}
                 </h3>
                 <p className="text-sm text-gray-600 max-w-md">
-                  {RECIPE_BOT_PERSONAS[persona].description}
+                  {getPersonaIntroduction(persona).description}
                 </p>
               </div>
               <p className="text-xs text-gray-500">
-                Start by telling me what kind of recipe you'd like to create, or
-                use the preferences above to guide me.
+                {getPersonaIntroduction(persona).guidance}
               </p>
             </div>
           </div>

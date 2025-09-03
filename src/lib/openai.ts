@@ -45,10 +45,20 @@ Your role:
 When generating a complete recipe, structure it as a JSON object with:
 {
   "title": "Recipe Name",
-  "ingredients": ["ingredient 1", "ingredient 2"],
-  "instructions": "Step-by-step cooking instructions",
+  "ingredients": [
+    {
+      "item": "ingredient name",
+      "amount": "quantity needed",
+      "prep": "preparation instructions"
+    }
+  ],
+  "instructions": ["Step 1", "Step 2", "Step 3"],
+  "setup": ["Prep time: X minutes", "Cook time: X minutes", "Equipment needed"],
+  "categories": ["Course: Main", "Cuisine: Type", "Technique: Method"],
   "notes": "Tips, variations, and additional notes"
 }`,
+    description:
+      'Master Italian chef with 20+ years of Mediterranean culinary expertise, specializing in traditional techniques and fresh ingredients',
   },
 
   nutritionist: {
@@ -72,10 +82,20 @@ Your role:
 When generating a complete recipe, structure it as a JSON object with:
 {
   "title": "Recipe Name",
-  "ingredients": ["ingredient 1", "ingredient 2"],
-  "instructions": "Step-by-step cooking instructions",
+  "ingredients": [
+    {
+      "item": "ingredient name",
+      "amount": "quantity needed",
+      "prep": "preparation instructions"
+    }
+  ],
+  "instructions": ["Step 1", "Step 2", "Step 3"],
+  "setup": ["Prep time: X minutes", "Cook time: X minutes", "Equipment needed"],
+  "categories": ["Course: Main", "Cuisine: Type", "Technique: Method"],
   "notes": "Nutritional info, tips, and healthy variations"
 }`,
+    description:
+      'Registered dietitian and nutrition expert focused on creating healthy, balanced meals that are both nutritious and delicious',
   },
 
   homeCook: {
@@ -99,10 +119,20 @@ Your role:
 When generating a complete recipe, structure it as a JSON object with:
 {
   "title": "Recipe Name",
-  "ingredients": ["ingredient 1", "ingredient 2"],
-  "instructions": "Step-by-step cooking instructions",
+  "ingredients": [
+    {
+      "item": "ingredient name",
+      "amount": "quantity needed",
+      "prep": "preparation instructions"
+    }
+  ],
+  "instructions": ["Step 1", "Step 2", "Step 3"],
+  "setup": ["Prep time: X minutes", "Cook time: X minutes", "Equipment needed"],
+  "categories": ["Course: Main", "Cuisine: Type", "Technique: Method"],
   "notes": "Family tips, variations, and serving suggestions"
 }`,
+    description:
+      'Beloved home cook with decades of experience creating comforting, family-friendly recipes that bring joy to every meal',
   },
 
   assistantNutritionist: {
@@ -131,8 +161,16 @@ Your role:
 When generating a complete recipe, structure it as a JSON object with:
 {
   "title": "Recipe Name",
-  "ingredients": ["ingredient 1", "ingredient 2"],
-  "instructions": "Step-by-step cooking instructions",
+  "ingredients": [
+    {
+      "item": "ingredient name",
+      "amount": "quantity needed",
+      "prep": "preparation instructions"
+    }
+  ],
+  "instructions": ["Step 1", "Step 2", "Step 3"],
+  "setup": ["Prep time: X minutes", "Cook time: X minutes", "Equipment needed"],
+  "categories": ["Course: Main", "Cuisine: Type", "Technique: Method"],
   "notes": "Nutritional analysis, health benefits, and personalization tips"
 }
 
@@ -140,32 +178,87 @@ Note: This is fallback mode - use this prompt if Assistant API is unavailable.`,
     assistantId: 'asst_o3VGUZBpdYTdKEyKYoKua8ys',
     isAssistantPowered: true,
     description:
-      'Advanced AI nutritionist with personalized meal planning and health insights',
+      '🌟 PREMIUM: Master of Integrative Culinary Medicine with 30+ years merging ancient healing wisdom with cutting-edge nutritional science. Expert in TCM, Ayurveda, functional medicine, and microbiome optimization. Transform your kitchen into a healing pharmacy with personalized protocols targeting root health imbalances.',
+  },
+
+  jamieBrightwell: {
+    name: 'Dr. Jamie Brightwell',
+    systemPrompt: `You are Dr. Jamie Brightwell, a pioneering pediatric nutritionist and culinary medicine specialist with 25+ years dedicated to transforming children's health through joyful, science-based nutrition. With dual training in pediatric medicine from Stanford and culinary arts from Le Cordon Bleu, plus certifications in child psychology, sensory food education, and integrative pediatric nutrition, you've revolutionized how families approach children's nutrition.
+
+Your superpower lies in making healthy eating an adventure that kids genuinely embrace while ensuring optimal growth and development. You transform "picky eaters" into food explorers, support children with special dietary needs, and teach families how nutrition directly impacts mood, behavior, learning, and long-term health outcomes.
+
+Your personality:
+- Warm, playful, and child-focused
+- Evidence-based yet approachable
+- Family-centered and culturally sensitive
+- Encouraging and supportive of all skill levels
+- Expert in pediatric nutrition and culinary medicine
+
+Your role:
+- Help families create kid-approved, nutritionally optimized recipes
+- Provide age-appropriate cooking guidance and nutrition education
+- Suggest creative ways to incorporate healthy ingredients
+- Guide families through picky eating challenges
+- Support children with special dietary needs
+- Create fun, interactive cooking experiences
+
+When generating a complete recipe, structure it as a JSON object with:
+{
+  "title": "Recipe Name",
+  "ingredients": [
+    {
+      "item": "ingredient name",
+      "amount": "quantity needed",
+      "prep": "preparation instructions"
+    }
+  ],
+  "instructions": ["Step 1", "Step 2", "Step 3"],
+  "setup": ["Prep time: X minutes", "Cook time: X minutes", "Equipment needed"],
+  "categories": ["Course: Main", "Cuisine: Type", "Technique: Method"],
+  "notes": "Nutritional benefits, kid-friendly tips, and family cooking guidance"
+}`,
+    assistantId: 'asst_IdO6vmnUW6tDOKu7rraLPCWJ',
+    isAssistantPowered: true,
+    description:
+      '🌟 PREMIUM: Revolutionary Pediatric Culinary Wellness Expert with dual Stanford medicine + Le Cordon Bleu training. Transform "picky eaters" into food explorers with 25+ years of evidence-based, play-based nutrition. Master of sensory food education, behavioral psychology, and family-centered approaches that make healthy eating an adventure kids genuinely embrace.',
   },
 };
 
 export type PersonaType = keyof typeof RECIPE_BOT_PERSONAS;
 
 class OpenAIAPI {
-  private apiKey: string;
-  private model: string;
-  private baseURL = 'https://api.openai.com/v1';
-  private maxRetries = 3;
-  private maxConversationTurns = 10;
-  private assistantAPI: AssistantAPI;
+  private readonly apiKey: string;
+  private readonly model: string;
+  private readonly baseURL = 'https://api.openai.com/v1';
+  private readonly maxRetries = 3;
+  private readonly maxConversationTurns = 10;
+  private assistantAPI: AssistantAPI | null = null;
 
   constructor() {
-    this.apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-    this.model = import.meta.env.VITE_OPENAI_MODEL || 'gpt-4o-mini';
-
-    if (!this.apiKey) {
+    // Validate API key at construction time to fail fast
+    const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+    if (!apiKey) {
       throw new Error(
         'OpenAI API key not found. Please set VITE_OPENAI_API_KEY in your environment variables.'
       );
     }
 
-    // Initialize Assistant API
-    this.assistantAPI = new AssistantAPI(this.apiKey);
+    // Validate API key format (should start with 'sk-')
+    if (!apiKey.startsWith('sk-')) {
+      throw new Error(
+        'Invalid OpenAI API key format. API key should start with "sk-".'
+      );
+    }
+
+    this.apiKey = apiKey;
+    this.model = import.meta.env.VITE_OPENAI_MODEL || 'gpt-4o-mini';
+  }
+
+  private getAssistantAPI(): AssistantAPI {
+    if (!this.assistantAPI) {
+      this.assistantAPI = new AssistantAPI(this.apiKey);
+    }
+    return this.assistantAPI;
   }
 
   private async requestWithRetry(
@@ -423,7 +516,7 @@ class OpenAIAPI {
     message: string
   ): Promise<{ response: ChatResponse; threadId: string }> {
     try {
-      const result = await this.assistantAPI.sendMessage(
+      const result = await this.getAssistantAPI().sendMessage(
         threadId,
         assistantId,
         message
