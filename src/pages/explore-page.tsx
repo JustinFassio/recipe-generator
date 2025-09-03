@@ -73,7 +73,8 @@ export default function ExplorePage() {
     // Instead, save them to user's collection first
     toast({
       title: 'Info',
-      description: 'Public recipes must be saved to your collection before editing',
+      description:
+        'Public recipes must be saved to your collection before editing',
     });
     handleSaveRecipe(recipe.id);
   };

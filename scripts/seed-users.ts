@@ -27,7 +27,6 @@ const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
 
 // Constants
 const DEFAULT_MOOD = 'Mood: Simple';
-const MAX_MOODS_PER_RECIPE = 2;
 
 type SeedUser = {
   email: string;
@@ -284,8 +283,6 @@ async function seedRecipes() {
         'Collection: Vegetarian',
         'Collection: Fresh & Light',
         'Technique: No-Cook',
-        'Occasion: Summer',
-        'Dietary: Plant-Based',
       ],
     },
     {
@@ -311,9 +308,6 @@ async function seedRecipes() {
         'Occasion: Weeknight',
         'Collection: Vegetarian',
         'Collection: Quick & Easy',
-        'Technique: Sauté',
-        'Dietary: Plant-Based',
-        'Time: Under 30 Minutes',
       ],
     },
     {
@@ -340,9 +334,6 @@ async function seedRecipes() {
         'Technique: Sauté',
         'Collection: Vegetarian',
         'Collection: Healthy',
-        'Occasion: Weeknight',
-        'Dietary: Plant-Based',
-        'Time: Under 30 Minutes',
       ],
     },
 
@@ -370,8 +361,6 @@ async function seedRecipes() {
         'Collection: Classic',
         'Technique: No-Cook',
         'Occasion: Any',
-        'Dietary: Gluten-Free',
-        'Time: Under 15 Minutes',
       ],
     },
     {
@@ -398,8 +387,6 @@ async function seedRecipes() {
         'Collection: Lean Protein',
         'Occasion: Meal Prep',
         'Occasion: Weeknight',
-        'Dietary: Low-Carb',
-        'Time: Under 30 Minutes',
       ],
     },
     {
@@ -425,9 +412,6 @@ async function seedRecipes() {
         'Technique: Smoke',
         'Technique: Low & Slow',
         'Occasion: Weekend',
-        'Occasion: Special Occasion',
-        'Collection: Meat Lover',
-        'Time: Over 2 Hours',
       ],
     },
 
@@ -456,9 +440,6 @@ async function seedRecipes() {
         'Occasion: Weeknight',
         'Collection: One-Pot',
         'Collection: Quick & Easy',
-        'Technique: Simmer',
-        'Dietary: Vegetarian',
-        'Time: Under 30 Minutes',
       ],
     },
     {
@@ -486,10 +467,6 @@ async function seedRecipes() {
         'Technique: Simmer',
         'Technique: Paella',
         'Occasion: Weekend',
-        'Occasion: Special Occasion',
-        'Collection: Seafood',
-        'Collection: Rice Dishes',
-        'Time: 1-2 Hours',
       ],
     },
     {
@@ -516,10 +493,6 @@ async function seedRecipes() {
         'Cuisine: Asian',
         'Technique: Simmer',
         'Collection: Spicy',
-        'Collection: One-Pot',
-        'Occasion: Weeknight',
-        'Dietary: Gluten-Free',
-        'Time: 30-60 Minutes',
       ],
     },
     {
@@ -546,8 +519,6 @@ async function seedRecipes() {
         'Technique: Simmer',
         'Collection: Side Dishes',
         'Occasion: Any',
-        'Dietary: Vegetarian',
-        'Time: 30-60 Minutes',
       ],
     },
 
@@ -576,9 +547,6 @@ async function seedRecipes() {
         'Collection: Homemade',
         'Technique: Bake',
         'Technique: Yeast',
-        'Occasion: Any',
-        'Dietary: Gluten-Free',
-        'Time: 2-3 Hours',
       ],
     },
     {
@@ -604,9 +572,6 @@ async function seedRecipes() {
         'Technique: Bake',
         'Technique: Pastry',
         'Collection: Sweet Treats',
-        'Occasion: Special Occasion',
-        'Dietary: Vegetarian',
-        'Time: 1-2 Hours',
       ],
     },
     {
@@ -634,10 +599,6 @@ async function seedRecipes() {
         'Cuisine: Greek',
         'Collection: Gluten-Free',
         'Collection: Fresh & Light',
-        'Technique: No-Cook',
-        'Occasion: Summer',
-        'Dietary: Gluten-Free',
-        'Time: Under 15 Minutes',
       ],
     },
 
@@ -666,10 +627,6 @@ async function seedRecipes() {
         'Collection: High-Protein',
         'Collection: Dairy-Free',
         'Collection: Healthy',
-        'Technique: No-Cook',
-        'Occasion: Morning',
-        'Dietary: Dairy-Free',
-        'Time: Under 10 Minutes',
       ],
     },
     {
@@ -696,9 +653,6 @@ async function seedRecipes() {
         'Technique: No-Cook',
         'Collection: Seafood',
         'Collection: Homemade',
-        'Occasion: Special Occasion',
-        'Dietary: Gluten-Free',
-        'Time: 30-60 Minutes',
       ],
     },
     {
@@ -726,10 +680,6 @@ async function seedRecipes() {
         'Collection: Healthy',
         'Technique: Air Fryer',
         'Technique: Quick Cook',
-        'Occasion: Weeknight',
-        'Occasion: Meal Prep',
-        'Dietary: Low-Carb',
-        'Time: Under 20 Minutes',
       ],
     },
     {
@@ -755,11 +705,6 @@ async function seedRecipes() {
         'Collection: Dairy-Free',
         'Collection: Healthy',
         'Collection: Post-Workout',
-        'Technique: Blend',
-        'Occasion: Morning',
-        'Occasion: Post-Workout',
-        'Dietary: Dairy-Free',
-        'Time: Under 10 Minutes',
       ],
     },
 
@@ -789,11 +734,6 @@ async function seedRecipes() {
         'Cuisine: Latin American',
         'Collection: Spicy',
         'Collection: Street Food',
-        'Technique: Sauté',
-        'Occasion: Weeknight',
-        'Occasion: Party',
-        'Dietary: Gluten-Free',
-        'Time: Under 30 Minutes',
       ],
     },
     {
@@ -821,11 +761,6 @@ async function seedRecipes() {
         'Collection: BBQ',
         'Collection: Meat Lover',
         'Technique: Grill',
-        'Technique: Marinate',
-        'Occasion: Weekend',
-        'Occasion: Special Occasion',
-        'Dietary: Gluten-Free',
-        'Time: 1-2 Hours',
       ],
     },
     {
@@ -853,12 +788,6 @@ async function seedRecipes() {
         'Cuisine: Asian',
         'Collection: Spicy',
         'Collection: One-Pot',
-        'Technique: Simmer',
-        'Technique: Spice Blend',
-        'Occasion: Weeknight',
-        'Occasion: Special Occasion',
-        'Dietary: Gluten-Free',
-        'Time: 1-2 Hours',
       ],
     },
 
@@ -889,9 +818,6 @@ async function seedRecipes() {
         'Collection: Healthy',
         'Collection: Vegetarian',
         'Technique: No-Cook',
-        'Occasion: Lunch',
-        'Dietary: High-Protein',
-        'Time: 30-60 Minutes',
       ],
     },
     {
@@ -920,9 +846,6 @@ async function seedRecipes() {
         'Collection: Healthy',
         'Collection: Vegetarian',
         'Technique: Roast',
-        'Occasion: Dinner',
-        'Dietary: Plant-Based',
-        'Time: 45-60 Minutes',
       ],
     },
     {
@@ -951,9 +874,6 @@ async function seedRecipes() {
         'Collection: Comfort Food',
         'Collection: Vegetarian',
         'Technique: Stir',
-        'Occasion: Date Night',
-        'Dietary: Vegetarian',
-        'Time: 45-60 Minutes',
       ],
     },
     {
@@ -982,9 +902,6 @@ async function seedRecipes() {
         'Collection: Healthy',
         'Collection: Vegetarian',
         'Technique: Simmer',
-        'Occasion: Weeknight',
-        'Dietary: High-Protein',
-        'Time: 45-60 Minutes',
       ],
     },
     {
@@ -1012,8 +929,6 @@ async function seedRecipes() {
         'Collection: Vegetarian',
         'Technique: No-Cook',
         'Occasion: Special Occasion',
-        'Dietary: Plant-Based',
-        'Time: Under 30 Minutes',
       ],
     },
     {
@@ -1042,9 +957,6 @@ async function seedRecipes() {
         'Collection: Low-Carb',
         'Collection: Vegetarian',
         'Technique: No-Cook',
-        'Occasion: Summer',
-        'Dietary: Low-Carb',
-        'Time: Under 20 Minutes',
       ],
     },
 
@@ -1075,10 +987,6 @@ async function seedRecipes() {
         'Collection: Meat Lover',
         'Collection: BBQ',
         'Technique: Smoke',
-        'Technique: Low & Slow',
-        'Occasion: Special Occasion',
-        'Occasion: Weekend',
-        'Time: Over 12 Hours',
       ],
     },
     {
@@ -1107,9 +1015,6 @@ async function seedRecipes() {
         'Collection: Lean Protein',
         'Technique: Grill',
         'Occasion: Weeknight',
-        'Occasion: Date Night',
-        'Dietary: Low-Carb',
-        'Time: Under 30 Minutes',
       ],
     },
     {
@@ -1138,10 +1043,6 @@ async function seedRecipes() {
         'Collection: BBQ',
         'Collection: Meat Lover',
         'Technique: Grill',
-        'Occasion: Weekend',
-        'Occasion: Party',
-        'Dietary: Low-Carb',
-        'Time: 1-2 Hours',
       ],
     },
     {
@@ -1170,9 +1071,6 @@ async function seedRecipes() {
         'Collection: Vegetarian',
         'Technique: Grill',
         'Occasion: Weekend',
-        'Occasion: Party',
-        'Dietary: Plant-Based',
-        'Time: Under 30 Minutes',
       ],
     },
     {
@@ -1201,10 +1099,6 @@ async function seedRecipes() {
         'Collection: BBQ',
         'Collection: Meat Lover',
         'Technique: Slow Cooker',
-        'Technique: Low & Slow',
-        'Occasion: Weekend',
-        'Occasion: Party',
-        'Time: Over 8 Hours',
       ],
     },
     {
@@ -1233,10 +1127,6 @@ async function seedRecipes() {
         'Collection: BBQ',
         'Collection: Summer',
         'Technique: Grill',
-        'Occasion: Weekend',
-        'Occasion: Summer',
-        'Dietary: Vegetarian',
-        'Time: Under 20 Minutes',
       ],
     },
 
@@ -1267,11 +1157,6 @@ async function seedRecipes() {
         'Cuisine: Asian',
         'Collection: Noodle Dishes',
         'Collection: Comfort Food',
-        'Technique: Simmer',
-        'Occasion: Weeknight',
-        'Occasion: Cold Weather',
-        'Dietary: Gluten-Free',
-        'Time: 1-2 Hours',
       ],
     },
     {
@@ -1300,11 +1185,6 @@ async function seedRecipes() {
         'Cuisine: Mediterranean',
         'Collection: Traditional',
         'Collection: Vegetarian',
-        'Technique: Fry',
-        'Occasion: Brunch',
-        'Occasion: Weeknight',
-        'Dietary: Vegetarian',
-        'Time: 45-60 Minutes',
       ],
     },
     {
@@ -1333,11 +1213,6 @@ async function seedRecipes() {
         'Cuisine: Asian',
         'Collection: Spicy',
         'Collection: One-Pot',
-        'Technique: Simmer',
-        'Occasion: Weeknight',
-        'Occasion: Special Occasion',
-        'Dietary: Gluten-Free',
-        'Time: 30-60 Minutes',
       ],
     },
     {
@@ -1366,11 +1241,6 @@ async function seedRecipes() {
         'Cuisine: African',
         'Collection: Exotic',
         'Collection: Meat Lover',
-        'Technique: Simmer',
-        'Occasion: Special Occasion',
-        'Occasion: Weekend',
-        'Dietary: Gluten-Free',
-        'Time: 2-3 Hours',
       ],
     },
     {
@@ -1399,11 +1269,6 @@ async function seedRecipes() {
         'Cuisine: Mediterranean',
         'Collection: Traditional',
         'Collection: Meat Lover',
-        'Technique: Bake',
-        'Occasion: Special Occasion',
-        'Occasion: Weekend',
-        'Dietary: Gluten-Free',
-        'Time: 1-2 Hours',
       ],
     },
     {
@@ -1432,11 +1297,6 @@ async function seedRecipes() {
         'Cuisine: Asian',
         'Collection: Noodle Dishes',
         'Collection: Comfort Food',
-        'Technique: Simmer',
-        'Occasion: Weeknight',
-        'Occasion: Cold Weather',
-        'Dietary: Gluten-Free',
-        'Time: 1-2 Hours',
       ],
     },
 
@@ -1467,11 +1327,6 @@ async function seedRecipes() {
         'Cuisine: European',
         'Collection: Sweet Treats',
         'Collection: Homemade',
-        'Technique: Bake',
-        'Technique: Laminated Dough',
-        'Occasion: Special Occasion',
-        'Occasion: Morning',
-        'Time: 3-4 Hours',
       ],
     },
     {
@@ -1500,11 +1355,6 @@ async function seedRecipes() {
         'Cuisine: European',
         'Collection: Sweet Treats',
         'Collection: Classic',
-        'Technique: No-Cook',
-        'Occasion: Special Occasion',
-        'Occasion: Date Night',
-        'Dietary: Vegetarian',
-        'Time: 30-60 Minutes',
       ],
     },
     {
@@ -1532,9 +1382,6 @@ async function seedRecipes() {
         'Collection: Artisan',
         'Technique: Bake',
         'Technique: Sourdough',
-        'Occasion: Any',
-        'Dietary: Vegetarian',
-        'Time: 24-48 Hours',
       ],
     },
     {
@@ -1563,11 +1410,6 @@ async function seedRecipes() {
         'Cuisine: European',
         'Collection: Sweet Treats',
         'Collection: Classic',
-        'Technique: Bake',
-        'Technique: Pastry',
-        'Occasion: Special Occasion',
-        'Occasion: Afternoon Tea',
-        'Time: 2-3 Hours',
       ],
     },
     {
@@ -1596,11 +1438,6 @@ async function seedRecipes() {
         'Cuisine: European',
         'Collection: Sweet Treats',
         'Collection: Traditional',
-        'Technique: No-Cook',
-        'Occasion: Special Occasion',
-        'Occasion: Party',
-        'Dietary: Vegetarian',
-        'Time: Under 30 Minutes',
       ],
     },
     {
@@ -1628,11 +1465,6 @@ async function seedRecipes() {
         'Cuisine: European',
         'Collection: Sweet Treats',
         'Collection: Classic',
-        'Technique: Bake',
-        'Technique: Laminated Dough',
-        'Occasion: Morning',
-        'Occasion: Special Occasion',
-        'Time: 1-2 Hours',
       ],
     },
 
@@ -1663,10 +1495,6 @@ async function seedRecipes() {
         'Collection: Superfood',
         'Collection: Dairy-Free',
         'Technique: No-Cook',
-        'Occasion: Morning',
-        'Occasion: Summer',
-        'Dietary: Dairy-Free',
-        'Time: Under 15 Minutes',
       ],
     },
     {
@@ -1695,10 +1523,6 @@ async function seedRecipes() {
         'Collection: Vegetarian',
         'Collection: High-Protein',
         'Technique: Bake',
-        'Occasion: Weeknight',
-        'Occasion: Meal Prep',
-        'Dietary: High-Protein',
-        'Time: 45-60 Minutes',
       ],
     },
     {
@@ -1727,10 +1551,6 @@ async function seedRecipes() {
         'Collection: Dairy-Free',
         'Collection: High-Protein',
         'Technique: No-Cook',
-        'Occasion: Morning',
-        'Occasion: Meal Prep',
-        'Dietary: Dairy-Free',
-        'Time: Overnight',
       ],
     },
     {
@@ -1759,10 +1579,6 @@ async function seedRecipes() {
         'Collection: Healthy',
         'Collection: High-Protein',
         'Technique: Sauté',
-        'Occasion: Weeknight',
-        'Occasion: Meal Prep',
-        'Dietary: Low-Carb',
-        'Time: Under 30 Minutes',
       ],
     },
     {
@@ -1791,10 +1607,6 @@ async function seedRecipes() {
         'Collection: Dairy-Free',
         'Collection: High-Protein',
         'Technique: No-Cook',
-        'Occasion: Any',
-        'Occasion: Post-Workout',
-        'Dietary: Dairy-Free',
-        'Time: Under 30 Minutes',
       ],
     },
     {
@@ -1823,10 +1635,6 @@ async function seedRecipes() {
         'Collection: Homemade',
         'Collection: Vegetarian',
         'Technique: Bake',
-        'Occasion: Morning',
-        'Occasion: Meal Prep',
-        'Dietary: Vegetarian',
-        'Time: 30-45 Minutes',
       ],
     },
 
@@ -1857,11 +1665,6 @@ async function seedRecipes() {
         'Collection: Spicy',
         'Collection: BBQ',
         'Collection: Meat Lover',
-        'Technique: Grill',
-        'Technique: Marinate',
-        'Occasion: Weekend',
-        'Occasion: Party',
-        'Time: 1-2 Hours',
       ],
     },
     {
@@ -1890,12 +1693,6 @@ async function seedRecipes() {
         'Cuisine: African',
         'Collection: Spicy',
         'Collection: Exotic',
-        'Collection: Meat Lover',
-        'Technique: Simmer',
-        'Occasion: Special Occasion',
-        'Occasion: Weekend',
-        'Dietary: Gluten-Free',
-        'Time: 1-2 Hours',
       ],
     },
     {
@@ -1924,12 +1721,6 @@ async function seedRecipes() {
         'Cuisine: Asian',
         'Collection: Spicy',
         'Collection: Seafood',
-        'Collection: Hot & Sour',
-        'Technique: Simmer',
-        'Occasion: Weeknight',
-        'Occasion: Cold Weather',
-        'Dietary: Gluten-Free',
-        'Time: 30-60 Minutes',
       ],
     },
     {
@@ -1958,12 +1749,6 @@ async function seedRecipes() {
         'Collection: High-Protein',
         'Cuisine: Indian',
         'Cuisine: Asian',
-        'Technique: Grill',
-        'Technique: Marinate',
-        'Occasion: Weeknight',
-        'Occasion: Special Occasion',
-        'Dietary: High-Protein',
-        'Time: 1-2 Hours',
       ],
     },
     {
@@ -1992,12 +1777,6 @@ async function seedRecipes() {
         'Cuisine: Asian',
         'Collection: Spicy',
         'Collection: Comfort Food',
-        'Collection: Quick & Easy',
-        'Technique: Fry',
-        'Occasion: Weeknight',
-        'Occasion: Late Night',
-        'Dietary: Vegetarian',
-        'Time: Under 20 Minutes',
       ],
     },
     {
@@ -2026,12 +1805,6 @@ async function seedRecipes() {
         'Cuisine: Asian',
         'Collection: Street Food',
         'Collection: Meat Lover',
-        'Collection: Quick & Easy',
-        'Technique: No-Cook',
-        'Occasion: Lunch',
-        'Occasion: Weekday',
-        'Dietary: Gluten-Free',
-        'Time: Under 15 Minutes',
       ],
     },
   ];
@@ -2156,8 +1929,10 @@ async function seedRecipes() {
       if (moodGuesses.length === 0) moodGuesses.push(DEFAULT_MOOD);
 
       // Limit to max MAX_MOODS_PER_RECIPE moods and ensure no duplicates
+      // Also ensure total categories never exceed 6 to respect database constraint
+      const maxMoodsToAdd = Math.max(0, 6 - existing.length);
       moodAugmented = Array.from(
-        new Set([...existing, ...moodGuesses.slice(0, MAX_MOODS_PER_RECIPE)])
+        new Set([...existing, ...moodGuesses.slice(0, maxMoodsToAdd)])
       );
     }
 

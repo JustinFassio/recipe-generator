@@ -60,11 +60,13 @@ export function RecipeCard({
       const isTouchDevice =
         'ontouchstart' in window || navigator.maxTouchPoints > 0;
       const isMobileScreen = window.innerWidth < 768;
-      const isMobileUserAgent = /iPhone|iPad|iPod|Android|Mobile|Tablet/i.test(navigator.userAgent);
-      
+      const isMobileUserAgent = /iPhone|iPad|iPod|Android|Mobile|Tablet/i.test(
+        navigator.userAgent
+      );
+
       // More robust mobile detection - use user agent as primary indicator
       const mobile = isMobileUserAgent || (isTouchDevice && isMobileScreen);
-      
+
       // Debug logging for production troubleshooting
       console.log('🔍 Device Detection:', {
         isTouchDevice,
@@ -74,9 +76,9 @@ export function RecipeCard({
         maxTouchPoints: navigator.maxTouchPoints,
         hasOntouchstart: 'ontouchstart' in window,
         finalMobile: mobile,
-        userAgent: navigator.userAgent
+        userAgent: navigator.userAgent,
       });
-      
+
       setIsMobile(mobile);
     };
 
