@@ -227,32 +227,36 @@ When generating a complete recipe, structure it as a JSON object with:
 export type PersonaType = keyof typeof RECIPE_BOT_PERSONAS;
 
 class OpenAIAPI {
-  private apiKey: string | null = null;
-  private model: string;
-  private baseURL = 'https://api.openai.com/v1';
-  private maxRetries = 3;
-  private maxConversationTurns = 10;
+  private readonly apiKey: string;
+  private readonly model: string;
+  private readonly baseURL = 'https://api.openai.com/v1';
+  private readonly maxRetries = 3;
+  private readonly maxConversationTurns = 10;
   private assistantAPI: AssistantAPI | null = null;
 
   constructor() {
-    this.model = import.meta.env.VITE_OPENAI_MODEL || 'gpt-4o-mini';
-  }
-
-  private getApiKey(): string {
-    if (!this.apiKey) {
-      this.apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-      if (!this.apiKey) {
-        throw new Error(
-          'OpenAI API key not found. Please set VITE_OPENAI_API_KEY in your environment variables.'
-        );
-      }
+    // Validate API key at construction time to fail fast
+    const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+    if (!apiKey) {
+      throw new Error(
+        'OpenAI API key not found. Please set VITE_OPENAI_API_KEY in your environment variables.'
+      );
     }
-    return this.apiKey;
+
+    // Validate API key format (should start with 'sk-')
+    if (!apiKey.startsWith('sk-')) {
+      throw new Error(
+        'Invalid OpenAI API key format. API key should start with "sk-".'
+      );
+    }
+
+    this.apiKey = apiKey;
+    this.model = import.meta.env.VITE_OPENAI_MODEL || 'gpt-4o-mini';
   }
 
   private getAssistantAPI(): AssistantAPI {
     if (!this.assistantAPI) {
-      this.assistantAPI = new AssistantAPI(this.getApiKey());
+      this.assistantAPI = new AssistantAPI(this.apiKey);
     }
     return this.assistantAPI;
   }
@@ -329,7 +333,7 @@ class OpenAIAPI {
         {
           method: 'POST',
           headers: {
-            Authorization: `Bearer ${this.getApiKey()}`,
+            Authorization: `Bearer ${this.apiKey}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
@@ -433,7 +437,7 @@ class OpenAIAPI {
         {
           method: 'POST',
           headers: {
-            Authorization: `Bearer ${this.getApiKey()}`,
+            Authorization: `Bearer ${this.apiKey}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
