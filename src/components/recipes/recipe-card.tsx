@@ -103,6 +103,60 @@ export function RecipeCard({
     return () => window.removeEventListener('resize', detectDevice);
   }, []);
 
+  // Force touch events to be preserved in production build
+  // This prevents tree-shaking from removing touch event handling
+  useEffect(() => {
+    // Create actual touch event listeners to force preservation
+    const touchStartHandler = (e: TouchEvent) => {
+      console.log('Touch start detected:', e.type);
+    };
+
+    const touchMoveHandler = (e: TouchEvent) => {
+      console.log('Touch move detected:', e.type);
+    };
+
+    const touchEndHandler = (e: TouchEvent) => {
+      console.log('Touch end detected:', e.type);
+    };
+
+    // Add listeners to document to force touch event preservation
+    document.addEventListener('touchstart', touchStartHandler, {
+      passive: true,
+    });
+    document.addEventListener('touchmove', touchMoveHandler, { passive: true });
+    document.addEventListener('touchend', touchEndHandler, { passive: true });
+
+    // Force TouchEvent type to be considered "used"
+    const touchEventType = TouchEvent;
+    console.log('TouchEvent type preserved:', touchEventType.name);
+
+    // Create a global touch event handler that cannot be tree-shaken
+    if (typeof window !== 'undefined') {
+      (
+        window as Window & { __TOUCH_EVENT_HANDLER__?: unknown }
+      ).__TOUCH_EVENT_HANDLER__ = {
+        touchStart: touchStartHandler,
+        touchMove: touchMoveHandler,
+        touchEnd: touchEndHandler,
+        touchEventType: touchEventType,
+        hasTouchSupport: 'ontouchstart' in window,
+        maxTouchPoints: navigator.maxTouchPoints,
+      };
+    }
+
+    return () => {
+      document.removeEventListener('touchstart', touchStartHandler);
+      document.removeEventListener('touchmove', touchMoveHandler);
+      document.removeEventListener('touchend', touchEndHandler);
+
+      // Clean up global handler
+      if (typeof window !== 'undefined') {
+        delete (window as Window & { __TOUCH_EVENT_HANDLER__?: unknown })
+          .__TOUCH_EVENT_HANDLER__;
+      }
+    };
+  }, []);
+
   // Touch event handlers for mobile
   const handleTouchStart = () => {
     if (isMobile) {
