@@ -29,9 +29,13 @@ import { useAuth } from '@/contexts/AuthProvider';
 
 interface ChatInterfaceProps {
   onRecipeGenerated: (recipe: RecipeFormData) => void;
+  defaultPersona?: PersonaType;
 }
 
-export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
+export function ChatInterface({
+  onRecipeGenerated,
+  defaultPersona,
+}: ChatInterfaceProps) {
   const { user } = useAuth();
   const {
     persona,
@@ -49,7 +53,7 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
     saveCurrentRecipe,
     generateEvaluationReport,
     saveEvaluationReport,
-  } = useConversation();
+  } = useConversation(defaultPersona);
 
   const { selections, updateSelections } = useSelections();
 

@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { openaiAPI, RECIPE_BOT_PERSONAS, type PersonaType } from '@/lib/openai';
 import type { RecipeFormData } from '@/lib/schemas';
 import { toast } from '@/hooks/use-toast';
@@ -42,7 +42,9 @@ export interface ConversationActions {
   saveEvaluationReport: () => Promise<void>;
 }
 
-export function useConversation(): ConversationState & ConversationActions {
+export function useConversation(
+  defaultPersona?: PersonaType
+): ConversationState & ConversationActions {
   const { user } = useAuth();
   const [persona, setPersona] = useState<PersonaType | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -50,7 +52,8 @@ export function useConversation(): ConversationState & ConversationActions {
     null
   );
   const [isLoading, setIsLoading] = useState(false);
-  const [showPersonaSelector, setShowPersonaSelector] = useState(true);
+  const [showPersonaSelector, setShowPersonaSelector] =
+    useState(!defaultPersona);
   const [threadId, setThreadId] = useState<string | null>(null);
   const [isUsingAssistant, setIsUsingAssistant] = useState(false);
   const [showSaveRecipeButton, setShowSaveRecipeButton] = useState(false);
@@ -186,6 +189,13 @@ I'll ensure all recommendations are safe for your dietary needs and tailored to 
     },
     [user?.id]
   );
+
+  // Auto-select default persona if provided
+  useEffect(() => {
+    if (defaultPersona && !persona) {
+      selectPersona(defaultPersona);
+    }
+  }, [defaultPersona, persona, selectPersona]);
 
   const sendMessage = useCallback(
     async (

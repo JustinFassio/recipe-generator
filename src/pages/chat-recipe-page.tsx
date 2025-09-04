@@ -1,17 +1,27 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { ChatInterface } from '@/components/chat/ChatInterface';
 import { RecipeForm } from '@/components/recipes/recipe-form';
 import { Button } from '@/components/ui/button';
 import type { RecipeFormData } from '@/lib/schemas';
+import { PersonaType } from '@/lib/openai';
 
-export function ChatRecipePage() {
+interface ChatRecipePageProps {
+  defaultPersona?: PersonaType;
+}
+
+export function ChatRecipePage({ defaultPersona }: ChatRecipePageProps = {}) {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [generatedRecipe, setGeneratedRecipe] = useState<RecipeFormData | null>(
     null
   );
   const [showEditor, setShowEditor] = useState(false);
+
+  // Get persona from URL parameter or use prop
+  const personaFromUrl = searchParams.get('persona') as PersonaType | null;
+  const finalDefaultPersona = defaultPersona || personaFromUrl;
 
   const handleRecipeGenerated = (recipe: RecipeFormData) => {
     setGeneratedRecipe(recipe);
@@ -76,7 +86,10 @@ export function ChatRecipePage() {
           </div>
         ) : (
           <div className="bg-base-100 rounded-lg shadow-sm">
-            <ChatInterface onRecipeGenerated={handleRecipeGenerated} />
+            <ChatInterface
+              onRecipeGenerated={handleRecipeGenerated}
+              defaultPersona={finalDefaultPersona}
+            />
           </div>
         )}
       </div>
