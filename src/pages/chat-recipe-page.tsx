@@ -21,7 +21,7 @@ export function ChatRecipePage({ defaultPersona }: ChatRecipePageProps = {}) {
 
   // Get persona from URL parameter or use prop
   const personaFromUrl = searchParams.get('persona') as PersonaType | null;
-  const finalDefaultPersona = defaultPersona || personaFromUrl;
+  const finalDefaultPersona = defaultPersona || personaFromUrl || undefined;
 
   const handleRecipeGenerated = (recipe: RecipeFormData) => {
     setGeneratedRecipe(recipe);
