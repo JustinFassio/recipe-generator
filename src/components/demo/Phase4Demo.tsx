@@ -17,11 +17,21 @@ const Phase4Demo: React.FC = () => {
   const [userData, setUserData] = useState<UserPreferencesForAI | null>(null);
   const [demoRecipe] = useState({
     title: 'Spicy Thai Curry with Shrimp',
-    ingredients: ['shrimp', 'coconut milk', 'curry paste', 'vegetables', 'rice'],
-    instructions: 'Cook rice, sauté shrimp, add curry paste and coconut milk, simmer with vegetables',
+    ingredients: [
+      'shrimp',
+      'coconut milk',
+      'curry paste',
+      'vegetables',
+      'rice',
+    ],
+    instructions:
+      'Cook rice, sauté shrimp, add curry paste and coconut milk, simmer with vegetables',
     notes: 'Spicy dish with medium heat level. Serves 4 people.',
   });
-  const [validationResults, setValidationResults] = useState<Record<string, unknown> | null>(null);
+  const [validationResults, setValidationResults] = useState<Record<
+    string,
+    unknown
+  > | null>(null);
   const [cookingTips, setCookingTips] = useState<string[]>([]);
 
   useEffect(() => {
@@ -29,7 +39,7 @@ const Phase4Demo: React.FC = () => {
     const loadUserData = async () => {
       const data = await getUserDataForAI('demo-user');
       setUserData(data);
-      
+
       // Generate cooking tips
       const tips = generatePersonalizedCookingTips(data);
       setCookingTips(tips);
@@ -40,7 +50,7 @@ const Phase4Demo: React.FC = () => {
 
   const testSafetyCheck = () => {
     if (!userData) return;
-    
+
     const safetyResult = quickSafetyCheck(demoRecipe.ingredients, userData);
     setValidationResults({
       type: 'Safety Check',
@@ -50,7 +60,7 @@ const Phase4Demo: React.FC = () => {
 
   const testFullValidation = () => {
     if (!userData) return;
-    
+
     const validationResult = validateRecipeForUser(demoRecipe, userData);
     setValidationResults({
       type: 'Full Validation',
@@ -60,14 +70,18 @@ const Phase4Demo: React.FC = () => {
 
   const testEnhancedPrompt = () => {
     if (!userData) return;
-    
+
     const basePrompt = 'You are a helpful cooking assistant.';
     const userRequest = 'Create a healthy dinner recipe';
-    const enhancedPrompt = buildEnhancedAIPrompt(basePrompt, userRequest, userData);
-    
+    const enhancedPrompt = buildEnhancedAIPrompt(
+      basePrompt,
+      userRequest,
+      userData
+    );
+
     setValidationResults({
       type: 'Enhanced AI Prompt',
-      result: { 
+      result: {
         prompt: enhancedPrompt,
         originalLength: basePrompt.length,
         enhancedLength: enhancedPrompt.length,
@@ -76,7 +90,7 @@ const Phase4Demo: React.FC = () => {
           restrictions: userData.safety.dietary_restrictions,
           skillLevel: userData.profile.skill_level,
           timeConstraint: userData.profile.time_per_meal,
-        }
+        },
       },
     });
   };
@@ -88,7 +102,7 @@ const Phase4Demo: React.FC = () => {
   return (
     <div className="p-6 max-w-4xl mx-auto">
       <h1 className="text-3xl font-bold mb-6">Phase 4: AI Integration Demo</h1>
-      
+
       {/* User Data Display */}
       <div className="bg-base-200 p-4 rounded-lg mb-6">
         <h2 className="text-xl font-semibold mb-3">Current User Data</h2>
@@ -102,7 +116,9 @@ const Phase4Demo: React.FC = () => {
           <div>
             <h3 className="font-medium">Safety</h3>
             <p>Allergies: {userData.safety.allergies.join(', ')}</p>
-            <p>Restrictions: {userData.safety.dietary_restrictions.join(', ')}</p>
+            <p>
+              Restrictions: {userData.safety.dietary_restrictions.join(', ')}
+            </p>
           </div>
           <div>
             <h3 className="font-medium">Cooking</h3>
@@ -116,29 +132,26 @@ const Phase4Demo: React.FC = () => {
       <div className="bg-base-200 p-4 rounded-lg mb-6">
         <h2 className="text-xl font-semibold mb-3">Demo Recipe</h2>
         <h3 className="font-medium">{demoRecipe.title}</h3>
-        <p><strong>Ingredients:</strong> {demoRecipe.ingredients.join(', ')}</p>
-        <p><strong>Instructions:</strong> {demoRecipe.instructions}</p>
-        <p><strong>Notes:</strong> {demoRecipe.notes}</p>
+        <p>
+          <strong>Ingredients:</strong> {demoRecipe.ingredients.join(', ')}
+        </p>
+        <p>
+          <strong>Instructions:</strong> {demoRecipe.instructions}
+        </p>
+        <p>
+          <strong>Notes:</strong> {demoRecipe.notes}
+        </p>
       </div>
 
       {/* Test Buttons */}
       <div className="flex flex-wrap gap-2 mb-6">
-        <button
-          onClick={testSafetyCheck}
-          className="btn btn-primary"
-        >
+        <button onClick={testSafetyCheck} className="btn btn-primary">
           Test Safety Check
         </button>
-        <button
-          onClick={testFullValidation}
-          className="btn btn-secondary"
-        >
+        <button onClick={testFullValidation} className="btn btn-secondary">
           Test Full Validation
         </button>
-        <button
-          onClick={testEnhancedPrompt}
-          className="btn btn-accent"
-        >
+        <button onClick={testEnhancedPrompt} className="btn btn-accent">
           Test Enhanced AI Prompt
         </button>
       </div>
@@ -146,7 +159,9 @@ const Phase4Demo: React.FC = () => {
       {/* Results Display */}
       {validationResults && (
         <div className="bg-base-200 p-4 rounded-lg mb-6">
-          <h2 className="text-xl font-semibold mb-3">{validationResults.type}</h2>
+          <h2 className="text-xl font-semibold mb-3">
+            {String(validationResults.type)}
+          </h2>
           <pre className="bg-base-300 p-3 rounded text-sm overflow-x-auto">
             {JSON.stringify(validationResults.result, null, 2)}
           </pre>
@@ -155,10 +170,14 @@ const Phase4Demo: React.FC = () => {
 
       {/* Cooking Tips */}
       <div className="bg-base-200 p-4 rounded-lg">
-        <h2 className="text-xl font-semibold mb-3">Personalized Cooking Tips</h2>
+        <h2 className="text-xl font-semibold mb-3">
+          Personalized Cooking Tips
+        </h2>
         <ul className="list-disc list-inside space-y-2">
           {cookingTips.map((tip, index) => (
-            <li key={index} className="text-sm">{tip}</li>
+            <li key={index} className="text-sm">
+              {tip}
+            </li>
           ))}
         </ul>
       </div>

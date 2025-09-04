@@ -1,7 +1,7 @@
 /**
  * Main AI Integration Module
  * Phase 4: Integration with AI System
- * 
+ *
  * This module provides the complete integration between user account data
  * and the AI recipe generation system.
  */
@@ -38,10 +38,7 @@ export {
 } from './recipeFiltering';
 
 // Data fetching and caching
-export type {
-  CachedUserData,
-  HouseholdMember,
-} from './caching';
+export type { CachedUserData, HouseholdMember } from './caching';
 export {
   getUserDataForAI,
   getHouseholdMembersForAI,
@@ -121,12 +118,13 @@ export const buildEnhancedAIPromptWithOverrides = (
 ): string => {
   // Build base user context (safety and core preferences)
   const userContext = buildUserContextPrompt(userData);
-  
+
   // Build cultural context with LIVE SELECTION OVERRIDES
-  const effectiveCuisines = liveSelections.cuisines.length > 0 
-    ? liveSelections.cuisines 
-    : userData.cooking.preferred_cuisines;
-    
+  const effectiveCuisines =
+    liveSelections.cuisines.length > 0
+      ? liveSelections.cuisines
+      : userData.cooking.preferred_cuisines;
+
   const culturalContext = buildCulturalPrompt({
     preferred_cuisines: effectiveCuisines,
     spice_tolerance: userData.cooking.spice_tolerance,
@@ -135,9 +133,14 @@ export const buildEnhancedAIPromptWithOverrides = (
 
   // Build live selection context
   let liveSelectionContext = '';
-  if (liveSelections.categories.length > 0 || liveSelections.cuisines.length > 0 || liveSelections.moods.length > 0) {
-    liveSelectionContext = '\nLIVE MEAL PREFERENCES (Override account preferences):\n';
-    
+  if (
+    liveSelections.categories.length > 0 ||
+    liveSelections.cuisines.length > 0 ||
+    liveSelections.moods.length > 0
+  ) {
+    liveSelectionContext =
+      '\nLIVE MEAL PREFERENCES (Override account preferences):\n';
+
     if (liveSelections.categories.length > 0) {
       liveSelectionContext += `• **Categories:** ${liveSelections.categories.join(', ')}\n`;
     }
@@ -147,8 +150,9 @@ export const buildEnhancedAIPromptWithOverrides = (
     if (liveSelections.moods.length > 0) {
       liveSelectionContext += `• **Moods:** ${liveSelections.moods.join(', ')}\n`;
     }
-    
-    liveSelectionContext += '\n**Note:** These live selections override your account preferences for this specific meal.\n';
+
+    liveSelectionContext +=
+      '\n**Note:** These live selections override your account preferences for this specific meal.\n';
   }
 
   return `
@@ -193,25 +197,31 @@ export const quickSafetyCheck = (
   const blockedIngredients: string[] = [];
   const warnings: string[] = [];
 
-  ingredients.forEach(ingredient => {
+  ingredients.forEach((ingredient) => {
     // Check allergies (blocking)
-    if (userData.safety.allergies.some(allergy => 
-      ingredient.toLowerCase().includes(allergy.toLowerCase())
-    )) {
+    if (
+      userData.safety.allergies.some((allergy) =>
+        ingredient.toLowerCase().includes(allergy.toLowerCase())
+      )
+    ) {
       blockedIngredients.push(ingredient);
     }
 
     // Check dietary restrictions (warning)
-    if (userData.safety.dietary_restrictions.some(restriction => 
-      ingredient.toLowerCase().includes(restriction.toLowerCase())
-    )) {
+    if (
+      userData.safety.dietary_restrictions.some((restriction) =>
+        ingredient.toLowerCase().includes(restriction.toLowerCase())
+      )
+    ) {
       warnings.push(`${ingredient} conflicts with dietary restrictions`);
     }
 
     // Check disliked ingredients (warning)
-    if (userData.cooking.disliked_ingredients.some(disliked => 
-      ingredient.toLowerCase().includes(disliked.toLowerCase())
-    )) {
+    if (
+      userData.cooking.disliked_ingredients.some((disliked) =>
+        ingredient.toLowerCase().includes(disliked.toLowerCase())
+      )
+    ) {
       warnings.push(`${ingredient} is on your disliked list`);
     }
   });
@@ -233,11 +243,15 @@ export const generatePersonalizedCookingTips = (
 
   // Safety tips
   if (userData.safety.allergies.length > 0) {
-    tips.push(`Always check ingredient labels for: ${userData.safety.allergies.join(', ')}`);
+    tips.push(
+      `Always check ingredient labels for: ${userData.safety.allergies.join(', ')}`
+    );
   }
 
   if (userData.safety.dietary_restrictions.length > 0) {
-    tips.push(`Look for ${userData.safety.dietary_restrictions.join(', ')} alternatives`);
+    tips.push(
+      `Look for ${userData.safety.dietary_restrictions.join(', ')} alternatives`
+    );
   }
 
   // Skill level tips
@@ -257,7 +271,9 @@ export const generatePersonalizedCookingTips = (
 
   // Cuisine tips
   if (userData.cooking.preferred_cuisines.length > 0) {
-    tips.push(`Explore authentic ${userData.cooking.preferred_cuisines.join(', ')} recipes`);
+    tips.push(
+      `Explore authentic ${userData.cooking.preferred_cuisines.join(', ')} recipes`
+    );
   }
 
   // Equipment tips
@@ -293,7 +309,10 @@ export const validateRecipeForUser = (
   const safetyResult = validateRecipeSafety(recipe, userData);
   const estimatedTime = estimateRecipeTime(recipe);
   const difficulty = assessRecipeDifficulty(recipe);
-  const equipmentCheck = checkEquipmentAvailability(recipe, userData.cooking.available_equipment);
+  const equipmentCheck = checkEquipmentAvailability(
+    recipe,
+    userData.cooking.available_equipment
+  );
 
   const issues: {
     isValid: boolean;
@@ -312,26 +331,39 @@ export const validateRecipeForUser = (
   };
 
   // Time validation
-  if (userData.profile.time_per_meal && estimatedTime > userData.profile.time_per_meal) {
-    issues.timeIssues.push(`Recipe takes ${estimatedTime} minutes, but you have ${userData.profile.time_per_meal} minutes`);
+  if (
+    userData.profile.time_per_meal &&
+    estimatedTime > userData.profile.time_per_meal
+  ) {
+    issues.timeIssues.push(
+      `Recipe takes ${estimatedTime} minutes, but you have ${userData.profile.time_per_meal} minutes`
+    );
     issues.isValid = false;
   }
 
   // Skill validation
   if (userData.profile.skill_level) {
-    const skillLevels: Record<string, number> = { beginner: 1, intermediate: 2, advanced: 3 };
+    const skillLevels: Record<string, number> = {
+      beginner: 1,
+      intermediate: 2,
+      advanced: 3,
+    };
     const userSkill = skillLevels[userData.profile.skill_level] || 2;
     const recipeSkill = skillLevels[difficulty] || 2;
-    
+
     if (recipeSkill > userSkill) {
-      issues.skillIssues.push(`Recipe is ${difficulty} level, but you're ${userData.profile.skill_level}`);
+      issues.skillIssues.push(
+        `Recipe is ${difficulty} level, but you're ${userData.profile.skill_level}`
+      );
       issues.isValid = false;
     }
   }
 
   // Equipment validation
   if (!equipmentCheck.available) {
-    issues.equipmentIssues.push(`Missing equipment: ${equipmentCheck.missing.join(', ')}`);
+    issues.equipmentIssues.push(
+      `Missing equipment: ${equipmentCheck.missing.join(', ')}`
+    );
     issues.isValid = false;
   }
 
@@ -342,16 +374,24 @@ export const validateRecipeForUser = (
 
   // Generate recommendations
   if (issues.timeIssues.length > 0) {
-    issues.recommendations.push('Consider simpler preparation methods or meal prep');
+    issues.recommendations.push(
+      'Consider simpler preparation methods or meal prep'
+    );
   }
   if (issues.skillIssues.length > 0) {
-    issues.recommendations.push('Break down complex steps or practice basic techniques first');
+    issues.recommendations.push(
+      'Break down complex steps or practice basic techniques first'
+    );
   }
   if (issues.equipmentIssues.length > 0) {
-    issues.recommendations.push('Look for alternative cooking methods or consider purchasing equipment');
+    issues.recommendations.push(
+      'Look for alternative cooking methods or consider purchasing equipment'
+    );
   }
   if (issues.safetyIssues.length > 0) {
-    issues.recommendations.push('Review ingredients carefully and consider substitutions');
+    issues.recommendations.push(
+      'Review ingredients carefully and consider substitutions'
+    );
   }
 
   return issues;

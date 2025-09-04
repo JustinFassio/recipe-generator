@@ -22,16 +22,20 @@ export function CuisineCategorySelector({
   onSelectionChange,
   className = '',
 }: CuisineCategorySelectorProps) {
-  const { 
-    selections, 
-    updateSelections, 
+  const {
+    selections,
+    updateSelections,
     clearSelections,
     removeCategory,
     removeCuisine,
-    removeMood
+    removeMood,
   } = useSelections();
-  
-  const { categories: selectedCategories, cuisines: selectedCuisines, moods: selectedMoods } = selections;
+
+  const {
+    categories: selectedCategories,
+    cuisines: selectedCuisines,
+    moods: selectedMoods,
+  } = selections;
 
   const handleCategoriesChange = (categories: string[]) => {
     updateSelections({ categories });
@@ -63,7 +67,7 @@ export function CuisineCategorySelector({
   const handleRemoveCategory = (category: string) => {
     removeCategory(category);
     onSelectionChange({
-      categories: selectedCategories.filter(c => c !== category),
+      categories: selectedCategories.filter((c) => c !== category),
       cuisines: selectedCuisines,
       moods: selectedMoods,
     });
@@ -73,7 +77,7 @@ export function CuisineCategorySelector({
     removeCuisine(cuisine);
     onSelectionChange({
       categories: selectedCategories,
-      cuisines: selectedCuisines.filter(c => c !== cuisine),
+      cuisines: selectedCuisines.filter((c) => c !== cuisine),
       moods: selectedMoods,
     });
   };
@@ -83,7 +87,7 @@ export function CuisineCategorySelector({
     onSelectionChange({
       categories: selectedCategories,
       cuisines: selectedCuisines,
-      moods: selectedMoods.filter(m => m !== mood),
+      moods: selectedMoods.filter((m) => m !== mood),
     });
   };
 
@@ -138,15 +142,15 @@ export function CuisineCategorySelector({
         {/* Right side - Clear selections button */}
         <div className="flex justify-end sm:ml-auto">
           {hasSelections && (
-                          <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleClearAllSelections}
-                className="w-full sm:w-auto text-gray-500 hover:text-gray-700"
-              >
-                <X className="mr-1 h-4 w-4" />
-                Clear All
-              </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleClearAllSelections}
+              className="w-full sm:w-auto text-gray-500 hover:text-gray-700"
+            >
+              <X className="mr-1 h-4 w-4" />
+              Clear All
+            </Button>
           )}
         </div>
       </div>

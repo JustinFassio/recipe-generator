@@ -26,7 +26,9 @@ interface SelectionContextType {
   removeMood: (mood: string) => void;
 }
 
-const SelectionContext = createContext<SelectionContextType | undefined>(undefined);
+const SelectionContext = createContext<SelectionContextType | undefined>(
+  undefined
+);
 
 export const useSelections = () => {
   const context = useContext(SelectionContext);
@@ -40,7 +42,9 @@ interface SelectionProviderProps {
   children: ReactNode;
 }
 
-export const SelectionProvider: React.FC<SelectionProviderProps> = ({ children }) => {
+export const SelectionProvider: React.FC<SelectionProviderProps> = ({
+  children,
+}) => {
   const [selections, setSelections] = useState<SelectionState>({
     categories: [],
     cuisines: [],
@@ -48,7 +52,7 @@ export const SelectionProvider: React.FC<SelectionProviderProps> = ({ children }
   });
 
   const updateSelections = (newSelections: Partial<SelectionState>) => {
-    setSelections(prev => ({
+    setSelections((prev) => ({
       ...prev,
       ...newSelections,
     }));
@@ -63,71 +67,69 @@ export const SelectionProvider: React.FC<SelectionProviderProps> = ({ children }
   };
 
   const clearCategory = (category: string) => {
-    setSelections(prev => ({
+    setSelections((prev) => ({
       ...prev,
-      categories: prev.categories.filter(c => c !== category),
+      categories: prev.categories.filter((c) => c !== category),
     }));
   };
 
   const clearCuisine = (cuisine: string) => {
-    setSelections(prev => ({
+    setSelections((prev) => ({
       ...prev,
-      cuisines: prev.cuisines.filter(c => c !== cuisine),
+      cuisines: prev.cuisines.filter((c) => c !== cuisine),
     }));
   };
 
   const clearMood = (mood: string) => {
-    setSelections(prev => ({
+    setSelections((prev) => ({
       ...prev,
-      moods: prev.moods.filter(m => m !== mood),
+      moods: prev.moods.filter((m) => m !== mood),
     }));
   };
 
   const addCategory = (category: string) => {
-    setSelections(prev => ({
+    setSelections((prev) => ({
       ...prev,
-      categories: prev.categories.includes(category) 
-        ? prev.categories 
+      categories: prev.categories.includes(category)
+        ? prev.categories
         : [...prev.categories, category],
     }));
   };
 
   const addCuisine = (cuisine: string) => {
-    setSelections(prev => ({
+    setSelections((prev) => ({
       ...prev,
-      cuisines: prev.cuisines.includes(cuisine) 
-        ? prev.cuisines 
+      cuisines: prev.cuisines.includes(cuisine)
+        ? prev.cuisines
         : [...prev.cuisines, cuisine],
     }));
   };
 
   const addMood = (mood: string) => {
-    setSelections(prev => ({
+    setSelections((prev) => ({
       ...prev,
-      moods: prev.moods.includes(mood) 
-        ? prev.moods 
-        : [...prev.moods, mood],
+      moods: prev.moods.includes(mood) ? prev.moods : [...prev.moods, mood],
     }));
   };
 
   const removeCategory = (category: string) => {
-    setSelections(prev => ({
+    setSelections((prev) => ({
       ...prev,
-      categories: prev.categories.filter(c => c !== category),
+      categories: prev.categories.filter((c) => c !== category),
     }));
   };
 
   const removeCuisine = (cuisine: string) => {
-    setSelections(prev => ({
+    setSelections((prev) => ({
       ...prev,
-      cuisines: prev.cuisines.filter(c => c !== cuisine),
+      cuisines: prev.cuisines.filter((c) => c !== cuisine),
     }));
   };
 
   const removeMood = (mood: string) => {
-    setSelections(prev => ({
+    setSelections((prev) => ({
       ...prev,
-      moods: prev.moods.filter(m => m !== mood),
+      moods: prev.moods.filter((m) => m !== mood),
     }));
   };
 

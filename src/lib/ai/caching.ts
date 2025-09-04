@@ -101,7 +101,7 @@ export const getUserDataForAI = async (
 
   // Fetch fresh data (mock for now)
   console.log('Fetching fresh user data for AI');
-  const userData = await fetchUserData(userId);
+  const userData = await fetchUserData();
 
   // Cache the data
   const cacheData: CachedUserData = {
@@ -143,7 +143,7 @@ export const getHouseholdMembersForAI = async (
   }
 
   // Fetch fresh data (mock for now)
-  const household = await fetchHouseholdMembers(userId);
+  const household = await fetchHouseholdMembers();
 
   // Cache the data
   const cacheData = {
@@ -164,19 +164,19 @@ export const getHouseholdMembersForAI = async (
 /**
  * Mock API calls - replace with actual implementations
  */
-async function fetchUserData(_userId: string): Promise<UserPreferencesForAI> {
+async function fetchUserData(): Promise<UserPreferencesForAI> {
   // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 100));
-  
+  await new Promise((resolve) => setTimeout(resolve, 100));
+
   // For development, return mock data
   // In production, this would call your actual API
   return mockUserData;
 }
 
-async function fetchHouseholdMembers(_userId: string): Promise<HouseholdMember[]> {
+async function fetchHouseholdMembers(): Promise<HouseholdMember[]> {
   // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 100));
-  
+  await new Promise((resolve) => setTimeout(resolve, 100));
+
   // For development, return mock data
   // In production, this would call your actual API
   return mockHouseholdMembers;
@@ -188,10 +188,10 @@ async function fetchHouseholdMembers(_userId: string): Promise<HouseholdMember[]
 export const clearUserDataCache = (userId: string): void => {
   const cacheKey = `user-data-${userId}`;
   localStorage.removeItem(cacheKey);
-  
+
   const householdKey = `household-${userId}`;
   localStorage.removeItem(householdKey);
-  
+
   console.log('Cleared user data cache for:', userId);
 };
 
@@ -233,7 +233,10 @@ export const getComprehensiveUserContext = async (
   ]);
 
   // Combine user and household preferences for comprehensive context
-  const combinedPreferences = combineUserAndHouseholdPreferences(userData, household);
+  const combinedPreferences = combineUserAndHouseholdPreferences(
+    userData,
+    household
+  );
 
   return {
     userData,
@@ -252,7 +255,7 @@ function combineUserAndHouseholdPreferences(
   const combined = { ...userData };
 
   // Add household allergies and restrictions
-  household.forEach(member => {
+  household.forEach((member) => {
     combined.safety.allergies.push(...member.allergies);
     combined.safety.dietary_restrictions.push(...member.dietary_restrictions);
     combined.safety.medical_conditions.push(...member.medical_conditions);
@@ -260,8 +263,12 @@ function combineUserAndHouseholdPreferences(
 
   // Remove duplicates
   combined.safety.allergies = [...new Set(combined.safety.allergies)];
-  combined.safety.dietary_restrictions = [...new Set(combined.safety.dietary_restrictions)];
-  combined.safety.medical_conditions = [...new Set(combined.safety.medical_conditions)];
+  combined.safety.dietary_restrictions = [
+    ...new Set(combined.safety.dietary_restrictions),
+  ];
+  combined.safety.medical_conditions = [
+    ...new Set(combined.safety.medical_conditions),
+  ];
 
   return combined;
 }

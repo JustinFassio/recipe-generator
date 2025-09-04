@@ -59,7 +59,9 @@ export const scoreRecipeForUser = (
     const estimatedTime = estimateRecipeTime(recipe);
     if (estimatedTime > userData.profile.time_per_meal) {
       score -= 15;
-      reasons.push(`Exceeds time limit (${estimatedTime} min vs ${userData.profile.time_per_meal} min)`);
+      reasons.push(
+        `Exceeds time limit (${estimatedTime} min vs ${userData.profile.time_per_meal} min)`
+      );
       recommendations.push('Consider simpler preparation methods');
     } else if (estimatedTime <= userData.profile.time_per_meal * 0.7) {
       score += 5;
@@ -73,10 +75,12 @@ export const scoreRecipeForUser = (
     const skillLevels = { beginner: 1, intermediate: 2, advanced: 3 };
     const userSkill = skillLevels[userData.profile.skill_level];
     const recipeSkill = skillLevels[recipeDifficulty];
-    
+
     if (recipeSkill > userSkill) {
       score -= 10;
-      reasons.push(`Above skill level (${recipeDifficulty} vs ${userData.profile.skill_level})`);
+      reasons.push(
+        `Above skill level (${recipeDifficulty} vs ${userData.profile.skill_level})`
+      );
       recommendations.push('Consider breaking down into simpler steps');
     } else if (recipeSkill < userSkill) {
       score += 5;
@@ -86,7 +90,10 @@ export const scoreRecipeForUser = (
 
   // Cuisine preference
   if (userData.cooking.preferred_cuisines.length > 0) {
-    const cuisineMatch = calculateCuisineMatch(recipe, userData.cooking.preferred_cuisines);
+    const cuisineMatch = calculateCuisineMatch(
+      recipe,
+      userData.cooking.preferred_cuisines
+    );
     if (cuisineMatch < 0.5) {
       score -= 10;
       reasons.push('Not preferred cuisine');
@@ -99,10 +106,15 @@ export const scoreRecipeForUser = (
 
   // Equipment availability
   if (userData.cooking.available_equipment.length > 0) {
-    const equipmentMatch = checkEquipmentAvailability(recipe, userData.cooking.available_equipment);
+    const equipmentMatch = checkEquipmentAvailability(
+      recipe,
+      userData.cooking.available_equipment
+    );
     if (!equipmentMatch.available) {
       score -= 15;
-      reasons.push(`Requires missing equipment: ${equipmentMatch.missing.join(', ')}`);
+      reasons.push(
+        `Requires missing equipment: ${equipmentMatch.missing.join(', ')}`
+      );
       recommendations.push('Consider alternative cooking methods');
     } else {
       score += 5;
@@ -113,10 +125,10 @@ export const scoreRecipeForUser = (
   // Spice tolerance
   if (userData.cooking.spice_tolerance && recipe.notes) {
     const spiceKeywords = ['spicy', 'hot', 'chili', 'pepper', 'heat'];
-    const hasSpice = spiceKeywords.some(keyword => 
+    const hasSpice = spiceKeywords.some((keyword) =>
       recipe.notes!.toLowerCase().includes(keyword)
     );
-    
+
     if (hasSpice && userData.cooking.spice_tolerance < 3) {
       score -= 8;
       reasons.push('May be too spicy for your tolerance');
@@ -126,14 +138,15 @@ export const scoreRecipeForUser = (
 
   // Ingredient preferences
   if (userData.cooking.disliked_ingredients.length > 0) {
-    const dislikedCount = userData.cooking.disliked_ingredients.filter(disliked =>
-      recipe.ingredients.some(ingredient => 
-        ingredient.toLowerCase().includes(disliked.toLowerCase())
-      )
+    const dislikedCount = userData.cooking.disliked_ingredients.filter(
+      (disliked) =>
+        recipe.ingredients.some((ingredient) =>
+          ingredient.toLowerCase().includes(disliked.toLowerCase())
+        )
     ).length;
-    
+
     if (dislikedCount > 0) {
-      score -= (dislikedCount * 5);
+      score -= dislikedCount * 5;
       reasons.push(`Contains ${dislikedCount} disliked ingredients`);
       recommendations.push('Consider ingredient substitutions');
     }
@@ -143,12 +156,16 @@ export const scoreRecipeForUser = (
   if (userData.profile.units && recipe.notes) {
     const hasMetric = /\d+\s*(g|kg|ml|l|cm)/i.test(recipe.notes);
     const hasImperial = /\d+\s*(oz|lb|cup|tbsp|tsp|inch)/i.test(recipe.notes);
-    
+
     if (userData.profile.units === 'metric' && hasImperial && !hasMetric) {
       score -= 5;
       reasons.push('Uses imperial measurements');
       recommendations.push('Convert to metric units');
-    } else if (userData.profile.units === 'imperial' && hasMetric && !hasImperial) {
+    } else if (
+      userData.profile.units === 'imperial' &&
+      hasMetric &&
+      !hasImperial
+    ) {
       score -= 5;
       reasons.push('Uses metric measurements');
       recommendations.push('Convert to imperial units');
@@ -184,17 +201,21 @@ export const filterAndRankRecipes = (
   const { minScore = 50, maxResults = 10, includeBlocked = false } = options;
 
   // Score all recipes
-  const scoredRecipes = recipes.map(recipe => scoreRecipeForUser(recipe, userData));
+  const scoredRecipes = recipes.map((recipe) =>
+    scoreRecipeForUser(recipe, userData)
+  );
 
   // Filter based on criteria
   let filteredRecipes = scoredRecipes;
-  
+
   if (!includeBlocked) {
-    filteredRecipes = filteredRecipes.filter(recipe => recipe.score > 0);
+    filteredRecipes = filteredRecipes.filter((recipe) => recipe.score > 0);
   }
-  
+
   if (minScore > 0) {
-    filteredRecipes = filteredRecipes.filter(recipe => recipe.score >= minScore);
+    filteredRecipes = filteredRecipes.filter(
+      (recipe) => recipe.score >= minScore
+    );
   }
 
   // Sort by score (highest first)

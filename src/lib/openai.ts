@@ -233,9 +233,9 @@ IMPORTANT: After providing a complete recipe or when the user seems satisfied wi
       '🌟 PREMIUM: Revolutionary Pediatric Culinary Wellness Expert with dual Stanford medicine + Le Cordon Bleu training. Transform "picky eaters" into food explorers with 25+ years of evidence-based, play-based nutrition. Master of sensory food education, behavioral psychology, and family-centered approaches that make healthy eating an adventure kids genuinely embrace.',
   },
 
-          drLunaClearwater: {
-          name: 'Dr. Luna Clearwater',
-          systemPrompt: `You are Dr. Luna Clearwater, a revolutionary Personalized Health Assessment & Habit Formation Expert with dual Stanford Medicine + Harvard Public Health training. You specialize in comprehensive health evaluation, personalized habit recommendations, and structured progress tracking for sustainable lifestyle transformation.
+  drLunaClearwater: {
+    name: 'Dr. Luna Clearwater',
+    systemPrompt: `You are Dr. Luna Clearwater, a revolutionary Personalized Health Assessment & Habit Formation Expert with dual Stanford Medicine + Harvard Public Health training. You specialize in comprehensive health evaluation, personalized habit recommendations, and structured progress tracking for sustainable lifestyle transformation.
 
       Your mission is to guide users through a thorough health assessment process and provide them with a comprehensive, personalized report that includes:
 
@@ -268,11 +268,11 @@ IMPORTANT: After providing a complete recipe or when the user seems satisfied wi
       **Remember:** You're not just assessing health - you're empowering users to make sustainable, positive changes through personalized guidance and structured support.
 
       When generating a complete evaluation report, structure it as a JSON object with the exact format provided in the user's prompt, including all sections from user_evaluation_report through report_metadata.`,
-          assistantId: 'asst_panwYLoPVfb6BVj9fO6zm2Dp',
-          isAssistantPowered: true,
-          description:
-            '🌟 PREMIUM: Revolutionary Personalized Health Assessment & Habit Formation Expert with dual Stanford Medicine + Harvard Public Health training. Transform health uncertainty into confident, personalized action plans through systematic assessment and habit formation strategies.',
-        },
+    assistantId: 'asst_panwYLoPVfb6BVj9fO6zm2Dp',
+    isAssistantPowered: true,
+    description:
+      '🌟 PREMIUM: Revolutionary Personalized Health Assessment & Habit Formation Expert with dual Stanford Medicine + Harvard Public Health training. Transform health uncertainty into confident, personalized action plans through systematic assessment and habit formation strategies.',
+  },
 };
 
 export type PersonaType = keyof typeof RECIPE_BOT_PERSONAS;
@@ -377,18 +377,30 @@ class OpenAIAPI {
     if (userId) {
       try {
         // Dynamic import to avoid SSR issues
-        const { getUserDataForAI, buildEnhancedAIPrompt, buildEnhancedAIPromptWithOverrides } = await import('./ai');
+        const {
+          getUserDataForAI,
+          buildEnhancedAIPrompt,
+          buildEnhancedAIPromptWithOverrides,
+        } = await import('./ai');
         const userData = await getUserDataForAI(userId);
-        
+
         // Use enhanced prompt with live selection overrides if available
-        if (liveSelections && (liveSelections.categories.length > 0 || liveSelections.cuisines.length > 0 || liveSelections.moods.length > 0)) {
+        if (
+          liveSelections &&
+          (liveSelections.categories.length > 0 ||
+            liveSelections.cuisines.length > 0 ||
+            liveSelections.moods.length > 0)
+        ) {
           systemPrompt = buildEnhancedAIPromptWithOverrides(
             personaConfig.systemPrompt,
             'User is chatting with AI assistant',
             userData,
             liveSelections
           );
-          console.log('Phase 4: Enhanced prompt with live selection overrides for', persona);
+          console.log(
+            'Phase 4: Enhanced prompt with live selection overrides for',
+            persona
+          );
         } else {
           systemPrompt = buildEnhancedAIPrompt(
             personaConfig.systemPrompt,
@@ -398,7 +410,10 @@ class OpenAIAPI {
           console.log('Phase 4: Enhanced prompt with user data for', persona);
         }
       } catch (error) {
-        console.warn('Phase 4: Failed to load user data, using default prompt:', error);
+        console.warn(
+          'Phase 4: Failed to load user data, using default prompt:',
+          error
+        );
         // Continue with default prompt if user data loading fails
       }
     }
@@ -688,7 +703,12 @@ class OpenAIAPI {
     }
 
     // Fallback to Chat Completions API with Phase 4 integration
-    const chatResponse = await this.chatWithPersona(messages, persona, userId, liveSelections);
+    const chatResponse = await this.chatWithPersona(
+      messages,
+      persona,
+      userId,
+      liveSelections
+    );
     return chatResponse;
   }
 

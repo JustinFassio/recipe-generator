@@ -10,7 +10,7 @@ interface SaveRecipeButtonProps {
 export const SaveRecipeButton: React.FC<SaveRecipeButtonProps> = ({
   onSave,
   isLoading,
-  className = ''
+  className = '',
 }) => {
   return (
     <div className={`flex justify-center p-4 ${className}`}>

@@ -120,11 +120,13 @@ export const estimateRecipeTime = (recipe: {
   ingredients: string[];
 }): number => {
   // Simple estimation based on instruction complexity
-  const instructionLines = recipe.instructions.split('\n').filter(line => line.trim().length > 0);
+  const instructionLines = recipe.instructions
+    .split('\n')
+    .filter((line) => line.trim().length > 0);
   const baseTime = 15; // Base prep time
   const perInstruction = 5; // Time per instruction step
-  
-  return baseTime + (instructionLines.length * perInstruction);
+
+  return baseTime + instructionLines.length * perInstruction;
 };
 
 /**
@@ -134,9 +136,11 @@ export const assessRecipeDifficulty = (recipe: {
   instructions: string;
   ingredients: string[];
 }): 'beginner' | 'intermediate' | 'advanced' => {
-  const instructionLines = recipe.instructions.split('\n').filter(line => line.trim().length > 0);
+  const instructionLines = recipe.instructions
+    .split('\n')
+    .filter((line) => line.trim().length > 0);
   const ingredientCount = recipe.ingredients.length;
-  
+
   // Simple difficulty assessment
   if (instructionLines.length <= 3 && ingredientCount <= 5) {
     return 'beginner';
@@ -161,25 +165,36 @@ export const checkEquipmentAvailability = (
   missing: string[];
 } => {
   const commonEquipment = [
-    'oven', 'stovetop', 'microwave', 'blender', 'food processor',
-    'slow cooker', 'instant pot', 'air fryer', 'grill', 'smoker'
+    'oven',
+    'stovetop',
+    'microwave',
+    'blender',
+    'food processor',
+    'slow cooker',
+    'instant pot',
+    'air fryer',
+    'grill',
+    'smoker',
   ];
-  
+
   const requiredEquipment: string[] = [];
-  
+
   // Check instructions for equipment mentions
   const lowerInstructions = recipe.instructions.toLowerCase();
   const lowerNotes = (recipe.notes || '').toLowerCase();
   const allText = `${lowerInstructions} ${lowerNotes}`;
-  
-  commonEquipment.forEach(equipment => {
-    if (allText.includes(equipment) && !availableEquipment.some(available => 
-      available.toLowerCase().includes(equipment)
-    )) {
+
+  commonEquipment.forEach((equipment) => {
+    if (
+      allText.includes(equipment) &&
+      !availableEquipment.some((available) =>
+        available.toLowerCase().includes(equipment)
+      )
+    ) {
       requiredEquipment.push(equipment);
     }
   });
-  
+
   return {
     available: requiredEquipment.length === 0,
     missing: requiredEquipment,
@@ -197,12 +212,12 @@ export const calculateCuisineMatch = (
   preferredCuisines: string[]
 ): number => {
   if (preferredCuisines.length === 0) return 0.5; // Neutral if no preferences
-  
+
   const recipeText = `${recipe.title} ${recipe.notes || ''}`.toLowerCase();
-  
-  const matches = preferredCuisines.filter(cuisine => 
+
+  const matches = preferredCuisines.filter((cuisine) =>
     recipeText.includes(cuisine.toLowerCase())
   );
-  
+
   return matches.length / preferredCuisines.length;
 };

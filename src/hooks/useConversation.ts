@@ -51,57 +51,68 @@ export function useConversation(): ConversationState & ConversationActions {
   const [isUsingAssistant, setIsUsingAssistant] = useState(false);
   const [showSaveRecipeButton, setShowSaveRecipeButton] = useState(false);
 
-  const selectPersona = useCallback(async (selectedPersona: PersonaType) => {
-    setPersona(selectedPersona);
-    setShowPersonaSelector(false);
+  const selectPersona = useCallback(
+    async (selectedPersona: PersonaType) => {
+      setPersona(selectedPersona);
+      setShowPersonaSelector(false);
 
-    const personaConfig = RECIPE_BOT_PERSONAS[selectedPersona];
+      const personaConfig = RECIPE_BOT_PERSONAS[selectedPersona];
 
-    // Check if this persona uses Assistant API
-    const usingAssistant = !!(
-      personaConfig.assistantId && personaConfig.isAssistantPowered
-    );
-    setIsUsingAssistant(usingAssistant);
+      // Check if this persona uses Assistant API
+      const usingAssistant = !!(
+        personaConfig.assistantId && personaConfig.isAssistantPowered
+      );
+      setIsUsingAssistant(usingAssistant);
 
-    // Reset thread ID when switching personas
-    setThreadId(null);
+      // Reset thread ID when switching personas
+      setThreadId(null);
 
-    // Phase 4: Get user profile data and enhance the welcome message
-    let welcomeContent = `Hi! I'm ${personaConfig.name}, your AI Recipe Creator. I'll help you create a delicious recipe step by step. What kind of dish would you like to make today? You can tell me about a main ingredient, cuisine type, dietary preferences, or just describe what you're craving!`;
+      // Phase 4: Get user profile data and enhance the welcome message
+      let welcomeContent = `Hi! I'm ${personaConfig.name}, your AI Recipe Creator. I'll help you create a delicious recipe step by step. What kind of dish would you like to make today? You can tell me about a main ingredient, cuisine type, dietary preferences, or just describe what you're craving!`;
 
-    if (user?.id) {
-      try {
-        // Dynamic import to avoid SSR issues
-        const { getUserDataForAI, buildEnhancedAIPrompt } = await import('@/lib/ai');
-        const userData = await getUserDataForAI(user.id);
-        
-        // Create a personalized welcome message with user context
-        // Note: enhancedPrompt is used internally by buildEnhancedAIPrompt
-        buildEnhancedAIPrompt(
-          personaConfig.systemPrompt,
-          'User is starting a conversation with this AI assistant',
-          userData
-        );
-        
-        // Add user context to the welcome message
-        welcomeContent += `\n\n**Personalized for you:** I can see your preferences and will ensure all recommendations are safe and suitable for your needs.`;
-        
-        console.log('Phase 4: Enhanced persona selection with user data for', selectedPersona);
-      } catch (error) {
-        console.warn('Phase 4: Failed to load user data during persona selection:', error);
-        // Continue with default welcome message if user data loading fails
+      if (user?.id) {
+        try {
+          // Dynamic import to avoid SSR issues
+          const { getUserDataForAI, buildEnhancedAIPrompt } = await import(
+            '@/lib/ai'
+          );
+          const userData = await getUserDataForAI(user.id);
+
+          // Create a personalized welcome message with user context
+          // Note: enhancedPrompt is used internally by buildEnhancedAIPrompt
+          buildEnhancedAIPrompt(
+            personaConfig.systemPrompt,
+            'User is starting a conversation with this AI assistant',
+            userData
+          );
+
+          // Add user context to the welcome message
+          welcomeContent += `\n\n**Personalized for you:** I can see your preferences and will ensure all recommendations are safe and suitable for your needs.`;
+
+          console.log(
+            'Phase 4: Enhanced persona selection with user data for',
+            selectedPersona
+          );
+        } catch (error) {
+          console.warn(
+            'Phase 4: Failed to load user data during persona selection:',
+            error
+          );
+          // Continue with default welcome message if user data loading fails
+        }
       }
-    }
 
-    const welcomeMessage: Message = {
-      id: '1',
-      role: 'assistant',
-      content: welcomeContent,
-      timestamp: new Date(),
-    };
+      const welcomeMessage: Message = {
+        id: '1',
+        role: 'assistant',
+        content: welcomeContent,
+        timestamp: new Date(),
+      };
 
-    setMessages([welcomeMessage]);
-  }, [user?.id]);
+      setMessages([welcomeMessage]);
+    },
+    [user?.id]
+  );
 
   const sendMessage = useCallback(
     async (
@@ -170,7 +181,10 @@ export function useConversation(): ConversationState & ConversationActions {
         setMessages((prev) => [...prev, assistantMessage]);
 
         // Check if AI is asking if user is ready to save the recipe
-        const isReadyToSave = /ready.*create.*save.*recipe|ready.*save.*recipe|create.*save.*recipe|ready.*save|want.*save.*recipe|save.*this.*recipe|create.*recipe|finalize.*recipe|ready.*finalize/i.test(response.message);
+        const isReadyToSave =
+          /ready.*create.*save.*recipe|ready.*save.*recipe|create.*save.*recipe|ready.*save|want.*save.*recipe|save.*this.*recipe|create.*recipe|finalize.*recipe|ready.*finalize/i.test(
+            response.message
+          );
         setShowSaveRecipeButton(isReadyToSave);
 
         // No automatic recipe detection - recipes will be created when user clicks "Save Recipe"
@@ -423,7 +437,15 @@ export function useConversation(): ConversationState & ConversationActions {
 Format it as valid JSON that can be parsed directly.`;
 
       const response = await openaiAPI.sendMessageWithPersona(
-        [...messages, { id: Date.now().toString(), role: 'user', content: saveRequest, timestamp: new Date() }],
+        [
+          ...messages,
+          {
+            id: Date.now().toString(),
+            role: 'user',
+            content: saveRequest,
+            timestamp: new Date(),
+          },
+        ],
         persona,
         threadId,
         user?.id
@@ -452,7 +474,7 @@ Format it as valid JSON that can be parsed directly.`;
         const jsonMatch = response.message.match(/\{[\s\S]*\}/);
         if (jsonMatch) {
           const recipeData = JSON.parse(jsonMatch[0]);
-          
+
           // Convert to RecipeFormData format
           const recipe: RecipeFormData = {
             title: recipeData.title || 'Untitled Recipe',
@@ -468,9 +490,9 @@ Format it as valid JSON that can be parsed directly.`;
           console.log('Setting generated recipe:', recipe);
           setGeneratedRecipe(recipe);
           setShowSaveRecipeButton(false);
-          
+
           toast({
-            title: "Recipe Generated!",
+            title: 'Recipe Generated!',
             description: `"${recipe.title}" is ready to save. Please review and save it to your collection.`,
           });
         } else {
@@ -479,18 +501,17 @@ Format it as valid JSON that can be parsed directly.`;
       } catch (parseError) {
         console.error('Failed to parse recipe JSON:', parseError);
         toast({
-          title: "Save Failed",
-          description: "Could not parse the recipe format. Please try again.",
-          variant: "destructive",
+          title: 'Save Failed',
+          description: 'Could not parse the recipe format. Please try again.',
+          variant: 'destructive',
         });
       }
-
     } catch (error) {
       console.error('Failed to save recipe:', error);
       toast({
-        title: "Save Failed",
-        description: "Could not save the recipe. Please try again.",
-        variant: "destructive",
+        title: 'Save Failed',
+        description: 'Could not save the recipe. Please try again.',
+        variant: 'destructive',
       });
     } finally {
       setIsLoading(false);
