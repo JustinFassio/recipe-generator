@@ -12,6 +12,9 @@ import {
   calculateCuisineMatch,
 } from './safetyGuardrails';
 
+// Constants for recipe analysis
+const SPICE_KEYWORDS = ['spicy', 'hot', 'chili', 'pepper', 'heat'] as const;
+
 export interface RecipeScore {
   recipe: {
     title: string;
@@ -124,8 +127,7 @@ export const scoreRecipeForUser = (
 
   // Spice tolerance
   if (userData.cooking.spice_tolerance && recipe.notes) {
-    const spiceKeywords = ['spicy', 'hot', 'chili', 'pepper', 'heat'];
-    const hasSpice = spiceKeywords.some((keyword) =>
+    const hasSpice = SPICE_KEYWORDS.some((keyword) =>
       recipe.notes!.toLowerCase().includes(keyword)
     );
 
