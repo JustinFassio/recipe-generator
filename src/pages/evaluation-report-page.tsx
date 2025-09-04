@@ -291,13 +291,13 @@ export default function EvaluationReportPage() {
                         selectedReport.user_evaluation_report.evaluation_date
                       )}
                     </p>
-                    {isFallbackReport(selectedReport) && (
+                    {isFallbackReport(selectedReport) ? (
                       <div className="mt-2">
                         <Badge variant="secondary" className="text-xs">
                           Raw Report Format
                         </Badge>
                       </div>
-                    )}
+                    ) : null}
                   </div>
                   <div className="flex gap-2">
                     <Button
