@@ -103,6 +103,7 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
         return <Home className="h-4 w-4" />;
       case 'assistantNutritionist':
       case 'jamieBrightwell':
+      case 'drLunaClearwater':
         return <Brain className="h-4 w-4" />;
       default:
         return <Bot className="h-4 w-4" />;
@@ -119,6 +120,7 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
         return 'bg-blue-100 text-blue-600';
       case 'assistantNutritionist':
       case 'jamieBrightwell':
+      case 'drLunaClearwater':
         return 'bg-gradient-to-br from-purple-100 to-blue-100 text-purple-600';
       default:
         return 'bg-gray-100 text-gray-600';
@@ -166,6 +168,14 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
             "🌟 PREMIUM: Revolutionary Pediatric Culinary Wellness Expert with dual Stanford medicine + Le Cordon Bleu training. Transform 'picky eaters' into food explorers with 25+ years of evidence-based, play-based nutrition.",
           guidance:
             "Hi! I'm Dr. Jamie Brightwell, your Pediatric Culinary Wellness Expert! I'll help you create delicious, nutritionally-optimized meals that your children will actually want to eat. Tell me about your child's age, any picky eating challenges, dietary restrictions, or what you'd like to achieve. I can help with sensory-friendly foods, hidden nutrition techniques, and making healthy eating an adventure!",
+        };
+      case 'drLunaClearwater':
+        return {
+          title: "Welcome! I'm Dr. Luna Clearwater",
+          description:
+            '🌟 PREMIUM: Revolutionary Personalized Health Assessment & Habit Formation Expert with dual Stanford Medicine + Harvard Public Health training. Transform health uncertainty into confident, personalized action plans.',
+          guidance:
+            "Hi! I'm Dr. Luna Clearwater, your Personalized Health Assessment & Habit Formation Expert! I'll guide you through a comprehensive health evaluation to create a personalized action plan. Tell me about your health goals, current habits, dietary preferences, or any health concerns. I'll assess your needs and provide a detailed, structured report with actionable recommendations for sustainable lifestyle transformation!",
         };
       default:
         return {
