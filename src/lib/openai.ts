@@ -685,86 +685,15 @@ class OpenAIAPI {
   // Removed: convertConversationToRecipe() - now using parseRecipeFromText() instead
 
   /**
-   * Send message using Assistant API with context injection support
+   * Send message using Assistant API
    */
   async chatWithAssistant(
     threadId: string | null,
     assistantId: string,
-    message: string,
-    userId?: string
+    message: string
   ): Promise<{ response: ChatResponse; threadId: string }> {
     try {
-      // For Dr. Luna Clearwater, inject user context as a visible message
-      if (assistantId === 'asst_panwYLoPVfb6BVj9fO6zm2Dp' && userId) {
-        try {
-          // Dynamic import to avoid SSR issues
-          const { buildComprehensiveUserContext } = await import('./ai');
-          const userContext = await buildComprehensiveUserContext(userId);
-
-          // Create thread if not provided
-          const actualThreadId =
-            threadId || (await this.getAssistantAPI().createThread());
-
-          // First, add the user's message to get initial response
-          await this.getAssistantAPI().addMessageToThread(
-            actualThreadId,
-            message
-          );
-
-          // Create and start run for the user's message
-          const userRunId = await this.getAssistantAPI().createRun(
-            actualThreadId,
-            assistantId
-          );
-          await this.getAssistantAPI().pollRunCompletion(
-            actualThreadId,
-            userRunId
-          );
-
-          // Get the initial response
-          const initialResponse =
-            await this.getAssistantAPI().getLatestMessage(actualThreadId);
-
-          // Now add the user context as a follow-up message (visible to user)
-          const contextMessage = `SYSTEM: Here is the user's comprehensive profile data for your health assessment:\n\n${userContext}`;
-          await this.getAssistantAPI().addMessageToThread(
-            actualThreadId,
-            contextMessage
-          );
-
-          // Create and start run to process the context
-          const contextRunId = await this.getAssistantAPI().createRun(
-            actualThreadId,
-            assistantId
-          );
-          await this.getAssistantAPI().pollRunCompletion(
-            actualThreadId,
-            contextRunId
-          );
-
-          // Get the context-aware response
-          const contextResponse =
-            await this.getAssistantAPI().getLatestMessage(actualThreadId);
-
-          // Combine both responses
-          const combinedResponse = `${initialResponse}\n\n---\n\n${contextResponse}`;
-
-          return {
-            response: {
-              message: combinedResponse,
-            },
-            threadId: actualThreadId,
-          };
-        } catch (contextError) {
-          console.warn(
-            'Context injection failed, using standard Assistant API:',
-            contextError
-          );
-          // Fall through to standard Assistant API
-        }
-      }
-
-      // Standard Assistant API flow (for other assistants or when context injection fails)
+      // Standard Assistant API flow for all assistants
       const result = await this.getAssistantAPI().sendMessage(
         threadId,
         assistantId,
@@ -809,8 +738,7 @@ class OpenAIAPI {
         const assistantPromise = this.chatWithAssistant(
           threadId || null,
           personaConfig.assistantId,
-          userMessage.content,
-          userId
+          userMessage.content
         );
 
         const timeoutPromise = new Promise<never>((_, reject) => {
