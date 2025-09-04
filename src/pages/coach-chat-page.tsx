@@ -1,4 +1,3 @@
-import React from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { ChatInterface } from '@/components/chat/ChatInterface';
