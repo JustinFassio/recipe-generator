@@ -694,7 +694,7 @@ class OpenAIAPI {
     userId?: string
   ): Promise<{ response: ChatResponse; threadId: string }> {
     try {
-      // For Dr. Luna Clearwater, inject user context as the first message
+      // For Dr. Luna Clearwater, inject user context as a visible message
       if (assistantId === 'asst_panwYLoPVfb6BVj9fO6zm2Dp' && userId) {
         try {
           // Dynamic import to avoid SSR issues
@@ -705,23 +705,7 @@ class OpenAIAPI {
           const actualThreadId =
             threadId || (await this.getAssistantAPI().createThread());
 
-          // Add user context as the first message (silent injection)
-          await this.getAssistantAPI().addMessageToThread(
-            actualThreadId,
-            userContext
-          );
-
-          // Create and start run to process the context
-          const contextRunId = await this.getAssistantAPI().createRun(
-            actualThreadId,
-            assistantId
-          );
-          await this.getAssistantAPI().pollRunCompletion(
-            actualThreadId,
-            contextRunId
-          );
-
-          // Now add the user's actual message
+          // First, add the user's message to get initial response
           await this.getAssistantAPI().addMessageToThread(
             actualThreadId,
             message
@@ -737,13 +721,37 @@ class OpenAIAPI {
             userRunId
           );
 
-          // Get the assistant's response
-          const assistantMessage =
+          // Get the initial response
+          const initialResponse =
             await this.getAssistantAPI().getLatestMessage(actualThreadId);
+
+          // Now add the user context as a follow-up message (visible to user)
+          const contextMessage = `SYSTEM: Here is the user's comprehensive profile data for your health assessment:\n\n${userContext}`;
+          await this.getAssistantAPI().addMessageToThread(
+            actualThreadId,
+            contextMessage
+          );
+
+          // Create and start run to process the context
+          const contextRunId = await this.getAssistantAPI().createRun(
+            actualThreadId,
+            assistantId
+          );
+          await this.getAssistantAPI().pollRunCompletion(
+            actualThreadId,
+            contextRunId
+          );
+
+          // Get the context-aware response
+          const contextResponse =
+            await this.getAssistantAPI().getLatestMessage(actualThreadId);
+
+          // Combine both responses
+          const combinedResponse = `${initialResponse}\n\n---\n\n${contextResponse}`;
 
           return {
             response: {
-              message: assistantMessage,
+              message: combinedResponse,
             },
             threadId: actualThreadId,
           };
