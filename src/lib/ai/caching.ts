@@ -100,6 +100,7 @@ export const getUserDataForAI = async (
   }
 
   // Fetch fresh data (mock for now)
+  // Currently using mock data for development; replace fetchUserData() with actual API call before production
   console.log('Fetching fresh user data for AI');
   const userData = await fetchUserData();
 
@@ -143,6 +144,7 @@ export const getHouseholdMembersForAI = async (
   }
 
   // Fetch fresh data (mock for now)
+  // Currently using mock data for development; replace fetchHouseholdMembers() with actual API call before production
   const household = await fetchHouseholdMembers();
 
   // Cache the data
