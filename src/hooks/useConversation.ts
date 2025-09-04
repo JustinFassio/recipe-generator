@@ -181,10 +181,11 @@ export function useConversation(): ConversationState & ConversationActions {
         setMessages((prev) => [...prev, assistantMessage]);
 
         // Check if AI is asking if user is ready to save the recipe
-        const isReadyToSave =
-          /ready.*create.*save.*recipe|ready.*save.*recipe|create.*save.*recipe|ready.*save|want.*save.*recipe|save.*this.*recipe|create.*recipe|finalize.*recipe|ready.*finalize/i.test(
-            response.message
-          );
+        // Regex pattern to detect if the AI is prompting the user to save or finalize a recipe.
+        // Matches phrases like "ready to save recipe", "create and save recipe", "finalize recipe", etc.
+        const SAVE_INTENTION_REGEX =
+          /ready.*create.*save.*recipe|ready.*save.*recipe|create.*save.*recipe|ready.*save|want.*save.*recipe|save.*this.*recipe|create.*recipe|finalize.*recipe|ready.*finalize/i;
+        const isReadyToSave = SAVE_INTENTION_REGEX.test(response.message);
         setShowSaveRecipeButton(isReadyToSave);
 
         // No automatic recipe detection - recipes will be created when user clicks "Save Recipe"
