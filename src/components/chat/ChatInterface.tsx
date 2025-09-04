@@ -63,10 +63,6 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
   useEffect(() => {
     // Automatically call onRecipeGenerated when a recipe is successfully parsed
     if (generatedRecipe) {
-      console.log(
-        'Generated recipe detected, calling onRecipeGenerated:',
-        generatedRecipe
-      );
       onRecipeGenerated(generatedRecipe);
     }
   }, [generatedRecipe, onRecipeGenerated]);
