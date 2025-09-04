@@ -3,6 +3,7 @@ import { openaiAPI, RECIPE_BOT_PERSONAS, type PersonaType } from '@/lib/openai';
 import type { RecipeFormData } from '@/lib/schemas';
 import { toast } from '@/hooks/use-toast';
 import { parseRecipeFromText } from '@/lib/recipe-parser';
+import { useAuth } from '@/contexts/AuthProvider';
 
 export interface Message {
   id: string;
@@ -19,6 +20,7 @@ export interface ConversationState {
   showPersonaSelector: boolean;
   threadId: string | null;
   isUsingAssistant: boolean;
+  showSaveRecipeButton: boolean;
 }
 
 export interface ConversationActions {
@@ -33,9 +35,11 @@ export interface ConversationActions {
   setGeneratedRecipe: (recipe: RecipeFormData | null) => void;
   convertToRecipe: () => Promise<void>;
   requestCompleteRecipe: () => Promise<void>;
+  saveCurrentRecipe: () => Promise<void>;
 }
 
 export function useConversation(): ConversationState & ConversationActions {
+  const { user } = useAuth();
   const [persona, setPersona] = useState<PersonaType | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [generatedRecipe, setGeneratedRecipe] = useState<RecipeFormData | null>(
@@ -45,31 +49,70 @@ export function useConversation(): ConversationState & ConversationActions {
   const [showPersonaSelector, setShowPersonaSelector] = useState(true);
   const [threadId, setThreadId] = useState<string | null>(null);
   const [isUsingAssistant, setIsUsingAssistant] = useState(false);
+  const [showSaveRecipeButton, setShowSaveRecipeButton] = useState(false);
 
-  const selectPersona = useCallback((selectedPersona: PersonaType) => {
-    setPersona(selectedPersona);
-    setShowPersonaSelector(false);
+  const selectPersona = useCallback(
+    async (selectedPersona: PersonaType) => {
+      setPersona(selectedPersona);
+      setShowPersonaSelector(false);
 
-    const personaConfig = RECIPE_BOT_PERSONAS[selectedPersona];
+      const personaConfig = RECIPE_BOT_PERSONAS[selectedPersona];
 
-    // Check if this persona uses Assistant API
-    const usingAssistant = !!(
-      personaConfig.assistantId && personaConfig.isAssistantPowered
-    );
-    setIsUsingAssistant(usingAssistant);
+      // Check if this persona uses Assistant API
+      const usingAssistant = !!(
+        personaConfig.assistantId && personaConfig.isAssistantPowered
+      );
+      setIsUsingAssistant(usingAssistant);
 
-    // Reset thread ID when switching personas
-    setThreadId(null);
+      // Reset thread ID when switching personas
+      setThreadId(null);
 
-    const welcomeMessage: Message = {
-      id: '1',
-      role: 'assistant',
-      content: `Hi! I'm ${personaConfig.name}, your AI Recipe Creator. I'll help you create a delicious recipe step by step. What kind of dish would you like to make today? You can tell me about a main ingredient, cuisine type, dietary preferences, or just describe what you're craving!`,
-      timestamp: new Date(),
-    };
+      // Phase 4: Get user profile data and enhance the welcome message
+      let welcomeContent = `Hi! I'm ${personaConfig.name}, your AI Recipe Creator. I'll help you create a delicious recipe step by step. What kind of dish would you like to make today? You can tell me about a main ingredient, cuisine type, dietary preferences, or just describe what you're craving!`;
 
-    setMessages([welcomeMessage]);
-  }, []);
+      if (user?.id) {
+        try {
+          // Dynamic import to avoid SSR issues
+          const { getUserDataForAI, buildEnhancedAIPrompt } = await import(
+            '@/lib/ai'
+          );
+          const userData = await getUserDataForAI(user.id);
+
+          // Create a personalized welcome message with user context
+          // Note: enhancedPrompt is used internally by buildEnhancedAIPrompt
+          buildEnhancedAIPrompt(
+            personaConfig.systemPrompt,
+            'User is starting a conversation with this AI assistant',
+            userData
+          );
+
+          // Add user context to the welcome message
+          welcomeContent += `\n\n**Personalized for you:** I can see your preferences and will ensure all recommendations are safe and suitable for your needs.`;
+
+          console.log(
+            'Phase 4: Enhanced persona selection with user data for',
+            selectedPersona
+          );
+        } catch (error) {
+          console.warn(
+            'Phase 4: Failed to load user data during persona selection:',
+            error
+          );
+          // Continue with default welcome message if user data loading fails
+        }
+      }
+
+      const welcomeMessage: Message = {
+        id: '1',
+        role: 'assistant',
+        content: welcomeContent,
+        timestamp: new Date(),
+      };
+
+      setMessages([welcomeMessage]);
+    },
+    [user?.id]
+  );
 
   const sendMessage = useCallback(
     async (
@@ -118,7 +161,9 @@ export function useConversation(): ConversationState & ConversationActions {
         const response = await openaiAPI.sendMessageWithPersona(
           [...messages, userMessage],
           persona,
-          threadId
+          threadId,
+          user?.id,
+          preferences // Pass live selections as overrides
         );
 
         // Update thread ID if using Assistant API
@@ -134,6 +179,14 @@ export function useConversation(): ConversationState & ConversationActions {
         };
 
         setMessages((prev) => [...prev, assistantMessage]);
+
+        // Check if AI is asking if user is ready to save the recipe
+        // Regex pattern to detect if the AI is prompting the user to save or finalize a recipe.
+        // Matches phrases like "ready to save recipe", "create and save recipe", "finalize recipe", etc.
+        const SAVE_INTENTION_REGEX =
+          /ready.*create.*save.*recipe|ready.*save.*recipe|create.*save.*recipe|ready.*save|want.*save.*recipe|save.*this.*recipe|create.*recipe|finalize.*recipe|ready.*finalize/i;
+        const isReadyToSave = SAVE_INTENTION_REGEX.test(response.message);
+        setShowSaveRecipeButton(isReadyToSave);
 
         // No automatic recipe detection - recipes will be created when user clicks "Save Recipe"
       } catch (error) {
@@ -368,6 +421,104 @@ export function useConversation(): ConversationState & ConversationActions {
     await sendMessage(recipeRequest);
   }, [persona, sendMessage]);
 
+  const saveCurrentRecipe = useCallback(async () => {
+    if (!persona) return;
+
+    setIsLoading(true);
+    try {
+      // Send a message asking AI to output the current recipe in JSON format
+      const saveRequest = `Please output the current recipe we've been discussing in a structured JSON format. Include:
+- title: Recipe name
+- ingredients: Array of ingredient strings (e.g., ["2 cups flour", "1 tsp salt"])
+- instructions: Complete cooking instructions as a single string
+- notes: Any additional notes or tips
+- setup: Array of preparation steps (e.g., ["Preheat oven to 350°F", "Grease baking pan"])
+- categories: Array of relevant categories (e.g., ["Dinner", "Italian", "Quick"])
+
+Format it as valid JSON that can be parsed directly.`;
+
+      const response = await openaiAPI.sendMessageWithPersona(
+        [
+          ...messages,
+          {
+            id: Date.now().toString(),
+            role: 'user',
+            content: saveRequest,
+            timestamp: new Date(),
+          },
+        ],
+        persona,
+        threadId,
+        user?.id
+      );
+
+      // Add the save request and response to messages
+      const userMessage: Message = {
+        id: Date.now().toString(),
+        role: 'user',
+        content: saveRequest,
+        timestamp: new Date(),
+      };
+
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: response.message,
+        timestamp: new Date(),
+      };
+
+      setMessages((prev) => [...prev, userMessage, assistantMessage]);
+
+      // Try to parse the JSON response and open recipe form
+      try {
+        // Extract JSON from the response (might be wrapped in markdown or text)
+        const jsonMatch = response.message.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const recipeData = JSON.parse(jsonMatch[0]);
+
+          // Convert to RecipeFormData format
+          const recipe: RecipeFormData = {
+            title: recipeData.title || 'Untitled Recipe',
+            ingredients: recipeData.ingredients || [],
+            instructions: recipeData.instructions || '',
+            notes: recipeData.notes || '',
+            setup: recipeData.setup || [],
+            categories: recipeData.categories || [],
+            image_url: null,
+          };
+
+          // Set the generated recipe and trigger form opening
+          console.log('Setting generated recipe:', recipe);
+          setGeneratedRecipe(recipe);
+          setShowSaveRecipeButton(false);
+
+          toast({
+            title: 'Recipe Generated!',
+            description: `"${recipe.title}" is ready to save. Please review and save it to your collection.`,
+          });
+        } else {
+          throw new Error('No valid JSON found in response');
+        }
+      } catch (parseError) {
+        console.error('Failed to parse recipe JSON:', parseError);
+        toast({
+          title: 'Save Failed',
+          description: 'Could not parse the recipe format. Please try again.',
+          variant: 'destructive',
+        });
+      }
+    } catch (error) {
+      console.error('Failed to save recipe:', error);
+      toast({
+        title: 'Save Failed',
+        description: 'Could not save the recipe. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [persona, messages, threadId, user?.id, setGeneratedRecipe]);
+
   return {
     // State
     persona,
@@ -377,6 +528,7 @@ export function useConversation(): ConversationState & ConversationActions {
     showPersonaSelector,
     threadId,
     isUsingAssistant,
+    showSaveRecipeButton,
     // Actions
     selectPersona,
     sendMessage,
@@ -386,5 +538,6 @@ export function useConversation(): ConversationState & ConversationActions {
     setGeneratedRecipe,
     convertToRecipe,
     requestCompleteRecipe,
+    saveCurrentRecipe,
   };
 }

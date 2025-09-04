@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { createDaisyUIInputClasses } from '@/lib/input-migration';
 import { createDaisyUICardClasses } from '@/lib/card-migration';
 import { createDaisyUIScrollAreaClasses } from '@/lib/scroll-area-migration';
@@ -12,6 +12,7 @@ import {
   Home,
   Bot,
   Brain,
+  Save,
 } from 'lucide-react';
 import { PersonaSelector } from './PersonaSelector';
 import { ChatHeader } from './ChatHeader';
@@ -20,33 +21,37 @@ import { Button } from '@/components/ui/button';
 import { useConversation } from '@/hooks/useConversation';
 import { RECIPE_BOT_PERSONAS, type PersonaType } from '@/lib/openai';
 import type { RecipeFormData } from '@/lib/schemas';
+import { useSelections } from '@/contexts/SelectionContext';
+import { UserProfileDisplay } from './UserProfileDisplay';
+import { SaveRecipeButton } from './SaveRecipeButton';
+import { useAuth } from '@/contexts/AuthProvider';
 
 interface ChatInterfaceProps {
   onRecipeGenerated: (recipe: RecipeFormData) => void;
 }
 
 export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
+  const { user } = useAuth();
   const {
     persona,
     messages,
     generatedRecipe,
     isLoading,
     showPersonaSelector,
+    showSaveRecipeButton,
     selectPersona,
     sendMessage,
     startNewRecipe,
     changePersona,
     convertToRecipe,
+    saveCurrentRecipe,
   } = useConversation();
+
+  const { selections, updateSelections } = useSelections();
 
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [inputValue, setInputValue] = React.useState('');
-  const [cuisineCategorySelection, setCuisineCategorySelection] = useState<{
-    categories: string[];
-    cuisines: string[];
-    moods: string[];
-  }>({ categories: [], cuisines: [], moods: [] });
 
   useEffect(() => {
     // Auto-scroll to bottom when new messages are added
@@ -68,7 +73,7 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
     const messageContent = inputValue.trim();
     setInputValue('');
 
-    await sendMessage(messageContent, cuisineCategorySelection);
+    await sendMessage(messageContent, selections);
     inputRef.current?.focus();
   };
 
@@ -90,7 +95,7 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
     cuisines: string[];
     moods: string[];
   }) => {
-    setCuisineCategorySelection(selection);
+    updateSelections(selection);
   };
 
   const getPersonaIcon = (personaType: PersonaType) => {
@@ -103,6 +108,7 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
         return <Home className="h-4 w-4" />;
       case 'assistantNutritionist':
       case 'jamieBrightwell':
+      case 'drLunaClearwater':
         return <Brain className="h-4 w-4" />;
       default:
         return <Bot className="h-4 w-4" />;
@@ -119,6 +125,7 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
         return 'bg-blue-100 text-blue-600';
       case 'assistantNutritionist':
       case 'jamieBrightwell':
+      case 'drLunaClearwater':
         return 'bg-gradient-to-br from-purple-100 to-blue-100 text-purple-600';
       default:
         return 'bg-gray-100 text-gray-600';
@@ -166,6 +173,14 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
             "🌟 PREMIUM: Revolutionary Pediatric Culinary Wellness Expert with dual Stanford medicine + Le Cordon Bleu training. Transform 'picky eaters' into food explorers with 25+ years of evidence-based, play-based nutrition.",
           guidance:
             "Hi! I'm Dr. Jamie Brightwell, your Pediatric Culinary Wellness Expert! I'll help you create delicious, nutritionally-optimized meals that your children will actually want to eat. Tell me about your child's age, any picky eating challenges, dietary restrictions, or what you'd like to achieve. I can help with sensory-friendly foods, hidden nutrition techniques, and making healthy eating an adventure!",
+        };
+      case 'drLunaClearwater':
+        return {
+          title: "Welcome! I'm Dr. Luna Clearwater",
+          description:
+            '🌟 PREMIUM: Revolutionary Personalized Health Assessment & Habit Formation Expert with dual Stanford Medicine + Harvard Public Health training. Transform health uncertainty into confident, personalized action plans.',
+          guidance:
+            "Hi! I'm Dr. Luna Clearwater, your Personalized Health Assessment & Habit Formation Expert! I'll guide you through a comprehensive health evaluation to create a personalized action plan. Tell me about your health goals, current habits, dietary preferences, or any health concerns. I'll assess your needs and provide a detailed, structured report with actionable recommendations for sustainable lifestyle transformation!",
         };
       default:
         return {
@@ -216,6 +231,15 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
           />
         </div>
       </div>
+
+      {/* User Profile Display - Phase 4 Integration */}
+      {user?.id && persona && (
+        <div className="bg-base-100 border-b p-4">
+          <div className="max-w-4xl mx-auto">
+            <UserProfileDisplay userId={user.id} liveSelections={selections} />
+          </div>
+        </div>
+      )}
 
       {/* Chat Messages - Responsive height */}
       <div
@@ -339,6 +363,29 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
           )}
         </div>
       </div>
+
+      {/* Save Recipe Button - Shows when AI asks if ready to save */}
+      {showSaveRecipeButton && (
+        <SaveRecipeButton
+          onSave={saveCurrentRecipe}
+          isLoading={isLoading}
+          className="bg-gradient-to-r from-green-50 to-blue-50 border-t"
+        />
+      )}
+
+      {/* Manual Save Recipe Button - Always visible for testing */}
+      {persona && messages.length > 2 && (
+        <div className="flex justify-center p-2 bg-gray-50 border-t">
+          <button
+            onClick={saveCurrentRecipe}
+            disabled={isLoading}
+            className="btn btn-outline btn-sm flex items-center gap-2"
+          >
+            <Save className="h-4 w-4" />
+            <span>Save Current Recipe</span>
+          </button>
+        </div>
+      )}
 
       {/* Chat Input - Always visible and accessible */}
       <div className="bg-base-100 rounded-b-lg border-t p-4 sticky bottom-0 shadow-lg">
