@@ -137,6 +137,11 @@ I'll ensure all recommendations are safe for your dietary needs and tailored to 
                 setThreadId(silentResponse.threadId);
               }
 
+              // Use the Assistant API response as the welcome message instead of hardcoded content
+              if (silentResponse.response?.message) {
+                welcomeContent = silentResponse.response.message;
+              }
+
               console.log(
                 'Silent context injection completed for OpenAI Assistant:',
                 selectedPersona
