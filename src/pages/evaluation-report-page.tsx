@@ -225,7 +225,7 @@ export default function EvaluationReportPage() {
                 Clearwater yet.
               </p>
               <Button asChild>
-                <a href="/chat?persona=drLunaClearwater">
+                <a href="/coach-chat?persona=drLunaClearwater">
                   Start Health Evaluation
                 </a>
               </Button>
