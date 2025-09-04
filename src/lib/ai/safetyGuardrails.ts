@@ -32,7 +32,7 @@ export interface RecipeSafetyResult {
  */
 export const checkIngredientSafety = (check: SafetyCheck): SafetyResult => {
   const warnings = [];
-  const blocked = false;
+  let blocked = false;
   let severity: 'safe' | 'warning' | 'critical' = 'safe';
 
   // Check allergies (blocking - critical)
@@ -41,12 +41,14 @@ export const checkIngredientSafety = (check: SafetyCheck): SafetyResult => {
       check.ingredient.toLowerCase().includes(allergy.toLowerCase())
     )
   ) {
+    blocked = true;
+    warnings.push(`Contains ${check.ingredient} which you are allergic to`);
     return {
       safe: false,
       blocked: true,
       reason: 'Contains user allergen',
       severity: 'critical',
-      warnings: [`Contains ${check.ingredient} which you are allergic to`],
+      warnings,
     };
   }
 
