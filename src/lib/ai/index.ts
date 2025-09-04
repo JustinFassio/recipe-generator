@@ -396,3 +396,61 @@ export const validateRecipeForUser = (
 
   return issues;
 };
+
+/**
+ * Build comprehensive user context for OpenAI Assistants
+ * This creates a detailed, structured context that gives the AI complete understanding
+ * of the user's profile, preferences, and constraints
+ */
+export const buildComprehensiveUserContext = async (
+  userId: string
+): Promise<string> => {
+  try {
+    // Import the function to avoid circular dependency issues
+    const { getUserDataForAI } = await import('./caching');
+    const userData = await getUserDataForAI(userId);
+
+    return `SYSTEM CONTEXT INJECTION - COMPREHENSIVE USER PROFILE
+
+**CRITICAL SAFETY INFORMATION (ALWAYS PRIORITIZE):**
+- ALLERGIES: ${userData.safety.allergies.length > 0 ? userData.safety.allergies.join(', ') : 'None reported'}
+- DIETARY RESTRICTIONS: ${userData.safety.dietary_restrictions.length > 0 ? userData.safety.dietary_restrictions.join(', ') : 'None reported'}
+- MEDICAL CONDITIONS: ${userData.safety.medical_conditions.length > 0 ? userData.safety.medical_conditions.join(', ') : 'None reported'}
+
+**COOKING PROFILE & CAPABILITIES:**
+- SKILL LEVEL: ${userData.profile.skill_level || 'Not specified'}
+- TIME AVAILABILITY: ${userData.profile.time_per_meal || 'Not specified'} minutes per meal
+- EQUIPMENT AVAILABLE: ${userData.cooking.available_equipment.join(', ')}
+- SPICE TOLERANCE: ${userData.cooking.spice_tolerance || 'Not specified'}/5
+- DISLIKED INGREDIENTS: ${userData.cooking.disliked_ingredients.length > 0 ? userData.cooking.disliked_ingredients.join(', ') : 'None reported'}
+
+**CULINARY PREFERENCES & BACKGROUND:**
+- PREFERRED CUISINES: ${userData.cooking.preferred_cuisines.join(', ')}
+- REGION: ${userData.profile.region || 'Not specified'}
+- MEASUREMENT UNITS: ${userData.profile.units || 'Not specified'}
+
+**AI ASSISTANT INSTRUCTIONS:**
+1. ALWAYS check allergies and dietary restrictions FIRST before suggesting any ingredients
+2. Tailor recipe complexity to their skill level (${userData.profile.skill_level || 'beginner'})
+3. Respect their time constraints (${userData.profile.time_per_meal || '45'} minutes)
+4. Use only equipment they have available
+5. Consider their spice tolerance (${userData.cooking.spice_tolerance || '3'}/5)
+6. Incorporate their preferred cuisines and cultural preferences
+7. Use appropriate measurement units (${userData.profile.units || 'imperial'})
+8. Provide appropriate portion sizes and cooking guidance
+9. Offer helpful cooking tips appropriate for their skill level
+10. Suggest safe substitutions for any problematic ingredients
+
+**CONVERSATION STYLE:**
+- Be warm, encouraging, and supportive of their cooking journey
+- Acknowledge their preferences and constraints naturally
+- Provide educational content appropriate for their skill level
+- Celebrate their cultural background and preferences
+- Always prioritize safety and health considerations
+
+Remember: This user has chosen you as their AI cooking assistant. Use this comprehensive context to provide the most personalized, safe, and enjoyable cooking experience possible.`;
+  } catch (error) {
+    console.warn('Failed to build comprehensive user context:', error);
+    return 'SYSTEM CONTEXT INJECTION - UNABLE TO LOAD USER PROFILE DATA';
+  }
+};

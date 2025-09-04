@@ -89,6 +89,50 @@ export function useConversation(): ConversationState & ConversationActions {
           // Add user context to the welcome message
           welcomeContent += `\n\n**Personalized for you:** I can see your preferences and will ensure all recommendations are safe and suitable for your needs.`;
 
+          // SILENT CONTEXT INJECTION: Send user profile data to OpenAI Assistant immediately
+          if (usingAssistant && personaConfig.assistantId) {
+            try {
+              // Use the comprehensive context builder for better structure
+              const { buildComprehensiveUserContext } = await import(
+                '@/lib/ai'
+              );
+              const contextMessage = await buildComprehensiveUserContext(
+                user.id
+              );
+
+              // Send this context message silently to the OpenAI Assistant
+              // This will make the assistant "think" about the user's profile
+              const silentResponse = await openaiAPI.sendMessageWithPersona(
+                [
+                  {
+                    id: 'context-injection',
+                    role: 'user',
+                    content: contextMessage,
+                    timestamp: new Date(),
+                  },
+                ],
+                selectedPersona,
+                null, // No thread ID yet
+                user.id
+              );
+
+              // Store the thread ID for future messages
+              if (silentResponse.threadId) {
+                setThreadId(silentResponse.threadId);
+              }
+
+              console.log(
+                'Silent context injection completed for OpenAI Assistant:',
+                selectedPersona
+              );
+            } catch (contextError) {
+              console.warn(
+                'Silent context injection failed, continuing with normal flow:',
+                contextError
+              );
+            }
+          }
+
           console.log(
             'Phase 4: Enhanced persona selection with user data for',
             selectedPersona
