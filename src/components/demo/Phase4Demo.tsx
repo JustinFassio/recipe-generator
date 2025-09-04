@@ -21,7 +21,7 @@ const Phase4Demo: React.FC = () => {
     instructions: 'Cook rice, sauté shrimp, add curry paste and coconut milk, simmer with vegetables',
     notes: 'Spicy dish with medium heat level. Serves 4 people.',
   });
-  const [validationResults, setValidationResults] = useState<any>(null);
+  const [validationResults, setValidationResults] = useState<Record<string, unknown> | null>(null);
   const [cookingTips, setCookingTips] = useState<string[]>([]);
 
   useEffect(() => {

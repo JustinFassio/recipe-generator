@@ -32,7 +32,7 @@ export interface RecipeSafetyResult {
  */
 export const checkIngredientSafety = (check: SafetyCheck): SafetyResult => {
   const warnings = [];
-  let blocked = false;
+  const blocked = false;
   let severity: 'safe' | 'warning' | 'critical' = 'safe';
 
   // Check allergies (blocking - critical)
