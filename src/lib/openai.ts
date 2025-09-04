@@ -1,6 +1,9 @@
 import type { RecipeFormData } from './schemas';
 import { AssistantAPI } from './assistantAPI';
 
+// Constants for common prompts
+const SAVE_RECIPE_PROMPT = `IMPORTANT: After providing a complete recipe or when the user seems satisfied with a recipe discussion, always ask: "Ready to Create and Save the Recipe?" This will allow the user to save the recipe to their collection.`;
+
 interface Message {
   id: string;
   role: 'user' | 'assistant' | 'system';
@@ -58,7 +61,7 @@ When generating a complete recipe, structure it as a JSON object with:
   "notes": "Tips, variations, and additional notes"
 }
 
-IMPORTANT: After providing a complete recipe or when the user seems satisfied with a recipe discussion, always ask: "Ready to Create and Save the Recipe?" This will allow the user to save the recipe to their collection.`,
+${SAVE_RECIPE_PROMPT}`,
     description:
       'Master Italian chef with 20+ years of Mediterranean culinary expertise, specializing in traditional techniques and fresh ingredients',
   },
@@ -97,7 +100,7 @@ When generating a complete recipe, structure it as a JSON object with:
   "notes": "Nutritional info, tips, and healthy variations"
 }
 
-IMPORTANT: After providing a complete recipe or when the user seems satisfied with a recipe discussion, always ask: "Ready to Create and Save the Recipe?" This will allow the user to save the recipe to their collection.`,
+${SAVE_RECIPE_PROMPT}`,
     description:
       'Registered dietitian and nutrition expert focused on creating healthy, balanced meals that are both nutritious and delicious',
   },
@@ -136,7 +139,7 @@ When generating a complete recipe, structure it as a JSON object with:
   "notes": "Family tips, variations, and serving suggestions"
 }
 
-IMPORTANT: After providing a complete recipe or when the user seems satisfied with a recipe discussion, always ask: "Ready to Create and Save the Recipe?" This will allow the user to save the recipe to their collection.`,
+${SAVE_RECIPE_PROMPT}`,
     description:
       'Beloved home cook with decades of experience creating comforting, family-friendly recipes that bring joy to every meal',
   },
@@ -180,7 +183,7 @@ When generating a complete recipe, structure it as a JSON object with:
   "notes": "Nutritional analysis, health benefits, and personalization tips"
 }
 
-IMPORTANT: After providing a complete recipe or when the user seems satisfied with a recipe discussion, always ask: "Ready to Create and Save the Recipe?" This will allow the user to save the recipe to their collection.
+${SAVE_RECIPE_PROMPT}
 
 Note: This is fallback mode - use this prompt if Assistant API is unavailable.`,
     assistantId: 'asst_o3VGUZBpdYTdKEyKYoKua8ys',
@@ -226,7 +229,7 @@ When generating a complete recipe, structure it as a JSON object with:
   "notes": "Nutritional benefits, kid-friendly tips, and family cooking guidance"
 }
 
-IMPORTANT: After providing a complete recipe or when the user seems satisfied with a recipe discussion, always ask: "Ready to Create and Save the Recipe?" This will allow the user to save the recipe to their collection.`,
+${SAVE_RECIPE_PROMPT}`,
     assistantId: 'asst_IdO6vmnUW6tDOKu7rraLPCWJ',
     isAssistantPowered: true,
     description:
