@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { createDaisyUIInputClasses } from '@/lib/input-migration';
 import { createDaisyUICardClasses } from '@/lib/card-migration';
 import { createDaisyUIScrollAreaClasses } from '@/lib/scroll-area-migration';
@@ -12,6 +12,7 @@ import {
   Home,
   Bot,
   Brain,
+  Save,
 } from 'lucide-react';
 import { PersonaSelector } from './PersonaSelector';
 import { ChatHeader } from './ChatHeader';
@@ -20,33 +21,37 @@ import { Button } from '@/components/ui/button';
 import { useConversation } from '@/hooks/useConversation';
 import { RECIPE_BOT_PERSONAS, type PersonaType } from '@/lib/openai';
 import type { RecipeFormData } from '@/lib/schemas';
+import { useSelections } from '@/contexts/SelectionContext';
+import { UserProfileDisplay } from './UserProfileDisplay';
+import { SaveRecipeButton } from './SaveRecipeButton';
+import { useAuth } from '@/contexts/AuthProvider';
 
 interface ChatInterfaceProps {
   onRecipeGenerated: (recipe: RecipeFormData) => void;
 }
 
 export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
+  const { user } = useAuth();
   const {
     persona,
     messages,
     generatedRecipe,
     isLoading,
     showPersonaSelector,
+    showSaveRecipeButton,
     selectPersona,
     sendMessage,
     startNewRecipe,
     changePersona,
     convertToRecipe,
+    saveCurrentRecipe,
   } = useConversation();
+
+  const { selections, updateSelections } = useSelections();
 
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [inputValue, setInputValue] = React.useState('');
-  const [cuisineCategorySelection, setCuisineCategorySelection] = useState<{
-    categories: string[];
-    cuisines: string[];
-    moods: string[];
-  }>({ categories: [], cuisines: [], moods: [] });
 
   useEffect(() => {
     // Auto-scroll to bottom when new messages are added
@@ -58,6 +63,7 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
   useEffect(() => {
     // Automatically call onRecipeGenerated when a recipe is successfully parsed
     if (generatedRecipe) {
+      console.log('Generated recipe detected, calling onRecipeGenerated:', generatedRecipe);
       onRecipeGenerated(generatedRecipe);
     }
   }, [generatedRecipe, onRecipeGenerated]);
@@ -68,7 +74,7 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
     const messageContent = inputValue.trim();
     setInputValue('');
 
-    await sendMessage(messageContent, cuisineCategorySelection);
+    await sendMessage(messageContent, selections);
     inputRef.current?.focus();
   };
 
@@ -90,7 +96,7 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
     cuisines: string[];
     moods: string[];
   }) => {
-    setCuisineCategorySelection(selection);
+    updateSelections(selection);
   };
 
   const getPersonaIcon = (personaType: PersonaType) => {
@@ -227,6 +233,15 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
         </div>
       </div>
 
+      {/* User Profile Display - Phase 4 Integration */}
+      {user?.id && persona && (
+        <div className="bg-base-100 border-b p-4">
+          <div className="max-w-4xl mx-auto">
+            <UserProfileDisplay userId={user.id} liveSelections={selections} />
+          </div>
+        </div>
+      )}
+
       {/* Chat Messages - Responsive height */}
       <div
         ref={scrollAreaRef}
@@ -349,6 +364,29 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
           )}
         </div>
       </div>
+
+      {/* Save Recipe Button - Shows when AI asks if ready to save */}
+      {showSaveRecipeButton && (
+        <SaveRecipeButton
+          onSave={saveCurrentRecipe}
+          isLoading={isLoading}
+          className="bg-gradient-to-r from-green-50 to-blue-50 border-t"
+        />
+      )}
+
+      {/* Manual Save Recipe Button - Always visible for testing */}
+      {persona && messages.length > 2 && (
+        <div className="flex justify-center p-2 bg-gray-50 border-t">
+          <button
+            onClick={saveCurrentRecipe}
+            disabled={isLoading}
+            className="btn btn-outline btn-sm flex items-center gap-2"
+          >
+            <Save className="h-4 w-4" />
+            <span>Save Current Recipe</span>
+          </button>
+        </div>
+      )}
 
       {/* Chat Input - Always visible and accessible */}
       <div className="bg-base-100 rounded-b-lg border-t p-4 sticky bottom-0 shadow-lg">

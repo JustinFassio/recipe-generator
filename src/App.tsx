@@ -13,6 +13,8 @@ import AuthCallbackPage from '@/pages/auth-callback-page';
 import ExplorePage from '@/pages/explore-page';
 import { AuthForm } from '@/components/auth/auth-form';
 import { ThemeProvider } from '@/components/ui/theme-provider';
+import Phase4Demo from '@/components/demo/Phase4Demo';
+import { SelectionProvider } from '@/contexts/SelectionContext';
 
 import { Toaster } from '@/components/ui/toaster';
 
@@ -126,6 +128,19 @@ function AppContent() {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/phase4-demo"
+        element={
+          <ProtectedRoute>
+            <div className="bg-base-100 min-h-screen">
+              <Header />
+              <main>
+                <Phase4Demo />
+              </main>
+            </div>
+          </ProtectedRoute>
+        }
+      />
 
       {/* Default redirects */}
       <Route path="/" element={<Navigate to="/recipes" replace />} />
@@ -140,7 +155,9 @@ function App() {
       <ThemeProvider>
         <BrowserRouter>
           <AuthProvider>
-            <AppContent />
+            <SelectionProvider>
+              <AppContent />
+            </SelectionProvider>
           </AuthProvider>
           <Toaster />
         </BrowserRouter>

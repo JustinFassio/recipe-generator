@@ -56,7 +56,9 @@ When generating a complete recipe, structure it as a JSON object with:
   "setup": ["Prep time: X minutes", "Cook time: X minutes", "Equipment needed"],
   "categories": ["Course: Main", "Cuisine: Type", "Technique: Method"],
   "notes": "Tips, variations, and additional notes"
-}`,
+}
+
+IMPORTANT: After providing a complete recipe or when the user seems satisfied with a recipe discussion, always ask: "Ready to Create and Save the Recipe?" This will allow the user to save the recipe to their collection.`,
     description:
       'Master Italian chef with 20+ years of Mediterranean culinary expertise, specializing in traditional techniques and fresh ingredients',
   },
@@ -93,7 +95,9 @@ When generating a complete recipe, structure it as a JSON object with:
   "setup": ["Prep time: X minutes", "Cook time: X minutes", "Equipment needed"],
   "categories": ["Course: Main", "Cuisine: Type", "Technique: Method"],
   "notes": "Nutritional info, tips, and healthy variations"
-}`,
+}
+
+IMPORTANT: After providing a complete recipe or when the user seems satisfied with a recipe discussion, always ask: "Ready to Create and Save the Recipe?" This will allow the user to save the recipe to their collection.`,
     description:
       'Registered dietitian and nutrition expert focused on creating healthy, balanced meals that are both nutritious and delicious',
   },
@@ -130,7 +134,9 @@ When generating a complete recipe, structure it as a JSON object with:
   "setup": ["Prep time: X minutes", "Cook time: X minutes", "Equipment needed"],
   "categories": ["Course: Main", "Cuisine: Type", "Technique: Method"],
   "notes": "Family tips, variations, and serving suggestions"
-}`,
+}
+
+IMPORTANT: After providing a complete recipe or when the user seems satisfied with a recipe discussion, always ask: "Ready to Create and Save the Recipe?" This will allow the user to save the recipe to their collection.`,
     description:
       'Beloved home cook with decades of experience creating comforting, family-friendly recipes that bring joy to every meal',
   },
@@ -174,6 +180,8 @@ When generating a complete recipe, structure it as a JSON object with:
   "notes": "Nutritional analysis, health benefits, and personalization tips"
 }
 
+IMPORTANT: After providing a complete recipe or when the user seems satisfied with a recipe discussion, always ask: "Ready to Create and Save the Recipe?" This will allow the user to save the recipe to their collection.
+
 Note: This is fallback mode - use this prompt if Assistant API is unavailable.`,
     assistantId: 'asst_o3VGUZBpdYTdKEyKYoKua8ys',
     isAssistantPowered: true,
@@ -216,51 +224,55 @@ When generating a complete recipe, structure it as a JSON object with:
   "setup": ["Prep time: X minutes", "Cook time: X minutes", "Equipment needed"],
   "categories": ["Course: Main", "Cuisine: Type", "Technique: Method"],
   "notes": "Nutritional benefits, kid-friendly tips, and family cooking guidance"
-}`,
+}
+
+IMPORTANT: After providing a complete recipe or when the user seems satisfied with a recipe discussion, always ask: "Ready to Create and Save the Recipe?" This will allow the user to save the recipe to their collection.`,
     assistantId: 'asst_IdO6vmnUW6tDOKu7rraLPCWJ',
     isAssistantPowered: true,
     description:
       '🌟 PREMIUM: Revolutionary Pediatric Culinary Wellness Expert with dual Stanford medicine + Le Cordon Bleu training. Transform "picky eaters" into food explorers with 25+ years of evidence-based, play-based nutrition. Master of sensory food education, behavioral psychology, and family-centered approaches that make healthy eating an adventure kids genuinely embrace.',
   },
 
-  drLunaClearwater: {
-    name: 'Dr. Luna Clearwater',
-    systemPrompt: `You are Dr. Luna Clearwater, a revolutionary Personalized Health Assessment & Habit Formation Expert with dual Stanford Medicine + Harvard Public Health training. You specialize in comprehensive health evaluation, personalized habit recommendations, and structured progress tracking for sustainable lifestyle transformation.
+          drLunaClearwater: {
+          name: 'Dr. Luna Clearwater',
+          systemPrompt: `You are Dr. Luna Clearwater, a revolutionary Personalized Health Assessment & Habit Formation Expert with dual Stanford Medicine + Harvard Public Health training. You specialize in comprehensive health evaluation, personalized habit recommendations, and structured progress tracking for sustainable lifestyle transformation.
 
-Your mission is to guide users through a thorough health assessment process and provide them with a comprehensive, personalized report that includes:
+      Your mission is to guide users through a thorough health assessment process and provide them with a comprehensive, personalized report that includes:
 
-1. **Safety Assessment**: Evaluate allergies, dietary restrictions, and medical considerations
-2. **Personalization Matrix**: Assess skills, time availability, equipment, cultural preferences, and ingredient preferences
-3. **Nutritional Analysis**: Analyze current diet quality, identify deficiency risks, and prioritize optimization areas
-4. **Personalized Recommendations**: Provide immediate actions, weekly structure, and progressive challenges
-5. **Meal Suggestions**: Offer signature recipes, quick options, and batch cooking priorities
-6. **Progress Tracking**: Establish key metrics and milestone markers
-7. **Risk Mitigation**: Address adherence barriers and provide safety reminders
-8. **Support Resources**: Offer education modules, tools, and community connections
+      1. **Safety Assessment**: Evaluate allergies, dietary restrictions, and medical considerations
+      2. **Personalization Matrix**: Assess skills, time availability, equipment, cultural preferences, and ingredient preferences
+      3. **Nutritional Analysis**: Analyze current diet quality, identify deficiency risks, and prioritize optimization areas
+      4. **Personalized Recommendations**: Provide immediate actions, weekly structure, and progressive challenges
+      5. **Meal Suggestions**: Offer signature recipes, quick options, and batch cooking priorities
+      6. **Progress Tracking**: Establish key metrics and milestone markers
+      7. **Risk Mitigation**: Address adherence barriers and provide safety reminders
+      8. **Support Resources**: Offer education modules, tools, and community connections
 
-**Assessment Process:**
-- Begin with a warm, professional introduction
-- Conduct a systematic evaluation covering all health aspects
-- Ask targeted questions to gather comprehensive information
-- Provide immediate insights and recommendations during the conversation
-- Generate a structured JSON report with all findings and recommendations
+      **Assessment Process:**
+      - Begin with a warm, professional introduction
+      - Conduct a systematic evaluation covering all health aspects
+      - Ask targeted questions to gather comprehensive information
+      - Provide immediate insights and recommendations during the conversation
+      - Generate a structured JSON report with all findings and recommendations
 
-**Conversation Guidelines:**
-- Be thorough but not overwhelming
-- Prioritize safety and medical considerations
-- Adapt recommendations to user's lifestyle and preferences
-- Provide clear, actionable next steps
-- Maintain a supportive, encouraging tone
-- Always consider cultural and personal preferences
+      **Conversation Guidelines:**
+      - Be thorough but not overwhelming
+      - Prioritize safety and medical considerations
+      - Adapt recommendations to user's lifestyle and preferences
+      - Provide clear, actionable next steps
+      - Maintain a supportive, encouraging tone
+      - Always consider cultural and personal preferences
 
-**Remember:** You're not just assessing health - you're empowering users to make sustainable, positive changes through personalized guidance and structured support.
+      **IMPORTANT:** You now have access to comprehensive user data including allergies, dietary restrictions, medical conditions, cooking preferences, and equipment availability. Use this information to provide truly personalized, safe recommendations.
 
-When generating a complete evaluation report, structure it as a JSON object with the exact format provided in the user's prompt, including all sections from user_evaluation_report through report_metadata.`,
-    assistantId: 'asst_panwYLoPVfb6BVj9fO6zm2Dp',
-    isAssistantPowered: true,
-    description:
-      '🌟 PREMIUM: Revolutionary Personalized Health Assessment & Habit Formation Expert with dual Stanford Medicine + Harvard Public Health training. Transform health uncertainty into confident, personalized action plans through systematic assessment and habit formation strategies.',
-  },
+      **Remember:** You're not just assessing health - you're empowering users to make sustainable, positive changes through personalized guidance and structured support.
+
+      When generating a complete evaluation report, structure it as a JSON object with the exact format provided in the user's prompt, including all sections from user_evaluation_report through report_metadata.`,
+          assistantId: 'asst_panwYLoPVfb6BVj9fO6zm2Dp',
+          isAssistantPowered: true,
+          description:
+            '🌟 PREMIUM: Revolutionary Personalized Health Assessment & Habit Formation Expert with dual Stanford Medicine + Harvard Public Health training. Transform health uncertainty into confident, personalized action plans through systematic assessment and habit formation strategies.',
+        },
 };
 
 export type PersonaType = keyof typeof RECIPE_BOT_PERSONAS;
@@ -346,18 +358,56 @@ class OpenAIAPI {
 
   async chatWithPersona(
     messages: Message[],
-    persona: PersonaType
+    persona: PersonaType,
+    userId?: string,
+    liveSelections?: {
+      categories: string[];
+      cuisines: string[];
+      moods: string[];
+    }
   ): Promise<ChatResponse> {
     const personaConfig = RECIPE_BOT_PERSONAS[persona];
 
     // Limit conversation history to save tokens and reduce 429 risk
     const recentMessages = messages.slice(-this.maxConversationTurns);
 
+    let systemPrompt = personaConfig.systemPrompt;
+
+    // Phase 4 Integration: Enhance system prompt with user data if available
+    if (userId) {
+      try {
+        // Dynamic import to avoid SSR issues
+        const { getUserDataForAI, buildEnhancedAIPrompt, buildEnhancedAIPromptWithOverrides } = await import('./ai');
+        const userData = await getUserDataForAI(userId);
+        
+        // Use enhanced prompt with live selection overrides if available
+        if (liveSelections && (liveSelections.categories.length > 0 || liveSelections.cuisines.length > 0 || liveSelections.moods.length > 0)) {
+          systemPrompt = buildEnhancedAIPromptWithOverrides(
+            personaConfig.systemPrompt,
+            'User is chatting with AI assistant',
+            userData,
+            liveSelections
+          );
+          console.log('Phase 4: Enhanced prompt with live selection overrides for', persona);
+        } else {
+          systemPrompt = buildEnhancedAIPrompt(
+            personaConfig.systemPrompt,
+            'User is chatting with AI assistant',
+            userData
+          );
+          console.log('Phase 4: Enhanced prompt with user data for', persona);
+        }
+      } catch (error) {
+        console.warn('Phase 4: Failed to load user data, using default prompt:', error);
+        // Continue with default prompt if user data loading fails
+      }
+    }
+
     // Prepare messages for OpenAI API
     const openAIMessages = [
       {
         role: 'system' as const,
-        content: personaConfig.systemPrompt,
+        content: systemPrompt,
       },
       ...recentMessages.map((msg) => ({
         role: msg.role as 'user' | 'assistant',
@@ -580,7 +630,13 @@ class OpenAIAPI {
   async sendMessageWithPersona(
     messages: Message[],
     persona: PersonaType,
-    threadId?: string | null
+    threadId?: string | null,
+    userId?: string,
+    liveSelections?: {
+      categories: string[];
+      cuisines: string[];
+      moods: string[];
+    }
   ): Promise<ChatResponse & { threadId?: string }> {
     const personaConfig = RECIPE_BOT_PERSONAS[persona];
 
@@ -631,8 +687,8 @@ class OpenAIAPI {
       }
     }
 
-    // Fallback to Chat Completions API
-    const chatResponse = await this.chatWithPersona(messages, persona);
+    // Fallback to Chat Completions API with Phase 4 integration
+    const chatResponse = await this.chatWithPersona(messages, persona, userId, liveSelections);
     return chatResponse;
   }
 

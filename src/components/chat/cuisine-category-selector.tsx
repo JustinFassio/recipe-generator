@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CategoryFilter } from '@/components/ui/category-filter';
@@ -8,6 +7,7 @@ import CategoryChip from '@/components/ui/CategoryChip';
 import { CANONICAL_CATEGORIES } from '@/lib/categories';
 import { CUISINE_OPTIONS } from '@/lib/cuisines';
 import { MOOD_OPTIONS } from '@/lib/moods';
+import { useSelections } from '@/contexts/SelectionContext';
 
 export interface CuisineCategorySelectorProps {
   onSelectionChange: (selection: {
@@ -22,12 +22,19 @@ export function CuisineCategorySelector({
   onSelectionChange,
   className = '',
 }: CuisineCategorySelectorProps) {
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [selectedCuisines, setSelectedCuisines] = useState<string[]>([]);
-  const [selectedMoods, setSelectedMoods] = useState<string[]>([]);
+  const { 
+    selections, 
+    updateSelections, 
+    clearSelections,
+    removeCategory,
+    removeCuisine,
+    removeMood
+  } = useSelections();
+  
+  const { categories: selectedCategories, cuisines: selectedCuisines, moods: selectedMoods } = selections;
 
   const handleCategoriesChange = (categories: string[]) => {
-    setSelectedCategories(categories);
+    updateSelections({ categories });
     onSelectionChange({
       categories,
       cuisines: selectedCuisines,
@@ -36,7 +43,7 @@ export function CuisineCategorySelector({
   };
 
   const handleCuisinesChange = (cuisines: string[]) => {
-    setSelectedCuisines(cuisines);
+    updateSelections({ cuisines });
     onSelectionChange({
       categories: selectedCategories,
       cuisines,
@@ -45,7 +52,7 @@ export function CuisineCategorySelector({
   };
 
   const handleMoodsChange = (moods: string[]) => {
-    setSelectedMoods(moods);
+    updateSelections({ moods });
     onSelectionChange({
       categories: selectedCategories,
       cuisines: selectedCuisines,
@@ -53,40 +60,35 @@ export function CuisineCategorySelector({
     });
   };
 
-  const removeCategory = (category: string) => {
-    const newCategories = selectedCategories.filter((c) => c !== category);
-    setSelectedCategories(newCategories);
+  const handleRemoveCategory = (category: string) => {
+    removeCategory(category);
     onSelectionChange({
-      categories: newCategories,
+      categories: selectedCategories.filter(c => c !== category),
       cuisines: selectedCuisines,
       moods: selectedMoods,
     });
   };
 
-  const removeCuisine = (cuisine: string) => {
-    const newCuisines = selectedCuisines.filter((c) => c !== cuisine);
-    setSelectedCuisines(newCuisines);
+  const handleRemoveCuisine = (cuisine: string) => {
+    removeCuisine(cuisine);
     onSelectionChange({
       categories: selectedCategories,
-      cuisines: newCuisines,
+      cuisines: selectedCuisines.filter(c => c !== cuisine),
       moods: selectedMoods,
     });
   };
 
-  const removeMood = (mood: string) => {
-    const newMoods = selectedMoods.filter((m) => m !== mood);
-    setSelectedMoods(newMoods);
+  const handleRemoveMood = (mood: string) => {
+    removeMood(mood);
     onSelectionChange({
       categories: selectedCategories,
       cuisines: selectedCuisines,
-      moods: newMoods,
+      moods: selectedMoods.filter(m => m !== mood),
     });
   };
 
-  const clearAllSelections = () => {
-    setSelectedCategories([]);
-    setSelectedCuisines([]);
-    setSelectedMoods([]);
+  const handleClearAllSelections = () => {
+    clearSelections();
     onSelectionChange({
       categories: [],
       cuisines: [],
@@ -136,15 +138,15 @@ export function CuisineCategorySelector({
         {/* Right side - Clear selections button */}
         <div className="flex justify-end sm:ml-auto">
           {hasSelections && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={clearAllSelections}
-              className="w-full sm:w-auto text-gray-500 hover:text-gray-700"
-            >
-              <X className="mr-1 h-4 w-4" />
-              Clear All
-            </Button>
+                          <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleClearAllSelections}
+                className="w-full sm:w-auto text-gray-500 hover:text-gray-700"
+              >
+                <X className="mr-1 h-4 w-4" />
+                Clear All
+              </Button>
           )}
         </div>
       </div>
@@ -157,7 +159,7 @@ export function CuisineCategorySelector({
             <CategoryChip
               key={category}
               category={category}
-              onRemove={() => removeCategory(category)}
+              onRemove={() => handleRemoveCategory(category)}
               variant="removable"
             />
           ))}
@@ -167,7 +169,7 @@ export function CuisineCategorySelector({
             <CategoryChip
               key={cuisine}
               category={cuisine}
-              onRemove={() => removeCuisine(cuisine)}
+              onRemove={() => handleRemoveCuisine(cuisine)}
               variant="removable"
             />
           ))}
@@ -177,7 +179,7 @@ export function CuisineCategorySelector({
             <CategoryChip
               key={mood}
               category={mood}
-              onRemove={() => removeMood(mood)}
+              onRemove={() => handleRemoveMood(mood)}
               variant="removable"
             />
           ))}
