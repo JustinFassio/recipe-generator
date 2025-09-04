@@ -806,7 +806,7 @@ Generate realistic data based on our conversation.`,
       );
 
       // Try to parse the multi-part JSON response from Dr. Luna
-      let reportData = {};
+      let reportData: Record<string, unknown> = {};
       let hasValidData = false;
 
       try {
