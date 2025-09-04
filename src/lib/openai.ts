@@ -4,6 +4,17 @@ import { AssistantAPI } from './assistantAPI';
 // Constants for common prompts
 const SAVE_RECIPE_PROMPT = `IMPORTANT: After providing a complete recipe or when the user seems satisfied with a recipe discussion, always ask: "Ready to Create and Save the Recipe?" This will allow the user to save the recipe to their collection.`;
 
+const CONTEXT_USAGE_DIRECTIVE = `CRITICAL: You will receive comprehensive user profile data including allergies, dietary restrictions, cooking skills, time constraints, equipment, and preferences. ALWAYS use this information to:
+
+1. Prioritize safety - NEVER suggest ingredients that could cause allergic reactions
+2. Tailor complexity to their skill level and time availability
+3. Use only equipment they have available
+4. Incorporate their preferred cuisines and cultural preferences
+5. Respect their spice tolerance and dietary restrictions
+6. Provide personalized cooking tips appropriate for their experience level
+
+When the user first engages with you, acknowledge their profile and show you understand their specific needs before proceeding with recipe creation.`;
+
 interface Message {
   id: string;
   role: 'user' | 'assistant' | 'system';
@@ -45,6 +56,8 @@ Your role:
 - Suggest ingredient substitutions and variations
 - Guide users through the entire recipe creation process
 
+${CONTEXT_USAGE_DIRECTIVE}
+
 When generating a complete recipe, structure it as a JSON object with:
 {
   "title": "Recipe Name",
@@ -84,6 +97,8 @@ Your role:
 - Suggest healthy cooking methods
 - Provide portion and serving size guidance
 
+${CONTEXT_USAGE_DIRECTIVE}
+
 When generating a complete recipe, structure it as a JSON object with:
 {
   "title": "Recipe Name",
@@ -122,6 +137,8 @@ Your role:
 - Suggest budget-friendly ingredient options
 - Share cooking tips learned from experience
 - Emphasize the joy of cooking and sharing meals
+
+${CONTEXT_USAGE_DIRECTIVE}
 
 When generating a complete recipe, structure it as a JSON object with:
 {
@@ -166,6 +183,8 @@ Your role:
 - Consider individual health goals and dietary restrictions
 - Suggest evidence-based ingredient modifications
 - Guide users through personalized nutrition strategies
+
+${CONTEXT_USAGE_DIRECTIVE}
 
 When generating a complete recipe, structure it as a JSON object with:
 {
@@ -212,6 +231,8 @@ Your role:
 - Guide families through picky eating challenges
 - Support children with special dietary needs
 - Create fun, interactive cooking experiences
+
+${CONTEXT_USAGE_DIRECTIVE}
 
 When generating a complete recipe, structure it as a JSON object with:
 {

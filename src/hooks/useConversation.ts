@@ -86,8 +86,24 @@ export function useConversation(): ConversationState & ConversationActions {
             userData
           );
 
-          // Add user context to the welcome message
-          welcomeContent += `\n\n**Personalized for you:** I can see your preferences and will ensure all recommendations are safe and suitable for your needs.`;
+          // Generate a personalized, actionable welcome message
+          welcomeContent = `Hi! I'm ${personaConfig.name}, your AI Recipe Creator. 
+
+**Your Profile Summary:**
+• **Skill Level**: ${userData.profile.skill_level || 'Beginner'} cook
+• **Available Time**: ${userData.profile.time_per_meal || '45'} minutes per meal
+• **Preferred Cuisines**: ${userData.cooking.preferred_cuisines.join(', ')}
+• **Equipment**: ${userData.cooking.available_equipment.join(', ')}
+• **Safety**: ${userData.safety.allergies.length > 0 ? `Allergies to ${userData.safety.allergies.join(', ')}` : 'No allergies reported'}
+
+**Ready to Begin?** 
+
+I'm here to create the perfect recipe for you! To get started, I need to know:
+
+**What's your main ingredient or craving today?** 
+(You can tell me about a specific ingredient, cuisine type, or just describe what you're in the mood for!)
+
+I'll ensure all recommendations are safe for your dietary needs and tailored to your skill level and time constraints.`;
 
           // SILENT CONTEXT INJECTION: Send user profile data to OpenAI Assistant immediately
           if (usingAssistant && personaConfig.assistantId) {
