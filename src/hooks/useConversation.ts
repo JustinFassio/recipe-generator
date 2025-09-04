@@ -21,6 +21,8 @@ export interface ConversationState {
   threadId: string | null;
   isUsingAssistant: boolean;
   showSaveRecipeButton: boolean;
+  hasEvaluationReport: boolean;
+  generatedEvaluationReport: string | null;
 }
 
 export interface ConversationActions {
@@ -36,6 +38,8 @@ export interface ConversationActions {
   convertToRecipe: () => Promise<void>;
   requestCompleteRecipe: () => Promise<void>;
   saveCurrentRecipe: () => Promise<void>;
+  generateEvaluationReport: () => Promise<void>;
+  saveEvaluationReport: () => Promise<void>;
 }
 
 export function useConversation(): ConversationState & ConversationActions {
@@ -50,6 +54,10 @@ export function useConversation(): ConversationState & ConversationActions {
   const [threadId, setThreadId] = useState<string | null>(null);
   const [isUsingAssistant, setIsUsingAssistant] = useState(false);
   const [showSaveRecipeButton, setShowSaveRecipeButton] = useState(false);
+  const [hasEvaluationReport, setHasEvaluationReport] = useState(false);
+  const [generatedEvaluationReport, setGeneratedEvaluationReport] = useState<
+    string | null
+  >(null);
 
   const selectPersona = useCallback(
     async (selectedPersona: PersonaType) => {
@@ -584,6 +592,121 @@ Format it as valid JSON that can be parsed directly.`;
     }
   }, [persona, messages, threadId, user?.id, setGeneratedRecipe]);
 
+  const generateEvaluationReport = useCallback(async () => {
+    if (!persona || persona !== 'drLunaClearwater') return;
+
+    setIsLoading(true);
+    try {
+      // Send a message asking Dr. Luna to generate the evaluation report
+      const reportRequest = 'Please prepare the user evaluation report';
+
+      const response = await openaiAPI.sendMessageWithPersona(
+        [
+          ...messages,
+          {
+            id: Date.now().toString(),
+            role: 'user',
+            content: reportRequest,
+            timestamp: new Date(),
+          },
+        ],
+        persona,
+        threadId,
+        user?.id
+      );
+
+      // Add the report request and response to messages
+      const userMessage: Message = {
+        id: Date.now().toString(),
+        role: 'user',
+        content: reportRequest,
+        timestamp: new Date(),
+      };
+
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: response.message,
+        timestamp: new Date(),
+      };
+
+      setMessages((prev) => [...prev, userMessage, assistantMessage]);
+      setGeneratedEvaluationReport(response.message);
+      setHasEvaluationReport(true);
+
+      toast({
+        title: 'Evaluation Report Generated!',
+        description:
+          'Your comprehensive health evaluation report is ready to save.',
+      });
+    } catch (error) {
+      console.error('Failed to generate evaluation report:', error);
+      toast({
+        title: 'Generation Failed',
+        description:
+          'Could not generate the evaluation report. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [persona, messages, threadId, user?.id]);
+
+  const saveEvaluationReport = useCallback(async () => {
+    if (!user?.id || !generatedEvaluationReport) return;
+
+    setIsLoading(true);
+    try {
+      // Import the evaluation report storage functions
+      const { saveEvaluationReport: saveReport } = await import(
+        '@/lib/evaluation-report-storage'
+      );
+
+      // Try to parse the JSON response from Dr. Luna
+      let reportData;
+      try {
+        // Extract JSON from the response (might be wrapped in markdown or text)
+        const jsonMatch = generatedEvaluationReport.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          reportData = JSON.parse(jsonMatch[0]);
+        } else {
+          throw new Error('No valid JSON found in response');
+        }
+      } catch (parseError) {
+        console.error('Failed to parse evaluation report JSON:', parseError);
+        toast({
+          title: 'Save Failed',
+          description:
+            'Could not parse the evaluation report format. Please try generating the report again.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      // Save the evaluation report
+      saveReport(user.id, reportData);
+
+      toast({
+        title: 'Evaluation Report Saved!',
+        description:
+          'Your health evaluation report has been saved to your health reports.',
+      });
+
+      // Reset the report state
+      setHasEvaluationReport(false);
+      setGeneratedEvaluationReport(null);
+    } catch (error) {
+      console.error('Failed to save evaluation report:', error);
+      toast({
+        title: 'Save Failed',
+        description: 'Could not save the evaluation report. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user?.id, generatedEvaluationReport]);
+
   return {
     // State
     persona,
@@ -594,6 +717,8 @@ Format it as valid JSON that can be parsed directly.`;
     threadId,
     isUsingAssistant,
     showSaveRecipeButton,
+    hasEvaluationReport,
+    generatedEvaluationReport,
     // Actions
     selectPersona,
     sendMessage,
@@ -604,5 +729,7 @@ Format it as valid JSON that can be parsed directly.`;
     convertToRecipe,
     requestCompleteRecipe,
     saveCurrentRecipe,
+    generateEvaluationReport,
+    saveEvaluationReport,
   };
 }

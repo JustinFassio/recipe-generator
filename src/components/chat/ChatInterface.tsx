@@ -24,6 +24,7 @@ import type { RecipeFormData } from '@/lib/schemas';
 import { useSelections } from '@/contexts/SelectionContext';
 import { UserProfileDisplay } from './UserProfileDisplay';
 import { SaveRecipeButton } from './SaveRecipeButton';
+import { EvaluationReportButton } from './EvaluationReportButton';
 import { useAuth } from '@/contexts/AuthProvider';
 
 interface ChatInterfaceProps {
@@ -39,12 +40,15 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
     isLoading,
     showPersonaSelector,
     showSaveRecipeButton,
+    hasEvaluationReport,
     selectPersona,
     sendMessage,
     startNewRecipe,
     changePersona,
     convertToRecipe,
     saveCurrentRecipe,
+    generateEvaluationReport,
+    saveEvaluationReport,
   } = useConversation();
 
   const { selections, updateSelections } = useSelections();
@@ -364,8 +368,8 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
         </div>
       </div>
 
-      {/* Save Recipe Button - Shows when AI asks if ready to save */}
-      {showSaveRecipeButton && (
+      {/* Save Recipe Button - Shows when AI asks if ready to save (for non-Dr. Luna personas) */}
+      {showSaveRecipeButton && persona !== 'drLunaClearwater' && (
         <SaveRecipeButton
           onSave={saveCurrentRecipe}
           isLoading={isLoading}
@@ -373,8 +377,19 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
         />
       )}
 
-      {/* Manual Save Recipe Button - Always visible for testing */}
-      {persona && messages.length > 2 && (
+      {/* Evaluation Report Button - For Dr. Luna Clearwater */}
+      {persona === 'drLunaClearwater' && messages.length > 2 && (
+        <EvaluationReportButton
+          onGenerate={generateEvaluationReport}
+          onSave={saveEvaluationReport}
+          isLoading={isLoading}
+          hasReport={hasEvaluationReport}
+          className="bg-gradient-to-r from-green-50 to-blue-50 border-t"
+        />
+      )}
+
+      {/* Manual Save Recipe Button - Always visible for testing (for non-Dr. Luna personas) */}
+      {persona && persona !== 'drLunaClearwater' && messages.length > 2 && (
         <div className="flex justify-center p-2 bg-gray-50 border-t">
           <button
             onClick={saveCurrentRecipe}
