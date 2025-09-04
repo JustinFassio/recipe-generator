@@ -910,7 +910,10 @@ Generate realistic data based on our conversation.`,
       }
 
       // Save the evaluation report
-      saveReport(user.id, reportData);
+      saveReport(
+        user.id,
+        reportData as unknown as Parameters<typeof saveReport>[1]
+      );
 
       toast({
         title: 'Evaluation Report Saved!',
