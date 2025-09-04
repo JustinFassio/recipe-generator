@@ -598,7 +598,18 @@ Format it as valid JSON that can be parsed directly.`;
     setIsLoading(true);
     try {
       // Send a message asking Dr. Luna to generate the evaluation report
-      const reportRequest = 'Please prepare the user evaluation report';
+      const reportRequest = `Please prepare the user evaluation report in the exact JSON format specified in your system prompt. 
+
+IMPORTANT: Output ONLY the JSON object, wrapped in markdown code blocks like this:
+\`\`\`json
+{
+  "user_evaluation_report": {
+    // ... complete report structure
+  }
+}
+\`\`\`
+
+Do not include any additional text, explanations, or formatting outside the JSON code block.`;
 
       const response = await openaiAPI.sendMessageWithPersona(
         [
@@ -665,15 +676,30 @@ Format it as valid JSON that can be parsed directly.`;
       // Try to parse the JSON response from Dr. Luna
       let reportData;
       try {
-        // Extract JSON from the response (might be wrapped in markdown or text)
-        const jsonMatch = generatedEvaluationReport.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-          reportData = JSON.parse(jsonMatch[0]);
+        // First, try to find JSON wrapped in markdown code blocks
+        const codeBlockMatch = generatedEvaluationReport.match(
+          /```(?:json)?\s*(\{[\s\S]*?\})\s*```/
+        );
+        if (codeBlockMatch) {
+          reportData = JSON.parse(codeBlockMatch[1]);
         } else {
-          throw new Error('No valid JSON found in response');
+          // If no code blocks, try to find JSON in the text
+          const jsonMatch = generatedEvaluationReport.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            // Clean up the JSON string - remove any trailing text after the last }
+            let jsonString = jsonMatch[0];
+            const lastBraceIndex = jsonString.lastIndexOf('}');
+            if (lastBraceIndex !== -1) {
+              jsonString = jsonString.substring(0, lastBraceIndex + 1);
+            }
+            reportData = JSON.parse(jsonString);
+          } else {
+            throw new Error('No valid JSON found in response');
+          }
         }
       } catch (parseError) {
         console.error('Failed to parse evaluation report JSON:', parseError);
+        console.error('Raw response:', generatedEvaluationReport);
         toast({
           title: 'Save Failed',
           description:
