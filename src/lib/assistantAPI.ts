@@ -244,6 +244,22 @@ export class AssistantAPI {
         throw new Error('No messages found in thread');
       }
 
+      // Debug: Log all messages to see what we're getting
+      console.log(`Thread ${threadId} has ${messages.length} messages:`);
+      messages.forEach(
+        (
+          msg: {
+            role: string;
+            content: Array<{ type: string; text?: { value: string } }>;
+          },
+          index: number
+        ) => {
+          console.log(
+            `Message ${index}: Role=${msg.role}, Content=${msg.content[0]?.text?.value?.substring(0, 100)}...`
+          );
+        }
+      );
+
       const latestMessage = messages[0];
       if (latestMessage.role !== 'assistant') {
         throw new Error('Latest message is not from assistant');
@@ -257,6 +273,9 @@ export class AssistantAPI {
         throw new Error('No text content found in assistant message');
       }
 
+      console.log(
+        `Returning message: ${textContent.text.value.substring(0, 100)}...`
+      );
       return textContent.text.value;
     } catch (error) {
       console.error('Error getting latest message:', error);
