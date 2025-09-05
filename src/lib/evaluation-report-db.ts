@@ -68,9 +68,10 @@ export const getUserEvaluationReportsFromDB = async (
     }
 
     // Convert database format to EvaluationReport format
-    const reports: EvaluationReport[] = data.map((dbReport) => ({
-      user_evaluation_report: dbReport.report_data,
-    }));
+    // Note: dbReport.report_data already contains the complete user_evaluation_report object
+    const reports: EvaluationReport[] = data.map(
+      (dbReport) => dbReport.report_data
+    );
 
     return reports;
   } catch (error) {
@@ -103,9 +104,8 @@ export const getEvaluationReportByIdFromDB = async (
       throw new Error(`Failed to load evaluation report: ${error.message}`);
     }
 
-    return {
-      user_evaluation_report: data.report_data,
-    };
+    // Note: data.report_data already contains the complete user_evaluation_report object
+    return data.report_data;
   } catch (error) {
     console.error('Error loading evaluation report from database:', error);
     return null;
@@ -196,9 +196,8 @@ export const getLatestEvaluationReportFromDB = async (
       );
     }
 
-    return {
-      user_evaluation_report: data.report_data,
-    };
+    // Note: data.report_data already contains the complete user_evaluation_report object
+    return data.report_data;
   } catch (error) {
     console.error(
       'Error loading latest evaluation report from database:',
