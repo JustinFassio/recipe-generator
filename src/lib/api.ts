@@ -42,7 +42,7 @@ export const recipeApi = {
     let query = supabase
       .from('recipes')
       .select(
-        'id, title, ingredients, categories, cooking_time, difficulty, is_public, created_at, updated_at'
+        'id, title, ingredients, instructions, notes, image_url, categories, cooking_time, difficulty, is_public, created_at, updated_at'
       )
       .eq('user_id', user.id);
 
@@ -134,7 +134,7 @@ export const recipeApi = {
     const { data: recipes, error: recipesError } = await supabase
       .from('recipes')
       .select(
-        'id, title, ingredients, categories, cooking_time, difficulty, user_id, created_at'
+        'id, title, ingredients, instructions, notes, image_url, categories, cooking_time, difficulty, user_id, created_at'
       )
       .eq('is_public', true)
       .order('created_at', { ascending: false });
