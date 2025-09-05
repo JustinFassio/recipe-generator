@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { openaiAPI, RECIPE_BOT_PERSONAS, type PersonaType } from '@/lib/openai';
 import type { RecipeFormData } from '@/lib/schemas';
 import { toast } from '@/hooks/use-toast';
@@ -21,8 +21,6 @@ export interface ConversationState {
   threadId: string | null;
   isUsingAssistant: boolean;
   showSaveRecipeButton: boolean;
-  hasEvaluationReport: boolean;
-  generatedEvaluationReport: string | null;
 }
 
 export interface ConversationActions {
@@ -38,13 +36,9 @@ export interface ConversationActions {
   convertToRecipe: () => Promise<void>;
   requestCompleteRecipe: () => Promise<void>;
   saveCurrentRecipe: () => Promise<void>;
-  generateEvaluationReport: () => Promise<void>;
-  saveEvaluationReport: () => Promise<void>;
 }
 
-export function useConversation(
-  defaultPersona?: PersonaType
-): ConversationState & ConversationActions {
+export function useConversation(): ConversationState & ConversationActions {
   const { user } = useAuth();
   const [persona, setPersona] = useState<PersonaType | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -52,15 +46,10 @@ export function useConversation(
     null
   );
   const [isLoading, setIsLoading] = useState(false);
-  const [showPersonaSelector, setShowPersonaSelector] =
-    useState(!defaultPersona);
+  const [showPersonaSelector, setShowPersonaSelector] = useState(true);
   const [threadId, setThreadId] = useState<string | null>(null);
   const [isUsingAssistant, setIsUsingAssistant] = useState(false);
   const [showSaveRecipeButton, setShowSaveRecipeButton] = useState(false);
-  const [hasEvaluationReport, setHasEvaluationReport] = useState(false);
-  const [generatedEvaluationReport, setGeneratedEvaluationReport] = useState<
-    string | null
-  >(null);
 
   const selectPersona = useCallback(
     async (selectedPersona: PersonaType) => {
@@ -97,73 +86,8 @@ export function useConversation(
             userData
           );
 
-          // Generate a personalized, actionable welcome message
-          welcomeContent = `Hi! I'm ${personaConfig.name}, your AI Recipe Creator. 
-
-**Your Profile Summary:**
-• **Skill Level**: ${userData.profile.skill_level || 'Beginner'} cook
-• **Available Time**: ${userData.profile.time_per_meal || '45'} minutes per meal
-• **Preferred Cuisines**: ${userData.cooking.preferred_cuisines.join(', ')}
-• **Equipment**: ${userData.cooking.available_equipment.join(', ')}
-• **Safety**: ${userData.safety.allergies.length > 0 ? `Allergies to ${userData.safety.allergies.join(', ')}` : 'No allergies reported'}
-
-**Ready to Begin?** 
-
-I'm here to create the perfect recipe for you! To get started, I need to know:
-
-**What's your main ingredient or craving today?** 
-(You can tell me about a specific ingredient, cuisine type, or just describe what you're in the mood for!)
-
-I'll ensure all recommendations are safe for your dietary needs and tailored to your skill level and time constraints.`;
-
-          // SILENT CONTEXT INJECTION: Send user profile data to OpenAI Assistant immediately
-          if (usingAssistant && personaConfig.assistantId) {
-            try {
-              // Use the comprehensive context builder for better structure
-              const { buildComprehensiveUserContext } = await import(
-                '@/lib/ai'
-              );
-              const contextMessage = await buildComprehensiveUserContext(
-                user.id
-              );
-
-              // Send this context message silently to the OpenAI Assistant
-              // This will make the assistant "think" about the user's profile
-              const silentResponse = await openaiAPI.sendMessageWithPersona(
-                [
-                  {
-                    id: 'context-injection',
-                    role: 'user',
-                    content: contextMessage,
-                    timestamp: new Date(),
-                  },
-                ],
-                selectedPersona,
-                null, // No thread ID yet
-                user.id
-              );
-
-              // Store the thread ID for future messages
-              if (silentResponse.threadId) {
-                setThreadId(silentResponse.threadId);
-              }
-
-              // Use the Assistant API response as the welcome message instead of hardcoded content
-              if (silentResponse.message) {
-                welcomeContent = silentResponse.message;
-              }
-
-              console.log(
-                'Silent context injection completed for OpenAI Assistant:',
-                selectedPersona
-              );
-            } catch (contextError) {
-              console.warn(
-                'Silent context injection failed, continuing with normal flow:',
-                contextError
-              );
-            }
-          }
+          // Add user context to the welcome message
+          welcomeContent += `\n\n**Personalized for you:** I can see your preferences and will ensure all recommendations are safe and suitable for your needs.`;
 
           console.log(
             'Phase 4: Enhanced persona selection with user data for',
@@ -189,13 +113,6 @@ I'll ensure all recommendations are safe for your dietary needs and tailored to 
     },
     [user?.id]
   );
-
-  // Auto-select default persona if provided
-  useEffect(() => {
-    if (defaultPersona && !persona) {
-      selectPersona(defaultPersona);
-    }
-  }, [defaultPersona, persona, selectPersona]);
 
   const sendMessage = useCallback(
     async (
@@ -657,350 +574,6 @@ Format as: {"title": "Recipe Name", "ingredients": ["ingredient 1", "ingredient 
     }
   }, [persona, messages, threadId, user?.id, setGeneratedRecipe]);
 
-  const generateEvaluationReport = useCallback(async () => {
-    if (!persona || persona !== 'drLunaClearwater') return;
-
-    setIsLoading(true);
-    try {
-      // Generate report in 3 parts to avoid truncation and tool requirements
-      const reportParts = [
-        {
-          part: 1,
-          request: `Please generate PART 1 of the user evaluation report. Focus on the foundational sections:
-
-\`\`\`json
-{
-  "user_evaluation_report": {
-    "report_id": "eval_2025_01_17_usr_[unique_id]",
-    "evaluation_date": "[current_date_time]",
-    "dietitian": "Dr. Luna Clearwater",
-    "report_version": "1.0",
-    "user_profile_summary": {
-      "user_id": "[generated_unique_id]",
-      "evaluation_completeness": [percentage],
-      "data_quality_score": [percentage],
-      "last_updated": "[current_date_time]"
-    },
-    "safety_assessment": {
-      "status": "[VERIFIED/REVIEW_NEEDED]",
-      "critical_alerts": [...],
-      "dietary_restrictions": [...],
-      "medical_considerations": [...]
-    },
-    "personalization_matrix": {
-      "skill_profile": {...},
-      "time_analysis": {...},
-      "equipment_optimization": {...},
-      "cultural_preferences": {...},
-      "ingredient_landscape": {...}
-    }
-  }
-}
-\`\`\`
-
-Generate realistic data based on our conversation. Use current dates and appropriate percentages.`,
-        },
-        {
-          part: 2,
-          request: `Please generate PART 2 of the user evaluation report. Focus on analysis and recommendations:
-
-\`\`\`json
-{
-  "nutritional_analysis": {
-    "current_status": {
-      "overall_diet_quality_score": [percentage],
-      "nutritional_completeness": [percentage],
-      "anti_inflammatory_index": [percentage],
-      "gut_health_score": [percentage],
-      "metabolic_health_score": [percentage]
-    },
-    "deficiency_risks": [...],
-    "optimization_priorities": [...]
-  },
-  "personalized_recommendations": {
-    "immediate_actions": [...],
-    "weekly_structure": {
-      "meal_framework": {...},
-      "cuisine_rotation": {...}
-    },
-    "progressive_challenges": [...]
-  },
-  "meal_suggestions": {
-    "signature_recipes": [...],
-    "quick_options": [...],
-    "batch_cooking_priorities": [...]
-  }
-}
-\`\`\`
-
-Generate realistic data based on our conversation.`,
-        },
-        {
-          part: 3,
-          request: `Please generate PART 3 of the user evaluation report. Focus on tracking and support:
-
-\`\`\`json
-{
-  "progress_tracking": {
-    "key_metrics": [...],
-    "milestone_markers": [...]
-  },
-  "risk_mitigation": {
-    "adherence_barriers": [...],
-    "safety_reminders": [...]
-  },
-  "support_resources": {
-    "education_modules": [...],
-    "tools_provided": [...],
-    "community_connections": [...]
-  },
-  "next_steps": {
-    "immediate_72_hours": [...],
-    "week_1_goals": [...],
-    "month_1_objectives": [...]
-  },
-  "professional_notes": {
-    "strengths_observed": "[specific_strengths]",
-    "growth_opportunities": "[specific_opportunities]",
-    "collaboration_recommendations": "[specific_recommendations]",
-    "reassessment_schedule": "[specific_schedule]"
-  },
-  "report_metadata": {
-    "confidence_level": [percentage],
-    "data_completeness": [percentage],
-    "personalization_depth": "[high/medium/low]",
-    "evidence_base": "[strong/moderate/developing]",
-    "last_literature_review": "[date]",
-    "next_update_recommended": "[date]"
-  }
-}
-\`\`\`
-
-Generate realistic data based on our conversation.`,
-        },
-      ];
-
-      let fullReport = '';
-      let reportData = {};
-
-      // Generate each part
-      for (const partInfo of reportParts) {
-        const response = await openaiAPI.sendMessageWithPersona(
-          [
-            ...messages,
-            {
-              id: Date.now().toString(),
-              role: 'user',
-              content: partInfo.request,
-              timestamp: new Date(),
-            },
-          ],
-          persona,
-          threadId,
-          user?.id
-        );
-
-        // Add the part request and response to messages
-        const userMessage: Message = {
-          id: Date.now().toString(),
-          role: 'user',
-          content: partInfo.request,
-          timestamp: new Date(),
-        };
-
-        const assistantMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          role: 'assistant',
-          content: response.message,
-          timestamp: new Date(),
-        };
-
-        setMessages((prev) => [...prev, userMessage, assistantMessage]);
-
-        // Extract JSON from this part
-        const codeBlockMatch = response.message.match(
-          /```(?:json)?\s*(\{[\s\S]*?\})\s*```/
-        );
-        if (codeBlockMatch) {
-          try {
-            const partData = JSON.parse(codeBlockMatch[1]);
-            reportData = { ...reportData, ...partData };
-            fullReport += response.message + '\n\n';
-          } catch (parseError) {
-            console.warn(`Failed to parse part ${partInfo.part}:`, parseError);
-            fullReport += response.message + '\n\n';
-          }
-        } else {
-          fullReport += response.message + '\n\n';
-        }
-
-        // Small delay between parts to avoid rate limiting
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-      }
-
-      // Store the complete report
-      setGeneratedEvaluationReport(fullReport);
-      setHasEvaluationReport(true);
-
-      toast({
-        title: 'Evaluation Report Generated!',
-        description:
-          'Your comprehensive health evaluation report is ready to save.',
-      });
-    } catch (error) {
-      console.error('Failed to generate evaluation report:', error);
-      toast({
-        title: 'Generation Failed',
-        description:
-          'Could not generate the evaluation report. Please try again.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }, [persona, messages, threadId, user?.id]);
-
-  const saveEvaluationReport = useCallback(async () => {
-    if (!user?.id || !generatedEvaluationReport) return;
-
-    setIsLoading(true);
-    try {
-      // Import the evaluation report storage functions
-      const { saveEvaluationReport: saveReport } = await import(
-        '@/lib/evaluation-report-storage'
-      );
-
-      // Try to parse the multi-part JSON response from Dr. Luna
-      let reportData: Record<string, unknown> = {};
-      let hasValidData = false;
-
-      try {
-        // Find all JSON code blocks in the multi-part response
-        const codeBlockMatches = generatedEvaluationReport.match(
-          /```(?:json)?\s*(\{[\s\S]*?\})\s*```/g
-        );
-
-        if (codeBlockMatches) {
-          // Parse each JSON block and merge them
-          for (const match of codeBlockMatches) {
-            const jsonMatch = match.match(
-              /```(?:json)?\s*(\{[\s\S]*?\})\s*```/
-            );
-            if (jsonMatch) {
-              try {
-                const partData = JSON.parse(jsonMatch[1]);
-                reportData = { ...reportData, ...partData };
-                hasValidData = true;
-              } catch (partParseError) {
-                console.warn(
-                  'Failed to parse part of evaluation report:',
-                  partParseError
-                );
-              }
-            }
-          }
-        }
-
-        // If we couldn't parse JSON blocks, try to save the raw text as a report
-        if (!hasValidData) {
-          // Create a basic report structure with the raw content
-          reportData = {
-            user_evaluation_report: {
-              report_id: `eval_${new Date().toISOString().split('T')[0]}_usr_${user.id.slice(-8)}`,
-              evaluation_date: new Date().toISOString(),
-              dietitian: 'Dr. Luna Clearwater',
-              report_version: '1.0',
-              raw_content: generatedEvaluationReport,
-              report_type: 'multi_part_text',
-              user_profile_summary: {
-                user_id: user.id,
-                evaluation_completeness: 100,
-                data_quality_score: 85,
-                last_updated: new Date().toISOString(),
-              },
-              report_metadata: {
-                confidence_level: 85,
-                data_completeness: 100,
-                personalization_depth: 'high',
-                evidence_base: 'strong',
-                last_literature_review: new Date().toISOString().split('T')[0],
-                next_update_recommended: new Date(
-                  Date.now() + 30 * 24 * 60 * 60 * 1000
-                )
-                  .toISOString()
-                  .split('T')[0],
-              },
-            },
-          };
-          hasValidData = true;
-        }
-      } catch (parseError) {
-        console.error('Failed to parse evaluation report:', parseError);
-        console.error('Raw response:', generatedEvaluationReport);
-
-        // Create a fallback report with the raw content
-        reportData = {
-          user_evaluation_report: {
-            report_id: `eval_${new Date().toISOString().split('T')[0]}_usr_${user.id.slice(-8)}`,
-            evaluation_date: new Date().toISOString(),
-            dietitian: 'Dr. Luna Clearwater',
-            report_version: '1.0',
-            raw_content: generatedEvaluationReport,
-            report_type: 'fallback_text',
-            user_profile_summary: {
-              user_id: user.id,
-              evaluation_completeness: 100,
-              data_quality_score: 75,
-              last_updated: new Date().toISOString(),
-            },
-            report_metadata: {
-              confidence_level: 75,
-              data_completeness: 100,
-              personalization_depth: 'medium',
-              evidence_base: 'moderate',
-              last_literature_review: new Date().toISOString().split('T')[0],
-              next_update_recommended: new Date(
-                Date.now() + 30 * 24 * 60 * 60 * 1000
-              )
-                .toISOString()
-                .split('T')[0],
-            },
-          },
-        };
-        hasValidData = true;
-      }
-
-      if (!hasValidData) {
-        throw new Error('No valid report data could be extracted');
-      }
-
-      // Save the evaluation report
-      saveReport(
-        user.id,
-        reportData as unknown as Parameters<typeof saveReport>[1]
-      );
-
-      toast({
-        title: 'Evaluation Report Saved!',
-        description:
-          'Your health evaluation report has been saved to your health reports.',
-      });
-
-      // Reset the report state
-      setHasEvaluationReport(false);
-      setGeneratedEvaluationReport(null);
-    } catch (error) {
-      console.error('Failed to save evaluation report:', error);
-      toast({
-        title: 'Save Failed',
-        description: 'Could not save the evaluation report. Please try again.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }, [user?.id, generatedEvaluationReport]);
-
   return {
     // State
     persona,
@@ -1011,8 +584,6 @@ Generate realistic data based on our conversation.`,
     threadId,
     isUsingAssistant,
     showSaveRecipeButton,
-    hasEvaluationReport,
-    generatedEvaluationReport,
     // Actions
     selectPersona,
     sendMessage,
@@ -1023,7 +594,5 @@ Generate realistic data based on our conversation.`,
     convertToRecipe,
     requestCompleteRecipe,
     saveCurrentRecipe,
-    generateEvaluationReport,
-    saveEvaluationReport,
   };
 }
