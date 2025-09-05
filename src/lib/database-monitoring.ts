@@ -60,7 +60,8 @@ class DatabaseMonitor {
 
         if (slowQueryData) {
           slowQueries = slowQueryData.map((q: Record<string, unknown>) => ({
-            query: q.query?.substring(0, 100) + '...' || 'Unknown query',
+            query:
+              (q.query as string)?.substring(0, 100) + '...' || 'Unknown query',
             duration: q.mean_exec_time || 0,
             calls: q.calls || 0,
           }));

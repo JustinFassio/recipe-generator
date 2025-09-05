@@ -99,7 +99,7 @@ export const recipeApi = {
     const { data, error } = await query;
 
     if (error) handleError(error, 'Get user recipes');
-    return data || [];
+    return (data as unknown as Recipe[]) || [];
   },
 
   // Get a single recipe by ID
@@ -144,7 +144,9 @@ export const recipeApi = {
 
     // Get unique user IDs from recipes
     const userIds = [
-      ...new Set(recipes.map((recipe: Recipe) => recipe.user_id)),
+      ...new Set(
+        recipes.map((recipe: Record<string, unknown>) => recipe.user_id)
+      ),
     ];
 
     // Fetch profiles for those users
@@ -164,10 +166,10 @@ export const recipeApi = {
     );
 
     // Combine recipes with profile data
-    return recipes.map((recipe: Recipe) => ({
+    return recipes.map((recipe: Record<string, unknown>) => ({
       ...recipe,
-      author_name: profileMap.get(recipe.user_id) || 'Unknown Author',
-    }));
+      author_name: profileMap.get(recipe.user_id as string) || 'Unknown Author',
+    })) as PublicRecipe[];
   },
 
   // Toggle recipe public status

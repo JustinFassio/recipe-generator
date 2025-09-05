@@ -10,7 +10,12 @@ export const queryClient = new QueryClient({
       gcTime: 5 * 60 * 1000, // 5 minutes garbage collection time
       retry: (failureCount, error: unknown) => {
         // Don't retry on 4xx errors (client errors)
-        if (error?.status >= 400 && error?.status < 500) {
+        if (
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (error as any)?.status >= 400 &&
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (error as any)?.status < 500
+        ) {
           return false;
         }
         // Retry up to 3 times for other errors
