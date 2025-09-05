@@ -228,7 +228,15 @@ export const saveEvaluationReport = async (
 
     let reports: EvaluationReport[] = [];
     if (existingReports) {
-      reports = JSON.parse(existingReports);
+      try {
+        reports = JSON.parse(existingReports);
+      } catch (parseError) {
+        console.warn(
+          `Corrupted evaluation reports in localStorage for user ${userId}. Resetting to empty array.`,
+          parseError
+        );
+        reports = [];
+      }
     }
 
     // Check if this report already exists (by report_id)
@@ -302,7 +310,16 @@ export const getUserEvaluationReports = async (
       return [];
     }
 
-    const reports: EvaluationReport[] = JSON.parse(storedReports);
+    let reports: EvaluationReport[] = [];
+    try {
+      reports = JSON.parse(storedReports);
+    } catch (parseError) {
+      console.warn(
+        `Corrupted evaluation reports in localStorage for user ${userId}. Returning empty array.`,
+        parseError
+      );
+      return [];
+    }
 
     // Sort by evaluation date (newest first)
     return reports.sort(
@@ -359,7 +376,16 @@ export const deleteEvaluationReport = async (
     const existingReports = localStorage.getItem(storageKey);
 
     if (existingReports) {
-      let reports: EvaluationReport[] = JSON.parse(existingReports);
+      let reports: EvaluationReport[] = [];
+      try {
+        reports = JSON.parse(existingReports);
+      } catch (parseError) {
+        console.warn(
+          `Corrupted evaluation reports in localStorage for user ${userId}. Cannot delete report.`,
+          parseError
+        );
+        return dbSuccess; // Return database success status
+      }
       reports = reports.filter(
         (report) => report.user_evaluation_report.report_id !== reportId
       );
