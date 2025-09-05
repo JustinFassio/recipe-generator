@@ -60,7 +60,11 @@ export function NutritionTab({ report }: TabProps) {
                     </p>
                     <div className="text-xs">
                       <span className="font-medium">Food sources:</span>{' '}
-                      {risk.food_sources?.join(', ') || 'None specified'}
+                      {Array.isArray(risk.food_sources)
+                        ? risk.food_sources.length > 0
+                          ? risk.food_sources.join(', ')
+                          : 'None specified'
+                        : 'None specified'}
                     </div>
                   </div>
                 )

@@ -37,7 +37,11 @@ export function SafetyTab({ report }: TabProps) {
                       </p>
                       <div className="text-xs">
                         <span className="font-medium">Hidden sources:</span>{' '}
-                        {alert.hidden_sources?.join(', ') || 'None specified'}
+                        {Array.isArray(alert.hidden_sources)
+                          ? alert.hidden_sources.length > 0
+                            ? alert.hidden_sources.join(', ')
+                            : 'None specified'
+                          : 'None specified'}
                       </div>
                     </div>
                   )
@@ -66,8 +70,11 @@ export function SafetyTab({ report }: TabProps) {
                       </p>
                       <div className="text-xs">
                         <span className="font-medium">Safe alternatives:</span>{' '}
-                        {restriction.safe_alternatives?.join(', ') ||
-                          'None specified'}
+                        {Array.isArray(restriction.safe_alternatives)
+                          ? restriction.safe_alternatives.length > 0
+                            ? restriction.safe_alternatives.join(', ')
+                            : 'None specified'
+                          : 'None specified'}
                       </div>
                     </div>
                   )

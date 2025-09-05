@@ -32,8 +32,11 @@ export function RecommendationsTab({ report }: TabProps) {
                     </p>
                     <div className="text-xs">
                       <span className="font-medium">Resources:</span>{' '}
-                      {action.resources_provided?.join(', ') ||
-                        'None specified'}
+                      {Array.isArray(action.resources_provided)
+                        ? action.resources_provided.length > 0
+                          ? action.resources_provided.join(', ')
+                          : 'None specified'
+                        : 'None specified'}
                     </div>
                   </div>
                 )
