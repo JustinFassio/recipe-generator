@@ -521,22 +521,24 @@ export function useConversation(): ConversationState & ConversationActions {
         } else {
           console.log('No JSON found in last message, trying AI extraction...');
 
-          // Fallback: Use AI to extract recipe from the last message
-          const extractRequest = `Please extract the recipe from this conversation and format it as JSON:
-          
-${lastAssistantMessage.content}
+          // Fallback: Use AI to extract recipe from the conversation with full context
+          const extractRequest = `Please extract the recipe from this conversation and format it as JSON. Consider the full conversation context to ensure accuracy:
 
 Format as: {"title": "Recipe Name", "ingredients": ["ingredient 1", "ingredient 2"], "instructions": "Step-by-step instructions", "notes": "Additional notes", "setup": ["prep step 1"], "categories": ["category 1"]}`;
 
+          // Include full conversation history for better context
+          const conversationWithExtractRequest = [
+            ...messages,
+            {
+              id: Date.now().toString(),
+              role: 'user' as const,
+              content: extractRequest,
+              timestamp: new Date(),
+            },
+          ];
+
           const response = await openaiAPI.sendMessageWithPersona(
-            [
-              {
-                id: Date.now().toString(),
-                role: 'user',
-                content: extractRequest,
-                timestamp: new Date(),
-              },
-            ],
+            conversationWithExtractRequest,
             persona,
             threadId,
             user?.id
