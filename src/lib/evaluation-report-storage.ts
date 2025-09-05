@@ -199,16 +199,30 @@ export interface EvaluationReport {
 
 /**
  * Save an evaluation report for a user
+ * Returns an object indicating which storage layers succeeded
  */
 export const saveEvaluationReport = async (
   userId: string,
   report: EvaluationReport
-): Promise<void> => {
-  try {
-    // Try to save to database first
-    await saveEvaluationReportToDB(userId, report);
+): Promise<{ database: boolean; localStorage: boolean }> => {
+  let databaseSuccess = false;
+  let localStorageSuccess = false;
 
-    // Also save to localStorage as backup
+  // Try to save to database first
+  try {
+    await saveEvaluationReportToDB(userId, report);
+    databaseSuccess = true;
+    console.log(
+      `Evaluation report saved to database for user ${userId}:`,
+      report.user_evaluation_report.report_id
+    );
+  } catch (dbError) {
+    console.error('Error saving evaluation report to database:', dbError);
+    // Continue with localStorage even if database fails
+  }
+
+  // Try to save to localStorage
+  try {
     const storageKey = `evaluation_reports_${userId}`;
     const existingReports = localStorage.getItem(storageKey);
 
@@ -240,15 +254,30 @@ export const saveEvaluationReport = async (
     );
 
     localStorage.setItem(storageKey, JSON.stringify(reports));
-
+    localStorageSuccess = true;
     console.log(
-      `Evaluation report saved for user ${userId}:`,
+      `Evaluation report saved to localStorage for user ${userId}:`,
       report.user_evaluation_report.report_id
     );
-  } catch (error) {
-    console.error('Error saving evaluation report:', error);
-    throw new Error('Failed to save evaluation report');
+  } catch (localStorageError) {
+    console.error(
+      'Error saving evaluation report to localStorage:',
+      localStorageError
+    );
   }
+
+  // If both storage layers failed, throw an error
+  if (!databaseSuccess && !localStorageSuccess) {
+    throw new Error(
+      'Failed to save evaluation report to both database and localStorage'
+    );
+  }
+
+  // Return success status for both storage layers
+  return {
+    database: databaseSuccess,
+    localStorage: localStorageSuccess,
+  };
 };
 
 /**
