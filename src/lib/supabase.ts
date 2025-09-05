@@ -45,6 +45,11 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   },
 });
 
+// Expose Supabase client to window for debugging (development only)
+if (typeof window !== 'undefined' && import.meta.env.DEV) {
+  (window as { supabase?: typeof supabase }).supabase = supabase;
+}
+
 // Re-export types for backward compatibility
 export type {
   Recipe,
