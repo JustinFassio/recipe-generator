@@ -8,12 +8,14 @@ import { RecipesPage } from '@/pages/recipes-page';
 import { AddRecipePage } from '@/pages/add-recipe-page';
 import { RecipeViewPage } from '@/pages/recipe-view-page';
 import { ChatRecipePage } from '@/pages/chat-recipe-page';
+import { CoachChatPage } from '@/pages/coach-chat-page';
 import ProfilePage from '@/pages/profile-page';
 import AuthCallbackPage from '@/pages/auth-callback-page';
 import ExplorePage from '@/pages/explore-page';
 import { AuthForm } from '@/components/auth/auth-form';
 import { ThemeProvider } from '@/components/ui/theme-provider';
 import Phase4Demo from '@/components/demo/Phase4Demo';
+import EvaluationReportPage from '@/pages/evaluation-report-page';
 import { SelectionProvider } from '@/contexts/SelectionContext';
 
 import { Toaster } from '@/components/ui/toaster';
@@ -103,6 +105,19 @@ function AppContent() {
         }
       />
       <Route
+        path="/coach-chat"
+        element={
+          <ProtectedRoute>
+            <div className="bg-base-100 min-h-screen">
+              <Header />
+              <main>
+                <CoachChatPage />
+              </main>
+            </div>
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/recipe/:id"
         element={
           <ProtectedRoute>
@@ -136,6 +151,19 @@ function AppContent() {
               <Header />
               <main>
                 <Phase4Demo />
+              </main>
+            </div>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/evaluation-report"
+        element={
+          <ProtectedRoute>
+            <div className="bg-base-100 min-h-screen">
+              <Header />
+              <main>
+                <EvaluationReportPage />
               </main>
             </div>
           </ProtectedRoute>

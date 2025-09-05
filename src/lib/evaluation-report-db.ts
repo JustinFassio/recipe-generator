@@ -216,3 +216,30 @@ export const getLatestEvaluationReportFromDB = async (
     return null;
   }
 };
+
+/**
+ * Clear all evaluation reports for a user from the database
+ */
+export const clearAllEvaluationReportsFromDB = async (
+  userId: string
+): Promise<boolean> => {
+  try {
+    const { error } = await supabase
+      .from('evaluation_reports')
+      .delete()
+      .eq('user_id', userId);
+
+    if (error) {
+      console.error('Error clearing evaluation reports from database:', error);
+      return false;
+    }
+
+    console.log(
+      `All evaluation reports cleared from database for user ${userId}`
+    );
+    return true;
+  } catch (error) {
+    console.error('Error clearing evaluation reports from database:', error);
+    return false;
+  }
+};
