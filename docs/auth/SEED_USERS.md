@@ -217,6 +217,51 @@ All recipes are automatically tagged with 1-2 mood tags based on their existing 
 - **Social**: Sharing, Romantic, Communal
 - **Style**: Traditional, Simple, Elegant, Rustic, Adventurous
 
+## Health Evaluation Reports (Dr. Luna Clearwater)
+
+Sample health evaluation reports are seeded for testing the Dr. Luna Clearwater health assessment functionality:
+
+### **Alice Baker** - Vegetarian with Peanut Allergy
+
+- **Report ID**: `eval_2025_01_15_alice_001`
+- **Date**: January 15, 2025
+- **Focus**: Vegetarian nutrition optimization with severe peanut allergy management
+- **Key Recommendations**: B12 supplementation, protein variety expansion, peanut cross-contamination prevention
+- **Safety Alerts**: Severe peanut allergy with high cross-contamination risk
+- **Nutritional Priorities**: Complete amino acid profiles, micronutrient density
+- **Meal Framework**: Mediterranean-Italian fusion with plant-based proteins
+
+### **Bob Carter** - BBQ Enthusiast
+
+- **Report ID**: `eval_2025_01_12_bob_001`
+- **Date**: January 12, 2025
+- **Focus**: Balanced nutrition while maintaining BBQ lifestyle
+- **Key Recommendations**: Increase vegetable intake, optimize fiber consumption
+- **Safety Alerts**: None
+- **Nutritional Priorities**: Vegetable integration, omega fatty acid balance
+- **Meal Framework**: BBQ-centered meals with substantial vegetable sides
+
+### **David Evans** - Celiac Disease Management
+
+- **Report ID**: `eval_2025_01_10_david_001`
+- **Date**: January 10, 2025
+- **Focus**: Celiac disease management with advanced gluten-free baking
+- **Key Recommendations**: Gut healing protocol, nutrient absorption optimization
+- **Safety Alerts**: Severe gluten allergy requiring strict avoidance
+- **Nutritional Priorities**: Iron status, gut health, inflammation reduction
+- **Meal Framework**: French-Mediterranean techniques with certified GF ingredients
+
+Each report includes comprehensive sections:
+
+- **Safety Assessment**: Critical alerts, dietary restrictions, medical considerations
+- **Personalization Matrix**: Skill profile, time analysis, equipment optimization, cultural preferences
+- **Nutritional Analysis**: Current status, deficiency risks, optimization priorities
+- **Personalized Recommendations**: Immediate actions, weekly structure, progressive challenges
+- **Meal Suggestions**: Signature recipes, quick options, batch cooking priorities
+- **Progress Tracking**: Key metrics, milestone markers
+- **Risk Mitigation**: Adherence barriers, safety reminders
+- **Support Resources**: Education modules, tools, community connections
+
 ## How to reseed locally
 
 1. Reset DB and run SQL seeds (e.g., sample recipes):
@@ -236,6 +281,7 @@ npm run seed
 - The script lives at `scripts/seed-users.ts` and uses `public.claim_username_atomic` to set usernames.
 - Profiles, user safety, and cooking preferences are populated for each user.
 - Each user has 9-10 recipes with comprehensive categories for thorough filtering system testing.
+- **Health evaluation reports** are seeded for Alice, Bob, and David to test Dr. Luna Clearwater functionality.
 - Categories cover all major dimensions: Course, Cuisine, Collection, Technique, Occasion, Dietary, Time, Dish Type, and **Mood**.
 - **Mood tags are automatically added based on existing category hints** - no manual tagging required.
 

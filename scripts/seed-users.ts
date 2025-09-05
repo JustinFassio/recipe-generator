@@ -233,6 +233,952 @@ async function upsertCooking(userId: string, cooking: SeedUser['cooking']) {
   if (error) throw error;
 }
 
+async function seedEvaluationReports() {
+  // Sample evaluation reports for each user to test Dr. Luna Clearwater functionality
+  const evaluationReports = [
+    // Alice's report - Vegetarian focus with peanut allergy
+    {
+      user_email: 'alice@example.com',
+      report: {
+        user_evaluation_report: {
+          report_id: 'eval_2025_01_15_alice_001',
+          evaluation_date: '2025-01-15T10:30:00Z',
+          dietitian: 'Dr. Luna Clearwater',
+          report_version: '1.0',
+          user_profile_summary: {
+            user_id: 'alice_profile_001',
+            evaluation_completeness: 92,
+            data_quality_score: 88,
+            last_updated: '2025-01-15T10:30:00Z',
+          },
+          safety_assessment: {
+            status: 'VERIFIED',
+            critical_alerts: [
+              {
+                type: 'allergy',
+                severity: 'severe',
+                item: 'peanuts',
+                required_action:
+                  'Complete avoidance required - check all processed foods',
+                hidden_sources: [
+                  'Asian sauces',
+                  'baked goods',
+                  'protein bars',
+                  'vegetarian meat substitutes',
+                ],
+                cross_contamination_risk: 'high',
+              },
+            ],
+            dietary_restrictions: [
+              {
+                type: 'vegetarian',
+                severity: 'moderate',
+                tolerance_threshold: 'No meat, fish, or poultry',
+                safe_alternatives: [
+                  'legumes',
+                  'tofu',
+                  'tempeh',
+                  'quinoa',
+                  'nuts (except peanuts)',
+                ],
+                enzyme_supplementation: 'optional',
+              },
+            ],
+            medical_considerations: [],
+          },
+          personalization_matrix: {
+            skill_profile: {
+              current_level: 'intermediate',
+              confidence_score: 75,
+              growth_trajectory: 'positive',
+              recommended_techniques: [
+                'meal prep',
+                'batch cooking',
+                'flavor layering',
+              ],
+              advancement_timeline: '3-6 months to advanced',
+            },
+            time_analysis: {
+              available_time_per_meal: 30,
+              time_utilization_efficiency: 70,
+              optimization_opportunities: [
+                'prep shortcuts',
+                'one-pot meals',
+                'freezer-friendly options',
+              ],
+              quick_meal_quota: '60% of weekly meals',
+            },
+            equipment_optimization: {
+              utilization_rate: 85,
+              underused_tools: [],
+              missing_beneficial_tools: ['food processor', 'pressure cooker'],
+              technique_adaptations:
+                'Focus on skillet and oven-based techniques',
+            },
+            cultural_preferences: {
+              primary_cuisines: ['italian', 'mexican'],
+              flavor_profile_affinity: 'Mediterranean herbs and spices',
+              spice_tolerance_calibration: 2,
+              fusion_receptiveness: 'medium',
+            },
+            ingredient_landscape: {
+              embrace_list: [
+                'tomatoes',
+                'basil',
+                'olive oil',
+                'garlic',
+                'beans',
+                'quinoa',
+              ],
+              avoid_list: ['peanuts', 'anchovies', 'meat products'],
+              exploration_candidates: [
+                'nutritional yeast',
+                'tahini',
+                'hemp seeds',
+              ],
+              substitution_success_rate: 80,
+            },
+          },
+          nutritional_analysis: {
+            current_status: {
+              overall_diet_quality_score: 78,
+              nutritional_completeness: 82,
+              anti_inflammatory_index: 85,
+              gut_health_score: 80,
+              metabolic_health_score: 75,
+            },
+            deficiency_risks: [
+              {
+                nutrient: 'Vitamin B12',
+                risk_level: 'moderate',
+                current_intake_estimate: '40% of RDA',
+                food_sources: [
+                  'nutritional yeast',
+                  'fortified plant milks',
+                  'supplements',
+                ],
+                supplementation_consideration: 'recommended',
+              },
+              {
+                nutrient: 'Iron',
+                risk_level: 'low',
+                current_intake_estimate: '85% of RDA',
+                food_sources: ['lentils', 'spinach', 'quinoa', 'pumpkin seeds'],
+                supplementation_consideration: 'optional',
+              },
+            ],
+            optimization_priorities: [
+              {
+                priority: 1,
+                focus: 'Protein variety and completeness',
+                impact_score: 85,
+                implementation_difficulty: 'easy',
+              },
+              {
+                priority: 2,
+                focus: 'Vitamin B12 supplementation',
+                impact_score: 90,
+                implementation_difficulty: 'easy',
+              },
+            ],
+          },
+          personalized_recommendations: {
+            immediate_actions: [
+              {
+                action: 'Start B12 supplementation',
+                description: 'Take 250mcg methylcobalamin daily with breakfast',
+                expected_benefit:
+                  'Prevent B12 deficiency and support energy levels',
+                difficulty: 'easy',
+                resources_provided: [
+                  'supplement guide',
+                  'timing recommendations',
+                ],
+              },
+              {
+                action: 'Expand protein sources',
+                description:
+                  'Include hemp seeds, nutritional yeast, and tempeh weekly',
+                expected_benefit:
+                  'Complete amino acid profile and improved satiety',
+                difficulty: 'moderate',
+                resources_provided: [
+                  'recipe suggestions',
+                  'preparation guides',
+                ],
+              },
+            ],
+            weekly_structure: {
+              meal_framework: {
+                breakfast_template:
+                  'Protein-rich smoothie or overnight oats with seeds',
+                lunch_template:
+                  'Quinoa or legume-based salad with healthy fats',
+                dinner_template:
+                  'One-pot vegetarian meal with complete proteins',
+                snack_strategy: 'Nuts, seeds, or hummus with vegetables',
+              },
+              cuisine_rotation: {
+                monday: 'Italian',
+                tuesday: 'Mexican',
+                wednesday: 'Mediterranean',
+                thursday: 'Italian',
+                friday: 'Mexican',
+                weekend: 'Experimental fusion',
+              },
+            },
+            progressive_challenges: [
+              {
+                week_1_4: 'Master 3 new tempeh recipes',
+                week_5_8: 'Experiment with fermented foods',
+                week_9_12: 'Create signature fusion dishes',
+              },
+            ],
+          },
+          meal_suggestions: {
+            signature_recipes: [
+              {
+                name: 'Mediterranean Quinoa Power Bowl',
+                prep_time: 25,
+                skill_match: 90,
+                health_impact_score: 95,
+                customization_notes: 'Add hemp seeds for complete protein',
+                allergen_safe: true,
+              },
+              {
+                name: 'Italian White Bean Pasta',
+                prep_time: 20,
+                skill_match: 85,
+                health_impact_score: 80,
+                customization_notes: 'Use nutritional yeast for umami depth',
+                allergen_safe: true,
+              },
+            ],
+            quick_options: [
+              'Hummus veggie wraps',
+              'Quinoa stir-fry',
+              'Bean and avocado toast',
+            ],
+            batch_cooking_priorities: [
+              'Quinoa pilaf',
+              'Lentil soup',
+              'Roasted vegetables',
+            ],
+          },
+          progress_tracking: {
+            key_metrics: [
+              {
+                metric: 'Energy levels',
+                baseline: 'Self-reported daily rating 1-10',
+                target: 'Maintain 7+ average',
+                reassessment: 'Weekly check-ins',
+              },
+              {
+                metric: 'Meal satisfaction',
+                baseline: 'Post-meal fullness and satisfaction',
+                target: '8+ satisfaction rating',
+                reassessment: 'Daily logging for 2 weeks',
+              },
+            ],
+            milestone_markers: [
+              {
+                week_2: 'B12 supplement routine established',
+                week_4: '5 new protein-rich recipes mastered',
+                week_8: 'Consistent energy levels reported',
+                week_12: 'Complete nutritional profile achieved',
+              },
+            ],
+          },
+          risk_mitigation: {
+            adherence_barriers: [
+              {
+                barrier: 'Time constraints during busy weekdays',
+                mitigation_strategy: 'Sunday meal prep sessions',
+                backup_plan: 'Quick 15-minute emergency meals list',
+              },
+            ],
+            safety_reminders: [
+              'Always check labels for peanut contamination',
+              'Keep emergency antihistamine available',
+            ],
+          },
+          support_resources: {
+            education_modules: [
+              'Vegetarian nutrition basics',
+              'Peanut allergy management',
+              'Meal prep mastery',
+            ],
+            tools_provided: [
+              'Meal planning templates',
+              'Shopping lists',
+              'Recipe database',
+            ],
+            community_connections: [
+              'Local vegetarian cooking groups',
+              'Allergy-friendly recipe forums',
+            ],
+          },
+          next_steps: {
+            immediate_72_hours: [
+              'Purchase B12 supplement',
+              'Plan first tempeh recipe',
+              'Stock pantry with recommended items',
+            ],
+            week_1_goals: [
+              'Establish supplement routine',
+              'Try 2 new protein sources',
+              'Complete first meal prep session',
+            ],
+            week_1_objectives: [
+              'Track energy levels daily',
+              'Document meal satisfaction',
+              'Practice new cooking techniques',
+            ],
+          },
+          professional_notes: {
+            strengths_observed:
+              'Strong commitment to vegetarian lifestyle, good basic cooking skills, willingness to try new foods',
+            growth_opportunities:
+              'Expand protein variety, optimize nutrient timing, develop advanced flavor techniques',
+            collaboration_recommendations:
+              'Consider working with registered dietitian for ongoing B12 monitoring',
+            reassessment_schedule:
+              '3-month comprehensive review with lab work if needed',
+          },
+          report_metadata: {
+            confidence_level: 88,
+            data_completeness: 92,
+            personalization_depth: 'high',
+            evidence_base: 'strong',
+            last_literature_review: '2025-01-10',
+            next_update_recommended: '2025-04-15',
+          },
+        },
+      },
+    },
+
+    // Bob's report - BBQ enthusiast, no restrictions
+    {
+      user_email: 'bob@example.com',
+      report: {
+        user_evaluation_report: {
+          report_id: 'eval_2025_01_12_bob_001',
+          evaluation_date: '2025-01-12T14:15:00Z',
+          dietitian: 'Dr. Luna Clearwater',
+          report_version: '1.0',
+          user_profile_summary: {
+            user_id: 'bob_profile_001',
+            evaluation_completeness: 95,
+            data_quality_score: 90,
+            last_updated: '2025-01-12T14:15:00Z',
+          },
+          safety_assessment: {
+            status: 'VERIFIED',
+            critical_alerts: [],
+            dietary_restrictions: [],
+            medical_considerations: [],
+          },
+          personalization_matrix: {
+            skill_profile: {
+              current_level: 'advanced',
+              confidence_score: 90,
+              growth_trajectory: 'stable',
+              recommended_techniques: [
+                'smoking techniques',
+                'rub development',
+                'temperature control',
+              ],
+              advancement_timeline: 'Maintain expertise, explore new cuisines',
+            },
+            time_analysis: {
+              available_time_per_meal: 45,
+              time_utilization_efficiency: 85,
+              optimization_opportunities: [
+                'weekday quick options',
+                'batch prep for busy periods',
+              ],
+              quick_meal_quota: '30% of weekly meals',
+            },
+            equipment_optimization: {
+              utilization_rate: 95,
+              underused_tools: [],
+              missing_beneficial_tools: [
+                'meat thermometer probe',
+                'cedar planks',
+              ],
+              technique_adaptations: 'Leverage grill and slow cooker expertise',
+            },
+            cultural_preferences: {
+              primary_cuisines: ['bbq', 'american'],
+              flavor_profile_affinity: 'Smoky, savory, bold flavors',
+              spice_tolerance_calibration: 4,
+              fusion_receptiveness: 'low',
+            },
+            ingredient_landscape: {
+              embrace_list: [
+                'beef',
+                'pork',
+                'chicken',
+                'hickory',
+                'mesquite',
+                'dry rubs',
+              ],
+              avoid_list: [],
+              exploration_candidates: [
+                'Korean BBQ marinades',
+                'Mexican spice blends',
+              ],
+              substitution_success_rate: 70,
+            },
+          },
+          nutritional_analysis: {
+            current_status: {
+              overall_diet_quality_score: 72,
+              nutritional_completeness: 75,
+              anti_inflammatory_index: 60,
+              gut_health_score: 65,
+              metabolic_health_score: 70,
+            },
+            deficiency_risks: [
+              {
+                nutrient: 'Fiber',
+                risk_level: 'moderate',
+                current_intake_estimate: '60% of recommended',
+                food_sources: [
+                  'vegetables',
+                  'fruits',
+                  'whole grains',
+                  'legumes',
+                ],
+                supplementation_consideration: 'not_needed',
+              },
+            ],
+            optimization_priorities: [
+              {
+                priority: 1,
+                focus: 'Increase vegetable intake',
+                impact_score: 80,
+                implementation_difficulty: 'moderate',
+              },
+              {
+                priority: 2,
+                focus: 'Balance omega-3 to omega-6 ratio',
+                impact_score: 75,
+                implementation_difficulty: 'easy',
+              },
+            ],
+          },
+          personalized_recommendations: {
+            immediate_actions: [
+              {
+                action: 'Add grilled vegetables to every BBQ session',
+                description: 'Grill colorful vegetables alongside meats',
+                expected_benefit:
+                  'Increased fiber, antioxidants, and meal balance',
+                difficulty: 'easy',
+                resources_provided: [
+                  'grilled vegetable guide',
+                  'seasoning suggestions',
+                ],
+              },
+            ],
+            weekly_structure: {
+              meal_framework: {
+                breakfast_template: 'Protein-rich options with some vegetables',
+                lunch_template:
+                  'Balanced plate with lean protein and vegetables',
+                dinner_template:
+                  'BBQ proteins with substantial vegetable sides',
+                snack_strategy: 'Nuts, jerky, or vegetables with dips',
+              },
+              cuisine_rotation: {
+                monday: 'American BBQ',
+                tuesday: 'American comfort',
+                wednesday: 'BBQ',
+                thursday: 'American',
+                friday: 'BBQ',
+                weekend: 'Experimental BBQ fusion',
+              },
+            },
+            progressive_challenges: [
+              {
+                week_1_4: 'Master vegetable grilling techniques',
+                week_5_8: 'Explore international BBQ styles',
+                week_9_12: 'Create signature healthy BBQ menu',
+              },
+            ],
+          },
+          meal_suggestions: {
+            signature_recipes: [
+              {
+                name: 'Smoky Vegetable Medley',
+                prep_time: 30,
+                skill_match: 95,
+                health_impact_score: 85,
+                customization_notes: 'Use different wood chips for variety',
+                allergen_safe: true,
+              },
+            ],
+            quick_options: [
+              'Grilled chicken salads',
+              'Veggie burgers',
+              'Quick-seared proteins',
+            ],
+            batch_cooking_priorities: [
+              'Smoked meats for the week',
+              'Grilled vegetable prep',
+            ],
+          },
+          progress_tracking: {
+            key_metrics: [
+              {
+                metric: 'Vegetable servings per day',
+                baseline: 'Current intake assessment',
+                target: '5+ servings daily',
+                reassessment: 'Weekly tracking',
+              },
+            ],
+            milestone_markers: [
+              {
+                week_2: 'Vegetable grilling routine established',
+                week_4: 'Fiber intake increased by 50%',
+                week_8: 'New BBQ vegetable techniques mastered',
+                week_12: 'Balanced BBQ lifestyle achieved',
+              },
+            ],
+          },
+          risk_mitigation: {
+            adherence_barriers: [
+              {
+                barrier: 'Preference for meat-heavy meals',
+                mitigation_strategy: 'Start with small vegetable additions',
+                backup_plan: 'Focus on vegetables that complement BBQ flavors',
+              },
+            ],
+            safety_reminders: [
+              'Monitor grill temperatures',
+              'Ensure proper meat cooking temperatures',
+            ],
+          },
+          support_resources: {
+            education_modules: [
+              'Vegetable grilling mastery',
+              'BBQ nutrition optimization',
+            ],
+            tools_provided: ['Grilling guides', 'Vegetable prep techniques'],
+            community_connections: [
+              'BBQ enthusiast groups',
+              'Healthy grilling communities',
+            ],
+          },
+          next_steps: {
+            immediate_72_hours: [
+              'Plan first vegetable grilling session',
+              'Research new vegetable varieties',
+            ],
+            week_1_goals: [
+              'Grill vegetables 3 times',
+              'Try 2 new vegetable preparations',
+            ],
+            week_1_objectives: [
+              'Track vegetable intake',
+              'Experiment with seasonings',
+              'Document favorite combinations',
+            ],
+          },
+          professional_notes: {
+            strengths_observed:
+              'Excellent grilling skills, meal planning discipline, open to gradual changes',
+            growth_opportunities:
+              'Increase plant food variety, explore international flavors, optimize nutrient balance',
+            collaboration_recommendations:
+              'Consider consulting with sports nutritionist for meal prep optimization',
+            reassessment_schedule:
+              '6-month review to assess dietary balance improvements',
+          },
+          report_metadata: {
+            confidence_level: 90,
+            data_completeness: 95,
+            personalization_depth: 'high',
+            evidence_base: 'strong',
+            last_literature_review: '2025-01-10',
+            next_update_recommended: '2025-07-12',
+          },
+        },
+      },
+    },
+
+    // David's report - Gluten-free baker
+    {
+      user_email: 'david@example.com',
+      report: {
+        user_evaluation_report: {
+          report_id: 'eval_2025_01_10_david_001',
+          evaluation_date: '2025-01-10T09:45:00Z',
+          dietitian: 'Dr. Luna Clearwater',
+          report_version: '1.0',
+          user_profile_summary: {
+            user_id: 'david_profile_001',
+            evaluation_completeness: 98,
+            data_quality_score: 95,
+            last_updated: '2025-01-10T09:45:00Z',
+          },
+          safety_assessment: {
+            status: 'VERIFIED',
+            critical_alerts: [
+              {
+                type: 'allergy',
+                severity: 'severe',
+                item: 'gluten',
+                required_action:
+                  'Strict gluten-free diet required - celiac management protocol',
+                hidden_sources: [
+                  'soy sauce',
+                  'malt vinegar',
+                  'modified food starch',
+                  'communion wafers',
+                ],
+                cross_contamination_risk: 'high',
+              },
+            ],
+            dietary_restrictions: [
+              {
+                type: 'gluten-free',
+                severity: 'severe',
+                tolerance_threshold: 'Less than 20ppm gluten',
+                safe_alternatives: [
+                  'almond flour',
+                  'rice flour',
+                  'coconut flour',
+                  'certified GF oats',
+                ],
+                enzyme_supplementation: 'not_recommended',
+              },
+            ],
+            medical_considerations: [
+              {
+                condition: 'celiac_disease',
+                nutritional_priority: 'Nutrient absorption optimization',
+                key_strategies: [
+                  'gut healing support',
+                  'nutrient density focus',
+                  'inflammation reduction',
+                ],
+                monitoring_markers: [
+                  'iron levels',
+                  'B vitamin status',
+                  'bone density',
+                ],
+              },
+            ],
+          },
+          personalization_matrix: {
+            skill_profile: {
+              current_level: 'expert',
+              confidence_score: 95,
+              growth_trajectory: 'positive',
+              recommended_techniques: [
+                'gluten-free pastry innovation',
+                'ancient grain exploration',
+              ],
+              advancement_timeline: 'Continuous learning and innovation',
+            },
+            time_analysis: {
+              available_time_per_meal: 60,
+              time_utilization_efficiency: 90,
+              optimization_opportunities: [
+                'batch baking sessions',
+                'ingredient prep organization',
+              ],
+              quick_meal_quota: '20% of weekly meals',
+            },
+            equipment_optimization: {
+              utilization_rate: 98,
+              underused_tools: [],
+              missing_beneficial_tools: ['grain mill', 'proofing box'],
+              technique_adaptations:
+                'Leverage professional-level baking equipment',
+            },
+            cultural_preferences: {
+              primary_cuisines: ['french', 'mediterranean'],
+              flavor_profile_affinity: 'Refined, delicate, complex flavors',
+              spice_tolerance_calibration: 1,
+              fusion_receptiveness: 'high',
+            },
+            ingredient_landscape: {
+              embrace_list: [
+                'almond flour',
+                'coconut flour',
+                'ancient grains',
+                'high-quality dairy',
+                'fresh herbs',
+              ],
+              avoid_list: [
+                'wheat',
+                'barley',
+                'rye',
+                'conventional oats',
+                'artificial sweeteners',
+              ],
+              exploration_candidates: [
+                'teff flour',
+                'cassava flour',
+                'tiger nut flour',
+              ],
+              substitution_success_rate: 95,
+            },
+          },
+          nutritional_analysis: {
+            current_status: {
+              overall_diet_quality_score: 85,
+              nutritional_completeness: 80,
+              anti_inflammatory_index: 90,
+              gut_health_score: 75,
+              metabolic_health_score: 82,
+            },
+            deficiency_risks: [
+              {
+                nutrient: 'Iron',
+                risk_level: 'moderate',
+                current_intake_estimate: '70% of RDA',
+                food_sources: [
+                  'grass-fed beef',
+                  'dark leafy greens',
+                  'pumpkin seeds',
+                ],
+                supplementation_consideration: 'recommended',
+              },
+              {
+                nutrient: 'B Vitamins',
+                risk_level: 'low',
+                current_intake_estimate: '80% of RDA',
+                food_sources: ['nutritional yeast', 'eggs', 'leafy greens'],
+                supplementation_consideration: 'optional',
+              },
+            ],
+            optimization_priorities: [
+              {
+                priority: 1,
+                focus: 'Gut healing and nutrient absorption',
+                impact_score: 95,
+                implementation_difficulty: 'moderate',
+              },
+              {
+                priority: 2,
+                focus: 'Iron status optimization',
+                impact_score: 85,
+                implementation_difficulty: 'easy',
+              },
+            ],
+          },
+          personalized_recommendations: {
+            immediate_actions: [
+              {
+                action: 'Implement gut healing protocol',
+                description:
+                  'Add bone broth, fermented foods, and healing spices daily',
+                expected_benefit:
+                  'Improved nutrient absorption and reduced inflammation',
+                difficulty: 'moderate',
+                resources_provided: [
+                  'gut healing meal plan',
+                  'fermented food guide',
+                ],
+              },
+            ],
+            weekly_structure: {
+              meal_framework: {
+                breakfast_template:
+                  'Nutrient-dense GF baked goods with protein',
+                lunch_template:
+                  'Mediterranean-inspired salads with ancient grains',
+                dinner_template:
+                  'French-technique proteins with seasonal vegetables',
+                snack_strategy: 'Homemade GF pastries and nuts',
+              },
+              cuisine_rotation: {
+                monday: 'French',
+                tuesday: 'Mediterranean',
+                wednesday: 'French',
+                thursday: 'Mediterranean',
+                friday: 'French',
+                weekend: 'Experimental fusion',
+              },
+            },
+            progressive_challenges: [
+              {
+                week_1_4: 'Master gut-healing recipes',
+                week_5_8: 'Explore ancient grain applications',
+                week_9_12: 'Create signature GF pastry line',
+              },
+            ],
+          },
+          meal_suggestions: {
+            signature_recipes: [
+              {
+                name: 'Healing Bone Broth Soup',
+                prep_time: 180,
+                skill_match: 90,
+                health_impact_score: 95,
+                customization_notes: 'Add healing herbs and vegetables',
+                allergen_safe: true,
+              },
+            ],
+            quick_options: [
+              'GF sourdough toast variations',
+              'Quick egg dishes',
+              'Simple salads',
+            ],
+            batch_cooking_priorities: [
+              'Weekly bread baking',
+              'Bone broth preparation',
+              'Fermented vegetables',
+            ],
+          },
+          progress_tracking: {
+            key_metrics: [
+              {
+                metric: 'Digestive comfort',
+                baseline: 'Daily symptom tracking',
+                target: 'Minimal digestive issues',
+                reassessment: 'Weekly assessment',
+              },
+            ],
+            milestone_markers: [
+              {
+                week_2: 'Gut healing protocol established',
+                week_4: 'Improved energy and digestion',
+                week_8: 'New ancient grain recipes mastered',
+                week_12: 'Optimal nutrient absorption achieved',
+              },
+            ],
+          },
+          risk_mitigation: {
+            adherence_barriers: [
+              {
+                barrier: 'Cross-contamination in shared kitchens',
+                mitigation_strategy: 'Dedicated GF preparation areas and tools',
+                backup_plan: 'Portable GF cooking kit for travel',
+              },
+            ],
+            safety_reminders: [
+              'Verify GF certification on all ingredients',
+              'Maintain separate cutting boards and utensils',
+            ],
+          },
+          support_resources: {
+            education_modules: [
+              'Celiac management',
+              'Advanced GF baking',
+              'Gut health optimization',
+            ],
+            tools_provided: [
+              'GF ingredient database',
+              'Cross-contamination prevention guide',
+            ],
+            community_connections: [
+              'Celiac support groups',
+              'GF baking communities',
+              'Professional pastry networks',
+            ],
+          },
+          next_steps: {
+            immediate_72_hours: [
+              'Start bone broth preparation',
+              'Source healing ingredients',
+              'Plan gut-healing meals',
+            ],
+            week_1_goals: [
+              'Establish healing routine',
+              'Try 3 new ancient grains',
+              'Monitor digestive response',
+            ],
+            week_1_objectives: [
+              'Track symptoms daily',
+              'Experiment with fermented foods',
+              'Optimize nutrient timing',
+            ],
+          },
+          professional_notes: {
+            strengths_observed:
+              'Expert-level GF baking skills, strong ingredient knowledge, commitment to health',
+            growth_opportunities:
+              'Focus on gut healing, expand savory applications, optimize nutrient absorption',
+            collaboration_recommendations:
+              'Consider working with gastroenterologist for ongoing celiac monitoring',
+            reassessment_schedule:
+              '3-month review with potential lab work for nutrient status',
+          },
+          report_metadata: {
+            confidence_level: 95,
+            data_completeness: 98,
+            personalization_depth: 'high',
+            evidence_base: 'strong',
+            last_literature_review: '2025-01-08',
+            next_update_recommended: '2025-04-10',
+          },
+        },
+      },
+    },
+  ];
+
+  // Get all users for mapping emails to user IDs
+  const { data: userList, error: userListError } =
+    await admin.auth.admin.listUsers({
+      page: 1,
+      perPage: 100,
+    });
+
+  if (userListError) {
+    console.error(
+      'Error fetching user list for evaluation reports:',
+      userListError
+    );
+    return;
+  }
+
+  for (const reportData of evaluationReports) {
+    // Find user ID by email
+    const userMatch = userList.users.find(
+      (x) => x.email?.toLowerCase() === reportData.user_email.toLowerCase()
+    );
+
+    if (!userMatch) {
+      console.warn(
+        `User ${reportData.user_email} not found for evaluation report`
+      );
+      continue;
+    }
+
+    // Insert evaluation report
+    const { error } = await admin.from('evaluation_reports').upsert(
+      {
+        user_id: userMatch.id,
+        report_id: reportData.report.user_evaluation_report.report_id,
+        evaluation_date:
+          reportData.report.user_evaluation_report.evaluation_date,
+        dietitian: reportData.report.user_evaluation_report.dietitian,
+        report_version: reportData.report.user_evaluation_report.report_version,
+        report_data: reportData.report,
+      },
+      { onConflict: 'user_id,report_id' }
+    );
+
+    if (error) {
+      console.error(
+        `Error seeding evaluation report for ${reportData.user_email}:`,
+        error
+      );
+    } else {
+      console.log(
+        `✅ Evaluation report seeded for ${reportData.user_email}: ${reportData.report.user_evaluation_report.report_id}`
+      );
+    }
+  }
+
+  console.log('✅ Evaluation reports seeded successfully.');
+}
+
 async function seedRecipes() {
   const recipes = [
     // Alice's recipes (4 total: 1 shared, 3 private)
@@ -2012,6 +2958,9 @@ async function main() {
 
   // Seed recipes after all users are created
   await seedRecipes();
+
+  // Seed evaluation reports after all users and recipes are created
+  await seedEvaluationReports();
 
   console.log('✅ Seed users complete.');
 }
