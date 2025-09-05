@@ -509,55 +509,58 @@ I'll ensure all recommendations are safe for your dietary needs and tailored to 
 
     setIsLoading(true);
     try {
-      // Send a message asking AI to output the current recipe in JSON format
-      const saveRequest = `Please output the current recipe we've been discussing in a structured JSON format. Include:
-- title: Recipe name
-- ingredients: Array of ingredient strings (e.g., ["2 cups flour", "1 tsp salt"])
-- instructions: Complete cooking instructions as a single string
-- notes: Any additional notes or tips
-- setup: Array of preparation steps (e.g., ["Preheat oven to 350°F", "Grease baking pan"])
-- categories: Array of relevant categories (e.g., ["Dinner", "Italian", "Quick"])
+      // Find the last assistant message that contains a recipe
+      const lastAssistantMessage = messages
+        .slice()
+        .reverse()
+        .find((msg) => msg.role === 'assistant' && msg.content);
 
-Format it as valid JSON that can be parsed directly.`;
+      if (!lastAssistantMessage) {
+        throw new Error('No assistant message found to extract recipe from');
+      }
 
-      const response = await openaiAPI.sendMessageWithPersona(
-        [
-          ...messages,
-          {
-            id: Date.now().toString(),
-            role: 'user',
-            content: saveRequest,
-            timestamp: new Date(),
-          },
-        ],
-        persona,
-        threadId,
-        user?.id
+      console.log(
+        '🔍 Extracting recipe from last assistant message:',
+        lastAssistantMessage.content
       );
 
-      // Add the save request and response to messages
-      const userMessage: Message = {
-        id: Date.now().toString(),
-        role: 'user',
-        content: saveRequest,
-        timestamp: new Date(),
-      };
-
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: response.message,
-        timestamp: new Date(),
-      };
-
-      setMessages((prev) => [...prev, userMessage, assistantMessage]);
-
-      // Try to parse the JSON response and open recipe form
+      // Try to parse the JSON from the last assistant message
       try {
+        console.log('🔍 Full response message:', lastAssistantMessage.content);
+
         // Extract JSON from the response (might be wrapped in markdown or text)
-        const jsonMatch = response.message.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-          const recipeData = JSON.parse(jsonMatch[0]);
+        let jsonText = null;
+
+        // First, try to find JSON in markdown code blocks
+        const jsonBlockMatch = lastAssistantMessage.content.match(
+          /```json\s*([\s\S]*?)\s*```/
+        );
+        if (jsonBlockMatch) {
+          jsonText = jsonBlockMatch[1].trim();
+          console.log('📄 Found JSON in markdown block:', jsonText);
+        } else {
+          // Try to find JSON object in the text - look for complete JSON objects
+          const jsonMatches = lastAssistantMessage.content.match(
+            /\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}/g
+          );
+          if (jsonMatches && jsonMatches.length > 0) {
+            // Try each match until we find valid JSON
+            for (const match of jsonMatches) {
+              try {
+                JSON.parse(match);
+                jsonText = match;
+                console.log('📄 Found valid JSON in text:', jsonText);
+                break;
+              } catch {
+                // Continue to next match
+              }
+            }
+          }
+        }
+
+        if (jsonText) {
+          console.log('🧪 Attempting to parse JSON:', jsonText);
+          const recipeData = JSON.parse(jsonText);
 
           // Convert to RecipeFormData format
           const recipe: RecipeFormData = {
@@ -580,10 +583,62 @@ Format it as valid JSON that can be parsed directly.`;
             description: `"${recipe.title}" is ready to save. Please review and save it to your collection.`,
           });
         } else {
-          throw new Error('No valid JSON found in response');
+          console.log('No JSON found in last message, trying AI extraction...');
+
+          // Fallback: Use AI to extract recipe from the last message
+          const extractRequest = `Please extract the recipe from this conversation and format it as JSON:
+          
+${lastAssistantMessage.content}
+
+Format as: {"title": "Recipe Name", "ingredients": ["ingredient 1", "ingredient 2"], "instructions": "Step-by-step instructions", "notes": "Additional notes", "setup": ["prep step 1"], "categories": ["category 1"]}`;
+
+          const response = await openaiAPI.sendMessageWithPersona(
+            [
+              {
+                id: Date.now().toString(),
+                role: 'user',
+                content: extractRequest,
+                timestamp: new Date(),
+              },
+            ],
+            persona,
+            threadId,
+            user?.id
+          );
+
+          // Try to parse the AI-extracted JSON
+          const jsonBlockMatch = response.message.match(
+            /```json\s*([\s\S]*?)\s*```/
+          );
+          if (jsonBlockMatch) {
+            const recipeData = JSON.parse(jsonBlockMatch[1]);
+            const recipe: RecipeFormData = {
+              title: recipeData.title || 'Untitled Recipe',
+              ingredients: recipeData.ingredients || [],
+              instructions: recipeData.instructions || '',
+              notes: recipeData.notes || '',
+              setup: recipeData.setup || [],
+              categories: recipeData.categories || [],
+              image_url: null,
+            };
+
+            setGeneratedRecipe(recipe);
+            setShowSaveRecipeButton(false);
+
+            toast({
+              title: 'Recipe Generated!',
+              description: `"${recipe.title}" is ready to save. Please review and save it to your collection.`,
+            });
+          } else {
+            throw new Error('No valid JSON found in response');
+          }
         }
       } catch (parseError) {
         console.error('Failed to parse recipe JSON:', parseError);
+        console.error(
+          'Response that failed to parse:',
+          lastAssistantMessage.content
+        );
         toast({
           title: 'Save Failed',
           description: 'Could not parse the recipe format. Please try again.',

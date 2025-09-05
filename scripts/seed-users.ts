@@ -1964,6 +1964,768 @@ async function seedRecipes() {
   console.log('✅ Recipes seeded successfully.');
 }
 
+async function seedEvaluationReports() {
+  const evaluationReports = [
+    // Alice's reports
+    {
+      id: '11111111-1111-1111-1111-111111111111',
+      user_email: 'alice@example.com',
+      report_id: 'eval_2025_01_17_alice_001',
+      evaluation_date: '2025-01-17T10:00:00Z',
+      dietitian: 'Dr. Luna Clearwater',
+      report_version: '1.0',
+      report_data: {
+        report_id: 'eval_2025_01_17_alice_001',
+        evaluation_date: '2025-01-17T10:00:00Z',
+        dietitian: 'Dr. Luna Clearwater',
+        report_version: '1.0',
+        user_profile_summary: {
+          user_id: 'alice_user_id',
+          evaluation_completeness: 85,
+          data_quality_score: 90,
+          last_updated: '2025-01-17T10:00:00Z',
+        },
+        safety_assessment: {
+          status: 'VERIFIED',
+          critical_alerts: [
+            {
+              type: 'allergy',
+              severity: 'severe',
+              item: 'peanuts',
+              required_action:
+                'Avoid all peanut products and check labels carefully',
+              hidden_sources: ['processed foods', 'sauces', 'baked goods'],
+              cross_contamination_risk: 'high',
+            },
+          ],
+          dietary_restrictions: [
+            {
+              type: 'vegetarian',
+              severity: 'moderate',
+              tolerance_threshold: 'strict vegetarian',
+              safe_alternatives: [
+                'plant-based proteins',
+                'legumes',
+                'nuts (non-peanut)',
+              ],
+              enzyme_supplementation: 'not_needed',
+            },
+          ],
+          medical_considerations: [],
+        },
+        personalization_matrix: {
+          skill_profile: {
+            current_level: 'intermediate',
+            confidence_score: 75,
+            growth_trajectory: 'positive',
+            recommended_techniques: [
+              'meal prep',
+              'batch cooking',
+              'vegetable roasting',
+            ],
+            advancement_timeline: '3-6 months',
+          },
+          time_analysis: {
+            available_time_per_meal: 30,
+            time_utilization_efficiency: 80,
+            optimization_opportunities: ['prep ahead', 'one-pot meals'],
+            quick_meal_quota: '60%',
+          },
+          equipment_optimization: {
+            utilization_rate: 70,
+            underused_tools: ['blender'],
+            missing_beneficial_tools: ['food processor'],
+            technique_adaptations: 'focus on oven and skillet techniques',
+          },
+          cultural_preferences: {
+            primary_cuisines: ['italian', 'mexican'],
+            flavor_profile_affinity: 'mediterranean',
+            spice_tolerance_calibration: 2,
+            fusion_receptiveness: 'medium',
+          },
+          ingredient_landscape: {
+            embrace_list: ['vegetables', 'legumes', 'grains', 'herbs'],
+            avoid_list: ['peanuts', 'anchovies', 'meat'],
+            exploration_candidates: ['quinoa', 'tempeh', 'nutritional yeast'],
+            substitution_success_rate: 85,
+          },
+        },
+        nutritional_analysis: {
+          current_status: {
+            overall_diet_quality_score: 78,
+            nutritional_completeness: 82,
+            anti_inflammatory_index: 75,
+            gut_health_score: 80,
+            metabolic_health_score: 85,
+          },
+          deficiency_risks: [
+            {
+              nutrient: 'B12',
+              risk_level: 'moderate',
+              current_intake_estimate: '60% of RDA',
+              food_sources: ['fortified cereals', 'nutritional yeast'],
+              supplementation_consideration: 'recommended',
+            },
+          ],
+          optimization_priorities: [
+            {
+              priority: 1,
+              focus: 'protein variety',
+              impact_score: 85,
+              implementation_difficulty: 'easy',
+            },
+          ],
+        },
+        personalized_recommendations: {
+          immediate_actions: [
+            {
+              action: 'Add B12 supplement',
+              description: 'Take daily B12 supplement to prevent deficiency',
+              expected_benefit: 'Improved energy and neurological function',
+              difficulty: 'easy',
+              resources_provided: [
+                'supplement guide',
+                'timing recommendations',
+              ],
+            },
+          ],
+          weekly_structure: {
+            meal_framework: {
+              breakfast_template: 'Protein-rich smoothie or overnight oats',
+              lunch_template: 'Grain bowl with vegetables and legumes',
+              dinner_template: 'One-pot pasta or stir-fry with vegetables',
+              snack_strategy: 'Nuts, fruits, or hummus with vegetables',
+            },
+            cuisine_rotation: {
+              monday: 'italian',
+              tuesday: 'mexican',
+              wednesday: 'mediterranean',
+              thursday: 'asian',
+              friday: 'fusion',
+              weekend: 'experimental',
+            },
+          },
+          progressive_challenges: [
+            {
+              week_1_4: 'Try one new vegetable per week',
+              week_5_8: 'Master meal prep for 3 days',
+              week_9_12: 'Experiment with fermentation',
+            },
+          ],
+        },
+        meal_suggestions: {
+          signature_recipes: [
+            {
+              name: 'Mediterranean Quinoa Bowl',
+              prep_time: 20,
+              skill_match: 85,
+              health_impact_score: 90,
+              customization_notes: 'Add seasonal vegetables',
+              allergen_safe: true,
+            },
+          ],
+          quick_options: ['Avocado toast', 'Caprese salad', 'Hummus wrap'],
+          batch_cooking_priorities: [
+            'Roasted vegetables',
+            'Cooked grains',
+            'Bean salads',
+          ],
+        },
+        progress_tracking: {
+          key_metrics: [
+            {
+              metric: 'Weekly vegetable variety',
+              baseline: '5 different vegetables',
+              target: '8 different vegetables',
+              reassessment: 'monthly',
+            },
+          ],
+          milestone_markers: [
+            {
+              week_2: 'Consistent B12 supplementation',
+              week_4: 'Meal prep routine established',
+              week_8: 'Increased protein variety',
+              week_12: 'Improved energy levels',
+            },
+          ],
+        },
+        risk_mitigation: {
+          adherence_barriers: [
+            {
+              barrier: 'Time constraints',
+              mitigation_strategy: 'Batch cooking on weekends',
+              backup_plan: 'Keep healthy frozen meals available',
+            },
+          ],
+          safety_reminders: [
+            'Always check labels for peanuts',
+            'Carry epinephrine if prescribed',
+          ],
+        },
+        support_resources: {
+          education_modules: [
+            'Vegetarian nutrition basics',
+            'Meal prep strategies',
+          ],
+          tools_provided: ['Meal planning template', 'Grocery list generator'],
+          community_connections: [
+            'Local vegetarian cooking class',
+            'Online support group',
+          ],
+        },
+        next_steps: {
+          immediate_72_hours: [
+            'Purchase B12 supplement',
+            "Plan next week's meals",
+          ],
+          week_1_goals: ['Start B12 supplementation', 'Try one new vegetable'],
+          month_1_objectives: [
+            'Establish meal prep routine',
+            'Increase protein variety',
+          ],
+        },
+        professional_notes: {
+          strengths_observed:
+            'Good foundation in vegetarian cooking, open to new techniques',
+          growth_opportunities: 'Protein variety and meal prep efficiency',
+          collaboration_recommendations:
+            'Consider working with a registered dietitian for B12 monitoring',
+          reassessment_schedule: '3 months',
+        },
+        report_metadata: {
+          confidence_level: 88,
+          data_completeness: 85,
+          personalization_depth: 'high',
+          evidence_base: 'strong',
+          last_literature_review: '2025-01-15',
+          next_update_recommended: '2025-04-17',
+        },
+      },
+    },
+    {
+      id: '11111111-1111-1111-1111-111111111112',
+      user_email: 'alice@example.com',
+      report_id: 'eval_2025_01_20_alice_002',
+      evaluation_date: '2025-01-20T14:30:00Z',
+      dietitian: 'Dr. Luna Clearwater',
+      report_version: '1.0',
+      report_data: {
+        report_id: 'eval_2025_01_20_alice_002',
+        evaluation_date: '2025-01-20T14:30:00Z',
+        dietitian: 'Dr. Luna Clearwater',
+        report_version: '1.0',
+        user_profile_summary: {
+          user_id: 'alice_user_id',
+          evaluation_completeness: 90,
+          data_quality_score: 95,
+          last_updated: '2025-01-20T14:30:00Z',
+        },
+        safety_assessment: {
+          status: 'VERIFIED',
+          critical_alerts: [
+            {
+              type: 'allergy',
+              severity: 'severe',
+              item: 'peanuts',
+              required_action:
+                'Avoid all peanut products and check labels carefully',
+              hidden_sources: ['processed foods', 'sauces', 'baked goods'],
+              cross_contamination_risk: 'high',
+            },
+          ],
+          dietary_restrictions: [
+            {
+              type: 'vegetarian',
+              severity: 'moderate',
+              tolerance_threshold: 'strict vegetarian',
+              safe_alternatives: [
+                'plant-based proteins',
+                'legumes',
+                'nuts (non-peanut)',
+              ],
+              enzyme_supplementation: 'not_needed',
+            },
+          ],
+          medical_considerations: [],
+        },
+        personalization_matrix: {
+          skill_profile: {
+            current_level: 'intermediate',
+            confidence_score: 80,
+            growth_trajectory: 'positive',
+            recommended_techniques: [
+              'quick meal assembly',
+              'prep ahead strategies',
+            ],
+            advancement_timeline: '2-4 months',
+          },
+          time_analysis: {
+            available_time_per_meal: 20,
+            time_utilization_efficiency: 85,
+            optimization_opportunities: ['prep ahead', 'quick assembly meals'],
+            quick_meal_quota: '80%',
+          },
+          equipment_optimization: {
+            utilization_rate: 75,
+            underused_tools: ['blender'],
+            missing_beneficial_tools: ['food processor', 'rice cooker'],
+            technique_adaptations:
+              'focus on quick assembly and minimal cooking',
+          },
+          cultural_preferences: {
+            primary_cuisines: ['italian', 'mexican'],
+            flavor_profile_affinity: 'mediterranean',
+            spice_tolerance_calibration: 2,
+            fusion_receptiveness: 'medium',
+          },
+          ingredient_landscape: {
+            embrace_list: ['vegetables', 'legumes', 'grains', 'herbs'],
+            avoid_list: ['peanuts', 'anchovies', 'meat'],
+            exploration_candidates: [
+              'pre-cooked grains',
+              'canned beans',
+              'frozen vegetables',
+            ],
+            substitution_success_rate: 90,
+          },
+        },
+        nutritional_analysis: {
+          current_status: {
+            overall_diet_quality_score: 82,
+            nutritional_completeness: 85,
+            anti_inflammatory_index: 80,
+            gut_health_score: 85,
+            metabolic_health_score: 88,
+          },
+          deficiency_risks: [
+            {
+              nutrient: 'B12',
+              risk_level: 'low',
+              current_intake_estimate: '85% of RDA',
+              food_sources: [
+                'fortified cereals',
+                'nutritional yeast',
+                'supplements',
+              ],
+              supplementation_consideration: 'optional',
+            },
+          ],
+          optimization_priorities: [
+            {
+              priority: 1,
+              focus: 'meal prep efficiency',
+              impact_score: 90,
+              implementation_difficulty: 'moderate',
+            },
+          ],
+        },
+        personalized_recommendations: {
+          immediate_actions: [
+            {
+              action: 'Set up weekly meal prep',
+              description: 'Dedicate 2 hours on Sunday to prep ingredients',
+              expected_benefit: 'Faster weekday meal assembly',
+              difficulty: 'moderate',
+              resources_provided: ['meal prep guide', 'storage tips'],
+            },
+          ],
+          weekly_structure: {
+            meal_framework: {
+              breakfast_template: 'Overnight oats or smoothie',
+              lunch_template: 'Pre-assembled grain bowl',
+              dinner_template: 'Quick stir-fry or pasta',
+              snack_strategy: 'Pre-cut vegetables with hummus',
+            },
+            cuisine_rotation: {
+              monday: 'italian',
+              tuesday: 'mexican',
+              wednesday: 'mediterranean',
+              thursday: 'asian',
+              friday: 'fusion',
+              weekend: 'experimental',
+            },
+          },
+          progressive_challenges: [
+            {
+              week_1_4: 'Master 3 quick meal templates',
+              week_5_8: 'Establish consistent meal prep routine',
+              week_9_12: 'Optimize prep time to under 2 hours',
+            },
+          ],
+        },
+        meal_suggestions: {
+          signature_recipes: [
+            {
+              name: 'Quick Veggie Stir-Fry',
+              prep_time: 15,
+              skill_match: 90,
+              health_impact_score: 85,
+              customization_notes: 'Use pre-cut vegetables',
+              allergen_safe: true,
+            },
+          ],
+          quick_options: [
+            'Avocado toast',
+            'Caprese salad',
+            'Hummus wrap',
+            'Grain bowl',
+          ],
+          batch_cooking_priorities: [
+            'Cooked grains',
+            'Roasted vegetables',
+            'Bean salads',
+          ],
+        },
+        progress_tracking: {
+          key_metrics: [
+            {
+              metric: 'Meal prep time',
+              baseline: '3 hours per week',
+              target: '2 hours per week',
+              reassessment: 'monthly',
+            },
+          ],
+          milestone_markers: [
+            {
+              week_2: 'Consistent meal prep routine',
+              week_4: 'Reduced weekday cooking time',
+              week_8: 'Optimized prep efficiency',
+              week_12: 'Maintained healthy eating with less time',
+            },
+          ],
+        },
+        risk_mitigation: {
+          adherence_barriers: [
+            {
+              barrier: 'Time constraints',
+              mitigation_strategy: 'Batch cooking on weekends',
+              backup_plan: 'Keep healthy frozen meals available',
+            },
+          ],
+          safety_reminders: [
+            'Always check labels for peanuts',
+            'Carry epinephrine if prescribed',
+          ],
+        },
+        support_resources: {
+          education_modules: [
+            'Quick meal prep strategies',
+            'Time-saving cooking techniques',
+          ],
+          tools_provided: ['Meal prep template', 'Quick recipe collection'],
+          community_connections: [
+            'Local meal prep group',
+            'Online time-saving tips',
+          ],
+        },
+        next_steps: {
+          immediate_72_hours: [
+            "Plan next week's meals",
+            'Shop for prep ingredients',
+          ],
+          week_1_goals: [
+            'Establish meal prep routine',
+            'Try 3 quick meal templates',
+          ],
+          month_1_objectives: [
+            'Optimize prep time',
+            'Maintain healthy eating with less time',
+          ],
+        },
+        professional_notes: {
+          strengths_observed:
+            'Good foundation in vegetarian cooking, open to new techniques',
+          growth_opportunities: 'Meal prep efficiency and time management',
+          collaboration_recommendations:
+            'Consider working with a meal prep coach',
+          reassessment_schedule: '3 months',
+        },
+        report_metadata: {
+          confidence_level: 92,
+          data_completeness: 90,
+          personalization_depth: 'high',
+          evidence_base: 'strong',
+          last_literature_review: '2025-01-18',
+          next_update_recommended: '2025-04-20',
+        },
+      },
+    },
+    // Bob's reports
+    {
+      id: '22222222-2222-2222-2222-222222222221',
+      user_email: 'bob@example.com',
+      report_id: 'eval_2025_01_18_bob_001',
+      evaluation_date: '2025-01-18T09:00:00Z',
+      dietitian: 'Dr. Luna Clearwater',
+      report_version: '1.0',
+      report_data: {
+        report_id: 'eval_2025_01_18_bob_001',
+        evaluation_date: '2025-01-18T09:00:00Z',
+        dietitian: 'Dr. Luna Clearwater',
+        report_version: '1.0',
+        user_profile_summary: {
+          user_id: 'bob_user_id',
+          evaluation_completeness: 88,
+          data_quality_score: 92,
+          last_updated: '2025-01-18T09:00:00Z',
+        },
+        safety_assessment: {
+          status: 'VERIFIED',
+          critical_alerts: [],
+          dietary_restrictions: [],
+          medical_considerations: [],
+        },
+        personalization_matrix: {
+          skill_profile: {
+            current_level: 'advanced',
+            confidence_score: 85,
+            growth_trajectory: 'positive',
+            recommended_techniques: ['grilling', 'smoking', 'meal prep'],
+            advancement_timeline: '2-4 months',
+          },
+          time_analysis: {
+            available_time_per_meal: 45,
+            time_utilization_efficiency: 75,
+            optimization_opportunities: ['weekend prep', 'batch cooking'],
+            quick_meal_quota: '40%',
+          },
+          equipment_optimization: {
+            utilization_rate: 90,
+            underused_tools: [],
+            missing_beneficial_tools: ['thermometer', 'meat grinder'],
+            technique_adaptations: 'focus on grilling and slow cooking',
+          },
+          cultural_preferences: {
+            primary_cuisines: ['bbq', 'american'],
+            flavor_profile_affinity: 'smoky and bold',
+            spice_tolerance_calibration: 4,
+            fusion_receptiveness: 'low',
+          },
+          ingredient_landscape: {
+            embrace_list: ['meats', 'spices', 'smoking woods', 'bbq sauces'],
+            avoid_list: [],
+            exploration_candidates: ['exotic spices', 'different wood types'],
+            substitution_success_rate: 80,
+          },
+        },
+        nutritional_analysis: {
+          current_status: {
+            overall_diet_quality_score: 72,
+            nutritional_completeness: 75,
+            anti_inflammatory_index: 65,
+            gut_health_score: 70,
+            metabolic_health_score: 78,
+          },
+          deficiency_risks: [
+            {
+              nutrient: 'fiber',
+              risk_level: 'moderate',
+              current_intake_estimate: '70% of RDA',
+              food_sources: ['vegetables', 'whole grains', 'legumes'],
+              supplementation_consideration: 'optional',
+            },
+          ],
+          optimization_priorities: [
+            {
+              priority: 1,
+              focus: 'vegetable intake',
+              impact_score: 80,
+              implementation_difficulty: 'moderate',
+            },
+          ],
+        },
+        personalized_recommendations: {
+          immediate_actions: [
+            {
+              action: 'Add more vegetables to meals',
+              description: 'Include 2-3 servings of vegetables with each meal',
+              expected_benefit: 'Improved fiber intake and overall nutrition',
+              difficulty: 'moderate',
+              resources_provided: [
+                'vegetable prep guide',
+                'grilling vegetables tips',
+              ],
+            },
+          ],
+          weekly_structure: {
+            meal_framework: {
+              breakfast_template:
+                'High-protein breakfast with eggs and vegetables',
+              lunch_template: 'Grilled protein with vegetable sides',
+              dinner_template:
+                'Main protein with roasted vegetables and grains',
+              snack_strategy: 'Nuts, fruits, or protein bars',
+            },
+            cuisine_rotation: {
+              monday: 'american',
+              tuesday: 'bbq',
+              wednesday: 'grilled',
+              thursday: 'smoked',
+              friday: 'bbq',
+              weekend: 'experimental',
+            },
+          },
+          progressive_challenges: [
+            {
+              week_1_4: 'Add vegetables to every meal',
+              week_5_8: 'Master vegetable grilling techniques',
+              week_9_12: 'Experiment with different vegetable preparations',
+            },
+          ],
+        },
+        meal_suggestions: {
+          signature_recipes: [
+            {
+              name: 'Grilled Chicken with Vegetables',
+              prep_time: 30,
+              skill_match: 90,
+              health_impact_score: 85,
+              customization_notes: 'Use seasonal vegetables',
+              allergen_safe: true,
+            },
+          ],
+          quick_options: [
+            'Grilled chicken breast',
+            'BBQ ribs',
+            'Smoked brisket',
+          ],
+          batch_cooking_priorities: [
+            'Grilled proteins',
+            'Roasted vegetables',
+            'BBQ sauces',
+          ],
+        },
+        progress_tracking: {
+          key_metrics: [
+            {
+              metric: 'Daily vegetable servings',
+              baseline: '3 servings',
+              target: '5 servings',
+              reassessment: 'monthly',
+            },
+          ],
+          milestone_markers: [
+            {
+              week_2: 'Consistent vegetable intake',
+              week_4: 'Improved grilling techniques',
+              week_8: 'Balanced meal composition',
+              week_12: 'Enhanced nutritional profile',
+            },
+          ],
+        },
+        risk_mitigation: {
+          adherence_barriers: [
+            {
+              barrier: 'Preference for meat-heavy meals',
+              mitigation_strategy: 'Gradually increase vegetable portions',
+              backup_plan: 'Use vegetable-based sides and sauces',
+            },
+          ],
+          safety_reminders: [
+            'Monitor meat temperatures',
+            'Practice safe grilling techniques',
+          ],
+        },
+        support_resources: {
+          education_modules: [
+            'Grilling vegetables',
+            'Balanced nutrition for athletes',
+          ],
+          tools_provided: [
+            'Grilling temperature guide',
+            'Vegetable prep techniques',
+          ],
+          community_connections: [
+            'Local BBQ club',
+            'Grilling enthusiasts group',
+          ],
+        },
+        next_steps: {
+          immediate_72_hours: [
+            'Plan vegetable-heavy meals',
+            'Shop for fresh vegetables',
+          ],
+          week_1_goals: [
+            'Add vegetables to every meal',
+            'Try grilling vegetables',
+          ],
+          month_1_objectives: [
+            'Master vegetable grilling',
+            'Improve meal balance',
+          ],
+        },
+        professional_notes: {
+          strengths_observed: 'Excellent grilling skills, good protein intake',
+          growth_opportunities: 'Vegetable variety and meal balance',
+          collaboration_recommendations:
+            'Consider working with a sports nutritionist',
+          reassessment_schedule: '3 months',
+        },
+        report_metadata: {
+          confidence_level: 90,
+          data_completeness: 88,
+          personalization_depth: 'high',
+          evidence_base: 'strong',
+          last_literature_review: '2025-01-16',
+          next_update_recommended: '2025-04-18',
+        },
+      },
+    },
+  ];
+
+  // Fetch all users once before the loop for better performance
+  const { data: userList, error: userListError } =
+    await admin.auth.admin.listUsers({
+      page: 1,
+      perPage: 100,
+    });
+
+  if (userListError) {
+    console.error(
+      'Error fetching user list for evaluation reports:',
+      userListError
+    );
+    return;
+  }
+
+  for (const report of evaluationReports) {
+    // Get user ID for the report from cached user list
+    const userMatch = userList.users.find(
+      (x) => x.email?.toLowerCase() === report.user_email.toLowerCase()
+    );
+
+    if (!userMatch) {
+      console.warn(
+        `User ${report.user_email} not found for evaluation report ${report.report_id}`
+      );
+      continue;
+    }
+
+    // Insert evaluation report
+    const { error } = await admin.from('evaluation_reports').upsert(
+      {
+        id: report.id,
+        user_id: userMatch.id,
+        report_id: report.report_id,
+        evaluation_date: report.evaluation_date,
+        dietitian: report.dietitian,
+        report_version: report.report_version,
+        report_data: report.report_data,
+      },
+      { onConflict: 'id' }
+    );
+
+    if (error) {
+      console.error(
+        `Error seeding evaluation report ${report.report_id}:`,
+        error
+      );
+    }
+  }
+
+  console.log('✅ Evaluation reports seeded successfully.');
+}
+
 async function main() {
   for (const u of users) {
     // Create or fetch existing user
@@ -2012,6 +2774,9 @@ async function main() {
 
   // Seed recipes after all users are created
   await seedRecipes();
+
+  // Seed evaluation reports after all users are created
+  await seedEvaluationReports();
 
   console.log('✅ Seed users complete.');
 }
