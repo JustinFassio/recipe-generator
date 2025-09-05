@@ -59,6 +59,14 @@ export function Header() {
             >
               Explore
             </Button>
+            <Button
+              variant={
+                location.pathname === '/evaluation-report' ? 'default' : 'ghost'
+              }
+              onClick={() => navigate('/evaluation-report')}
+            >
+              Health Reports
+            </Button>
 
             {/* AccessibilityProvider removed to prevent duplicate theme application */}
 
@@ -194,6 +202,18 @@ export function Header() {
               className="w-full justify-start"
             >
               Explore
+            </Button>
+            <Button
+              variant={
+                location.pathname === '/evaluation-report' ? 'default' : 'ghost'
+              }
+              onClick={() => {
+                navigate('/evaluation-report');
+                closeMobileMenu();
+              }}
+              className="w-full justify-start"
+            >
+              Health Reports
             </Button>
 
             <Button
