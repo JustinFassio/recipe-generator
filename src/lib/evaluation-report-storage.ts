@@ -468,8 +468,13 @@ export const importEvaluationReport = async (
           }
 
           resolve(report);
-        } catch {
-          reject(new Error('Invalid JSON file'));
+        } catch (parseError) {
+          console.error('Error parsing evaluation report JSON:', parseError);
+          reject(
+            new Error(
+              `Invalid JSON file: ${parseError instanceof Error ? parseError.message : 'Unknown error'}`
+            )
+          );
         }
       };
 
@@ -478,8 +483,13 @@ export const importEvaluationReport = async (
       };
 
       reader.readAsText(file);
-    } catch {
-      reject(new Error('Failed to process file'));
+    } catch (fileError) {
+      console.error('Error processing evaluation report file:', fileError);
+      reject(
+        new Error(
+          `Failed to process file: ${fileError instanceof Error ? fileError.message : 'Unknown error'}`
+        )
+      );
     }
   });
 };
