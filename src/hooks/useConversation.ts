@@ -447,6 +447,7 @@ export function useConversation(): ConversationState & ConversationActions {
 
         // Extract JSON from the response (might be wrapped in markdown or text)
         let jsonText = null;
+        let preParsedData = null;
 
         // First, try to find JSON in markdown code blocks
         const jsonBlockMatch = lastAssistantMessage.content.match(
@@ -457,7 +458,9 @@ export function useConversation(): ConversationState & ConversationActions {
           console.log('📄 Found JSON in markdown block:', jsonText);
         } else {
           // Try to extract the first valid JSON object using brace matching
-          function extractFirstJsonObject(text: string): string | null {
+          function extractFirstJsonObject(
+            text: string
+          ): { jsonString: string; parsedData: unknown } | null {
             let start = -1;
             let depth = 0;
             for (let i = 0; i < text.length; i++) {
@@ -469,8 +472,8 @@ export function useConversation(): ConversationState & ConversationActions {
                 if (depth === 0 && start !== -1) {
                   const candidate = text.slice(start, i + 1);
                   try {
-                    JSON.parse(candidate);
-                    return candidate;
+                    const parsedData = JSON.parse(candidate);
+                    return { jsonString: candidate, parsedData };
                   } catch {
                     // Not valid JSON, continue searching
                   }
@@ -480,18 +483,20 @@ export function useConversation(): ConversationState & ConversationActions {
             }
             return null;
           }
-          const candidateJson = extractFirstJsonObject(
+          const jsonResult = extractFirstJsonObject(
             lastAssistantMessage.content
           );
-          if (candidateJson) {
-            jsonText = candidateJson;
+          if (jsonResult) {
+            jsonText = jsonResult.jsonString;
+            preParsedData = jsonResult.parsedData;
             console.log('📄 Found valid JSON in text:', jsonText);
           }
         }
 
         if (jsonText) {
           console.log('🧪 Attempting to parse JSON:', jsonText);
-          const recipeData = JSON.parse(jsonText);
+          // Use already parsed data if available, otherwise parse the JSON text
+          const recipeData = preParsedData || JSON.parse(jsonText);
 
           // Convert to RecipeFormData format
           const recipe: RecipeFormData = {
