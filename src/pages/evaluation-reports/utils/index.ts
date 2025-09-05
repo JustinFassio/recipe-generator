@@ -1,4 +1,4 @@
-import type { EvaluationReport } from '@/lib/evaluation-report-storage';
+import type { EvaluationReport } from '@/lib/evaluation-report-types';
 
 export const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString('en-US', {
