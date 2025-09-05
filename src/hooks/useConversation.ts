@@ -538,6 +538,7 @@ I'll ensure all recommendations are safe for your dietary needs and tailored to 
 
         // Extract JSON from the response (might be wrapped in markdown or text)
         let jsonText = null;
+        let preParsedData = null;
 
         // First, try to find JSON in markdown code blocks
         const jsonBlockMatch = lastAssistantMessage.content.match(
@@ -547,28 +548,46 @@ I'll ensure all recommendations are safe for your dietary needs and tailored to 
           jsonText = jsonBlockMatch[1].trim();
           console.log('📄 Found JSON in markdown block:', jsonText);
         } else {
-          // Try to find JSON object in the text - look for complete JSON objects
-          const jsonMatches = lastAssistantMessage.content.match(
-            /\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}/g
-          );
-          if (jsonMatches && jsonMatches.length > 0) {
-            // Try each match until we find valid JSON
-            for (const match of jsonMatches) {
-              try {
-                JSON.parse(match);
-                jsonText = match;
-                console.log('📄 Found valid JSON in text:', jsonText);
-                break;
-              } catch {
-                // Continue to next match
+          // Try to extract the first valid JSON object using brace matching
+          function extractFirstJsonObject(
+            text: string
+          ): { jsonString: string; parsedData: unknown } | null {
+            let start = -1;
+            let depth = 0;
+            for (let i = 0; i < text.length; i++) {
+              if (text[i] === '{') {
+                if (depth === 0) start = i;
+                depth++;
+              } else if (text[i] === '}') {
+                depth--;
+                if (depth === 0 && start !== -1) {
+                  const candidate = text.slice(start, i + 1);
+                  try {
+                    const parsedData = JSON.parse(candidate);
+                    return { jsonString: candidate, parsedData };
+                  } catch {
+                    // Not valid JSON, continue searching
+                  }
+                  start = -1;
+                }
               }
             }
+            return null;
+          }
+          const jsonResult = extractFirstJsonObject(
+            lastAssistantMessage.content
+          );
+          if (jsonResult) {
+            jsonText = jsonResult.jsonString;
+            preParsedData = jsonResult.parsedData;
+            console.log('📄 Found valid JSON in text:', jsonText);
           }
         }
 
         if (jsonText) {
           console.log('🧪 Attempting to parse JSON:', jsonText);
-          const recipeData = JSON.parse(jsonText);
+          // Use already parsed data if available, otherwise parse the JSON text
+          const recipeData = preParsedData || JSON.parse(jsonText);
 
           // Convert to RecipeFormData format
           const recipe: RecipeFormData = {
@@ -593,22 +612,24 @@ I'll ensure all recommendations are safe for your dietary needs and tailored to 
         } else {
           console.log('No JSON found in last message, trying AI extraction...');
 
-          // Fallback: Use AI to extract recipe from the last message
-          const extractRequest = `Please extract the recipe from this conversation and format it as JSON:
-          
-${lastAssistantMessage.content}
+          // Fallback: Use AI to extract recipe from the conversation with full context
+          const extractRequest = `Please extract the recipe from this conversation and format it as JSON. Consider the full conversation context to ensure accuracy:
 
 Format as: {"title": "Recipe Name", "ingredients": ["ingredient 1", "ingredient 2"], "instructions": "Step-by-step instructions", "notes": "Additional notes", "setup": ["prep step 1"], "categories": ["category 1"]}`;
 
+          // Include full conversation history for better context
+          const conversationWithExtractRequest = [
+            ...messages,
+            {
+              id: Date.now().toString(),
+              role: 'user' as const,
+              content: extractRequest,
+              timestamp: new Date(),
+            },
+          ];
+
           const response = await openaiAPI.sendMessageWithPersona(
-            [
-              {
-                id: Date.now().toString(),
-                role: 'user',
-                content: extractRequest,
-                timestamp: new Date(),
-              },
-            ],
+            conversationWithExtractRequest,
             persona,
             threadId,
             user?.id
