@@ -456,22 +456,36 @@ export function useConversation(): ConversationState & ConversationActions {
           jsonText = jsonBlockMatch[1].trim();
           console.log('📄 Found JSON in markdown block:', jsonText);
         } else {
-          // Try to find JSON object in the text - look for complete JSON objects
-          const jsonMatches = lastAssistantMessage.content.match(
-            /\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}/g
-          );
-          if (jsonMatches && jsonMatches.length > 0) {
-            // Try each match until we find valid JSON
-            for (const match of jsonMatches) {
-              try {
-                JSON.parse(match);
-                jsonText = match;
-                console.log('📄 Found valid JSON in text:', jsonText);
-                break;
-              } catch {
-                // Continue to next match
+          // Try to extract the first valid JSON object using brace matching
+          function extractFirstJsonObject(text: string): string | null {
+            let start = -1;
+            let depth = 0;
+            for (let i = 0; i < text.length; i++) {
+              if (text[i] === '{') {
+                if (depth === 0) start = i;
+                depth++;
+              } else if (text[i] === '}') {
+                depth--;
+                if (depth === 0 && start !== -1) {
+                  const candidate = text.slice(start, i + 1);
+                  try {
+                    JSON.parse(candidate);
+                    return candidate;
+                  } catch {
+                    // Not valid JSON, continue searching
+                  }
+                  start = -1;
+                }
               }
             }
+            return null;
+          }
+          const candidateJson = extractFirstJsonObject(
+            lastAssistantMessage.content
+          );
+          if (candidateJson) {
+            jsonText = candidateJson;
+            console.log('📄 Found valid JSON in text:', jsonText);
           }
         }
 
