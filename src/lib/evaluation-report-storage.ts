@@ -12,6 +12,7 @@ import {
   deleteEvaluationReportFromDB,
   hasEvaluationReportsInDB,
   getLatestEvaluationReportFromDB,
+  clearAllEvaluationReportsFromDB,
 } from './evaluation-report-db';
 
 export interface EvaluationReport {
@@ -345,16 +346,31 @@ export const deleteEvaluationReport = async (
 };
 
 /**
- * Clear all evaluation reports for a user
+ * Clear all evaluation reports for a user from both database and localStorage
  */
-export const clearAllEvaluationReports = (userId: string): void => {
+export const clearAllEvaluationReports = async (
+  userId: string
+): Promise<boolean> => {
   try {
+    // Clear from database first
+    const dbSuccess = await clearAllEvaluationReportsFromDB(userId);
+
+    // Clear from localStorage
     const storageKey = `evaluation_reports_${userId}`;
     localStorage.removeItem(storageKey);
 
-    console.log(`All evaluation reports cleared for user ${userId}`);
+    if (dbSuccess) {
+      console.log(`All evaluation reports cleared for user ${userId}`);
+      return true;
+    } else {
+      console.warn(
+        `Database clear failed, but localStorage cleared for user ${userId}`
+      );
+      return false;
+    }
   } catch (error) {
     console.error('Error clearing evaluation reports:', error);
+    return false;
   }
 };
 
