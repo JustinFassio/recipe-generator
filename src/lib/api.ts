@@ -1,6 +1,7 @@
 import { supabase } from './supabase';
 import type { Recipe, PublicRecipe, RecipeFilters } from './types';
 import { parseRecipeFromText } from './recipe-parser';
+import { trackDatabaseError, trackAPIError } from './error-tracking';
 
 // Type for profile summary data used in API responses
 interface ProfileSummary {
@@ -8,10 +9,24 @@ interface ProfileSummary {
   full_name: string | null;
 }
 
-// Simple error handler
+// Enhanced error handler with error tracking
 function handleError(error: unknown, operation: string): never {
-  console.error(`${operation} error:`, error);
   const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+
+  // Determine error category and track appropriately
+  if (
+    error &&
+    typeof error === 'object' &&
+    ('code' in error || 'hint' in error || 'details' in error)
+  ) {
+    // Supabase database error
+    trackDatabaseError(`${operation}: ${errorMessage}`, error, { operation });
+  } else {
+    // General API error
+    trackAPIError(`${operation}: ${errorMessage}`, error, { operation });
+  }
+
+  console.error(`${operation} error:`, error);
   throw new Error(`${operation} failed: ${errorMessage}`);
 }
 
@@ -23,16 +38,21 @@ export const recipeApi = {
     } = await supabase.auth.getUser();
     if (!user) throw new Error('User not authenticated');
 
-    let query = supabase.from('recipes').select('*').eq('user_id', user.id);
+    // Optimize: Only select needed fields for list view to reduce data transfer
+    let query = supabase
+      .from('recipes')
+      .select(
+        'id, title, ingredients, categories, cooking_time, difficulty, is_public, created_at, updated_at'
+      )
+      .eq('user_id', user.id);
 
-    // Apply search filter using efficient single query with OR conditions
+    // Apply search filter using new full-text search indexes for better performance
     if (filters?.searchTerm) {
-      const searchTerm = filters.searchTerm.toLowerCase();
+      const searchTerm = filters.searchTerm.replace(/[^\w\s]/g, ''); // Sanitize for tsquery
 
-      // Use a single query with OR conditions for better performance
-      // This avoids multiple database round trips and in-memory deduplication
+      // Use full-text search with our new GIN indexes for much better performance
       query = query.or(
-        `title.ilike.%${searchTerm}%,instructions.ilike.%${searchTerm}%,array_to_string(ingredients,',').ilike.%${searchTerm}%`
+        `to_tsvector('english', title).@@.to_tsquery('english', '${searchTerm}:*'),to_tsvector('english', instructions).@@.to_tsquery('english', '${searchTerm}:*'),ingredients.@>.{${searchTerm}}`
       );
     }
 
@@ -94,12 +114,28 @@ export const recipeApi = {
     return data;
   },
 
+  // Get recipe summary (optimized for list views)
+  async getRecipeSummary(id: string): Promise<Partial<Recipe> | null> {
+    const { data, error } = await supabase
+      .from('recipes')
+      .select(
+        'id, title, ingredients, categories, cooking_time, difficulty, is_public, created_at, updated_at'
+      )
+      .eq('id', id)
+      .single();
+
+    if (error) handleError(error, 'Get recipe summary');
+    return data;
+  },
+
   // Fetch public recipes for the Explore feed
   async getPublicRecipes(): Promise<PublicRecipe[]> {
-    // Get all public recipes
+    // Optimize: Only select fields needed for public recipe cards to reduce data transfer
     const { data: recipes, error: recipesError } = await supabase
       .from('recipes')
-      .select('*')
+      .select(
+        'id, title, ingredients, categories, cooking_time, difficulty, user_id, created_at'
+      )
       .eq('is_public', true)
       .order('created_at', { ascending: false });
 
