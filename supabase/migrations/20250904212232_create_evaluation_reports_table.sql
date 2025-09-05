@@ -36,5 +36,14 @@ CREATE POLICY "evaluation_reports_delete_own" ON "public"."evaluation_reports" F
 GRANT ALL ON TABLE "public"."evaluation_reports" TO "authenticated";
 GRANT ALL ON TABLE "public"."evaluation_reports" TO "service_role";
 
--- Create trigger for updated_at
-CREATE OR REPLACE TRIGGER "evaluation_reports_set_updated_at" BEFORE UPDATE ON "public"."evaluation_reports" FOR EACH ROW EXECUTE FUNCTION "public"."moddatetime"('updated_at');
+-- Create trigger for updated_at (only if moddatetime function exists)
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM pg_proc WHERE proname = 'moddatetime') THEN
+        CREATE OR REPLACE TRIGGER "evaluation_reports_set_updated_at" 
+        BEFORE UPDATE ON "public"."evaluation_reports" 
+        FOR EACH ROW EXECUTE FUNCTION "public"."moddatetime"('updated_at');
+    ELSE
+        RAISE WARNING 'moddatetime function not found. Trigger not created.';
+    END IF;
+END $$;
