@@ -7,6 +7,10 @@ export const useRecipes = (filters?: RecipeFilters) => {
   return useQuery({
     queryKey: ['recipes', filters],
     queryFn: () => recipeApi.getUserRecipes(filters),
+    staleTime: 5 * 60 * 1000, // 5 minutes - recipes don't change frequently
+    gcTime: 10 * 60 * 1000, // 10 minutes - keep in cache longer
+    refetchOnWindowFocus: false, // Don't refetch on every focus
+    refetchOnMount: false, // Don't refetch if we have fresh data
   });
 };
 
@@ -15,6 +19,21 @@ export const useRecipe = (id: string) => {
     queryKey: ['recipe', id],
     queryFn: () => recipeApi.getRecipe(id),
     enabled: !!id,
+    staleTime: 10 * 60 * 1000, // 10 minutes - individual recipes change less frequently
+    gcTime: 30 * 60 * 1000, // 30 minutes - keep individual recipes cached longer
+    refetchOnWindowFocus: false,
+  });
+};
+
+// New hook for recipe summaries (used in lists)
+export const useRecipeSummary = (id: string) => {
+  return useQuery({
+    queryKey: ['recipe-summary', id],
+    queryFn: () => recipeApi.getRecipeSummary(id),
+    enabled: !!id,
+    staleTime: 15 * 60 * 1000, // 15 minutes - summaries are even more stable
+    gcTime: 60 * 60 * 1000, // 1 hour - keep summaries cached very long
+    refetchOnWindowFocus: false,
   });
 };
 
@@ -23,8 +42,13 @@ export const useCreateRecipe = () => {
 
   return useMutation({
     mutationFn: recipeApi.createRecipe,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['recipes'] });
+    onSuccess: (newRecipe) => {
+      // More strategic invalidation - only invalidate recipes list, not individual recipes
+      queryClient.invalidateQueries({ queryKey: ['recipes'], exact: false });
+      // Optionally set the new recipe in cache to avoid refetch
+      if (newRecipe?.id) {
+        queryClient.setQueryData(['recipe', newRecipe.id], newRecipe);
+      }
       toast({
         title: 'Success',
         description: 'Recipe created successfully!',
@@ -47,8 +71,13 @@ export const useUpdateRecipe = () => {
   return useMutation({
     mutationFn: ({ id, updates }: { id: string; updates: Partial<Recipe> }) =>
       recipeApi.updateRecipe(id, updates),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['recipes'] });
+    onSuccess: (updatedRecipe, { id }) => {
+      // Strategic invalidation: update specific recipe in cache and invalidate lists
+      if (updatedRecipe) {
+        queryClient.setQueryData(['recipe', id], updatedRecipe);
+      }
+      queryClient.invalidateQueries({ queryKey: ['recipes'], exact: false });
+      queryClient.invalidateQueries({ queryKey: ['recipe-summary', id] });
       toast({
         title: 'Success',
         description: 'Recipe updated successfully!',
@@ -70,8 +99,11 @@ export const useDeleteRecipe = () => {
 
   return useMutation({
     mutationFn: recipeApi.deleteRecipe,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['recipes'] });
+    onSuccess: (_, deletedId) => {
+      // Strategic cache cleanup: remove from cache and invalidate lists
+      queryClient.removeQueries({ queryKey: ['recipe', deletedId] });
+      queryClient.removeQueries({ queryKey: ['recipe-summary', deletedId] });
+      queryClient.invalidateQueries({ queryKey: ['recipes'], exact: false });
       toast({
         title: 'Success',
         description: 'Recipe deleted successfully!',
@@ -102,6 +134,18 @@ export const useParseRecipe = () => {
       });
       console.error('Parse recipe error:', error);
     },
+  });
+};
+
+// Hook for public recipes (Explore page) with aggressive caching
+export const usePublicRecipes = () => {
+  return useQuery({
+    queryKey: ['public-recipes'],
+    queryFn: () => recipeApi.getPublicRecipes(),
+    staleTime: 15 * 60 * 1000, // 15 minutes - public recipes change less frequently
+    gcTime: 60 * 60 * 1000, // 1 hour - keep public recipes cached very long
+    refetchOnWindowFocus: false,
+    refetchOnMount: false, // Don't refetch if we have recent data
   });
 };
 

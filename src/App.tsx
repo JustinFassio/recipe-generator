@@ -15,7 +15,7 @@ import ExplorePage from '@/pages/explore-page';
 import { AuthForm } from '@/components/auth/auth-form';
 import { ThemeProvider } from '@/components/ui/theme-provider';
 import Phase4Demo from '@/components/demo/Phase4Demo';
-import EvaluationReportPage from '@/pages/evaluation-report-page';
+import EvaluationReportPage from '@/pages/evaluation-reports/EvaluationReportPage';
 import { SelectionProvider } from '@/contexts/SelectionContext';
 
 import { Toaster } from '@/components/ui/toaster';

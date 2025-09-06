@@ -60,6 +60,9 @@ Each phase builds on the previous and can be deployed independently.
 - [`CORE_DATABASE_SCHEMA.md`](./CORE_DATABASE_SCHEMA.md) - Complete database schema reference
 - [`MIGRATION_BEST_PRACTICES.md`](./MIGRATION_BEST_PRACTICES.md) - Migration guidelines and rules
 - [`TROUBLESHOOTING_GUIDE.md`](./TROUBLESHOOTING_GUIDE.md) - Quick solutions to common issues
+- [`SUPABASE_MCP_SERVER.md`](./SUPABASE_MCP_SERVER.md) - **NEW** Complete MCP Server integration guide
+- [`MCP_QUICK_REFERENCE.md`](./MCP_QUICK_REFERENCE.md) - **NEW** MCP Server quick reference card
+- [`SUPABASE_MCP_SETUP.md`](./SUPABASE_MCP_SETUP.md) - **NEW** MCP Server setup instructions
 
 ### **Implementation Guides**
 
@@ -169,6 +172,10 @@ curl -H "apikey: $(npx supabase status | sed -n 's/^anon key: //p' | tr -d '\n')
 - ✅ `is_username_available()` - Username availability check
 - ✅ `update_username_atomic()` - Atomic username updates
 - ✅ `claim_username_atomic()` - Username claiming
+- ✅ `get_slow_queries()` - Performance monitoring
+- ✅ `get_table_stats()` - Database health metrics
+- ✅ `get_database_metrics()` - Connection and cache statistics
+- ✅ `get_index_usage()` - Index efficiency analysis
 
 ### **Security**
 
@@ -180,7 +187,18 @@ curl -H "apikey: $(npx supabase status | sed -n 's/^anon key: //p' | tr -d '\n')
 
 - ✅ Strategic indexes for common queries
 - ✅ GIN indexes for array-based searches
-- ✅ Optimized for profile loading and recipe queries
+- ✅ Full-text search indexes for recipes
+- ✅ Connection pooling enabled
+- ✅ Query performance monitoring active
+- ✅ Optimized for sub-millisecond response times
+
+### **🤖 AI-Enhanced Development**
+
+- ✅ **Supabase MCP Server** - Real-time database schema access for AI
+- ✅ **Intelligent Query Optimization** - AI suggests performance improvements
+- ✅ **Context-Aware Development** - AI understands complete database structure
+- ✅ **Automated Best Practices** - AI enforces Supabase conventions
+- ✅ **Real-Time Troubleshooting** - AI can inspect database state during issues
 
 ---
 

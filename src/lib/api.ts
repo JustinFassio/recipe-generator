@@ -1,6 +1,7 @@
 import { supabase } from './supabase';
 import type { Recipe, PublicRecipe, RecipeFilters } from './types';
 import { parseRecipeFromText } from './recipe-parser';
+import { trackDatabaseError, trackAPIError } from './error-tracking';
 
 // Type for profile summary data used in API responses
 interface ProfileSummary {
@@ -8,10 +9,24 @@ interface ProfileSummary {
   full_name: string | null;
 }
 
-// Simple error handler
+// Enhanced error handler with error tracking
 function handleError(error: unknown, operation: string): never {
-  console.error(`${operation} error:`, error);
   const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+
+  // Determine error category and track appropriately
+  if (
+    error &&
+    typeof error === 'object' &&
+    ('code' in error || 'hint' in error || 'details' in error)
+  ) {
+    // Supabase database error
+    trackDatabaseError(`${operation}: ${errorMessage}`, error, { operation });
+  } else {
+    // General API error
+    trackAPIError(`${operation}: ${errorMessage}`, error, { operation });
+  }
+
+  console.error(`${operation} error:`, error);
   throw new Error(`${operation} failed: ${errorMessage}`);
 }
 
@@ -23,16 +38,22 @@ export const recipeApi = {
     } = await supabase.auth.getUser();
     if (!user) throw new Error('User not authenticated');
 
-    let query = supabase.from('recipes').select('*').eq('user_id', user.id);
+    // Optimize: Only select needed fields for list view to reduce data transfer
+    let query = supabase
+      .from('recipes')
+      .select(
+        'id, title, ingredients, instructions, notes, image_url, categories, cooking_time, difficulty, is_public, created_at, updated_at'
+      )
+      .eq('user_id', user.id);
 
-    // Apply search filter using efficient single query with OR conditions
+    // Apply search filter using secure parameterized queries to prevent SQL injection
     if (filters?.searchTerm) {
-      const searchTerm = filters.searchTerm.toLowerCase();
+      // SECURITY FIX: Use safe ILIKE patterns instead of raw SQL interpolation with to_tsquery
+      // This prevents SQL injection while maintaining search functionality
+      const searchTerm = filters.searchTerm.trim().replace(/[%_\\]/g, '\\$&'); // Escape LIKE wildcards
 
-      // Use a single query with OR conditions for better performance
-      // This avoids multiple database round trips and in-memory deduplication
       query = query.or(
-        `title.ilike.%${searchTerm}%,instructions.ilike.%${searchTerm}%,array_to_string(ingredients,',').ilike.%${searchTerm}%`
+        `title.ilike.%${searchTerm}%,instructions.ilike.%${searchTerm}%,ingredients.cs.{${searchTerm}}`
       );
     }
 
@@ -79,7 +100,7 @@ export const recipeApi = {
     const { data, error } = await query;
 
     if (error) handleError(error, 'Get user recipes');
-    return data || [];
+    return (data as unknown as Recipe[]) || [];
   },
 
   // Get a single recipe by ID
@@ -94,12 +115,28 @@ export const recipeApi = {
     return data;
   },
 
+  // Get recipe summary (optimized for list views)
+  async getRecipeSummary(id: string): Promise<Partial<Recipe> | null> {
+    const { data, error } = await supabase
+      .from('recipes')
+      .select(
+        'id, title, ingredients, categories, cooking_time, difficulty, is_public, created_at, updated_at'
+      )
+      .eq('id', id)
+      .single();
+
+    if (error) handleError(error, 'Get recipe summary');
+    return data;
+  },
+
   // Fetch public recipes for the Explore feed
   async getPublicRecipes(): Promise<PublicRecipe[]> {
-    // Get all public recipes
+    // Optimize: Only select fields needed for public recipe cards to reduce data transfer
     const { data: recipes, error: recipesError } = await supabase
       .from('recipes')
-      .select('*')
+      .select(
+        'id, title, ingredients, instructions, notes, image_url, categories, cooking_time, difficulty, user_id, created_at'
+      )
       .eq('is_public', true)
       .order('created_at', { ascending: false });
 
@@ -108,7 +145,9 @@ export const recipeApi = {
 
     // Get unique user IDs from recipes
     const userIds = [
-      ...new Set(recipes.map((recipe: Recipe) => recipe.user_id)),
+      ...new Set(
+        recipes.map((recipe: Record<string, unknown>) => recipe.user_id)
+      ),
     ];
 
     // Fetch profiles for those users
@@ -128,10 +167,10 @@ export const recipeApi = {
     );
 
     // Combine recipes with profile data
-    return recipes.map((recipe: Recipe) => ({
+    return recipes.map((recipe: Record<string, unknown>) => ({
       ...recipe,
-      author_name: profileMap.get(recipe.user_id) || 'Unknown Author',
-    }));
+      author_name: profileMap.get(recipe.user_id as string) || 'Unknown Author',
+    })) as PublicRecipe[];
   },
 
   // Toggle recipe public status

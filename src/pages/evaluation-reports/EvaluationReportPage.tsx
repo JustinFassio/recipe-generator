@@ -4,7 +4,7 @@ import {
   getUserEvaluationReports,
   deleteEvaluationReport,
   exportEvaluationReport,
-} from '@/lib/evaluation-report-storage';
+} from '@/lib/evaluation-report-db';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { User, BookOpen, RefreshCw } from 'lucide-react';

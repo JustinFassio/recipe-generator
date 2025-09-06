@@ -896,7 +896,7 @@ Generate realistic data based on our conversation.`,
     try {
       // Import the evaluation report storage functions
       const { saveEvaluationReport: saveReport } = await import(
-        '@/lib/evaluation-report-storage'
+        '@/lib/evaluation-report-db'
       );
 
       // Try to parse the multi-part JSON response from Dr. Luna
