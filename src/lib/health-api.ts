@@ -1,6 +1,54 @@
 import { supabase } from './supabase';
-import { databaseMonitor } from './database-monitoring';
+import { databaseMonitor, type DatabaseHealth } from './database-monitoring';
 import { getPerformanceData } from './monitoring';
+
+// Proper type definitions for performance data
+interface PerformanceSummary {
+  totalQueries: number;
+  avgResponseTime: number;
+  errorRate: number;
+  cacheHitRate: number;
+  slowQueries: number;
+  recentErrors: Array<{ error: unknown; timestamp: number; context: string }>;
+}
+
+interface DatabaseHealthSummary {
+  avgResponseTime: number;
+  uptimePercentage: number;
+  errorRate: number;
+  trend: 'improving' | 'stable' | 'degrading';
+}
+
+// Helper functions for safe property access
+function hasQueryMetricsSummary(health: HealthStatus): boolean {
+  return (
+    health.performance?.queryMetrics?.summary !== undefined &&
+    health.performance.queryMetrics.summary !== null
+  );
+}
+
+function getQueryMetricsSummary(
+  health: HealthStatus
+): PerformanceSummary | null {
+  return hasQueryMetricsSummary(health)
+    ? health.performance.queryMetrics.summary!
+    : null;
+}
+
+function hasDatabaseHealthTrend(health: HealthStatus): boolean {
+  return (
+    health.performance?.databaseHealth?.trend !== undefined &&
+    health.performance.databaseHealth.trend !== null
+  );
+}
+
+function getDatabaseHealthTrend(
+  health: HealthStatus
+): DatabaseHealthSummary | null {
+  return hasDatabaseHealthTrend(health)
+    ? health.performance.databaseHealth.trend!
+    : null;
+}
 
 // Health check API endpoints
 export interface HealthStatus {
@@ -22,8 +70,18 @@ export interface HealthStatus {
     };
   };
   performance: {
-    queryMetrics: Record<string, unknown>;
-    databaseHealth: Record<string, unknown>;
+    queryMetrics: {
+      summary?: PerformanceSummary;
+      metrics?: Array<unknown>;
+      health?: { healthy: boolean; issues: string[] };
+      timestamp?: number;
+    };
+    databaseHealth: {
+      current?: DatabaseHealth;
+      trend?: DatabaseHealthSummary;
+      history?: Array<unknown>;
+      recommendations?: string[];
+    };
   };
   recommendations: string[];
 }
@@ -261,59 +319,34 @@ class HealthAPI {
     }
 
     // Performance recommendations
-    if (
-      (health.performance.queryMetrics as Record<string, unknown>)?.summary &&
-      (health.performance.queryMetrics as Record<string, unknown>).summary &&
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (health.performance.queryMetrics as any).summary.errorRate > 0.05
-    ) {
+    const queryMetrics = getQueryMetricsSummary(health);
+    if (queryMetrics && queryMetrics.errorRate > 0.05) {
       recommendations.push(
         '📊 High query error rate detected - Review error logs and fix failing queries'
       );
     }
 
-    if (
-      (health.performance.queryMetrics as Record<string, unknown>)?.summary &&
-      (health.performance.queryMetrics as Record<string, unknown>).summary &&
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (health.performance.queryMetrics as any).summary.avgResponseTime > 1000
-    ) {
+    if (queryMetrics && queryMetrics.avgResponseTime > 1000) {
       recommendations.push(
         '📊 Average query response time is high - Optimize slow queries'
       );
     }
 
-    if (
-      (health.performance.queryMetrics as Record<string, unknown>)?.summary &&
-      (health.performance.queryMetrics as Record<string, unknown>).summary &&
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (health.performance.queryMetrics as any).summary.cacheHitRate < 0.8
-    ) {
+    if (queryMetrics && queryMetrics.cacheHitRate < 0.8) {
       recommendations.push(
         '💾 Low cache hit rate - Review caching strategy and stale times'
       );
     }
 
     // Database-specific recommendations
-    if (
-      (health.performance.databaseHealth as Record<string, unknown>)?.current &&
-      (health.performance.databaseHealth as Record<string, unknown>).current &&
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (health.performance.databaseHealth as any).current.slowQueries &&
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (health.performance.databaseHealth as any).current.slowQueries.length > 5
-    ) {
+    const dbHealthTrend = getDatabaseHealthTrend(health);
+    if (queryMetrics && queryMetrics.slowQueries > 5) {
       recommendations.push(
         '🐌 Multiple slow queries detected - Review and optimize database queries'
       );
     }
 
-    if (
-      (health.performance.databaseHealth as Record<string, unknown>)?.trend &&
-      (health.performance.databaseHealth as Record<string, unknown>).trend &&
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (health.performance.databaseHealth as any).trend.trend === 'degrading'
-    ) {
+    if (dbHealthTrend && dbHealthTrend.trend === 'degrading') {
       recommendations.push(
         '📉 Database performance is degrading - Monitor resource usage trends'
       );
