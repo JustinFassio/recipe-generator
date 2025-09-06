@@ -187,7 +187,7 @@ class ErrorTracker {
 
     // Catch React errors (if using error boundary)
     if (typeof window !== 'undefined') {
-      (window as Record<string, unknown>).__ERROR_TRACKER__ = this;
+      (window as unknown as Record<string, unknown>).__ERROR_TRACKER__ = this;
     }
   }
 
@@ -267,7 +267,7 @@ class ErrorTracker {
     switch (action.type) {
       case 'console': {
         const level = action.config.level || 'error';
-        console[level as keyof Console](`🚨 ALERT: ${rule.name}`, {
+        (console as any)[level as string](`🚨 ALERT: ${rule.name}`, {
           rule: rule.name,
           condition: rule.condition,
           context,
@@ -285,7 +285,7 @@ class ErrorTracker {
 
       case 'webhook':
         // Webhook alerting
-        if (action.config.url) {
+        if (action.config.url && typeof action.config.url === 'string') {
           fetch(action.config.url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

@@ -32,7 +32,7 @@ function handleError(error: unknown, operation: string): never {
 
 export const recipeApi = {
   // Fetch all recipes for the current user with optional filters
-  async getUserRecipes(filters?: RecipeFilters): Promise<Recipe[]> {
+  async getUserRecipes(filters?: RecipeFilters): Promise<Partial<Recipe>[]> {
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -144,7 +144,7 @@ export const recipeApi = {
 
     // Get unique user IDs from recipes
     const userIds = [
-      ...new Set(recipes.map((recipe: Recipe) => recipe.user_id)),
+      ...new Set(recipes.map((recipe: any) => recipe.user_id)),
     ];
 
     // Fetch profiles for those users
@@ -164,7 +164,7 @@ export const recipeApi = {
     );
 
     // Combine recipes with profile data
-    return recipes.map((recipe: Recipe) => ({
+    return recipes.map((recipe: any) => ({
       ...recipe,
       author_name: profileMap.get(recipe.user_id) || 'Unknown Author',
     }));

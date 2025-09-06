@@ -165,7 +165,7 @@ export function RecipesPage() {
             {recipes.map((recipe) => (
               <RecipeCard
                 key={recipe.id}
-                recipe={recipe}
+                recipe={recipe as Recipe}
                 onEdit={handleEditRecipe}
                 onView={handleViewRecipe}
                 showShareButton={true}

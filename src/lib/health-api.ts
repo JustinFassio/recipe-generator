@@ -69,8 +69,8 @@ class HealthAPI {
         storage: { status: 'down', responseTime: 0 },
       },
       performance: {
-        queryMetrics: null,
-        databaseHealth: null,
+        queryMetrics: {} as Record<string, unknown>,
+        databaseHealth: {} as Record<string, unknown>,
       },
       recommendations: [],
     };
@@ -97,7 +97,7 @@ class HealthAPI {
       // Get detailed database metrics
       try {
         const dbHealth = await databaseMonitor.getCurrentHealth();
-        health.services.database.details = dbHealth;
+        health.services.database.details = dbHealth as unknown as Record<string, unknown>;
         health.performance.databaseHealth =
           databaseMonitor.getPerformanceSummary();
       } catch (e) {
@@ -258,32 +258,32 @@ class HealthAPI {
     }
 
     // Performance recommendations
-    if (health.performance.queryMetrics?.summary?.errorRate > 0.05) {
+    if ((health.performance.queryMetrics as any)?.summary?.errorRate > 0.05) {
       recommendations.push(
         '📊 High query error rate detected - Review error logs and fix failing queries'
       );
     }
 
-    if (health.performance.queryMetrics?.summary?.avgResponseTime > 1000) {
+    if ((health.performance.queryMetrics as any)?.summary?.avgResponseTime > 1000) {
       recommendations.push(
         '📊 Average query response time is high - Optimize slow queries'
       );
     }
 
-    if (health.performance.queryMetrics?.summary?.cacheHitRate < 0.8) {
+    if ((health.performance.queryMetrics as any)?.summary?.cacheHitRate < 0.8) {
       recommendations.push(
         '💾 Low cache hit rate - Review caching strategy and stale times'
       );
     }
 
     // Database-specific recommendations
-    if (health.performance.databaseHealth?.current?.slowQueries?.length > 5) {
+    if ((health.performance.databaseHealth as any)?.current?.slowQueries?.length > 5) {
       recommendations.push(
         '🐌 Multiple slow queries detected - Review and optimize database queries'
       );
     }
 
-    if (health.performance.databaseHealth?.trend?.trend === 'degrading') {
+    if ((health.performance.databaseHealth as any)?.trend?.trend === 'degrading') {
       recommendations.push(
         '📉 Database performance is degrading - Monitor resource usage trends'
       );
@@ -311,8 +311,8 @@ class HealthAPI {
     // Test basic health
     try {
       results.basicHealth = await this.getBasicHealth();
-    } catch {
-      errors.push(`Basic health check failed: ${error}`);
+    } catch (e) {
+      errors.push(`Basic health check failed: ${e}`);
     }
 
     // Test monitoring functions
@@ -328,16 +328,16 @@ class HealthAPI {
         const { data, error } = await supabase.rpc(func);
         if (error) throw error;
         results[func] = data;
-      } catch {
-        errors.push(`Function ${func} failed: ${error}`);
+      } catch (e) {
+        errors.push(`Function ${func} failed: ${e}`);
       }
     }
 
     // Test performance monitoring
     try {
       results.performanceData = getPerformanceData();
-    } catch {
-      errors.push(`Performance data failed: ${error}`);
+    } catch (e) {
+      errors.push(`Performance data failed: ${e}`);
     }
 
     return {
@@ -359,8 +359,8 @@ if (process.env.NODE_ENV === 'development') {
       try {
         const health = await healthAPI.getBasicHealth();
         console.log('🏥 Health Check:', health);
-      } catch {
-        console.error('Health check failed:', error);
+      } catch (e) {
+        console.error('Health check failed:', e);
       }
     },
     2 * 60 * 1000

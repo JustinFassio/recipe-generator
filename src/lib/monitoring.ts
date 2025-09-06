@@ -85,10 +85,10 @@ class PerformanceMonitor {
   logError(error: unknown, context: string) {
     const errorEntry = {
       error: {
-        message: error?.message || 'Unknown error',
-        stack: error?.stack,
-        code: error?.code,
-        details: error?.details,
+        message: (error as any)?.message || 'Unknown error',
+        stack: (error as any)?.stack,
+        code: (error as any)?.code,
+        details: (error as any)?.details,
       },
       timestamp: Date.now(),
       context,
@@ -114,7 +114,7 @@ class PerformanceMonitor {
     errorRate: number;
     cacheHitRate: number;
     slowQueries: number;
-    recentErrors: typeof this.errorLog;
+    recentErrors: any[];
   } {
     const metrics = Array.from(this.queryMetrics.values());
     const totalQueries = metrics.reduce(
@@ -220,14 +220,14 @@ export function setupQueryClientMonitoring(queryClient: QueryClient) {
   });
 
   // Monitor mutations
-  queryClient.getMutationCache().subscribe((event) => {
+  queryClient.getMutationCache().subscribe((event: any) => {
     if (event.type === 'observerResult') {
       const { mutation } = event;
 
-      if (mutation.state.error) {
+      if (mutation?.state?.error) {
         performanceMonitor.logError(
           mutation.state.error,
-          `Mutation: ${JSON.stringify(mutation.options.mutationKey || 'unknown')}`
+          `Mutation: ${JSON.stringify(mutation.options?.mutationKey || 'unknown')}`
         );
       }
     }

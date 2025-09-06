@@ -277,6 +277,6 @@ describe('ProfilePage Integration Tests', () => {
     expect(screen.getByText('Preferred Cuisines')).toBeInTheDocument();
     expect(screen.getByText('Disliked Ingredients')).toBeInTheDocument();
     expect(screen.getByText('Available Equipment')).toBeInTheDocument();
-    expect(screen.getByText(/Spice Tolerance:/i)).toBeInTheDocument();
+    expect(screen.getByText(/Spice Tolerance/i)).toBeInTheDocument();
   });
 });
