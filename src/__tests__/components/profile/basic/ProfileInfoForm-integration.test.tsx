@@ -68,10 +68,8 @@ describe('ProfileInfoForm Integration with Hooks', () => {
     expect(
       screen.getByRole('combobox', { name: /measurement units/i })
     ).toBeInTheDocument();
-    expect(screen.getByText('Time Per Meal: 45m')).toBeInTheDocument();
-    expect(
-      screen.getByText('Cooking Skill Level: Intermediate')
-    ).toBeInTheDocument();
+    expect(screen.getByText('45m')).toBeInTheDocument();
+    expect(screen.getByText('Intermediate')).toBeInTheDocument();
     expect(
       screen.getByRole('button', { name: /update profile/i })
     ).toBeInTheDocument();

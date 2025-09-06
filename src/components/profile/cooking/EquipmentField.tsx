@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { FieldLabel, TagToggleGroup } from '@/components/profile/shared';
-import { withTextWrapping } from '@/lib/text-wrapping-migration';
 
 interface EquipmentFieldProps {
   values: string[];
@@ -25,6 +24,17 @@ const commonEquipment = [
   'Wok',
   'Dutch Oven',
   'Baking Sheets',
+  'Toaster',
+  'Coffee Maker',
+  'Electric Kettle',
+  'Immersion Blender',
+  'Pasta Maker',
+  'Bread Machine',
+  'Ice Cream Maker',
+  'Juicer',
+  'Spiralizer',
+  'Mandoline',
+  'Mortar and Pestle',
 ];
 
 export const EquipmentField: React.FC<EquipmentFieldProps> = ({
@@ -98,7 +108,7 @@ export const EquipmentField: React.FC<EquipmentFieldProps> = ({
       {values.length > 0 && (
         <div className="mt-2">
           <span className="text-sm font-medium">Selected:</span>
-          <div className={`mt-1 flex flex-wrap gap-1 ${withTextWrapping()}`}>
+          <div className="mt-1 flex flex-wrap gap-1">
             {values.map((equipment) => (
               <span
                 key={equipment}

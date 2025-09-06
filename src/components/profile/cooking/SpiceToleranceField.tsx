@@ -1,5 +1,5 @@
 import React from 'react';
-import { FieldLabel, RangeWithTicks } from '@/components/profile/shared';
+import { FieldLabel, ValueSlider } from '@/components/profile/shared';
 
 interface SpiceToleranceFieldProps {
   value: number;
@@ -16,13 +16,14 @@ export const SpiceToleranceField: React.FC<SpiceToleranceFieldProps> = ({
 }) => {
   return (
     <div className={`form-control ${className}`}>
-      <FieldLabel>Spice Tolerance: {spiceLabels[value - 1]}</FieldLabel>
-      <RangeWithTicks
+      <FieldLabel>Spice Tolerance</FieldLabel>
+      <ValueSlider
         value={value}
         onChange={onChange}
         min={1}
         max={5}
-        ticks={spiceLabels}
+        valueFormatter={(value) => spiceLabels[value - 1]}
+        className="w-full"
       />
     </div>
   );

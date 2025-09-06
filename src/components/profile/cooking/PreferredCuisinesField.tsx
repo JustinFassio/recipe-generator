@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { FieldLabel, TagToggleGroup } from '@/components/profile/shared';
-import { withTextWrapping } from '@/lib/text-wrapping-migration';
 
 interface PreferredCuisinesFieldProps {
   values: string[];
@@ -25,6 +24,28 @@ const commonCuisines = [
   'Middle Eastern',
   'German',
   'British',
+  'Brazilian',
+  'Peruvian',
+  'Argentine',
+  'Caribbean',
+  'Ethiopian',
+  'Moroccan',
+  'Turkish',
+  'Lebanese',
+  'Persian',
+  'Russian',
+  'Polish',
+  'Hungarian',
+  'Czech',
+  'Swedish',
+  'Norwegian',
+  'Dutch',
+  'Belgian',
+  'Portuguese',
+  'Cajun',
+  'Soul Food',
+  'Tex-Mex',
+  'Fusion',
 ];
 
 export const PreferredCuisinesField: React.FC<PreferredCuisinesFieldProps> = ({
@@ -98,7 +119,7 @@ export const PreferredCuisinesField: React.FC<PreferredCuisinesFieldProps> = ({
       {values.length > 0 && (
         <div className="mt-2">
           <span className="text-sm font-medium">Selected:</span>
-          <div className={`mt-1 flex flex-wrap gap-1 ${withTextWrapping()}`}>
+          <div className="mt-1 flex flex-wrap gap-1">
             {values.map((cuisine) => (
               <span
                 key={cuisine}

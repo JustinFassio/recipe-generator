@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { FieldLabel, TagToggleGroup } from '@/components/profile/shared';
-import { withTextWrapping } from '@/lib/text-wrapping-migration';
 
 interface MedicalConditionsFieldProps {
   values: string[];
@@ -90,7 +89,7 @@ export const MedicalConditionsField: React.FC<MedicalConditionsFieldProps> = ({
       {values.length > 0 && (
         <div className="mt-2">
           <span className="text-sm font-medium">Selected:</span>
-          <div className={`mt-1 flex flex-wrap gap-1 ${withTextWrapping()}`}>
+          <div className="mt-1 flex flex-wrap gap-1">
             {values.map((condition) => (
               <span
                 key={condition}

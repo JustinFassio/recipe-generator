@@ -1,6 +1,8 @@
-import React, { useRef } from 'react';
-import { User, Camera, Loader2 } from 'lucide-react';
+import React, { useRef, useEffect } from 'react';
+import { Camera, Loader2 } from 'lucide-react';
 import { SectionCard } from '@/components/profile/shared';
+import { ProgressiveAvatar } from '@/components/shared/ProgressiveImage';
+import { useAvatarCache } from '@/lib/avatar-cache';
 
 interface AvatarCardProps {
   avatarUrl: string | null;
@@ -16,6 +18,14 @@ export const AvatarCard: React.FC<AvatarCardProps> = ({
   className = '',
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { preloadAvatar } = useAvatarCache();
+
+  // Preload avatar when component mounts
+  useEffect(() => {
+    if (avatarUrl) {
+      preloadAvatar(avatarUrl, 'large');
+    }
+  }, [avatarUrl, preloadAvatar]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -38,29 +48,19 @@ export const AvatarCard: React.FC<AvatarCardProps> = ({
       <h2 className="card-title">Profile Picture</h2>
 
       <div className="flex flex-col items-center space-y-4">
-        <div className="avatar">
-          <div className="h-24 w-24 rounded-full">
-            {avatarUrl ? (
-              <img
-                src={`${avatarUrl}?t=${Date.now()}`}
-                alt="Profile"
-                onError={(e) => {
-                  console.error('Avatar image failed to load:', avatarUrl);
-                  // Fallback to default avatar on error
-                  e.currentTarget.style.display = 'none';
-                }}
-              />
-            ) : (
-              <div className="bg-primary/20 flex items-center justify-center">
-                <User className="text-primary h-12 w-12" />
-              </div>
-            )}
-            {loading && (
-              <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/50">
-                <Loader2 className="h-6 w-6 animate-spin text-white" />
-              </div>
-            )}
-          </div>
+        <div className="relative">
+          <ProgressiveAvatar
+            src={avatarUrl}
+            alt="Profile picture"
+            size="xlarge"
+            fallbackText="User"
+            priority={true}
+          />
+          {loading && (
+            <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/50">
+              <Loader2 className="h-6 w-6 animate-spin text-white" />
+            </div>
+          )}
         </div>
 
         <input
