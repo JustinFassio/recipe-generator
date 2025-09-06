@@ -53,11 +53,17 @@ BEGIN
     t.table_name::text,
     COALESCE(s.n_live_tup, 0) as row_count,
     pg_size_pretty(pg_total_relation_size(t.table_name::regclass)) as size,
-    (SELECT count(*) FROM pg_indexes WHERE tablename = t.table_name AND schemaname = 'public') as index_count,
+    COALESCE(idx.index_count, 0) as index_count,
     s.last_vacuum,
     s.last_analyze
   FROM information_schema.tables t
   LEFT JOIN pg_stat_user_tables s ON s.relname = t.table_name
+  LEFT JOIN (
+    SELECT tablename, count(*) as index_count
+    FROM pg_indexes
+    WHERE schemaname = 'public'
+    GROUP BY tablename
+  ) idx ON idx.tablename = t.table_name
   WHERE t.table_schema = 'public'
     AND t.table_type = 'BASE TABLE'
   ORDER BY s.n_live_tup DESC NULLS LAST;
