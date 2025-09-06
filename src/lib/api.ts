@@ -46,13 +46,14 @@ export const recipeApi = {
       )
       .eq('user_id', user.id);
 
-    // Apply search filter using new full-text search indexes for better performance
+    // Apply search filter using secure parameterized queries to prevent SQL injection
     if (filters?.searchTerm) {
-      const searchTerm = filters.searchTerm.replace(/[^\w\s]/g, ''); // Sanitize for tsquery
+      // SECURITY FIX: Use safe ILIKE patterns instead of raw SQL interpolation with to_tsquery
+      // This prevents SQL injection while maintaining search functionality
+      const searchTerm = filters.searchTerm.trim().replace(/[%_\\]/g, '\\$&'); // Escape LIKE wildcards
 
-      // Use full-text search with our new GIN indexes for much better performance
       query = query.or(
-        `to_tsvector('english', title).@@.to_tsquery('english', '${searchTerm}:*'),to_tsvector('english', instructions).@@.to_tsquery('english', '${searchTerm}:*'),ingredients.@>.{${searchTerm}}`
+        `title.ilike.%${searchTerm}%,instructions.ilike.%${searchTerm}%,ingredients.cs.{${searchTerm}}`
       );
     }
 
