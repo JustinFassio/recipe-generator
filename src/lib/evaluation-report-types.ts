@@ -193,7 +193,7 @@ export interface DatabaseEvaluationReport {
   evaluation_date: string;
   dietitian: string;
   report_version: string;
-  report_data: EvaluationReport['user_evaluation_report'];
+  report_data: EvaluationReport; // FIXED: report_data contains the complete EvaluationReport object
   created_at: string;
   updated_at: string;
 }
