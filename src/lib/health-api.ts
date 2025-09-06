@@ -97,7 +97,10 @@ class HealthAPI {
       // Get detailed database metrics
       try {
         const dbHealth = await databaseMonitor.getCurrentHealth();
-        health.services.database.details = dbHealth as unknown as Record<string, unknown>;
+        health.services.database.details = dbHealth as unknown as Record<
+          string,
+          unknown
+        >;
         health.performance.databaseHealth =
           databaseMonitor.getPerformanceSummary();
       } catch (e) {

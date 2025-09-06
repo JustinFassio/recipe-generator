@@ -267,12 +267,15 @@ class ErrorTracker {
     switch (action.type) {
       case 'console': {
         const level = action.config.level || 'error';
-        (console as any)[level as string](`🚨 ALERT: ${rule.name}`, {
-          rule: rule.name,
-          condition: rule.condition,
-          context,
-          timestamp: new Date().toISOString(),
-        });
+        (console as any)[level as string](
+          `🚨 ALERT: ${rule.name}`,
+          {
+            rule: rule.name,
+            condition: rule.condition,
+            context,
+            timestamp: new Date().toISOString(),
+          }
+        );
         break;
       }
 

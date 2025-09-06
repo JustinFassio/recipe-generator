@@ -85,10 +85,10 @@ class PerformanceMonitor {
   logError(error: unknown, context: string) {
     const errorEntry = {
       error: {
-        message: (error as any)?.message || 'Unknown error',
-        stack: (error as any)?.stack,
-        code: (error as any)?.code,
-        details: (error as any)?.details,
+        message: (error as Record<string, unknown>)?.message || 'Unknown error',
+        stack: (error as Record<string, unknown>)?.stack,
+        code: (error as Record<string, unknown>)?.code,
+        details: (error as Record<string, unknown>)?.details,
       },
       timestamp: Date.now(),
       context,
@@ -114,7 +114,7 @@ class PerformanceMonitor {
     errorRate: number;
     cacheHitRate: number;
     slowQueries: number;
-    recentErrors: any[];
+    recentErrors: Record<string, unknown>[];
   } {
     const metrics = Array.from(this.queryMetrics.values());
     const totalQueries = metrics.reduce(

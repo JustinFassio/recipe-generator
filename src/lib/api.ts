@@ -144,7 +144,11 @@ export const recipeApi = {
 
     // Get unique user IDs from recipes
     const userIds = [
-      ...new Set(recipes.map((recipe: any) => recipe.user_id)),
+      ...new Set(
+        recipes.map(
+          (recipe: Record<string, unknown>) => recipe.user_id as string
+        )
+      ),
     ];
 
     // Fetch profiles for those users
@@ -164,10 +168,10 @@ export const recipeApi = {
     );
 
     // Combine recipes with profile data
-    return recipes.map((recipe: any) => ({
+    return recipes.map((recipe: Record<string, unknown>) => ({
       ...recipe,
-      author_name: profileMap.get(recipe.user_id) || 'Unknown Author',
-    }));
+      author_name: profileMap.get(recipe.user_id as string) || 'Unknown Author',
+    })) as PublicRecipe[];
   },
 
   // Toggle recipe public status
