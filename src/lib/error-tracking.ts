@@ -106,7 +106,9 @@ class ErrorTracker {
       ? stackTrace.split('\n')[0]?.substring(0, 50) || ''
       : ''; // First line of stack
 
-    return btoa(baseKey + stackKey).substring(0, 16); // Base64 encoded, truncated
+    // Safely encode Unicode strings for base64
+    const safeString = unescape(encodeURIComponent(baseKey + stackKey));
+    return btoa(safeString).substring(0, 16); // Base64 encoded, truncated
   }
 
   // Setup default alert rules
