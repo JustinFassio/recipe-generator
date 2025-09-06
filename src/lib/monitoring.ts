@@ -1,4 +1,5 @@
 import { QueryClient } from '@tanstack/react-query';
+import type { MutationCacheNotifyEvent } from '@tanstack/react-query';
 
 // Performance monitoring utilities
 export interface QueryMetrics {
@@ -220,19 +221,21 @@ export function setupQueryClientMonitoring(queryClient: QueryClient) {
   });
 
   // Monitor mutations
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  queryClient.getMutationCache().subscribe((event: any) => {
-    if (event.type === 'observerResult') {
-      const { mutation } = event;
+  queryClient
+    .getMutationCache()
+    .subscribe((event: MutationCacheNotifyEvent) => {
+      // Handle mutation events - check for mutations with errors or state changes
+      if (event.type === 'updated' || event.type === 'added') {
+        const { mutation } = event;
 
-      if (mutation.state.error) {
-        performanceMonitor.logError(
-          mutation.state.error,
-          `Mutation: ${JSON.stringify(mutation.options.mutationKey || 'unknown')}`
-        );
+        if (mutation.state.error) {
+          performanceMonitor.logError(
+            mutation.state.error,
+            `Mutation: ${JSON.stringify(mutation.options.mutationKey || 'unknown')}`
+          );
+        }
       }
-    }
-  });
+    });
 
   // Clean up old metrics every 30 minutes
   setInterval(
