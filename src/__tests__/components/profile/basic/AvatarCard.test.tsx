@@ -18,11 +18,11 @@ describe('AvatarCard', () => {
       />
     );
 
-    const avatarImage = screen.getByAltText('Profile');
+    const avatarImage = screen.getByAltText('Profile picture');
     expect(avatarImage).toBeInTheDocument();
-    expect(avatarImage).toHaveAttribute('src');
-    expect(avatarImage.getAttribute('src')).toMatch(
-      /^https:\/\/example\.com\/avatar\.jpg\?t=\d+$/
+    expect(avatarImage).toHaveAttribute('data-src');
+    expect(avatarImage.getAttribute('data-src')).toMatch(
+      /^https:\/\/example\.com\/avatar\.jpg/
     );
   });
 

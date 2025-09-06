@@ -2,7 +2,6 @@ import { useState, useCallback, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthProvider';
 import { useToast } from '@/hooks/use-toast';
 import { updateProfile } from '@/lib/auth';
-import { MIN_TIME_PER_MEAL, MAX_TIME_PER_MEAL } from '@/lib/user-preferences';
 import {
   SKILL_LEVEL_MAP,
   SKILL_LEVEL_REVERSE_MAP,
@@ -57,8 +56,30 @@ export function useProfileBasics(): UseProfileBasicsReturn {
   const [region, setRegion] = useState(profile?.region || '');
   const [language, setLanguage] = useState(profile?.language || 'en');
   const [units, setUnits] = useState(profile?.units || 'metric');
+  // Convert database time_per_meal (minutes) to UI index (1-5)
+  const getTimePerMealForUI = useCallback(
+    (dbValue: number | string | null): number => {
+      if (!dbValue) return 2; // Default to 30 minutes (index 2)
+      const numericValue =
+        typeof dbValue === 'string' ? parseInt(dbValue, 10) : dbValue;
+      if (isNaN(numericValue)) return 2; // Default to 30 minutes if not a number
+      const timePerMealValues = [15, 30, 45, 60, 90];
+      const index = timePerMealValues.findIndex(
+        (value) => value === numericValue
+      );
+      return index >= 0 ? index + 1 : 2; // Default to 30 minutes if not found
+    },
+    []
+  );
+
+  // Convert UI index (1-5) to database time_per_meal (minutes)
+  const getTimePerMealForDB = useCallback((uiIndex: number): number => {
+    const timePerMealValues = [15, 30, 45, 60, 90];
+    return timePerMealValues[uiIndex - 1] || 30; // Default to 30 minutes
+  }, []);
+
   const [timePerMeal, setTimePerMeal] = useState<number>(
-    Number(profile?.time_per_meal) || 30
+    getTimePerMealForUI(profile?.time_per_meal || null)
   );
 
   // Use shared skill level mapping constants
@@ -100,10 +121,10 @@ export function useProfileBasics(): UseProfileBasicsReturn {
       setRegion(profile.region || '');
       setLanguage(profile.language || 'en');
       setUnits(profile.units || 'metric');
-      setTimePerMeal(Number(profile.time_per_meal) || 30);
+      setTimePerMeal(getTimePerMealForUI(profile.time_per_meal || null));
       setSkillLevel(getSkillLevelForUI(profile.skill_level));
     }
-  }, [profile, getSkillLevelForUI]);
+  }, [profile, getSkillLevelForUI, getTimePerMealForUI]);
 
   /**
    * Validate profile basics data before updating
@@ -126,11 +147,8 @@ export function useProfileBasics(): UseProfileBasicsReturn {
           return false;
         }
 
-        // Validate time per meal (should be within established bounds)
-        if (
-          data.time_per_meal < MIN_TIME_PER_MEAL ||
-          data.time_per_meal > MAX_TIME_PER_MEAL
-        ) {
+        // Validate time per meal (should be UI index 1-5)
+        if (data.time_per_meal < 1 || data.time_per_meal > 5) {
           return false;
         }
 
@@ -171,12 +189,15 @@ export function useProfileBasics(): UseProfileBasicsReturn {
         // Convert numeric skill level to database string value
         const dbSkillLevel = SKILL_LEVEL_MAP[data.skill_level] || 'beginner';
 
+        // Convert UI time_per_meal index to database value (minutes)
+        const dbTimePerMeal = getTimePerMealForDB(data.time_per_meal);
+
         const { success, error: updateError } = await updateProfile({
           full_name: data.full_name,
           region: data.region,
           language: data.language,
           units: data.units,
-          time_per_meal: data.time_per_meal,
+          time_per_meal: dbTimePerMeal,
           skill_level: dbSkillLevel,
         });
 
@@ -218,7 +239,7 @@ export function useProfileBasics(): UseProfileBasicsReturn {
         setLoading(false);
       }
     },
-    [validateProfileData, toast, refreshProfile]
+    [validateProfileData, toast, refreshProfile, getTimePerMealForDB]
   );
 
   return {

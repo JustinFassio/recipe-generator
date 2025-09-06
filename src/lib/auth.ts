@@ -1,5 +1,11 @@
 import { supabase } from './supabase';
 import type { Profile, AuthError } from './types';
+import {
+  processAvatarImage,
+  validateImageFile,
+  validateFileSignature,
+  DEFAULT_AVATAR_OPTIONS,
+} from './image-processing';
 
 // Username validation constants
 const USERNAME_VALIDATION_REGEX = /^[a-z0-9_]{3,24}$/;
@@ -381,10 +387,17 @@ export async function claimUsername(
   }
 }
 
-// Upload avatar image
-export async function uploadAvatar(
-  file: File
-): Promise<{ success: boolean; error?: AuthError; avatarUrl?: string }> {
+// Upload avatar image with optimization
+export async function uploadAvatar(file: File): Promise<{
+  success: boolean;
+  error?: AuthError;
+  avatarUrl?: string;
+  compressionInfo?: {
+    originalSize: number;
+    processedSize: number;
+    compressionRatio: number;
+  };
+}> {
   try {
     const {
       data: { user },
@@ -400,48 +413,87 @@ export async function uploadAvatar(
       };
     }
 
-    // Validate file type and size
-    const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-    if (!validTypes.includes(file.type)) {
+    // Enhanced validation
+    const fileValidation = validateImageFile(file);
+    if (!fileValidation.valid) {
       return {
         success: false,
         error: createAuthError(
-          'Please upload a valid image file (JPEG, PNG, WebP, or GIF)',
-          'INVALID_FILE_TYPE'
+          fileValidation.error || 'Invalid file',
+          'INVALID_FILE'
         ),
       };
     }
 
-    // Max 5MB
-    if (file.size > 5 * 1024 * 1024) {
+    // Validate file signature for additional security
+    const signatureValidation = await validateFileSignature(file);
+    if (!signatureValidation.valid) {
       return {
         success: false,
         error: createAuthError(
-          'File size must be less than 5MB',
-          'FILE_TOO_LARGE'
+          signatureValidation.error || 'Invalid file format',
+          'INVALID_FILE_SIGNATURE'
         ),
       };
     }
+
+    // Process and optimize the image
+    const processedResult = await processAvatarImage(
+      file,
+      DEFAULT_AVATAR_OPTIONS
+    );
 
     // Generate unique filename with timestamp for cache busting
-    const fileExt = file.name.split('.').pop();
     const timestamp = Date.now();
-    const fileName = `${user.id}/avatar-${timestamp}.${fileExt}`;
+    const fileName = `${user.id}/avatar-${timestamp}.webp`;
 
-    // Upload to storage
+    // Upload optimized image to storage
     const { error } = await supabase.storage
       .from('avatars')
-      .upload(fileName, file, { upsert: true });
+      .upload(fileName, processedResult.file, { upsert: true });
 
     if (error) {
+      // Enhanced error handling
+      if (error.message.includes('File size')) {
+        return {
+          success: false,
+          error: createAuthError(
+            'File size exceeds the limit. Please choose a smaller image.',
+            'FILE_TOO_LARGE'
+          ),
+        };
+      }
+      if (error.message.includes('Invalid file type')) {
+        return {
+          success: false,
+          error: createAuthError(
+            'Invalid file type. Please use JPEG, PNG, WebP, or GIF.',
+            'INVALID_FILE_TYPE'
+          ),
+        };
+      }
+      if (error.message.includes('quota')) {
+        return {
+          success: false,
+          error: createAuthError(
+            'Storage quota exceeded. Please contact support.',
+            'QUOTA_EXCEEDED'
+          ),
+        };
+      }
+
       return {
         success: false,
         error: createAuthError(error.message, error.name, error.message),
       };
     }
 
-    // Get public URL - manually construct to ensure production URL
-    const publicUrl = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/avatars/${fileName}`;
+    // Get public URL using Supabase's built-in method
+    const { data: urlData } = supabase.storage
+      .from('avatars')
+      .getPublicUrl(fileName);
+
+    const publicUrl = urlData.publicUrl;
 
     // Update profile with new avatar URL
     const { error: updateError } = await supabase
@@ -462,7 +514,15 @@ export async function uploadAvatar(
       };
     }
 
-    return { success: true, avatarUrl: publicUrl };
+    return {
+      success: true,
+      avatarUrl: publicUrl,
+      compressionInfo: {
+        originalSize: processedResult.originalSize,
+        processedSize: processedResult.processedSize,
+        compressionRatio: processedResult.compressionRatio,
+      },
+    };
   } catch (error) {
     return {
       success: false,

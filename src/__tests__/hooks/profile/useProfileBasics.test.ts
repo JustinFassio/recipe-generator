@@ -14,7 +14,7 @@ let mockProfile = {
   language: 'en',
   units: 'metric',
   time_per_meal: 45,
-  skill_level: '3',
+  skill_level: 'advanced', // Database value
 };
 
 vi.mock('@/contexts/AuthProvider', () => ({
@@ -44,7 +44,7 @@ describe('useProfileBasics', () => {
       language: 'en',
       units: 'metric',
       time_per_meal: 45,
-      skill_level: '3',
+      skill_level: 'advanced', // Database value
     };
   });
 
@@ -56,8 +56,8 @@ describe('useProfileBasics', () => {
       expect(result.current.region).toBe('US');
       expect(result.current.language).toBe('en');
       expect(result.current.units).toBe('metric');
-      expect(result.current.timePerMeal).toBe(45);
-      expect(result.current.skillLevel).toBe('1');
+      expect(result.current.timePerMeal).toBe(3);
+      expect(result.current.skillLevel).toBe('3');
       expect(result.current.loading).toBe(false);
       expect(result.current.error).toBe(null);
     });
@@ -72,7 +72,7 @@ describe('useProfileBasics', () => {
       expect(result.current.region).toBe('');
       expect(result.current.language).toBe('en');
       expect(result.current.units).toBe('metric');
-      expect(result.current.timePerMeal).toBe(30);
+      expect(result.current.timePerMeal).toBe(2);
       expect(result.current.skillLevel).toBe('1'); // Default to beginner
     });
 
@@ -132,8 +132,8 @@ describe('useProfileBasics', () => {
         region: 'CA',
         language: 'fr',
         units: 'imperial',
-        time_per_meal: 60,
-        skill_level: '4',
+        time_per_meal: 4, // UI index for 60 minutes
+        skill_level: '4', // UI value
       };
 
       let updateResult: boolean;
@@ -147,8 +147,8 @@ describe('useProfileBasics', () => {
         region: 'CA',
         language: 'fr',
         units: 'imperial',
-        time_per_meal: 60,
-        skill_level: 'expert',
+        time_per_meal: 60, // Converted from UI index 4
+        skill_level: 'expert', // Converted from UI value '4'
       });
       expect(mockRefreshProfile).toHaveBeenCalled();
       expect(mockToast).toHaveBeenCalledWith({
@@ -161,8 +161,8 @@ describe('useProfileBasics', () => {
       expect(result.current.region).toBe('CA');
       expect(result.current.language).toBe('fr');
       expect(result.current.units).toBe('imperial');
-      expect(result.current.timePerMeal).toBe(60);
-      expect(result.current.skillLevel).toBe('4');
+      expect(result.current.timePerMeal).toBe(4); // UI index
+      expect(result.current.skillLevel).toBe('4'); // UI value
     });
 
     it('should handle update errors', async () => {
@@ -179,8 +179,8 @@ describe('useProfileBasics', () => {
         region: 'US',
         language: 'en',
         units: 'metric',
-        time_per_meal: 30,
-        skill_level: '3',
+        time_per_meal: 2, // UI index for 30 minutes
+        skill_level: '3', // UI value
       };
 
       let updateResult: boolean;
@@ -208,8 +208,8 @@ describe('useProfileBasics', () => {
         region: 'US',
         language: 'en',
         units: 'metric',
-        time_per_meal: 30,
-        skill_level: '3',
+        time_per_meal: 2, // UI index for 30 minutes
+        skill_level: '3', // UI value
       };
 
       let updateResult: boolean;
@@ -234,8 +234,8 @@ describe('useProfileBasics', () => {
         region: 'US',
         language: '', // Invalid
         units: 'metric',
-        time_per_meal: 30,
-        skill_level: '3',
+        time_per_meal: 2, // UI index for 30 minutes
+        skill_level: '3', // UI value
       };
 
       let updateResult: boolean;
@@ -267,8 +267,8 @@ describe('useProfileBasics', () => {
         region: 'US',
         language: 'en',
         units: 'metric',
-        time_per_meal: 30,
-        skill_level: '3',
+        time_per_meal: 2, // UI index for 30 minutes
+        skill_level: '3', // UI value
       };
 
       // Start updating
@@ -368,7 +368,7 @@ describe('useProfileBasics', () => {
       expect(result.current.region).toBe('');
       expect(result.current.language).toBe('en');
       expect(result.current.units).toBe('metric');
-      expect(result.current.timePerMeal).toBe(30);
+      expect(result.current.timePerMeal).toBe(2);
       expect(result.current.skillLevel).toBe('1');
     });
 
@@ -376,13 +376,13 @@ describe('useProfileBasics', () => {
       // Mock profile with string numbers
       mockProfile = {
         time_per_meal: '45', // String number
-        skill_level: 3, // Number skill level
+        skill_level: 'advanced', // Database value
       };
 
       const { result } = renderHook(() => useProfileBasics());
 
-      expect(result.current.timePerMeal).toBe(45);
-      expect(result.current.skillLevel).toBe('1');
+      expect(result.current.timePerMeal).toBe(3);
+      expect(result.current.skillLevel).toBe('3');
     });
   });
 });

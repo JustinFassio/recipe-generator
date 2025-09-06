@@ -32,14 +32,21 @@ export function useAvatarUpload(): UseAvatarUploadReturn {
       setError(null);
 
       try {
-        const { success, error: uploadError } = await uploadAvatar(file);
+        const result = await uploadAvatar(file);
+        const { success, error: uploadError } = result;
 
         if (success) {
           await refreshProfile();
 
+          // Show success message with compression info if available
+          const compressionInfo = result.compressionInfo;
+          const description = compressionInfo
+            ? `Avatar updated successfully! Image optimized: ${compressionInfo.compressionRatio}% smaller (${Math.round(compressionInfo.originalSize / 1024)}KB → ${Math.round(compressionInfo.processedSize / 1024)}KB)`
+            : 'Avatar updated successfully!';
+
           toast({
             title: 'Success',
-            description: 'Avatar updated successfully!',
+            description,
           });
 
           return true;

@@ -2,7 +2,7 @@ import React from 'react';
 import {
   SectionCard,
   InlineIconInput,
-  RangeWithTicks,
+  ValueSlider,
 } from '@/components/profile/shared';
 import {
   User,
@@ -245,43 +245,37 @@ export const ProfileInfoForm: React.FC<ProfileInfoFormProps> = ({
         {/* Time Per Meal */}
         <div className="form-control">
           <label className="label">
-            <span className="label-text">
-              Time Per Meal: {timePerMealLabels[timePerMeal - 1]}
+            <span className="label-text flex items-center gap-2">
+              <Clock className="h-4 w-4" />
+              Average Time Per Meal
             </span>
           </label>
-          <div className="relative">
-            <Clock className="text-base-content/40 absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform" />
-            <div className="pl-10">
-              <RangeWithTicks
-                value={timePerMeal}
-                onChange={onTimePerMealChange}
-                min={1}
-                max={5}
-                ticks={timePerMealLabels}
-              />
-            </div>
-          </div>
+          <ValueSlider
+            value={timePerMeal}
+            onChange={onTimePerMealChange}
+            min={1}
+            max={5}
+            valueFormatter={(value) => timePerMealLabels[value - 1]}
+            className="w-full"
+          />
         </div>
 
         {/* Cooking Skill Level */}
         <div className="form-control">
           <label className="label">
-            <span className="label-text">
-              Cooking Skill Level: {skillLevelLabels[Number(skillLevel) - 1]}
+            <span className="label-text flex items-center gap-2">
+              <GraduationCap className="h-4 w-4" />
+              Cooking Skill Level
             </span>
           </label>
-          <div className="relative">
-            <GraduationCap className="text-base-content/40 absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform" />
-            <div className="pl-10">
-              <RangeWithTicks
-                value={Number(skillLevel)}
-                onChange={(value) => onSkillLevelChange(value.toString())}
-                min={1}
-                max={5}
-                ticks={skillLevelLabels}
-              />
-            </div>
-          </div>
+          <ValueSlider
+            value={Number(skillLevel)}
+            onChange={(value) => onSkillLevelChange(value.toString())}
+            min={1}
+            max={5}
+            valueFormatter={(value) => skillLevelLabels[value - 1]}
+            className="w-full"
+          />
         </div>
 
         {/* Submit Button */}
