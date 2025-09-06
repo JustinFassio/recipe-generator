@@ -1150,15 +1150,17 @@ async function seedEvaluationReports() {
       continue;
     }
 
+    // Extract nested property for better readability and maintainability
+    const evaluationReport = reportData.report.user_evaluation_report;
+
     // Insert evaluation report
     const { error } = await admin.from('evaluation_reports').upsert(
       {
         user_id: userMatch.id,
-        report_id: reportData.report.user_evaluation_report.report_id,
-        evaluation_date:
-          reportData.report.user_evaluation_report.evaluation_date,
-        dietitian: reportData.report.user_evaluation_report.dietitian,
-        report_version: reportData.report.user_evaluation_report.report_version,
+        report_id: evaluationReport.report_id,
+        evaluation_date: evaluationReport.evaluation_date,
+        dietitian: evaluationReport.dietitian,
+        report_version: evaluationReport.report_version,
         report_data: reportData.report,
       },
       { onConflict: 'user_id,report_id' }
@@ -1171,7 +1173,7 @@ async function seedEvaluationReports() {
       );
     } else {
       console.log(
-        `✅ Evaluation report seeded for ${reportData.user_email}: ${reportData.report.user_evaluation_report.report_id}`
+        `✅ Evaluation report seeded for ${reportData.user_email}: ${evaluationReport.report_id}`
       );
     }
   }
