@@ -49,13 +49,7 @@ class DatabaseMonitor {
       // Get slow query statistics (if pg_stat_statements is available)
       try {
         const { data: slowQueryData } = await supabase
-          .rpc(
-            'get_slow_queries',
-            {},
-            {
-              count: 'exact',
-            }
-          )
+          .rpc('get_slow_queries', {})
           .limit(10);
 
         if (slowQueryData) {
@@ -73,13 +67,7 @@ class DatabaseMonitor {
 
       // Get table statistics
       try {
-        const { data: tableStatsData } = await supabase.rpc(
-          'get_table_stats',
-          {},
-          {
-            count: 'exact',
-          }
-        );
+        const { data: tableStatsData } = await supabase.rpc('get_table_stats');
 
         if (tableStatsData) {
           tableStats = tableStatsData.map((t: Record<string, unknown>) => ({
