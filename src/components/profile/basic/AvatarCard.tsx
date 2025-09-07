@@ -2,7 +2,9 @@ import React, { useRef, useEffect } from 'react';
 import { Camera, Loader2 } from 'lucide-react';
 import { SectionCard } from '@/components/profile/shared';
 import { ProgressiveAvatar } from '@/components/shared/ProgressiveImage';
-import { useAvatarCache } from '@/lib/avatar-cache';
+import { useAdvancedAvatarCache } from '@/lib/avatar-cache-advanced';
+import { useAvatarAnalytics } from '@/lib/avatar-analytics';
+import { useAuth } from '@/contexts/AuthProvider';
 
 interface AvatarCardProps {
   avatarUrl: string | null;
@@ -18,14 +20,30 @@ export const AvatarCard: React.FC<AvatarCardProps> = ({
   className = '',
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { preloadAvatar } = useAvatarCache();
+  const { preloadAvatar, isAvatarCached } = useAdvancedAvatarCache();
+  const { trackView } = useAvatarAnalytics();
+  const { user } = useAuth();
 
-  // Preload avatar when component mounts
+  // Preload avatar when component mounts with analytics tracking
   useEffect(() => {
     if (avatarUrl) {
-      preloadAvatar(avatarUrl, 'large');
+      const startTime = performance.now();
+      const cacheHit = isAvatarCached(avatarUrl, 'large');
+
+      preloadAvatar(avatarUrl, 'large').then(() => {
+        const loadTime = performance.now() - startTime;
+
+        // Track avatar view with performance metrics
+        trackView({
+          userId: user?.id || 'anonymous',
+          avatarUrl,
+          size: 'large',
+          loadTime,
+          cacheHit,
+        });
+      });
     }
-  }, [avatarUrl, preloadAvatar]);
+  }, [avatarUrl, preloadAvatar, isAvatarCached, trackView, user?.id]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
