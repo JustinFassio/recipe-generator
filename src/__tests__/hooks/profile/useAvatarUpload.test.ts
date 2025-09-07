@@ -166,6 +166,8 @@ describe('useAvatarUpload', () => {
       await act(async () => {
         resolvePromise({ success: true });
         await promise;
+        // Wait for the delay and profile refresh
+        await new Promise((resolve) => setTimeout(resolve, 600));
       });
 
       expect(result.current.loading).toBe(false);
