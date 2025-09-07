@@ -186,21 +186,6 @@ async function cleanupCache(cache) {
 }
 
 /**
- * Generate a placeholder SVG for failed avatar loads
- */
-function generatePlaceholderSVG() {
-  return `
-    <svg width="100" height="100" xmlns="http://www.w3.org/2000/svg">
-      <rect width="100%" height="100%" fill="#f3f4f6"/>
-      <circle cx="50" cy="35" r="15" fill="#d1d5db"/>
-      <path d="M20 80 Q50 60 80 80 L80 100 L20 100 Z" fill="#d1d5db"/>
-      <text x="50" y="95" font-family="Arial, sans-serif" font-size="8" 
-            text-anchor="middle" fill="#9ca3af">Avatar</text>
-    </svg>
-  `;
-}
-
-/**
  * Background sync for avatar preloading
  */
 self.addEventListener('sync', (event) => {
