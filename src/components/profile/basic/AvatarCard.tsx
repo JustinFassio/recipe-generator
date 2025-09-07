@@ -73,6 +73,7 @@ export const AvatarCard: React.FC<AvatarCardProps> = ({
       <div className="flex flex-col items-center space-y-4">
         <div className="relative">
           <ProgressiveAvatar
+            key={avatarUrl || 'no-avatar'}
             src={avatarUrl}
             alt="Profile picture"
             size="xlarge"

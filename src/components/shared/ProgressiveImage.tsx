@@ -28,6 +28,13 @@ export const ProgressiveImage: React.FC<ProgressiveImageProps> = ({
   const [showPlaceholder, setShowPlaceholder] = useState(true);
   const imgRef = useRef<HTMLImageElement>(null);
 
+  // Reset state when src changes
+  useEffect(() => {
+    setImageLoaded(false);
+    setImageError(false);
+    setShowPlaceholder(true);
+  }, [src]);
+
   // Handle successful image load
   const handleImageLoad = useCallback(() => {
     setImageLoaded(true);
