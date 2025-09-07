@@ -17,6 +17,26 @@ import type { Profile } from '@/lib/types';
 import { ensureUserProfile } from '@/lib/auth-utils';
 import { createLogger } from '@/lib/logger';
 
+/**
+ * Creates a minimal profile object for fallback scenarios
+ */
+function createMinimalProfile(userId: string): Profile {
+  return {
+    id: userId,
+    username: null,
+    full_name: null,
+    bio: null,
+    avatar_url: null,
+    region: null,
+    language: null,
+    units: null,
+    time_per_meal: null,
+    skill_level: null,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  };
+}
+
 interface AuthContextType {
   user: User | null;
   profile: Profile | null;
@@ -111,11 +131,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           .eq('id', userId)
           .single();
 
-        // Increased timeout for local development stability
+        // Reduced timeout for better responsiveness
         const timeoutPromise = new Promise<never>((_, reject) => {
           setTimeout(
             () => reject(new Error('Profile query timeout')),
-            import.meta.env.DEV ? 20000 : 15000
+            import.meta.env.DEV ? 5000 : 10000
           );
         });
 
@@ -174,6 +194,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               logger.error(
                 `Network error, would back off for ${delay}ms (retry mechanism not implemented)`
               );
+            }
+
+            // If this is the last attempt, create a minimal profile
+            if (attempt >= 3) {
+              logger.warn(
+                'Creating minimal profile due to persistent database errors'
+              );
+              return createMinimalProfile(userId);
             }
 
             return null;
@@ -243,10 +271,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           id: profileData.id,
           username: profileData.username,
           fullName: profileData.full_name,
+          avatarUrl: profileData.avatar_url,
         });
         console.log(
           '🔄 Setting profile state with username:',
-          profileData.username
+          profileData.username,
+          'and avatar URL:',
+          profileData.avatar_url
         );
         setProfile(profileData);
         logger.success('Profile refreshed successfully');

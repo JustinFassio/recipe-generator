@@ -2,6 +2,8 @@ import { useState, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthProvider';
 import { useToast } from '@/hooks/use-toast';
 import { uploadAvatar } from '@/lib/auth';
+import { useAvatarAnalytics } from '@/lib/avatar-analytics';
+import { useAdvancedAvatarCache } from '@/lib/avatar-cache-advanced';
 
 export interface UseAvatarUploadReturn {
   // State
@@ -17,8 +19,10 @@ export interface UseAvatarUploadReturn {
  * Extracted from profile page to centralize avatar management logic
  */
 export function useAvatarUpload(): UseAvatarUploadReturn {
-  const { refreshProfile } = useAuth();
+  const { refreshProfile, user } = useAuth();
   const { toast } = useToast();
+  const { trackUpload } = useAvatarAnalytics();
+  const { invalidateUserAvatars } = useAdvancedAvatarCache();
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -31,15 +35,46 @@ export function useAvatarUpload(): UseAvatarUploadReturn {
       setLoading(true);
       setError(null);
 
+      const startTime = performance.now();
+      const originalFileSize = file.size;
+      const fileType = file.type;
+
       try {
         const result = await uploadAvatar(file);
-        const { success, error: uploadError } = result;
+        const uploadDuration = performance.now() - startTime;
+        const { success, error: uploadError, compressionInfo } = result;
+
+        // Track upload analytics
+        trackUpload({
+          userId: user?.id || 'anonymous',
+          originalFileSize,
+          processedFileSize: compressionInfo?.processedSize || originalFileSize,
+          compressionRatio: compressionInfo?.compressionRatio || 0,
+          uploadDuration,
+          fileType,
+          success,
+          errorType: uploadError?.code,
+        });
 
         if (success) {
-          await refreshProfile();
+          // Invalidate user's avatar cache to ensure fresh data
+          if (user?.id) {
+            invalidateUserAvatars(user.id);
+          }
+
+          // Add a small delay to ensure database is fully updated
+          await new Promise((resolve) => setTimeout(resolve, 500));
+
+          // Refresh profile with callback to verify the update
+          await refreshProfile((updatedProfile) => {
+            console.log('🔄 Profile refreshed after avatar upload:', {
+              userId: updatedProfile?.id,
+              avatarUrl: updatedProfile?.avatar_url,
+              hasAvatar: !!updatedProfile?.avatar_url,
+            });
+          });
 
           // Show success message with compression info if available
-          const compressionInfo = result.compressionInfo;
           const description = compressionInfo
             ? `Avatar updated successfully! Image optimized: ${compressionInfo.compressionRatio}% smaller (${Math.round(compressionInfo.originalSize / 1024)}KB → ${Math.round(compressionInfo.processedSize / 1024)}KB)`
             : 'Avatar updated successfully!';
@@ -64,9 +99,22 @@ export function useAvatarUpload(): UseAvatarUploadReturn {
           return false;
         }
       } catch (err) {
+        const uploadDuration = performance.now() - startTime;
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to upload avatar';
         setError(errorMessage);
+
+        // Track failed upload
+        trackUpload({
+          userId: user?.id || 'anonymous',
+          originalFileSize,
+          processedFileSize: originalFileSize,
+          compressionRatio: 0,
+          uploadDuration,
+          fileType,
+          success: false,
+          errorType: 'network_error',
+        });
 
         toast({
           title: 'Error',
@@ -79,7 +127,7 @@ export function useAvatarUpload(): UseAvatarUploadReturn {
         setLoading(false);
       }
     },
-    [refreshProfile, toast]
+    [refreshProfile, toast, trackUpload, user?.id, invalidateUserAvatars]
   );
 
   return {
