@@ -6,6 +6,7 @@
 export interface UserPreferencesForAI {
   // Phase 1A: Basic profile data
   profile: {
+    bio?: string;
     region?: string;
     language?: string;
     units?: 'metric' | 'imperial';
@@ -57,6 +58,10 @@ export const buildUserContextPrompt = (
   }
 
   // Basic profile preferences
+  if (userData.profile.bio) {
+    sections.push(`User Bio: ${userData.profile.bio}`);
+  }
+
   if (userData.profile.time_per_meal) {
     sections.push(`Cooking time: ${userData.profile.time_per_meal} minutes`);
   }
