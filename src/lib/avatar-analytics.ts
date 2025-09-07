@@ -383,9 +383,26 @@ class AvatarAnalyticsTracker {
 
       const analytics = this.getAnalytics();
 
+      // Compute period_start and period_end from event timestamps
+      const allTimestamps: number[] = [
+        ...this.uploadEvents.map((e) => e.timestamp),
+        ...this.viewEvents.map((e) => e.timestamp),
+        ...this.cacheEvents.map((e) => e.timestamp),
+      ];
+      const period_start =
+        allTimestamps.length > 0
+          ? new Date(Math.min(...allTimestamps)).toISOString()
+          : new Date().toISOString();
+      const period_end =
+        allTimestamps.length > 0
+          ? new Date(Math.max(...allTimestamps)).toISOString()
+          : new Date().toISOString();
+
       await supabase.from('avatar_analytics_summary').insert({
         analytics_data: analytics,
         created_at: new Date().toISOString(),
+        period_start,
+        period_end,
       });
 
       // Clear local events after successful flush
