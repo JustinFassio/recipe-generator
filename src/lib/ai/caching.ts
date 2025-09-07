@@ -93,6 +93,10 @@ export const getUserDataForAI = async (
       // Cache for 5 minutes
       if (cacheAge < 5 * 60 * 1000) {
         console.log('Using cached user data for AI');
+        const isMockData = parsed.userData === mockUserData;
+        console.log(
+          `Cached data source: ${isMockData ? 'MOCK (fallback)' : 'SUPABASE (real data)'}`
+        );
         return parsed.userData;
       }
     } catch (error) {
@@ -103,6 +107,12 @@ export const getUserDataForAI = async (
   // Fetch fresh data from Supabase
   console.log('Fetching fresh user data for AI from Supabase');
   const userData = await fetchUserData(userId);
+
+  // Log data source for debugging
+  const isMockData = userData === mockUserData;
+  console.log(
+    `User data source: ${isMockData ? 'MOCK (fallback)' : 'SUPABASE (real data)'}`
+  );
 
   // Cache the data
   const cacheData: CachedUserData = {
@@ -234,6 +244,7 @@ async function fetchUserData(userId: string): Promise<UserPreferencesForAI> {
     return userData;
   } catch (error) {
     console.error('Error fetching user data for AI:', error);
+    console.warn('Falling back to mock data due to fetch error');
     // Fallback to mock data if there's an error
     return mockUserData;
   }
