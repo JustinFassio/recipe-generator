@@ -29,6 +29,7 @@ export interface HouseholdMember {
  */
 const mockUserData: UserPreferencesForAI = {
   profile: {
+    bio: "I love experimenting with Mediterranean and Asian fusion cuisine. I enjoy cooking for my family and trying new techniques. I'm particularly interested in healthy, plant-based meals that are quick to prepare during weekdays.",
     region: 'North America',
     language: 'en',
     units: 'imperial',

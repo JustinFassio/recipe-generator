@@ -23,7 +23,17 @@ export const BioCard: React.FC<BioCardProps> = ({
       <div className="form-control">
         <label className="label">
           <span className="label-text">Bio</span>
-          <span className="label-text-alt">{bio.length}/500</span>
+          <span
+            className={`label-text-alt ${
+              bio.length > 480
+                ? 'text-error'
+                : bio.length > 400
+                  ? 'text-warning'
+                  : 'text-base-content/60'
+            }`}
+          >
+            {bio.length}/500
+          </span>
         </label>
         <textarea
           className="textarea-bordered textarea w-full"
