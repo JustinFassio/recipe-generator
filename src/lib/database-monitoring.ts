@@ -345,8 +345,8 @@ END;
 $$ LANGUAGE plpgsql;
 `;
 
-// Initialize monitoring in development
-if (process.env.NODE_ENV === 'development') {
+// Initialize monitoring (gated by env flag)
+if (import.meta.env.VITE_ENABLE_MONITORING === 'true') {
   // Start monitoring after a short delay to allow app to initialize
   setTimeout(() => {
     databaseMonitor.startMonitoring();
