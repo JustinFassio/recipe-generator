@@ -46,6 +46,14 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Skip service worker in development
+  if (
+    url.hostname.includes('127.0.0.1') ||
+    url.hostname.includes('localhost')
+  ) {
+    return;
+  }
+
   event.respondWith(handleAvatarRequest(event.request));
 });
 
@@ -122,7 +130,13 @@ async function handleAvatarRequest(request) {
         console.log('Network failed, serving stale cache:', request.url);
         return cachedResponse;
       }
-      throw new Error('Network request failed');
+
+      // If no cache available, let the browser handle the request normally
+      console.log(
+        'No cache available, letting browser handle request:',
+        request.url
+      );
+      return fetch(request);
     }
   } catch (error) {
     console.error('Avatar fetch failed:', error);
@@ -133,13 +147,9 @@ async function handleAvatarRequest(request) {
       return cachedResponse;
     }
 
-    // Return a placeholder image
-    return new Response(generatePlaceholderSVG(), {
-      headers: {
-        'Content-Type': 'image/svg+xml',
-        'Cache-Control': 'no-cache',
-      },
-    });
+    // Let the browser handle the request normally instead of returning placeholder
+    console.log('Letting browser handle failed avatar request:', request.url);
+    return fetch(request);
   }
 }
 
