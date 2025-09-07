@@ -192,7 +192,7 @@ export default function ProfilePage() {
         <div className="grid gap-8 md:grid-cols-2">
           {/* Avatar Section */}
           <AvatarCard
-            avatarUrl={profile.avatar_url}
+            avatarUrl={profile?.avatar_url || null}
             loading={avatarUpload.loading}
             onUpload={handleAvatarUpload}
           />
@@ -213,7 +213,7 @@ export default function ProfilePage() {
             onUsernameChange={usernameAvailability.handleUsernameChange}
             usernameAvailable={usernameAvailability.isAvailable}
             usernameChecking={usernameAvailability.isChecking}
-            currentUsername={profile.username}
+            currentUsername={profile?.username}
             region={profileBasics.region}
             onRegionChange={profileBasics.setRegion}
             language={profileBasics.language}
@@ -231,8 +231,8 @@ export default function ProfilePage() {
           {/* Debug info */}
           {import.meta.env.DEV && (
             <div className="mt-2 text-xs text-gray-500">
-              Debug: profile.username = "{profile.username}" (type:{' '}
-              {typeof profile.username})
+              Debug: profile.username = "{profile?.username}" (type:{' '}
+              {typeof profile?.username})
             </div>
           )}
 
