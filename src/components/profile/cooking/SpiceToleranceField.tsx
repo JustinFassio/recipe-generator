@@ -16,7 +16,7 @@ export const SpiceToleranceField: React.FC<SpiceToleranceFieldProps> = ({
 }) => {
   return (
     <div className={`form-control ${className}`}>
-      <FieldLabel>Spice Tolerance</FieldLabel>
+      <FieldLabel>Spice Tolerance:</FieldLabel>
       <ValueSlider
         value={value}
         onChange={onChange}

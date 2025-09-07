@@ -106,9 +106,23 @@ class ErrorTracker {
       ? stackTrace.split('\n')[0]?.substring(0, 50) || ''
       : ''; // First line of stack
 
-    // Safely encode Unicode strings for base64
-    const safeString = unescape(encodeURIComponent(baseKey + stackKey));
-    return btoa(safeString).substring(0, 16); // Base64 encoded, truncated
+    // Safely encode Unicode strings for base64.
+    // Wrap in try/catch in case btoa is unavailable or throws.
+    try {
+      const safeString = unescape(encodeURIComponent(baseKey + stackKey));
+      return btoa(safeString).substring(0, 16); // Base64 encoded, truncated
+    } catch {
+      // Fallback: simple non-cryptographic hash to ensure a stable key
+      const input = `${baseKey}|${stackKey}`;
+      let hash = 0;
+      for (let i = 0; i < input.length; i++) {
+        hash = (hash << 5) - hash + input.charCodeAt(i);
+        hash |= 0; // Convert to 32bit integer
+      }
+      // Ensure positive and format as hex; pad to keep key length consistent enough
+      const hex = (hash >>> 0).toString(16).padStart(8, '0');
+      return hex.substring(0, 16);
+    }
   }
 
   // Setup default alert rules

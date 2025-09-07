@@ -196,6 +196,9 @@ export const performanceMonitor = new PerformanceMonitor();
 
 // Setup monitoring for a QueryClient
 export function setupQueryClientMonitoring(queryClient: QueryClient) {
+  if (import.meta.env.VITE_ENABLE_MONITORING !== 'true') {
+    return;
+  }
   // Monitor query start/end
   queryClient.getQueryCache().subscribe((event) => {
     if (event.type === 'observerResultsUpdated') {
@@ -246,7 +249,10 @@ export function setupQueryClientMonitoring(queryClient: QueryClient) {
   );
 
   // Log performance summary every 5 minutes in development
-  if (process.env.NODE_ENV === 'development') {
+  if (
+    import.meta.env.VITE_ENABLE_MONITORING === 'true' &&
+    process.env.NODE_ENV === 'development'
+  ) {
     setInterval(
       () => {
         const summary = performanceMonitor.getPerformanceSummary();

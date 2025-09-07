@@ -49,13 +49,7 @@ class DatabaseMonitor {
       // Get slow query statistics (if pg_stat_statements is available)
       try {
         const { data: slowQueryData } = await supabase
-          .rpc(
-            'get_slow_queries',
-            {},
-            {
-              count: 'exact',
-            }
-          )
+          .rpc('get_slow_queries', {})
           .limit(10);
 
         if (slowQueryData) {
@@ -75,10 +69,7 @@ class DatabaseMonitor {
       try {
         const { data: tableStatsData } = await supabase.rpc(
           'get_table_stats',
-          {},
-          {
-            count: 'exact',
-          }
+          {}
         );
 
         if (tableStatsData) {
@@ -357,8 +348,8 @@ END;
 $$ LANGUAGE plpgsql;
 `;
 
-// Initialize monitoring in development
-if (process.env.NODE_ENV === 'development') {
+// Initialize monitoring (gated by env flag)
+if (import.meta.env.VITE_ENABLE_MONITORING === 'true') {
   // Start monitoring after a short delay to allow app to initialize
   setTimeout(() => {
     databaseMonitor.startMonitoring();

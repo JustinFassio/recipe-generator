@@ -398,7 +398,9 @@ class HealthAPI {
 
     // Test performance monitoring
     try {
-      results.performanceData = getPerformanceData();
+      if (import.meta.env.VITE_ENABLE_MONITORING === 'true') {
+        results.performanceData = getPerformanceData();
+      }
     } catch (e) {
       errors.push(`Performance data failed: ${e}`);
     }

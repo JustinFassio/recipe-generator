@@ -30,5 +30,7 @@ export const queryClient = new QueryClient({
   },
 });
 
-// Setup comprehensive monitoring
-setupQueryClientMonitoring(queryClient);
+// Setup comprehensive monitoring (gated by env flag)
+if (import.meta.env.VITE_ENABLE_MONITORING === 'true') {
+  setupQueryClientMonitoring(queryClient);
+}
