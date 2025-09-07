@@ -67,7 +67,10 @@ class DatabaseMonitor {
 
       // Get table statistics
       try {
-        const { data: tableStatsData } = await supabase.rpc('get_table_stats');
+        const { data: tableStatsData } = await supabase.rpc(
+          'get_table_stats',
+          {}
+        );
 
         if (tableStatsData) {
           tableStats = tableStatsData.map((t: Record<string, unknown>) => ({
