@@ -67,6 +67,19 @@ export const UserProfileDisplay: React.FC<UserProfileDisplayProps> = ({
         <h3 className="font-semibold text-blue-800">Your Profile</h3>
       </div>
 
+      {/* Bio Section */}
+      {userData.profile.bio && (
+        <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+          <div className="flex items-center gap-2 mb-2">
+            <User className="h-4 w-4 text-blue-600" />
+            <span className="font-medium text-blue-800">About You</span>
+          </div>
+          <p className="text-sm text-blue-700 italic">
+            "{userData.profile.bio}"
+          </p>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
         {/* Safety Section */}
         <div className="space-y-2">

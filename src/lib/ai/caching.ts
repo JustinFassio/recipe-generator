@@ -100,10 +100,9 @@ export const getUserDataForAI = async (
     }
   }
 
-  // Fetch fresh data (mock for now)
-  // Currently using mock data for development; replace fetchUserData() with actual API call before production
-  console.log('Fetching fresh user data for AI');
-  const userData = await fetchUserData();
+  // Fetch fresh data from Supabase
+  console.log('Fetching fresh user data for AI from Supabase');
+  const userData = await fetchUserData(userId);
 
   // Cache the data
   const cacheData: CachedUserData = {
@@ -165,15 +164,79 @@ export const getHouseholdMembersForAI = async (
 };
 
 /**
- * Mock API calls - replace with actual implementations
+ * Fetch real user data from Supabase
  */
-async function fetchUserData(): Promise<UserPreferencesForAI> {
-  // Simulate API delay
-  await new Promise((resolve) => setTimeout(resolve, 100));
+async function fetchUserData(userId: string): Promise<UserPreferencesForAI> {
+  try {
+    // Import Supabase client
+    const { supabase } = await import('@/lib/supabase');
 
-  // For development, return mock data
-  // In production, this would call your actual API
-  return mockUserData;
+    // Fetch profile data
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('bio, region, language, units, time_per_meal, skill_level')
+      .eq('id', userId)
+      .single();
+
+    if (profileError && profileError.code !== 'PGRST116') {
+      console.warn('Error fetching profile data:', profileError);
+    }
+
+    // Fetch safety data
+    const { data: safety, error: safetyError } = await supabase
+      .from('user_safety')
+      .select('allergies, dietary_restrictions, medical_conditions')
+      .eq('user_id', userId)
+      .single();
+
+    if (safetyError && safetyError.code !== 'PGRST116') {
+      console.warn('Error fetching safety data:', safetyError);
+    }
+
+    // Fetch cooking preferences
+    const { data: cooking, error: cookingError } = await supabase
+      .from('cooking_preferences')
+      .select(
+        'preferred_cuisines, available_equipment, disliked_ingredients, spice_tolerance'
+      )
+      .eq('user_id', userId)
+      .single();
+
+    if (cookingError && cookingError.code !== 'PGRST116') {
+      console.warn('Error fetching cooking preferences:', cookingError);
+    }
+
+    // Build the user data object
+    const userData: UserPreferencesForAI = {
+      profile: {
+        bio: profile?.bio || undefined,
+        region: profile?.region || undefined,
+        language: profile?.language || undefined,
+        units: (profile?.units as 'metric' | 'imperial') || undefined,
+        time_per_meal: profile?.time_per_meal || undefined,
+        skill_level:
+          (profile?.skill_level as 'beginner' | 'intermediate' | 'advanced') ||
+          undefined,
+      },
+      safety: {
+        allergies: safety?.allergies || [],
+        dietary_restrictions: safety?.dietary_restrictions || [],
+        medical_conditions: safety?.medical_conditions || [],
+      },
+      cooking: {
+        preferred_cuisines: cooking?.preferred_cuisines || [],
+        available_equipment: cooking?.available_equipment || [],
+        disliked_ingredients: cooking?.disliked_ingredients || [],
+        spice_tolerance: cooking?.spice_tolerance || 3,
+      },
+    };
+
+    return userData;
+  } catch (error) {
+    console.error('Error fetching user data for AI:', error);
+    // Fallback to mock data if there's an error
+    return mockUserData;
+  }
 }
 
 async function fetchHouseholdMembers(): Promise<HouseholdMember[]> {
