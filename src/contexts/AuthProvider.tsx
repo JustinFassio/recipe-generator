@@ -17,6 +17,26 @@ import type { Profile } from '@/lib/types';
 import { ensureUserProfile } from '@/lib/auth-utils';
 import { createLogger } from '@/lib/logger';
 
+/**
+ * Creates a minimal profile object for fallback scenarios
+ */
+function createMinimalProfile(userId: string): Profile {
+  return {
+    id: userId,
+    username: null,
+    full_name: null,
+    bio: null,
+    avatar_url: null,
+    region: null,
+    language: null,
+    units: null,
+    time_per_meal: null,
+    skill_level: null,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  };
+}
+
 interface AuthContextType {
   user: User | null;
   profile: Profile | null;
@@ -181,20 +201,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               logger.warn(
                 'Creating minimal profile due to persistent database errors'
               );
-              return {
-                id: userId,
-                username: null,
-                full_name: null,
-                bio: null,
-                avatar_url: null,
-                region: null,
-                language: null,
-                units: null,
-                time_per_meal: null,
-                skill_level: null,
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString(),
-              };
+              return createMinimalProfile(userId);
             }
 
             return null;
