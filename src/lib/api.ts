@@ -42,7 +42,7 @@ export const recipeApi = {
     let query = supabase
       .from('recipes')
       .select(
-        'id, title, ingredients, instructions, notes, image_url, categories, cooking_time, difficulty, is_public, created_at, updated_at'
+        'id, title, ingredients, instructions, notes, image_url, categories, cooking_time, difficulty, is_public, created_at, updated_at, user_id'
       )
       .eq('user_id', user.id);
 
