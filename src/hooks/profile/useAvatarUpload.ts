@@ -62,7 +62,17 @@ export function useAvatarUpload(): UseAvatarUploadReturn {
             invalidateUserAvatars(user.id);
           }
 
-          await refreshProfile();
+          // Add a small delay to ensure database is fully updated
+          await new Promise((resolve) => setTimeout(resolve, 500));
+
+          // Refresh profile with callback to verify the update
+          await refreshProfile((updatedProfile) => {
+            console.log('🔄 Profile refreshed after avatar upload:', {
+              userId: updatedProfile?.id,
+              avatarUrl: updatedProfile?.avatar_url,
+              hasAvatar: !!updatedProfile?.avatar_url,
+            });
+          });
 
           // Show success message with compression info if available
           const description = compressionInfo

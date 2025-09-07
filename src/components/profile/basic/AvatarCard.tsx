@@ -24,6 +24,11 @@ export const AvatarCard: React.FC<AvatarCardProps> = ({
   const { trackView } = useAvatarAnalytics();
   const { user } = useAuth();
 
+  // Debug avatar URL changes
+  useEffect(() => {
+    console.log('🖼️ AvatarCard received new avatarUrl:', avatarUrl);
+  }, [avatarUrl]);
+
   // Preload avatar when component mounts with analytics tracking
   useEffect(() => {
     if (avatarUrl) {

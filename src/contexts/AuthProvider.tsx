@@ -243,10 +243,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           id: profileData.id,
           username: profileData.username,
           fullName: profileData.full_name,
+          avatarUrl: profileData.avatar_url,
         });
         console.log(
           '🔄 Setting profile state with username:',
-          profileData.username
+          profileData.username,
+          'and avatar URL:',
+          profileData.avatar_url
         );
         setProfile(profileData);
         logger.success('Profile refreshed successfully');
