@@ -286,6 +286,8 @@ class AvatarAnalyticsTracker {
       const { error } = await supabase.from('avatar_analytics').insert({
         event_type: type,
         event_data: event,
+        user_id:
+          'userId' in event ? (event as { userId: string }).userId : null,
         created_at: new Date().toISOString(),
       });
 
