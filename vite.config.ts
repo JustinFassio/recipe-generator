@@ -3,6 +3,8 @@ import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
+  // Use relative base so built asset URLs work under subpaths (prod)
+  base: './',
   plugins: [react()],
   server: {
     port: 5174,

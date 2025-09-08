@@ -234,22 +234,51 @@ export const recipeApi = {
 
   // Update an existing recipe
   async updateRecipe(id: string, updates: Partial<Recipe>): Promise<Recipe> {
+    // Get current recipe to check for old image that needs cleanup
+    const { data: currentRecipe } = await supabase
+      .from('recipes')
+      .select('image_url')
+      .eq('id', id)
+      .single();
+
+    // Update recipe
     const { data, error } = await supabase
       .from('recipes')
-      .update(updates)
+      .update({ ...updates, updated_at: new Date().toISOString() })
       .eq('id', id)
       .select()
       .single();
 
     if (error) handleError(error, 'Update recipe');
+
+    // Clean up old image if it exists and is different from the new one
+    if (
+      currentRecipe?.image_url &&
+      currentRecipe.image_url !== updates.image_url
+    ) {
+      await this.deleteImageFromStorage(currentRecipe.image_url);
+    }
+
     return data;
   },
 
   // Delete a recipe
   async deleteRecipe(id: string): Promise<void> {
+    // Get recipe image URL before deletion for cleanup
+    const { data: recipe } = await supabase
+      .from('recipes')
+      .select('image_url')
+      .eq('id', id)
+      .single();
+
     const { error } = await supabase.from('recipes').delete().eq('id', id);
 
     if (error) handleError(error, 'Delete recipe');
+
+    // Clean up associated image if it exists
+    if (recipe?.image_url) {
+      await this.deleteImageFromStorage(recipe.image_url);
+    }
   },
 
   // Save (clone) a public recipe to user's collection
@@ -298,20 +327,89 @@ export const recipeApi = {
     } = await supabase.auth.getUser();
     if (!user) throw new Error('User not authenticated');
 
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+    // Derive a safe extension from MIME type if available, otherwise fall back to original name
+    const mimeType = file.type || 'application/octet-stream';
+    const defaultExtFromMime = (() => {
+      if (mimeType === 'image/jpeg') return 'jpg';
+      if (mimeType === 'image/png') return 'png';
+      if (mimeType === 'image/webp') return 'webp';
+      if (mimeType === 'image/gif') return 'gif';
+      return (file.name.split('.').pop() || 'bin').toLowerCase();
+    })();
 
-    const { error: uploadError } = await supabase.storage
-      .from('recipe-images')
-      .upload(fileName, file);
+    const fileExt = (
+      file.name.split('.').pop() || defaultExtFromMime
+    ).toLowerCase();
 
-    if (uploadError) handleError(uploadError, 'Upload image');
+    // Generate unique filename; include a random suffix to avoid rare collisions
+    const uniqueSuffix = Math.random().toString(36).slice(2, 8);
+    const initialName = `${user.id}/${Date.now()}-${uniqueSuffix}.${fileExt}`;
+
+    // Attempt upload; retry once on conflict with a new unique name
+    const attemptUpload = async (path: string): Promise<string> => {
+      const { error } = await supabase.storage
+        .from('recipe-images')
+        .upload(path, file, {
+          cacheControl: '31536000',
+          contentType: mimeType,
+          upsert: true, // Allow overwrites like profile avatars
+        });
+
+      if (error) {
+        // Handle conflict by retrying with a new name once
+        const status =
+          (error as unknown as { status?: number; statusCode?: number }) || {};
+        if (status.statusCode === 409 || status.status === 409) {
+          const altSuffix = Math.random().toString(36).slice(2, 8);
+          const altName = `${user.id}/${Date.now()}-${altSuffix}.${fileExt}`;
+          const { error: retryError } = await supabase.storage
+            .from('recipe-images')
+            .upload(altName, file, {
+              cacheControl: '31536000',
+              contentType: mimeType,
+              upsert: true,
+            });
+          if (retryError) {
+            handleError(retryError, 'Upload image (retry)');
+          }
+          return altName;
+        }
+        handleError(error, 'Upload image');
+      }
+      return path;
+    };
+
+    const storedPath = await attemptUpload(initialName);
 
     const { data } = supabase.storage
       .from('recipe-images')
-      .getPublicUrl(fileName);
-
+      .getPublicUrl(storedPath);
     return data.publicUrl;
+  },
+
+  // Delete image from storage
+  async deleteImageFromStorage(imageUrl: string): Promise<void> {
+    try {
+      // Extract path from URL
+      const url = new URL(imageUrl);
+      const pathSegments = url.pathname.split('/');
+      // Get the last two segments: user_id/filename
+      const path = pathSegments.slice(-2).join('/');
+
+      const { error } = await supabase.storage
+        .from('recipe-images')
+        .remove([path]);
+
+      if (error) {
+        console.warn('Failed to delete old image:', error);
+        // Don't throw - this shouldn't block the main operation
+      } else {
+        console.log('Successfully deleted old image:', path);
+      }
+    } catch (error) {
+      console.warn('Error parsing image URL for deletion:', error);
+      // Don't throw - this shouldn't block the main operation
+    }
   },
 
   // Parse recipe from text (delegates to recipe-parser)

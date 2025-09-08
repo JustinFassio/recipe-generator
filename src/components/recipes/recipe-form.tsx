@@ -14,7 +14,8 @@ import {
   useUpdateRecipe,
   useUploadImage,
 } from '@/hooks/use-recipes';
-import { useLocation } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { X, Upload, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -23,6 +24,7 @@ import { MAX_CATEGORIES_PER_RECIPE } from '@/lib/constants';
 import { processImageFile } from '@/lib/image-utils';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
+import { recipeApi } from '@/lib/api';
 
 import type { Recipe } from '@/lib/types';
 
@@ -40,11 +42,13 @@ export function RecipeForm({
   onSuccess,
 }: RecipeFormProps) {
   const location = useLocation();
+  const navigate = useNavigate();
   const editRecipe = location.state?.recipe || recipe;
 
   const createRecipe = useCreateRecipe();
   const updateRecipe = useUpdateRecipe();
   const uploadImage = useUploadImage();
+  const queryClient = useQueryClient();
 
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>('');
@@ -170,6 +174,8 @@ export function RecipeForm({
   };
 
   const onSubmit = async (data: RecipeFormData) => {
+    let uploadedImageUrl: string | null = null;
+
     try {
       // Mobile-specific debugging
       if (isMobile) {
@@ -187,6 +193,7 @@ export function RecipeForm({
           throw new Error('Failed to upload image');
         }
         imageUrl = uploadedUrl;
+        uploadedImageUrl = uploadedUrl; // Track for potential rollback
         if (isMobile) console.log('Image uploaded successfully:', uploadedUrl);
       }
 
@@ -216,9 +223,26 @@ export function RecipeForm({
       }
 
       if (isMobile) console.log('Recipe operation completed successfully');
+
+      // Force refresh of recipes page and navigate back with a refresh hint
+      await queryClient.invalidateQueries({
+        queryKey: ['recipes'],
+        exact: false,
+      });
       onSuccess?.();
+      navigate('/', { state: { refresh: Date.now() } });
     } catch (error) {
       console.error('Error saving recipe:', error);
+
+      // Rollback: delete uploaded image if recipe operation failed
+      if (uploadedImageUrl) {
+        try {
+          await recipeApi.deleteImageFromStorage(uploadedImageUrl);
+          console.log('Rolled back uploaded image:', uploadedImageUrl);
+        } catch (rollbackError) {
+          console.warn('Failed to rollback uploaded image:', rollbackError);
+        }
+      }
 
       // Enhanced error logging for mobile
       if (isMobile) {

@@ -12,7 +12,6 @@ import {
   Home,
   Bot,
   Brain,
-  Save,
 } from 'lucide-react';
 import { PersonaSelector } from './PersonaSelector';
 import { ChatHeader } from './ChatHeader';
@@ -23,7 +22,7 @@ import { RECIPE_BOT_PERSONAS, type PersonaType } from '@/lib/openai';
 import type { RecipeFormData } from '@/lib/schemas';
 import { useSelections } from '@/contexts/SelectionContext';
 import { UserProfileDisplay } from './UserProfileDisplay';
-import { SaveRecipeButton } from './SaveRecipeButton';
+import { SmartSaveRecipeButton } from './SmartSaveRecipeButton';
 import { useAuth } from '@/contexts/AuthProvider';
 
 interface ChatInterfaceProps {
@@ -38,13 +37,10 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
     generatedRecipe,
     isLoading,
     showPersonaSelector,
-    showSaveRecipeButton,
     selectPersona,
     sendMessage,
     startNewRecipe,
     changePersona,
-    convertToRecipe,
-    saveCurrentRecipe,
   } = useConversation();
 
   const { selections, updateSelections } = useSelections();
@@ -210,7 +206,7 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
         generatedRecipe={generatedRecipe}
         isLoading={isLoading}
         onSaveRecipe={handleSaveRecipe}
-        onConvertToRecipe={convertToRecipe}
+        onConvertToRecipe={async () => {}}
         onNewRecipe={startNewRecipe}
         onChangeAssistant={changePersona}
       />
@@ -364,27 +360,15 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
         </div>
       </div>
 
-      {/* Save Recipe Button - Shows when AI asks if ready to save */}
-      {showSaveRecipeButton && (
-        <SaveRecipeButton
-          onSave={saveCurrentRecipe}
-          isLoading={isLoading}
+      {/* Smart Save Recipe Button - Shows when there's conversation content */}
+      {persona && messages.length > 2 && (
+        <SmartSaveRecipeButton
+          conversationContent={messages
+            .map((m) => `${m.role}: ${m.content}`)
+            .join('\n\n')}
+          onRecipeParsed={onRecipeGenerated}
           className="bg-gradient-to-r from-green-50 to-blue-50 border-t"
         />
-      )}
-
-      {/* Manual Save Recipe Button - Always visible for testing */}
-      {persona && messages.length > 2 && (
-        <div className="flex justify-center p-2 bg-gray-50 border-t">
-          <button
-            onClick={saveCurrentRecipe}
-            disabled={isLoading}
-            className="btn btn-outline btn-sm flex items-center gap-2"
-          >
-            <Save className="h-4 w-4" />
-            <span>Save Current Recipe</span>
-          </button>
-        </div>
       )}
 
       {/* Chat Input - Always visible and accessible */}
