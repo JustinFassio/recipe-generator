@@ -2,7 +2,28 @@ import type { RecipeFormData } from './schemas';
 import { AssistantAPI } from './assistantAPI';
 
 // Constants for common prompts
-const SAVE_RECIPE_PROMPT = `IMPORTANT: After providing a complete recipe or when the user seems satisfied with a recipe discussion, always ask: "Ready to Create and Save the Recipe?" This will allow the user to save the recipe to their collection.`;
+const SAVE_RECIPE_PROMPT = `IMPORTANT: After providing a complete recipe or when the user seems satisfied with a recipe discussion, always ask: "Ready to Create and Save the Recipe?" This will allow the user to save the recipe to their collection.
+
+CRITICAL: When providing a complete recipe, ALWAYS format it as structured JSON in a markdown code block for easy parsing:
+
+\`\`\`json
+{
+  "title": "Recipe Name",
+  "ingredients": [
+    {
+      "item": "ingredient name",
+      "amount": "quantity needed",
+      "prep": "preparation instructions"
+    }
+  ],
+  "instructions": "Step-by-step cooking instructions",
+  "setup": ["Prep time: X minutes", "Cook time: X minutes", "Equipment needed"],
+  "categories": ["Course: Main", "Cuisine: Type", "Technique: Method"],
+  "notes": "Tips, variations, and additional notes"
+}
+\`\`\`
+
+This structured format ensures the recipe can be easily saved to the user's collection.`;
 
 const CONTEXT_USAGE_DIRECTIVE = `CRITICAL: You will receive comprehensive user profile data including allergies, dietary restrictions, cooking skills, time constraints, equipment, and preferences. ALWAYS use this information to:
 
