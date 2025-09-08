@@ -111,7 +111,11 @@ describe('RecipeCard', () => {
 
     const image = screen.getByAltText('Test Recipe');
     expect(image).toBeInTheDocument();
-    expect(image).toHaveAttribute('src', 'https://example.com/image.jpg');
+    // The image URL now includes a cache-busting parameter
+    expect(image).toHaveAttribute(
+      'src',
+      expect.stringContaining('https://example.com/image.jpg')
+    );
   });
 
   it('renders recipe without image when image_url is not provided', () => {

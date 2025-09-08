@@ -1,4 +1,4 @@
-import { Save, ChefHat, Heart, Home, Bot, Brain, Menu, X } from 'lucide-react';
+import { ChefHat, Heart, Home, Bot, Brain, Menu, X } from 'lucide-react';
 import { RECIPE_BOT_PERSONAS, type PersonaType } from '@/lib/openai';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
@@ -16,10 +16,6 @@ interface ChatHeaderProps {
 
 export function ChatHeader({
   selectedPersona,
-  generatedRecipe,
-  isLoading,
-  onSaveRecipe,
-  onConvertToRecipe,
   onNewRecipe,
   onChangeAssistant,
 }: ChatHeaderProps) {
@@ -83,24 +79,6 @@ export function ChatHeader({
 
         {/* Desktop Action Buttons */}
         <div className="hidden items-center space-x-2 md:flex">
-          {generatedRecipe ? (
-            <Button
-              onClick={onSaveRecipe}
-              className="bg-green-600 hover:bg-green-700"
-            >
-              <Save className="mr-2 h-4 w-4" />
-              Save Recipe
-            </Button>
-          ) : (
-            <Button
-              onClick={onConvertToRecipe}
-              disabled={isLoading}
-              className="bg-blue-600 hover:bg-blue-700"
-            >
-              <Save className="mr-2 h-4 w-4" />
-              {isLoading ? 'Parsing Recipe...' : 'Save Recipe'}
-            </Button>
-          )}
           <Button
             variant="outline"
             className="border-green-600 text-green-600 hover:bg-green-50"
@@ -146,30 +124,6 @@ export function ChatHeader({
             <h2 id="mobile-menu-title" className="sr-only">
               Chat Actions Menu
             </h2>
-            {generatedRecipe ? (
-              <Button
-                onClick={() => {
-                  onSaveRecipe();
-                  closeMobileMenu();
-                }}
-                className="w-full justify-start bg-green-600 hover:bg-green-700"
-              >
-                <Save className="mr-2 h-4 w-4" />
-                Save Recipe
-              </Button>
-            ) : (
-              <Button
-                onClick={() => {
-                  onConvertToRecipe();
-                  closeMobileMenu();
-                }}
-                disabled={isLoading}
-                className="w-full justify-start bg-blue-600 hover:bg-blue-700"
-              >
-                <Save className="mr-2 h-4 w-4" />
-                {isLoading ? 'Parsing Recipe...' : 'Save Recipe'}
-              </Button>
-            )}
             <Button
               variant="outline"
               onClick={() => {

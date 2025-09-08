@@ -149,11 +149,18 @@ function parseIngredients(ingredients: unknown): string[] {
           return item;
         } else if (typeof item === 'object' && item !== null) {
           const typedItem = item as IngredientItem;
+          // Ensure we have at least an item property
+          if (!typedItem.item && !typedItem.amount) {
+            console.warn('Invalid ingredient object:', item);
+            return String(item); // Fallback to string conversion
+          }
           const ingredientStr =
             `${typedItem.amount || ''} ${typedItem.item || ''} ${typedItem.prep ? `, ${typedItem.prep}` : ''}`.trim();
           return ingredientStr;
         }
-        return '';
+        // Handle any other type by converting to string
+        console.warn('Unexpected ingredient type:', typeof item, item);
+        return String(item);
       })
       .filter((item) => item.length > 0);
   } else if (typeof ingredients === 'object' && ingredients !== null) {
@@ -179,6 +186,16 @@ function parseIngredients(ingredients: unknown): string[] {
             result.push(item);
           } else if (typeof item === 'object' && item !== null) {
             const typedItem = item as IngredientItem;
+            // Ensure we have at least an item property
+            if (!typedItem.item && !typedItem.amount) {
+              console.warn(
+                'Invalid ingredient object in category:',
+                category,
+                item
+              );
+              result.push(String(item)); // Fallback to string conversion
+              continue;
+            }
             let ingredientStr = '';
             if (typedItem.amount) ingredientStr += `${typedItem.amount} `;
             if (typedItem.item) ingredientStr += typedItem.item;
@@ -187,13 +204,30 @@ function parseIngredients(ingredients: unknown): string[] {
             if (ingredientStr.trim()) {
               result.push(ingredientStr.trim());
             }
+          } else {
+            // Handle any other type by converting to string
+            console.warn(
+              'Unexpected ingredient type in category:',
+              category,
+              typeof item,
+              item
+            );
+            result.push(String(item));
           }
         }
       }
     }
   }
 
-  return result;
+  // Final safety check: ensure all items are strings
+  return result.map((item) => {
+    if (typeof item === 'string') {
+      return item;
+    } else {
+      console.warn('Non-string ingredient found in final result:', item);
+      return String(item);
+    }
+  });
 }
 
 function parseInstructions(parsed: Record<string, unknown>): string {

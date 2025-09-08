@@ -72,10 +72,27 @@ export const useUpdateRecipe = () => {
     mutationFn: ({ id, updates }: { id: string; updates: Partial<Recipe> }) =>
       recipeApi.updateRecipe(id, updates),
     onSuccess: (updatedRecipe, { id }) => {
-      // Strategic invalidation: update specific recipe in cache and invalidate lists
+      // Update detail cache
       if (updatedRecipe) {
         queryClient.setQueryData(['recipe', id], updatedRecipe);
+
+        // Optimistically update all recipes list caches so UI reflects immediately
+        queryClient.setQueriesData(
+          { queryKey: ['recipes'], exact: false },
+          (oldData: unknown) => {
+            if (!oldData) return oldData;
+            // Expect oldData to be Recipe[]; preserve structure if not an array
+            if (Array.isArray(oldData)) {
+              return oldData.map((r: Recipe) =>
+                r.id === updatedRecipe.id ? { ...r, ...updatedRecipe } : r
+              );
+            }
+            return oldData;
+          }
+        );
       }
+
+      // Still invalidate in background to ensure fresh server state
       queryClient.invalidateQueries({ queryKey: ['recipes'], exact: false });
       queryClient.invalidateQueries({ queryKey: ['recipe-summary', id] });
       toast({
@@ -150,8 +167,21 @@ export const usePublicRecipes = () => {
 };
 
 export const useUploadImage = () => {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: (file: File) => recipeApi.uploadImage(file),
+    onSuccess: async (imageUrl) => {
+      // Add a small delay to ensure database is fully updated (like profile avatars do)
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      // Invalidate all recipe queries to force fresh data (like profile avatars do)
+      queryClient.invalidateQueries({ queryKey: ['recipes'], exact: false });
+      console.log(
+        '🔄 Recipe image uploaded, cache invalidated after delay:',
+        imageUrl
+      );
+    },
     onError: (error) => {
       toast({
         title: 'Error',

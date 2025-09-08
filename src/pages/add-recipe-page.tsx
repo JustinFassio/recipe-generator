@@ -44,7 +44,7 @@ export function AddRecipePage() {
   };
 
   const handleSuccess = () => {
-    navigate('/');
+    navigate('/', { state: { refresh: Date.now() } });
   };
 
   const handleBackToParser = () => {

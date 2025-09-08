@@ -8,14 +8,25 @@ import { HybridFilterBar } from '@/components/recipes/hybrid-filter-bar';
 import { Button } from '@/components/ui/button';
 import { FloatingActionButton } from '@/components/ui/fab';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
 import type { Recipe } from '@/lib/types';
 
 export function RecipesPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const queryClient = useQueryClient();
   const { filters, updateFilters } = useRecipeFilters();
   const { data: recipes = [], isLoading, error } = useRecipes(filters);
+
+  // Force-refresh recipes when navigated to with a refresh flag
+  useEffect(() => {
+    const state = location.state as { refresh?: number } | null;
+    if (state?.refresh) {
+      queryClient.invalidateQueries({ queryKey: ['recipes'], exact: false });
+    }
+  }, [location.state, queryClient]);
 
   const handleEditRecipe = useCallback(
     (recipe: Recipe) => {
