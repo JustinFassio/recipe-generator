@@ -44,7 +44,7 @@ interface ProfileInfoFormProps {
   onStateProvinceChange: (value: string) => void;
   city: string;
   onCityChange: (value: string) => void;
-  region: string; // Legacy field
+  region: string;
   onRegionChange: (value: string) => void;
 
   // Other preferences
@@ -86,9 +86,7 @@ export const ProfileInfoForm: React.FC<ProfileInfoFormProps> = ({
   onStateProvinceChange,
   city,
   onCityChange,
-  // @ts-ignore - Legacy field kept for data layer compatibility
   region,
-  // @ts-ignore - Legacy field kept for data layer compatibility
   onRegionChange,
   language,
   onLanguageChange,
@@ -238,6 +236,36 @@ export const ProfileInfoForm: React.FC<ProfileInfoFormProps> = ({
         {/* Geographic Location */}
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-base-content">Location</h3>
+
+          {/* Region */}
+          <div className="form-control">
+            <label className="label">
+              <span className="label-text">Region</span>
+            </label>
+            <div className="relative">
+              <Globe className="text-base-content/40 absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform" />
+              <select
+                className="select-bordered select w-full pl-10"
+                value={region}
+                onChange={(e) => onRegionChange(e.target.value)}
+                aria-label="Region"
+              >
+                <option value="">Select a region (optional)</option>
+                <option value="North America">North America</option>
+                <option value="South America">South America</option>
+                <option value="Europe">Europe</option>
+                <option value="Asia">Asia</option>
+                <option value="Africa">Africa</option>
+                <option value="Oceania">Oceania</option>
+                <option value="Middle East">Middle East</option>
+              </select>
+            </div>
+            <label className="label">
+              <span className="label-text-alt text-base-content/60">
+                Choose your region for seasonal food recommendations
+              </span>
+            </label>
+          </div>
 
           {/* Country */}
           <div className="form-control">
