@@ -5,6 +5,41 @@ import { toast } from '@/hooks/use-toast';
 import { parseRecipeFromText } from '@/lib/recipe-parser';
 import { useAuth } from '@/contexts/AuthProvider';
 
+// Helper function to validate and convert ingredients to strings
+function validateAndConvertIngredients(ingredients: unknown): string[] {
+  if (!Array.isArray(ingredients)) {
+    console.warn('Ingredients is not an array:', ingredients);
+    return [];
+  }
+
+  return ingredients
+    .map((item: unknown) => {
+      if (typeof item === 'string') {
+        return item;
+      } else if (typeof item === 'object' && item !== null) {
+        // Handle ingredient objects with amount, item, prep structure
+        const typedItem = item as {
+          amount?: string;
+          item?: string;
+          prep?: string;
+        };
+        if (typedItem.item || typedItem.amount) {
+          const parts = [];
+          if (typedItem.amount) parts.push(typedItem.amount);
+          if (typedItem.item) parts.push(typedItem.item);
+          if (typedItem.prep) parts.push(typedItem.prep);
+          return parts.join(' ');
+        }
+        console.warn('Invalid ingredient object:', item);
+        return String(item);
+      } else {
+        console.warn('Unexpected ingredient type:', typeof item, item);
+        return String(item);
+      }
+    })
+    .filter((item) => item.length > 0);
+}
+
 export interface Message {
   id: string;
   role: 'user' | 'assistant';
@@ -601,7 +636,7 @@ I'll ensure all recommendations are safe for your dietary needs and tailored to 
           // Convert to RecipeFormData format
           const recipe: RecipeFormData = {
             title: recipeData.title || 'Untitled Recipe',
-            ingredients: recipeData.ingredients || [],
+            ingredients: validateAndConvertIngredients(recipeData.ingredients),
             instructions: recipeData.instructions || '',
             notes: recipeData.notes || '',
             setup: recipeData.setup || [],
@@ -652,7 +687,9 @@ Format as: {"title": "Recipe Name", "ingredients": ["ingredient 1", "ingredient 
             const recipeData = JSON.parse(jsonBlockMatch[1]);
             const recipe: RecipeFormData = {
               title: recipeData.title || 'Untitled Recipe',
-              ingredients: recipeData.ingredients || [],
+              ingredients: validateAndConvertIngredients(
+                recipeData.ingredients
+              ),
               instructions: recipeData.instructions || '',
               notes: recipeData.notes || '',
               setup: recipeData.setup || [],
