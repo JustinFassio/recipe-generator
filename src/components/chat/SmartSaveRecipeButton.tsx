@@ -111,10 +111,10 @@ export const SmartSaveRecipeButton: React.FC<SmartSaveRecipeButtonProps> = ({
     return cn(
       'btn btn-lg flex items-center gap-3 px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200',
       {
-        'btn-primary': parseStatus === 'idle' || parseStatus === 'parsing',
+        'btn-primary': parseStatus === 'idle',
         'btn-success': parseStatus === 'success',
         'btn-error': parseStatus === 'error',
-        'loading': isLoading,
+        loading: isLoading,
       }
     );
   };
