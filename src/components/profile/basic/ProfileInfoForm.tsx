@@ -86,7 +86,9 @@ export const ProfileInfoForm: React.FC<ProfileInfoFormProps> = ({
   onStateProvinceChange,
   city,
   onCityChange,
+  // @ts-ignore - Legacy field kept for data layer compatibility
   region,
+  // @ts-ignore - Legacy field kept for data layer compatibility
   onRegionChange,
   language,
   onLanguageChange,
@@ -339,7 +341,6 @@ export const ProfileInfoForm: React.FC<ProfileInfoFormProps> = ({
               </label>
             </div>
           )}
-
         </div>
 
         {/* Language */}
