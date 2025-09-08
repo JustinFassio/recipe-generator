@@ -7,6 +7,10 @@ import {
   DEFAULT_AVATAR_OPTIONS,
 } from './image-processing';
 
+// Profile field selection constants for consistency across queries
+export const PROFILE_FIELDS_FULL = 'id, username, full_name, avatar_url, bio, region, country, state_province, city, language, units, time_per_meal, skill_level, created_at, updated_at';
+export const PROFILE_FIELDS_BASIC = 'bio, region, country, state_province, city, language, units, time_per_meal, skill_level';
+
 // Username validation constants
 const USERNAME_VALIDATION_REGEX = /^[a-z0-9_]{3,24}$/;
 
@@ -367,9 +371,7 @@ export async function claimUsername(
     // Fetch the updated profile
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select(
-        'id, username, full_name, avatar_url, bio, region, country, state_province, city, language, units, time_per_meal, skill_level, created_at, updated_at'
-      )
+      .select(PROFILE_FIELDS_FULL)
       .eq('id', user.id)
       .single();
 

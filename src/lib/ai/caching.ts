@@ -4,6 +4,7 @@
  */
 
 import type { UserPreferencesForAI } from './userPreferencesToPrompt';
+import { PROFILE_FIELDS_BASIC } from '@/lib/auth';
 
 export interface CachedUserData {
   userData: UserPreferencesForAI;
@@ -187,9 +188,7 @@ async function fetchUserData(userId: string): Promise<UserPreferencesForAI> {
     // Fetch profile data
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select(
-        'bio, region, country, state_province, city, language, units, time_per_meal, skill_level'
-      )
+      .select(PROFILE_FIELDS_BASIC)
       .eq('id', userId)
       .single();
 
