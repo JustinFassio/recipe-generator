@@ -125,7 +125,7 @@ BEGIN
     -- Check for common country patterns
     IF profile_record.region ILIKE '%united states%' OR 
        profile_record.region ILIKE '%usa%' OR 
-       profile_record.region ILIKE '%us%' THEN
+       profile_record.region ~* '\mus\M' THEN
       country_name := 'United States';
     ELSIF profile_record.region ILIKE '%canada%' THEN
       country_name := 'Canada';
