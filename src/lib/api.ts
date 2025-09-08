@@ -298,19 +298,63 @@ export const recipeApi = {
     } = await supabase.auth.getUser();
     if (!user) throw new Error('User not authenticated');
 
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+    // Derive a safe extension from MIME type if available, otherwise fall back to original name
+    const mimeType = file.type || 'application/octet-stream';
+    const defaultExtFromMime = (() => {
+      if (mimeType === 'image/jpeg') return 'jpg';
+      if (mimeType === 'image/png') return 'png';
+      if (mimeType === 'image/webp') return 'webp';
+      if (mimeType === 'image/gif') return 'gif';
+      return (file.name.split('.').pop() || 'bin').toLowerCase();
+    })();
 
-    const { error: uploadError } = await supabase.storage
-      .from('recipe-images')
-      .upload(fileName, file);
+    const fileExt = (
+      file.name.split('.').pop() || defaultExtFromMime
+    ).toLowerCase();
 
-    if (uploadError) handleError(uploadError, 'Upload image');
+    // Generate unique filename; include a random suffix to avoid rare collisions
+    const uniqueSuffix = Math.random().toString(36).slice(2, 8);
+    const initialName = `${user.id}/${Date.now()}-${uniqueSuffix}.${fileExt}`;
+
+    // Attempt upload; retry once on conflict with a new unique name
+    const attemptUpload = async (path: string): Promise<string> => {
+      const { error } = await supabase.storage
+        .from('recipe-images')
+        .upload(path, file, {
+          cacheControl: '31536000',
+          contentType: mimeType,
+          upsert: false, // avoid unintended overwrites
+        });
+
+      if (error) {
+        // Handle conflict by retrying with a new name once
+        const status =
+          (error as unknown as { status?: number; statusCode?: number }) || {};
+        if (status.statusCode === 409 || status.status === 409) {
+          const altSuffix = Math.random().toString(36).slice(2, 8);
+          const altName = `${user.id}/${Date.now()}-${altSuffix}.${fileExt}`;
+          const { error: retryError } = await supabase.storage
+            .from('recipe-images')
+            .upload(altName, file, {
+              cacheControl: '31536000',
+              contentType: mimeType,
+              upsert: false,
+            });
+          if (retryError) {
+            handleError(retryError, 'Upload image (retry)');
+          }
+          return altName;
+        }
+        handleError(error, 'Upload image');
+      }
+      return path;
+    };
+
+    const storedPath = await attemptUpload(initialName);
 
     const { data } = supabase.storage
       .from('recipe-images')
-      .getPublicUrl(fileName);
-
+      .getPublicUrl(storedPath);
     return data.publicUrl;
   },
 
