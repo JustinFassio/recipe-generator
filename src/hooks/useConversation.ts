@@ -124,9 +124,18 @@ I'll ensure all recommendations are safe for your dietary needs and tailored to 
               const contextData = await getComprehensiveUserContext(user.id);
 
               // Convert context data to a string format for the message
+              const locationParts = [];
+              if (contextData.userData.profile.city)
+                locationParts.push(contextData.userData.profile.city);
+              if (contextData.userData.profile.state_province)
+                locationParts.push(contextData.userData.profile.state_province);
+              if (contextData.userData.profile.country)
+                locationParts.push(contextData.userData.profile.country);
+
               const contextMessage = `User Profile Context:
 - Skill Level: ${contextData.userData.profile.skill_level}
 - Time per Meal: ${contextData.userData.profile.time_per_meal} minutes
+- Location: ${locationParts.length > 0 ? locationParts.join(', ') : 'Not specified'}
 - Allergies: ${contextData.userData.safety.allergies.join(', ') || 'None'}
 - Dietary Restrictions: ${contextData.userData.safety.dietary_restrictions.join(', ') || 'None'}
 - Preferred Cuisines: ${contextData.userData.cooking.preferred_cuisines.join(', ')}

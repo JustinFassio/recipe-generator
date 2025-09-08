@@ -16,6 +16,11 @@ import {
   X,
   Loader2,
 } from 'lucide-react';
+import {
+  NORTH_AMERICAN_COUNTRIES,
+  getStatesProvincesByCountry,
+  getCitiesByStateProvince,
+} from '@/lib/geographic-data';
 
 // Username validation constant
 const USERNAME_PATTERN = '^[a-z0-9_]+$';
@@ -32,9 +37,17 @@ interface ProfileInfoFormProps {
   usernameChecking: boolean;
   currentUsername: string | null;
 
-  // Preferences
-  region: string;
+  // Geographic preferences
+  country: string;
+  onCountryChange: (value: string) => void;
+  stateProvince: string;
+  onStateProvinceChange: (value: string) => void;
+  city: string;
+  onCityChange: (value: string) => void;
+  region: string; // Legacy field
   onRegionChange: (value: string) => void;
+
+  // Other preferences
   language: string;
   onLanguageChange: (value: string) => void;
   units: string;
@@ -67,6 +80,12 @@ export const ProfileInfoForm: React.FC<ProfileInfoFormProps> = ({
   usernameAvailable,
   usernameChecking,
   currentUsername,
+  country,
+  onCountryChange,
+  stateProvince,
+  onStateProvinceChange,
+  city,
+  onCityChange,
   region,
   onRegionChange,
   language,
@@ -91,6 +110,15 @@ export const ProfileInfoForm: React.FC<ProfileInfoFormProps> = ({
     '🎯 ProfileInfoForm will show "Claim Username":',
     !currentUsername
   );
+
+  // Full Name validation helpers
+  const isFullNameTooLong = fullName.length > 80;
+  const isFullNameOnlySpaces =
+    fullName.trim().length === 0 && fullName.length > 0;
+
+  // Get available states/provinces and cities based on selected country
+  const availableStatesProvinces = getStatesProvincesByCountry(country);
+  const availableCities = getCitiesByStateProvince(stateProvince);
   return (
     <SectionCard className={className}>
       <h2 className="card-title">Profile Information</h2>
@@ -100,13 +128,34 @@ export const ProfileInfoForm: React.FC<ProfileInfoFormProps> = ({
         <div className="form-control">
           <label className="label">
             <span className="label-text">Full Name</span>
+            <span className="label-text-alt text-base-content/60">
+              {fullName.length}/80
+            </span>
           </label>
           <InlineIconInput
             icon={User}
             value={fullName}
             onChange={onFullNameChange}
             placeholder="Your full name"
+            maxLength={80}
+            className={
+              isFullNameTooLong || isFullNameOnlySpaces ? 'border-error' : ''
+            }
           />
+          {isFullNameTooLong && (
+            <label className="label">
+              <span className="label-text-alt text-error">
+                Full name must be 80 characters or less
+              </span>
+            </label>
+          )}
+          {isFullNameOnlySpaces && (
+            <label className="label">
+              <span className="label-text-alt text-warning">
+                Full name cannot be only spaces
+              </span>
+            </label>
+          )}
         </div>
 
         {/* Current Username */}
@@ -184,17 +233,125 @@ export const ProfileInfoForm: React.FC<ProfileInfoFormProps> = ({
           )}
         </div>
 
-        {/* Region */}
-        <div className="form-control">
-          <label className="label">
-            <span className="label-text">Region</span>
-          </label>
-          <InlineIconInput
-            icon={MapPin}
-            value={region}
-            onChange={onRegionChange}
-            placeholder="e.g., North America, Europe, Asia"
-          />
+        {/* Geographic Location */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-base-content">Location</h3>
+
+          {/* Country */}
+          <div className="form-control">
+            <label className="label">
+              <span className="label-text">Country</span>
+            </label>
+            <div className="relative">
+              <Globe className="text-base-content/40 absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform" />
+              <select
+                className="select-bordered select w-full pl-10"
+                value={country}
+                onChange={(e) => onCountryChange(e.target.value)}
+                aria-label="Country"
+              >
+                <option value="">Select a country</option>
+                {NORTH_AMERICAN_COUNTRIES.map((countryOption) => (
+                  <option key={countryOption.value} value={countryOption.value}>
+                    {countryOption.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <label className="label">
+              <span className="label-text-alt text-base-content/60">
+                Select your country for localized recipe recommendations
+              </span>
+            </label>
+          </div>
+
+          {/* State/Province */}
+          {country && availableStatesProvinces.length > 0 && (
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text">
+                  {country === 'United States'
+                    ? 'State'
+                    : country === 'Canada'
+                      ? 'Province/Territory'
+                      : country === 'Mexico'
+                        ? 'State'
+                        : 'State/Province'}
+                </span>
+              </label>
+              <div className="relative">
+                <MapPin className="text-base-content/40 absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform" />
+                <select
+                  className="select-bordered select w-full pl-10"
+                  value={stateProvince}
+                  onChange={(e) => onStateProvinceChange(e.target.value)}
+                  aria-label="State or Province"
+                >
+                  <option value="">
+                    Select{' '}
+                    {country === 'United States'
+                      ? 'state'
+                      : country === 'Canada'
+                        ? 'province/territory'
+                        : country === 'Mexico'
+                          ? 'state'
+                          : 'state/province'}
+                  </option>
+                  {availableStatesProvinces.map((stateProvinceOption) => (
+                    <option
+                      key={stateProvinceOption.value}
+                      value={stateProvinceOption.value}
+                    >
+                      {stateProvinceOption.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          )}
+
+          {/* City */}
+          {stateProvince && availableCities.length > 0 && (
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text">City</span>
+              </label>
+              <div className="relative">
+                <MapPin className="text-base-content/40 absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform" />
+                <select
+                  className="select-bordered select w-full pl-10"
+                  value={city}
+                  onChange={(e) => onCityChange(e.target.value)}
+                  aria-label="City"
+                >
+                  <option value="">Select a city</option>
+                  {availableCities.map((cityOption) => (
+                    <option key={cityOption} value={cityOption}>
+                      {cityOption}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <label className="label">
+                <span className="label-text-alt text-base-content/60">
+                  Select your city for hyper-local recipe recommendations
+                </span>
+              </label>
+            </div>
+          )}
+
+          {/* Legacy Region Field (Hidden but maintained for backward compatibility) */}
+          <div className="form-control" style={{ display: 'none' }}>
+            <label className="label">
+              <span className="label-text">Region (Legacy)</span>
+            </label>
+            <InlineIconInput
+              icon={MapPin}
+              value={region}
+              onChange={onRegionChange}
+              placeholder="Legacy region field"
+            />
+          </div>
         </div>
 
         {/* Language */}

@@ -145,6 +145,9 @@ describe('useProfileBasics', () => {
       expect(mockUpdateProfile).toHaveBeenCalledWith({
         full_name: 'Updated User',
         region: 'CA',
+        country: null,
+        state_province: null,
+        city: null,
         language: 'fr',
         units: 'imperial',
         time_per_meal: 60, // Converted from UI index 4
@@ -189,7 +192,7 @@ describe('useProfileBasics', () => {
       });
 
       expect(updateResult!).toBe(false);
-      expect(result.current.error).toBe('Failed to update profile basics');
+      expect(result.current.error).toBe('Update failed');
       expect(mockToast).toHaveBeenCalledWith({
         title: 'Error',
         description: errorMessage,
@@ -218,7 +221,7 @@ describe('useProfileBasics', () => {
       });
 
       expect(updateResult!).toBe(false);
-      expect(result.current.error).toBe('Failed to update profile basics');
+      expect(result.current.error).toBe('Network error');
       expect(mockToast).toHaveBeenCalledWith({
         title: 'Error',
         description: errorMessage,
@@ -244,7 +247,7 @@ describe('useProfileBasics', () => {
       });
 
       expect(updateResult!).toBe(false);
-      expect(result.current.error).toBe('Invalid profile data provided');
+      expect(result.current.error).toBe('Language is required');
       expect(mockUpdateProfile).not.toHaveBeenCalled();
       expect(mockToast).toHaveBeenCalledWith({
         title: 'Error',

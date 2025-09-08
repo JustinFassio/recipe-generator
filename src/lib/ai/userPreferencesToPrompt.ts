@@ -8,6 +8,9 @@ export interface UserPreferencesForAI {
   profile: {
     bio?: string;
     region?: string;
+    country?: string;
+    state_province?: string;
+    city?: string;
     language?: string;
     units?: 'metric' | 'imperial';
     time_per_meal?: number;
@@ -78,6 +81,17 @@ export const buildUserContextPrompt = (
     sections.push(`Region: ${userData.profile.region}`);
   }
 
+  // Location information
+  const locationParts = [];
+  if (userData.profile.city) locationParts.push(userData.profile.city);
+  if (userData.profile.state_province)
+    locationParts.push(userData.profile.state_province);
+  if (userData.profile.country) locationParts.push(userData.profile.country);
+
+  if (locationParts.length > 0) {
+    sections.push(`Location: ${locationParts.join(', ')}`);
+  }
+
   // Cooking preferences
   if (userData.cooking.preferred_cuisines.length > 0) {
     sections.push(
@@ -111,6 +125,9 @@ export const buildCulturalPrompt = (context: {
   preferred_cuisines: string[];
   spice_tolerance?: number;
   region?: string;
+  country?: string;
+  state_province?: string;
+  city?: string;
 }): string => {
   const sections = [];
 
@@ -140,6 +157,18 @@ export const buildCulturalPrompt = (context: {
     );
   }
 
+  // Location-specific preferences
+  const locationParts = [];
+  if (context.city) locationParts.push(context.city);
+  if (context.state_province) locationParts.push(context.state_province);
+  if (context.country) locationParts.push(context.country);
+
+  if (locationParts.length > 0) {
+    sections.push(
+      `Location: ${locationParts.join(', ')} - consider local ingredients, seasonal availability, and regional cooking traditions`
+    );
+  }
+
   return sections.join('\n');
 };
 
@@ -155,6 +184,9 @@ export const buildRecipeGenerationPrompt = (
     preferred_cuisines: userData.cooking.preferred_cuisines,
     spice_tolerance: userData.cooking.spice_tolerance,
     region: userData.profile.region,
+    country: userData.profile.country,
+    state_province: userData.profile.state_province,
+    city: userData.profile.city,
   });
 
   return `

@@ -214,6 +214,9 @@ export async function updateProfile(
       | 'avatar_url'
       | 'bio'
       | 'region'
+      | 'country'
+      | 'state_province'
+      | 'city'
       | 'language'
       | 'units'
       | 'time_per_meal'
@@ -365,7 +368,7 @@ export async function claimUsername(
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select(
-        'id, username, full_name, avatar_url, bio, region, language, units, time_per_meal, skill_level, created_at, updated_at'
+        'id, username, full_name, avatar_url, bio, region, country, state_province, city, language, units, time_per_meal, skill_level, created_at, updated_at'
       )
       .eq('id', user.id)
       .single();

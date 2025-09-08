@@ -161,6 +161,25 @@ export const UserProfileDisplay: React.FC<UserProfileDisplayProps> = ({
                 </span>
               </div>
             )}
+            {(userData.profile.city ||
+              userData.profile.state_province ||
+              userData.profile.country) && (
+              <div className="flex items-center gap-2">
+                <Globe className="h-3 w-3 text-indigo-500" />
+                <span className="text-gray-600">
+                  Location:{' '}
+                  <span className="font-medium">
+                    {[
+                      userData.profile.city,
+                      userData.profile.state_province,
+                      userData.profile.country,
+                    ]
+                      .filter(Boolean)
+                      .join(', ')}
+                  </span>
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </div>

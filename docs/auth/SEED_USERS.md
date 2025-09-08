@@ -27,6 +27,7 @@ All recipes are automatically tagged with 1-2 mood tags based on their existing 
 ### Alice Baker (alice@example.com)
 
 - **Profile**: "Home cook exploring quick vegetarian meals."
+- **Location**: San Francisco, California, United States
 - **Allergies**: peanuts
 - **Dietary**: vegetarian
 - **Cuisines**: italian, mexican
@@ -47,6 +48,7 @@ All recipes are automatically tagged with 1-2 mood tags based on their existing 
 ### Bob Carter (bob@example.com)
 
 - **Profile**: "Grill enthusiast and weekend meal-prepper."
+- **Location**: Houston, Texas, United States
 - **Allergies**: none
 - **Dietary**: none
 - **Cuisines**: bbq, american
@@ -66,6 +68,7 @@ All recipes are automatically tagged with 1-2 mood tags based on their existing 
 ### Cora Diaz (cora@example.com)
 
 - **Profile**: "Loves bold flavors and one-pot recipes."
+- **Location**: Toronto, Ontario, Canada
 - **Allergies**: shellfish
 - **Dietary**: none
 - **Cuisines**: spanish, thai
@@ -86,6 +89,7 @@ All recipes are automatically tagged with 1-2 mood tags based on their existing 
 ### David Evans (david@example.com)
 
 - **Profile**: "Baker and pastry enthusiast."
+- **Location**: Montreal, Quebec, Canada
 - **Allergies**: gluten
 - **Dietary**: gluten-free
 - **Cuisines**: french, mediterranean
@@ -105,6 +109,7 @@ All recipes are automatically tagged with 1-2 mood tags based on their existing 
 ### Emma Foster (emma@example.com)
 
 - **Profile**: "Health-conscious meal planner and fitness enthusiast."
+- **Location**: New York City, New York, United States
 - **Allergies**: dairy
 - **Dietary**: dairy-free, low-carb
 - **Cuisines**: greek, japanese
@@ -125,6 +130,7 @@ All recipes are automatically tagged with 1-2 mood tags based on their existing 
 ### Frank Garcia (frank@example.com)
 
 - **Profile**: "Spice lover and international cuisine explorer."
+- **Location**: Guadalajara, Jalisco, Mexico
 - **Allergies**: none
 - **Dietary**: none
 - **Cuisines**: indian, korean, vietnamese
