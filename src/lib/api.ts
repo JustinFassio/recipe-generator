@@ -234,22 +234,51 @@ export const recipeApi = {
 
   // Update an existing recipe
   async updateRecipe(id: string, updates: Partial<Recipe>): Promise<Recipe> {
+    // Get current recipe to check for old image that needs cleanup
+    const { data: currentRecipe } = await supabase
+      .from('recipes')
+      .select('image_url')
+      .eq('id', id)
+      .single();
+
+    // Update recipe
     const { data, error } = await supabase
       .from('recipes')
-      .update(updates)
+      .update({ ...updates, updated_at: new Date().toISOString() })
       .eq('id', id)
       .select()
       .single();
 
     if (error) handleError(error, 'Update recipe');
+
+    // Clean up old image if it exists and is different from the new one
+    if (
+      currentRecipe?.image_url &&
+      currentRecipe.image_url !== updates.image_url
+    ) {
+      await this.deleteImageFromStorage(currentRecipe.image_url);
+    }
+
     return data;
   },
 
   // Delete a recipe
   async deleteRecipe(id: string): Promise<void> {
+    // Get recipe image URL before deletion for cleanup
+    const { data: recipe } = await supabase
+      .from('recipes')
+      .select('image_url')
+      .eq('id', id)
+      .single();
+
     const { error } = await supabase.from('recipes').delete().eq('id', id);
 
     if (error) handleError(error, 'Delete recipe');
+
+    // Clean up associated image if it exists
+    if (recipe?.image_url) {
+      await this.deleteImageFromStorage(recipe.image_url);
+    }
   },
 
   // Save (clone) a public recipe to user's collection
@@ -323,7 +352,7 @@ export const recipeApi = {
         .upload(path, file, {
           cacheControl: '31536000',
           contentType: mimeType,
-          upsert: false, // avoid unintended overwrites
+          upsert: true, // Allow overwrites like profile avatars
         });
 
       if (error) {
@@ -338,7 +367,7 @@ export const recipeApi = {
             .upload(altName, file, {
               cacheControl: '31536000',
               contentType: mimeType,
-              upsert: false,
+              upsert: true,
             });
           if (retryError) {
             handleError(retryError, 'Upload image (retry)');
@@ -356,6 +385,31 @@ export const recipeApi = {
       .from('recipe-images')
       .getPublicUrl(storedPath);
     return data.publicUrl;
+  },
+
+  // Delete image from storage
+  async deleteImageFromStorage(imageUrl: string): Promise<void> {
+    try {
+      // Extract path from URL
+      const url = new URL(imageUrl);
+      const pathSegments = url.pathname.split('/');
+      // Get the last two segments: user_id/filename
+      const path = pathSegments.slice(-2).join('/');
+
+      const { error } = await supabase.storage
+        .from('recipe-images')
+        .remove([path]);
+
+      if (error) {
+        console.warn('Failed to delete old image:', error);
+        // Don't throw - this shouldn't block the main operation
+      } else {
+        console.log('Successfully deleted old image:', path);
+      }
+    } catch (error) {
+      console.warn('Error parsing image URL for deletion:', error);
+      // Don't throw - this shouldn't block the main operation
+    }
   },
 
   // Parse recipe from text (delegates to recipe-parser)
