@@ -9,6 +9,27 @@ import {
   type SkillLevelDB,
 } from '@/lib/profile-constants';
 
+// Reusable validation function for geographic field names
+const validateGeographicName = (
+  value: string, 
+  fieldName: string, 
+  minLength: number = 2, 
+  maxLength: number = 50
+): string | null => {
+  const trimmedValue = value.trim();
+  if (trimmedValue.length === 0) return null;
+  
+  if (trimmedValue.length < minLength || trimmedValue.length > maxLength) {
+    return `${fieldName} must be between ${minLength} and ${maxLength} characters`;
+  }
+  
+  if (!/^[a-zA-Z\s\-,.()]+$/.test(trimmedValue)) {
+    return `${fieldName} contains invalid characters. Use only letters, spaces, hyphens, commas, periods, and parentheses`;
+  }
+  
+  return null;
+};
+
 // Data interface for profile basics updates
 export interface ProfileBasicsData {
   full_name: string | null;
@@ -169,16 +190,9 @@ export function useProfileBasics(): UseProfileBasicsReturn {
           data.region !== undefined &&
           data.region.trim().length > 0
         ) {
-          const trimmedRegion = data.region.trim();
-          if (trimmedRegion.length > 100) {
-            setError('Region must be 100 characters or less');
-            return false;
-          }
-          // Basic validation for reasonable region names (no special characters except spaces, hyphens, commas)
-          if (!/^[a-zA-Z\s\-,.()]+$/.test(trimmedRegion)) {
-            setError(
-              'Region contains invalid characters. Use only letters, spaces, hyphens, commas, periods, and parentheses'
-            );
+          const regionError = validateGeographicName(data.region, 'Region', 1, 100);
+          if (regionError) {
+            setError(regionError);
             return false;
           }
         }
@@ -189,16 +203,9 @@ export function useProfileBasics(): UseProfileBasicsReturn {
           data.country !== undefined &&
           data.country.trim().length > 0
         ) {
-          const trimmedCountry = data.country.trim();
-          if (trimmedCountry.length < 2 || trimmedCountry.length > 50) {
-            setError('Country must be between 2 and 50 characters');
-            return false;
-          }
-          // Basic validation for reasonable country names
-          if (!/^[a-zA-Z\s\-,.()]+$/.test(trimmedCountry)) {
-            setError(
-              'Country contains invalid characters. Use only letters, spaces, hyphens, commas, periods, and parentheses'
-            );
+          const countryError = validateGeographicName(data.country, 'Country');
+          if (countryError) {
+            setError(countryError);
             return false;
           }
         }
@@ -209,19 +216,9 @@ export function useProfileBasics(): UseProfileBasicsReturn {
           data.state_province !== undefined &&
           data.state_province.trim().length > 0
         ) {
-          const trimmedStateProvince = data.state_province.trim();
-          if (
-            trimmedStateProvince.length < 2 ||
-            trimmedStateProvince.length > 50
-          ) {
-            setError('State/Province must be between 2 and 50 characters');
-            return false;
-          }
-          // Basic validation for reasonable state/province names
-          if (!/^[a-zA-Z\s\-,.()]+$/.test(trimmedStateProvince)) {
-            setError(
-              'State/Province contains invalid characters. Use only letters, spaces, hyphens, commas, periods, and parentheses'
-            );
+          const stateProvinceError = validateGeographicName(data.state_province, 'State/Province');
+          if (stateProvinceError) {
+            setError(stateProvinceError);
             return false;
           }
         }
@@ -232,16 +229,9 @@ export function useProfileBasics(): UseProfileBasicsReturn {
           data.city !== undefined &&
           data.city.trim().length > 0
         ) {
-          const trimmedCity = data.city.trim();
-          if (trimmedCity.length < 2 || trimmedCity.length > 50) {
-            setError('City must be between 2 and 50 characters');
-            return false;
-          }
-          // Basic validation for reasonable city names
-          if (!/^[a-zA-Z\s\-,.()]+$/.test(trimmedCity)) {
-            setError(
-              'City contains invalid characters. Use only letters, spaces, hyphens, commas, periods, and parentheses'
-            );
+          const cityError = validateGeographicName(data.city, 'City');
+          if (cityError) {
+            setError(cityError);
             return false;
           }
         }
