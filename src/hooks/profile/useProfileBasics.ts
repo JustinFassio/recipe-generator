@@ -11,22 +11,22 @@ import {
 
 // Reusable validation function for geographic field names
 const validateGeographicName = (
-  value: string, 
-  fieldName: string, 
-  minLength: number = 2, 
+  value: string,
+  fieldName: string,
+  minLength: number = 2,
   maxLength: number = 50
 ): string | null => {
   const trimmedValue = value.trim();
   if (trimmedValue.length === 0) return null;
-  
+
   if (trimmedValue.length < minLength || trimmedValue.length > maxLength) {
     return `${fieldName} must be between ${minLength} and ${maxLength} characters`;
   }
-  
+
   if (!/^[a-zA-Z\s\-,.()]+$/.test(trimmedValue)) {
     return `${fieldName} contains invalid characters. Use only letters, spaces, hyphens, commas, periods, and parentheses`;
   }
-  
+
   return null;
 };
 
@@ -190,7 +190,12 @@ export function useProfileBasics(): UseProfileBasicsReturn {
           data.region !== undefined &&
           data.region.trim().length > 0
         ) {
-          const regionError = validateGeographicName(data.region, 'Region', 1, 100);
+          const regionError = validateGeographicName(
+            data.region,
+            'Region',
+            1,
+            100
+          );
           if (regionError) {
             setError(regionError);
             return false;
@@ -216,7 +221,10 @@ export function useProfileBasics(): UseProfileBasicsReturn {
           data.state_province !== undefined &&
           data.state_province.trim().length > 0
         ) {
-          const stateProvinceError = validateGeographicName(data.state_province, 'State/Province');
+          const stateProvinceError = validateGeographicName(
+            data.state_province,
+            'State/Province'
+          );
           if (stateProvinceError) {
             setError(stateProvinceError);
             return false;
