@@ -293,7 +293,7 @@ export function useProfileBasics(): UseProfileBasicsReturn {
       }
 
       setLoading(true);
-      setError(null); // Clear any previous errors only if validation passes
+      setError(null); // Clear any previous errors
 
       try {
         // Convert numeric skill level to database string value
