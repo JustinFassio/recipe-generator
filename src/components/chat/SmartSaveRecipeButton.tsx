@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Save, Loader2, AlertCircle, CheckCircle } from 'lucide-react';
 import { parseRecipeUnified } from '@/lib/recipe-parser-unified';
 import { toast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
 import type { RecipeFormData } from '@/lib/schemas';
 
 interface SmartSaveRecipeButtonProps {
@@ -107,25 +108,15 @@ export const SmartSaveRecipeButton: React.FC<SmartSaveRecipeButtonProps> = ({
   };
 
   const getButtonClasses = () => {
-    const baseClasses = `
-      btn btn-primary btn-lg
-      flex items-center gap-3
-      px-8 py-4
-      text-lg font-semibold
-      shadow-lg hover:shadow-xl
-      transition-all duration-200
-      ${isLoading ? 'loading' : ''}
-    `;
-
-    if (parseStatus === 'success') {
-      return baseClasses.replace('btn-primary', 'btn-success');
-    }
-
-    if (parseStatus === 'error') {
-      return baseClasses.replace('btn-primary', 'btn-error');
-    }
-
-    return baseClasses;
+    return cn(
+      'btn btn-lg flex items-center gap-3 px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200',
+      {
+        'btn-primary': parseStatus === 'idle' || parseStatus === 'parsing',
+        'btn-success': parseStatus === 'success',
+        'btn-error': parseStatus === 'error',
+        'loading': isLoading,
+      }
+    );
   };
 
   return (

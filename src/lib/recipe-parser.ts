@@ -149,7 +149,7 @@ function parseIngredients(ingredients: unknown): string[] {
           return item;
         } else if (typeof item === 'object' && item !== null) {
           const typedItem = item as IngredientItem;
-          // Ensure we have at least an item property
+          // Ensure we have at least an item or amount property
           if (!typedItem.item && !typedItem.amount) {
             console.warn('Invalid ingredient object:', item);
             return String(item); // Fallback to string conversion
