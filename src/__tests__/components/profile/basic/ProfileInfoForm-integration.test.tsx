@@ -61,7 +61,6 @@ describe('ProfileInfoForm Integration with Hooks', () => {
 
     // Check that all form fields are rendered
     expect(screen.getByDisplayValue('John Doe')).toBeInTheDocument();
-    expect(screen.getByDisplayValue('North America')).toBeInTheDocument();
     expect(
       screen.getByRole('combobox', { name: /language/i })
     ).toBeInTheDocument();

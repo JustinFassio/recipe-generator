@@ -79,6 +79,9 @@ export default function ProfilePage() {
       const profileSuccess = await profileBasics.updateProfileBasics({
         full_name: profileBasics.fullName || null,
         region: profileBasics.region || null,
+        country: profileBasics.country || null,
+        state_province: profileBasics.stateProvince || null,
+        city: profileBasics.city || null,
         language: profileBasics.language,
         units: profileBasics.units,
         time_per_meal: profileBasics.timePerMeal,
@@ -214,6 +217,12 @@ export default function ProfilePage() {
             usernameAvailable={usernameAvailability.isAvailable}
             usernameChecking={usernameAvailability.isChecking}
             currentUsername={profile?.username}
+            country={profileBasics.country}
+            onCountryChange={profileBasics.setCountry}
+            stateProvince={profileBasics.stateProvince}
+            onStateProvinceChange={profileBasics.setStateProvince}
+            city={profileBasics.city}
+            onCityChange={profileBasics.setCity}
             region={profileBasics.region}
             onRegionChange={profileBasics.setRegion}
             language={profileBasics.language}

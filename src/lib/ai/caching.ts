@@ -4,6 +4,7 @@
  */
 
 import type { UserPreferencesForAI } from './userPreferencesToPrompt';
+import { PROFILE_FIELDS_BASIC } from '@/lib/auth';
 
 export interface CachedUserData {
   userData: UserPreferencesForAI;
@@ -31,6 +32,9 @@ const mockUserData: UserPreferencesForAI = {
   profile: {
     bio: "I love experimenting with Mediterranean and Asian fusion cuisine. I enjoy cooking for my family and trying new techniques. I'm particularly interested in healthy, plant-based meals that are quick to prepare during weekdays.",
     region: 'North America',
+    country: 'United States',
+    state_province: 'California',
+    city: 'San Francisco',
     language: 'en',
     units: 'imperial',
     time_per_meal: 45,
@@ -184,7 +188,7 @@ async function fetchUserData(userId: string): Promise<UserPreferencesForAI> {
     // Fetch profile data
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('bio, region, language, units, time_per_meal, skill_level')
+      .select(PROFILE_FIELDS_BASIC)
       .eq('id', userId)
       .single();
 
@@ -221,6 +225,9 @@ async function fetchUserData(userId: string): Promise<UserPreferencesForAI> {
       profile: {
         bio: profile?.bio || undefined,
         region: profile?.region || undefined,
+        country: profile?.country || undefined,
+        state_province: profile?.state_province || undefined,
+        city: profile?.city || undefined,
         language: profile?.language || undefined,
         units: (profile?.units as 'metric' | 'imperial') || undefined,
         time_per_meal: profile?.time_per_meal || undefined,

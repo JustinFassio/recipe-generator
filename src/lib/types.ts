@@ -42,7 +42,12 @@ export type Profile = {
   avatar_url: string | null;
   bio: string | null;
   // Basic preferences
-  region: string | null;
+  region: string | null; // Legacy field
+  // Geographic preferences
+  country: string | null;
+  state_province: string | null;
+  city: string | null;
+  // Other preferences
   language: string | null;
   units: string | null;
   time_per_meal: number | null;

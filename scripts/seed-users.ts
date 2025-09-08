@@ -36,6 +36,10 @@ type SeedUser = {
   username: string;
   profile?: Partial<{
     bio: string;
+    country: string;
+    state_province: string;
+    city: string;
+    region: string; // Legacy field
   }>;
   safety?: Partial<{
     allergies: string[];
@@ -57,6 +61,10 @@ const users: SeedUser[] = [
     username: 'alice',
     profile: {
       bio: 'Home cook exploring quick vegetarian meals.',
+      country: 'United States',
+      state_province: 'California',
+      city: 'San Francisco',
+      region: 'San Francisco, California, United States', // Legacy field
     },
     safety: {
       allergies: ['peanuts'],
@@ -76,6 +84,10 @@ const users: SeedUser[] = [
     username: 'bob',
     profile: {
       bio: 'Grill enthusiast and weekend meal-prepper.',
+      country: 'United States',
+      state_province: 'Texas',
+      city: 'Houston',
+      region: 'Houston, Texas, United States', // Legacy field
     },
     safety: {
       allergies: [],
@@ -95,6 +107,10 @@ const users: SeedUser[] = [
     username: 'cora',
     profile: {
       bio: 'Loves bold flavors and one-pot recipes.',
+      country: 'Canada',
+      state_province: 'Ontario',
+      city: 'Toronto',
+      region: 'Toronto, Ontario, Canada', // Legacy field
     },
     safety: {
       allergies: ['shellfish'],
@@ -114,6 +130,10 @@ const users: SeedUser[] = [
     username: 'david',
     profile: {
       bio: 'Baker and pastry enthusiast.',
+      country: 'Canada',
+      state_province: 'Quebec',
+      city: 'Montreal',
+      region: 'Montreal, Quebec, Canada', // Legacy field
     },
     safety: {
       allergies: ['gluten'],
@@ -133,6 +153,10 @@ const users: SeedUser[] = [
     username: 'emma',
     profile: {
       bio: 'Health-conscious meal planner and fitness enthusiast.',
+      country: 'United States',
+      state_province: 'New York',
+      city: 'New York City',
+      region: 'New York City, New York, United States', // Legacy field
     },
     safety: {
       allergies: ['dairy'],
@@ -152,6 +176,10 @@ const users: SeedUser[] = [
     username: 'frank',
     profile: {
       bio: 'Spice lover and international cuisine explorer.',
+      country: 'Mexico',
+      state_province: 'Jalisco',
+      city: 'Guadalajara',
+      region: 'Guadalajara, Jalisco, Mexico', // Legacy field
     },
     safety: {
       allergies: [],
@@ -210,7 +238,11 @@ async function createProfile(
     {
       id: userId,
       full_name: fullName,
-      ...profile,
+      country: profile?.country || null,
+      state_province: profile?.state_province || null,
+      city: profile?.city || null,
+      region: profile?.region || null, // Legacy field
+      bio: profile?.bio || null,
     },
     { onConflict: 'id' }
   );

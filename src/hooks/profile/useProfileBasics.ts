@@ -9,10 +9,34 @@ import {
   type SkillLevelDB,
 } from '@/lib/profile-constants';
 
+// Reusable validation function for geographic field names
+const validateGeographicName = (
+  value: string,
+  fieldName: string,
+  minLength: number = 2,
+  maxLength: number = 50
+): string | null => {
+  const trimmedValue = value.trim();
+  if (trimmedValue.length === 0) return null;
+
+  if (trimmedValue.length < minLength || trimmedValue.length > maxLength) {
+    return `${fieldName} must be between ${minLength} and ${maxLength} characters`;
+  }
+
+  if (!/^[a-zA-Z\s\-,.()]+$/.test(trimmedValue)) {
+    return `${fieldName} contains invalid characters. Use only letters, spaces, hyphens, commas, periods, and parentheses`;
+  }
+
+  return null;
+};
+
 // Data interface for profile basics updates
 export interface ProfileBasicsData {
   full_name: string | null;
   region: string | null;
+  country: string | null;
+  state_province: string | null;
+  city: string | null;
   language: string;
   units: string;
   time_per_meal: number;
@@ -23,6 +47,9 @@ export interface UseProfileBasicsReturn {
   // State
   fullName: string;
   region: string;
+  country: string;
+  stateProvince: string;
+  city: string;
   language: string;
   units: string;
   timePerMeal: number;
@@ -34,6 +61,9 @@ export interface UseProfileBasicsReturn {
   updateProfileBasics: (data: ProfileBasicsData) => Promise<boolean>;
   setFullName: (value: string) => void;
   setRegion: (value: string) => void;
+  setCountry: (value: string) => void;
+  setStateProvince: (value: string) => void;
+  setCity: (value: string) => void;
   setLanguage: (value: string) => void;
   setUnits: (value: string) => void;
   setTimePerMeal: (value: number) => void;
@@ -54,6 +84,11 @@ export function useProfileBasics(): UseProfileBasicsReturn {
   // State - Initialize from profile or defaults
   const [fullName, setFullName] = useState(profile?.full_name || '');
   const [region, setRegion] = useState(profile?.region || '');
+  const [country, setCountry] = useState(profile?.country || '');
+  const [stateProvince, setStateProvince] = useState(
+    profile?.state_province || ''
+  );
+  const [city, setCity] = useState(profile?.city || '');
   const [language, setLanguage] = useState(profile?.language || 'en');
   const [units, setUnits] = useState(profile?.units || 'metric');
   // Convert database time_per_meal (minutes) to UI index (1-5)
@@ -119,6 +154,9 @@ export function useProfileBasics(): UseProfileBasicsReturn {
     if (profile) {
       setFullName(profile.full_name || '');
       setRegion(profile.region || '');
+      setCountry(profile.country || '');
+      setStateProvince(profile.state_province || '');
+      setCity(profile.city || '');
       setLanguage(profile.language || 'en');
       setUnits(profile.units || 'metric');
       setTimePerMeal(getTimePerMealForUI(profile.time_per_meal || null));
@@ -137,23 +175,96 @@ export function useProfileBasics(): UseProfileBasicsReturn {
           return false;
         }
 
+        // Validate full_name (matches database constraint: length(trim(full_name)) BETWEEN 1 AND 80)
+        if (data.full_name !== null && data.full_name !== undefined) {
+          const trimmedName = data.full_name.trim();
+          if (trimmedName.length < 1 || trimmedName.length > 80) {
+            setError('Full name must be between 1 and 80 characters');
+            return false;
+          }
+        }
+
+        // Validate region (optional field, but if provided should be reasonable length)
+        if (
+          data.region !== null &&
+          data.region !== undefined &&
+          data.region.trim().length > 0
+        ) {
+          const regionError = validateGeographicName(
+            data.region,
+            'Region',
+            1,
+            100
+          );
+          if (regionError) {
+            setError(regionError);
+            return false;
+          }
+        }
+
+        // Validate country (optional field, but if provided should be reasonable length)
+        if (
+          data.country !== null &&
+          data.country !== undefined &&
+          data.country.trim().length > 0
+        ) {
+          const countryError = validateGeographicName(data.country, 'Country');
+          if (countryError) {
+            setError(countryError);
+            return false;
+          }
+        }
+
+        // Validate state/province (optional field, but if provided should be reasonable length)
+        if (
+          data.state_province !== null &&
+          data.state_province !== undefined &&
+          data.state_province.trim().length > 0
+        ) {
+          const stateProvinceError = validateGeographicName(
+            data.state_province,
+            'State/Province'
+          );
+          if (stateProvinceError) {
+            setError(stateProvinceError);
+            return false;
+          }
+        }
+
+        // Validate city (optional field, but if provided should be reasonable length)
+        if (
+          data.city !== null &&
+          data.city !== undefined &&
+          data.city.trim().length > 0
+        ) {
+          const cityError = validateGeographicName(data.city, 'City');
+          if (cityError) {
+            setError(cityError);
+            return false;
+          }
+        }
+
         // Validate language (should be a valid language code)
         if (!data.language || data.language.trim().length === 0) {
+          setError('Language is required');
           return false;
         }
 
         // Validate units (should be 'metric' or 'imperial')
         if (!['metric', 'imperial'].includes(data.units)) {
+          setError('Units must be either metric or imperial');
           return false;
         }
 
         // Validate time per meal (should be UI index 1-5)
         if (data.time_per_meal < 1 || data.time_per_meal > 5) {
+          setError('Time per meal must be between 1 and 5');
           return false;
         }
 
         // Validate skill level (should be 1-5 for UI)
         if (!/^[1-5]$/.test(data.skill_level)) {
+          setError('Skill level must be between 1 and 5');
           return false;
         }
 
@@ -173,7 +284,6 @@ export function useProfileBasics(): UseProfileBasicsReturn {
     async (data: ProfileBasicsData): Promise<boolean> => {
       // Validate data before updating
       if (!validateProfileData(data)) {
-        setError('Invalid profile data provided');
         toast({
           title: 'Error',
           description: 'Please ensure all profile fields are valid.',
@@ -183,7 +293,7 @@ export function useProfileBasics(): UseProfileBasicsReturn {
       }
 
       setLoading(true);
-      setError(null);
+      setError(null); // Clear any previous errors only if validation passes
 
       try {
         // Convert numeric skill level to database string value
@@ -193,8 +303,13 @@ export function useProfileBasics(): UseProfileBasicsReturn {
         const dbTimePerMeal = getTimePerMealForDB(data.time_per_meal);
 
         const { success, error: updateError } = await updateProfile({
-          full_name: data.full_name,
-          region: data.region,
+          full_name: data.full_name ? data.full_name.trim() : null,
+          region: data.region ? data.region.trim() : null,
+          country: data.country ? data.country.trim() : null,
+          state_province: data.state_province
+            ? data.state_province.trim()
+            : null,
+          city: data.city ? data.city.trim() : null,
           language: data.language,
           units: data.units,
           time_per_meal: dbTimePerMeal,
@@ -205,6 +320,9 @@ export function useProfileBasics(): UseProfileBasicsReturn {
           // Update local state to match saved data
           setFullName(data.full_name || '');
           setRegion(data.region || '');
+          setCountry(data.country || '');
+          setStateProvince(data.state_province || '');
+          setCity(data.city || '');
           setLanguage(data.language);
           setUnits(data.units);
           setTimePerMeal(data.time_per_meal);
@@ -233,7 +351,6 @@ export function useProfileBasics(): UseProfileBasicsReturn {
           variant: 'destructive',
         });
 
-        setError('Failed to update profile basics');
         return false;
       } finally {
         setLoading(false);
@@ -246,6 +363,9 @@ export function useProfileBasics(): UseProfileBasicsReturn {
     // State
     fullName,
     region,
+    country,
+    stateProvince,
+    city,
     language,
     units,
     timePerMeal,
@@ -257,6 +377,9 @@ export function useProfileBasics(): UseProfileBasicsReturn {
     updateProfileBasics,
     setFullName,
     setRegion,
+    setCountry,
+    setStateProvince,
+    setCity,
     setLanguage,
     setUnits,
     setTimePerMeal,
