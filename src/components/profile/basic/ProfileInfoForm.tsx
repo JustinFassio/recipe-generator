@@ -112,10 +112,13 @@ export const ProfileInfoForm: React.FC<ProfileInfoFormProps> = ({
   );
 
   // Full Name validation helpers
-  const { isFullNameTooLong, isFullNameOnlySpaces } = useMemo(() => ({
-    isFullNameTooLong: fullName.length > 80,
-    isFullNameOnlySpaces: fullName.trim().length === 0 && fullName.length > 0,
-  }), [fullName]);
+  const { isFullNameTooLong, isFullNameOnlySpaces } = useMemo(
+    () => ({
+      isFullNameTooLong: fullName.length > 80,
+      isFullNameOnlySpaces: fullName.trim().length === 0 && fullName.length > 0,
+    }),
+    [fullName]
+  );
 
   // Get available states/provinces and cities based on selected country
   const availableStatesProvinces = getStatesProvincesByCountry(country);
