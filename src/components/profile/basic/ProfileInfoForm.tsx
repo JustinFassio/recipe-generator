@@ -340,18 +340,6 @@ export const ProfileInfoForm: React.FC<ProfileInfoFormProps> = ({
             </div>
           )}
 
-          {/* Legacy Region Field (Hidden but maintained for backward compatibility) */}
-          <div className="form-control" style={{ display: 'none' }}>
-            <label className="label">
-              <span className="label-text">Region (Legacy)</span>
-            </label>
-            <InlineIconInput
-              icon={MapPin}
-              value={region}
-              onChange={onRegionChange}
-              placeholder="Legacy region field"
-            />
-          </div>
         </div>
 
         {/* Language */}
