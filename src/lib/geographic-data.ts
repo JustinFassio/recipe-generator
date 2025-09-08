@@ -390,8 +390,107 @@ export const getStateProvinceByValue = (
   return statesProvinces.find((sp) => sp.value === value);
 };
 
+// Type-safe state/province names for MAJOR_CITIES
+export type StateProvinceName =
+  | 'Alabama'
+  | 'Alaska'
+  | 'Arizona'
+  | 'Arkansas'
+  | 'California'
+  | 'Colorado'
+  | 'Connecticut'
+  | 'Delaware'
+  | 'Florida'
+  | 'Georgia'
+  | 'Hawaii'
+  | 'Idaho'
+  | 'Illinois'
+  | 'Indiana'
+  | 'Iowa'
+  | 'Kansas'
+  | 'Kentucky'
+  | 'Louisiana'
+  | 'Maine'
+  | 'Maryland'
+  | 'Massachusetts'
+  | 'Michigan'
+  | 'Minnesota'
+  | 'Mississippi'
+  | 'Missouri'
+  | 'Montana'
+  | 'Nebraska'
+  | 'Nevada'
+  | 'New Hampshire'
+  | 'New Jersey'
+  | 'New Mexico'
+  | 'New York'
+  | 'North Carolina'
+  | 'North Dakota'
+  | 'Ohio'
+  | 'Oklahoma'
+  | 'Oregon'
+  | 'Pennsylvania'
+  | 'Rhode Island'
+  | 'South Carolina'
+  | 'South Dakota'
+  | 'Tennessee'
+  | 'Texas'
+  | 'Utah'
+  | 'Vermont'
+  | 'Virginia'
+  | 'Washington'
+  | 'West Virginia'
+  | 'Wisconsin'
+  | 'Wyoming'
+  | 'Alberta'
+  | 'British Columbia'
+  | 'Manitoba'
+  | 'New Brunswick'
+  | 'Newfoundland and Labrador'
+  | 'Nova Scotia'
+  | 'Ontario'
+  | 'Prince Edward Island'
+  | 'Quebec'
+  | 'Saskatchewan'
+  | 'Northwest Territories'
+  | 'Nunavut'
+  | 'Yukon'
+  | 'Aguascalientes'
+  | 'Baja California'
+  | 'Baja California Sur'
+  | 'Campeche'
+  | 'Chiapas'
+  | 'Chihuahua'
+  | 'Coahuila'
+  | 'Colima'
+  | 'Durango'
+  | 'Guanajuato'
+  | 'Guerrero'
+  | 'Hidalgo'
+  | 'Jalisco'
+  | 'Mexico City'
+  | 'Mexico State'
+  | 'Michoacán'
+  | 'Morelos'
+  | 'Nayarit'
+  | 'Nuevo Leon'
+  | 'Oaxaca'
+  | 'Puebla'
+  | 'Querétaro'
+  | 'Quintana Roo'
+  | 'San Luis Potosí'
+  | 'Sinaloa'
+  | 'Sonora'
+  | 'Tabasco'
+  | 'Tamaulipas'
+  | 'Tlaxcala'
+  | 'Veracruz'
+  | 'Yucatán'
+  | 'Zacatecas'
+  | 'Mexico';
+
 // Major cities for each state/province (sample data - can be expanded)
-export const MAJOR_CITIES: { [key: string]: string[] } = {
+export const MAJOR_CITIES: { [key in StateProvinceName]?: string[] } = {
   // US States
   California: [
     'Los Angeles',
@@ -544,7 +643,7 @@ export const MAJOR_CITIES: { [key: string]: string[] } = {
 };
 
 export const getCitiesByStateProvince = (stateProvince: string): string[] => {
-  return MAJOR_CITIES[stateProvince] || [];
+  return MAJOR_CITIES[stateProvince as StateProvinceName] || [];
 };
 
 export const getCitiesByCountry = (country: string): string[] => {
