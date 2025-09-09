@@ -7,8 +7,11 @@ import { Button } from '@/components/ui/button';
 import { Search, Plus, Check, RefreshCw, Trash2, Shield } from 'lucide-react';
 import { GROCERY_CATEGORIES } from '@/lib/groceries/categories';
 import type { GlobalIngredient } from '@/lib/groceries/enhanced-ingredient-matcher';
+import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/contexts/AuthProvider';
 
 export default function GlobalIngredientsPage() {
+  const { user } = useAuth();
   const {
     globalIngredients,
     hiddenNormalizedNames,
@@ -64,10 +67,43 @@ export default function GlobalIngredientsPage() {
   }, [groceries.groceries]);
 
   const handleAddToGroceries = async (category: string, name: string) => {
-    // Add exactly what the user clicked (alias allowed), do not canonicalize
-    // Use addIngredients to add as unselected staple (not active)
-    groceries.addIngredients(category, [name]);
-    await groceries.saveGroceries();
+    try {
+      // Direct database operation - no complex state management
+      const { data: currentData, error: fetchError } = await supabase
+        .from('user_groceries')
+        .select('groceries')
+        .eq('user_id', user?.id)
+        .single();
+
+      if (fetchError) {
+        console.error('Error fetching groceries:', fetchError);
+        return;
+      }
+
+      // Add ingredient directly to the database
+      const updatedGroceries = {
+        ...currentData.groceries,
+        [category]: [...(currentData.groceries[category] || []), name],
+      };
+
+      const { error: saveError } = await supabase
+        .from('user_groceries')
+        .upsert({
+          user_id: user?.id,
+          groceries: updatedGroceries,
+          updated_at: new Date().toISOString(),
+        });
+
+      if (saveError) {
+        console.error('Error saving groceries:', saveError);
+        return;
+      }
+
+      // Force reload the groceries hook to update UI
+      await groceries.loadGroceries();
+    } catch (error) {
+      console.error('Error in handleAddToGroceries:', error);
+    }
   };
 
   const handleRemoveFromGroceries = async (name: string) => {
