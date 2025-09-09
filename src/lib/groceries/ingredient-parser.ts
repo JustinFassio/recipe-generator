@@ -1,4 +1,3 @@
-/* eslint-disable no-useless-escape */
 // Lightweight ingredient text parser used before saving to Global Ingredients.
 // Goal: strip quantity/units/size adjectives and return the clean ingredient name,
 // while also returning structured pieces if the caller wants them.
@@ -26,7 +25,7 @@ export function parseIngredientText(rawInput: string): ParsedIngredient {
   // Capture an optional leading quantity (numbers, decimals, mixed numbers, ranges, fractions)
   // followed by an optional unit and optional size descriptor.
   const qtyUnit = new RegExp(
-    `^\s*(?<qty>(?:\d+(?:[./]\d+)?|\d*\s*\d/\d|\d+\.\d+|\d+\s*-\s*\d+)?)\s*(?<unit>${UNIT_PATTERN.source})?\s*(?<size>${SIZE_PATTERN.source})?\s*`,
+    `^\\s*(?<qty>(?:\\d+(?:[./]\\d+)?|\\d*\\s*\\d/\\d|\\d+\\.\\d+|\\d+\\s*-\\s*\\d+)?)\\s*(?<unit>${UNIT_PATTERN.source})?\\s*(?<size>${SIZE_PATTERN.source})?\\s*`,
     'i'
   );
 
