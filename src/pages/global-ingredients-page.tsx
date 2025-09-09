@@ -6,6 +6,7 @@ import { createDaisyUICardClasses } from '@/lib/card-migration';
 import { Button } from '@/components/ui/button';
 import { Search, Plus, Check, RefreshCw, Trash2, Shield } from 'lucide-react';
 import { GROCERY_CATEGORIES } from '@/lib/groceries/categories';
+import type { GlobalIngredient } from '@/lib/groceries/enhanced-ingredient-matcher';
 
 export default function GlobalIngredientsPage() {
   const {
@@ -31,13 +32,10 @@ export default function GlobalIngredientsPage() {
         activeCategory === 'all' ? true : g.category === activeCategory
       );
 
-    const map: Record<string, typeof items> = {} as Record<
-      string,
-      typeof items
-    >;
+    const map: Record<string, GlobalIngredient[]> = {};
     items.forEach((g) => {
-      if (!map[g.category]) map[g.category] = [] as typeof items;
-      (map[g.category] as typeof items).push(g);
+      if (!map[g.category]) map[g.category] = [];
+      map[g.category].push(g);
     });
     return map;
   }, [globalIngredients, query, activeCategory]);
