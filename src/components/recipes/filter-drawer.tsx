@@ -93,24 +93,21 @@ export function FilterDrawer({
         </div>
 
         {/* Filter Sections */}
-        <div className="space-y-4">
+        <div className="space-y-3">
           {/* Categories */}
           <div>
-            <label className="label">
-              <span className="label-text font-medium">Categories</span>
-              <span className="label-text-alt text-gray-500">
-                {state.selectedCategories.length} selected
-              </span>
-            </label>
             <Button
               variant="outline"
               className="w-full justify-between"
               onClick={onOpenCategories}
             >
               <span>
-                {state.selectedCategories.length > 0
-                  ? `${state.selectedCategories.length} categories selected`
-                  : 'Select categories'}
+                Categories
+                {state.selectedCategories.length > 0 && (
+                  <span className="ml-2 text-xs text-gray-500">
+                    ({state.selectedCategories.length} selected)
+                  </span>
+                )}
               </span>
               <ChevronRight className="h-4 w-4" />
             </Button>
@@ -118,21 +115,18 @@ export function FilterDrawer({
 
           {/* Cuisines */}
           <div>
-            <label className="label">
-              <span className="label-text font-medium">Cuisines</span>
-              <span className="label-text-alt text-gray-500">
-                {state.selectedCuisines.length} selected
-              </span>
-            </label>
             <Button
               variant="outline"
               className="w-full justify-between"
               onClick={onOpenCuisines}
             >
               <span>
-                {state.selectedCuisines.length > 0
-                  ? `${state.selectedCuisines.length} cuisines selected`
-                  : 'Select cuisines'}
+                Cuisines
+                {state.selectedCuisines.length > 0 && (
+                  <span className="ml-2 text-xs text-gray-500">
+                    ({state.selectedCuisines.length} selected)
+                  </span>
+                )}
               </span>
               <ChevronRight className="h-4 w-4" />
             </Button>
@@ -140,21 +134,18 @@ export function FilterDrawer({
 
           {/* Moods */}
           <div>
-            <label className="label">
-              <span className="label-text font-medium">Moods</span>
-              <span className="label-text-alt text-gray-500">
-                {state.selectedMoods.length} selected
-              </span>
-            </label>
             <Button
               variant="outline"
               className="w-full justify-between"
               onClick={onOpenMoods}
             >
               <span>
-                {state.selectedMoods.length > 0
-                  ? `${state.selectedMoods.length} moods selected`
-                  : 'Select moods'}
+                Moods
+                {state.selectedMoods.length > 0 && (
+                  <span className="ml-2 text-xs text-gray-500">
+                    ({state.selectedMoods.length} selected)
+                  </span>
+                )}
               </span>
               <ChevronRight className="h-4 w-4" />
             </Button>
@@ -162,23 +153,18 @@ export function FilterDrawer({
 
           {/* Available Ingredients */}
           <div>
-            <label className="label">
-              <span className="label-text font-medium">
-                Available Ingredients
-              </span>
-              <span className="label-text-alt text-gray-500">
-                {state.selectedIngredients.length} selected
-              </span>
-            </label>
             <Button
               variant="outline"
               className="w-full justify-between"
               onClick={onOpenIngredients}
             >
               <span>
-                {state.selectedIngredients.length > 0
-                  ? `${state.selectedIngredients.length} ingredients selected`
-                  : 'Select available ingredients'}
+                Available Ingredients
+                {state.selectedIngredients.length > 0 && (
+                  <span className="ml-2 text-xs text-gray-500">
+                    ({state.selectedIngredients.length} selected)
+                  </span>
+                )}
               </span>
               <ChevronRight className="h-4 w-4" />
             </Button>

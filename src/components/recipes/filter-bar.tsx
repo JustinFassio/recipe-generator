@@ -71,9 +71,9 @@ export function FilterBar({
       </div>
 
       {/* Filter Controls */}
-      <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:space-y-0 sm:gap-4">
+      <div className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:space-y-0 sm:gap-3">
         {/* Left side - All filters grouped together */}
-        <div className="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:gap-4">
+        <div className="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:gap-3">
           {/* Categories Filter */}
           <CategoryFilter
             selectedCategories={filters.categories || []}
@@ -116,7 +116,7 @@ export function FilterBar({
         </div>
 
         {/* Right side - Sort options and clear filters */}
-        <div className="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:gap-3 sm:ml-auto">
+        <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:gap-2 sm:ml-auto">
           {/* Sort Options */}
           <Select
             value={filters.sortBy || 'date'}
