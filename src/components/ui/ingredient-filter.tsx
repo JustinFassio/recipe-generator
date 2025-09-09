@@ -58,7 +58,7 @@ export function IngredientFilter({
         <DropdownMenuTrigger asChild>
           <Button variant="outline" size="sm" className="justify-start">
             <Filter className="mr-2 h-4 w-4" />
-            Available Ingredients
+            Ingredients
             {selectedIngredients.length > 0 && (
               <span className="ml-1 badge badge-primary badge-xs">
                 {selectedIngredients.length}

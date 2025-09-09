@@ -159,7 +159,7 @@ export function FilterDrawer({
               onClick={onOpenIngredients}
             >
               <span>
-                Available Ingredients
+                Ingredients
                 {state.selectedIngredients.length > 0 && (
                   <span className="ml-2 text-xs text-gray-500">
                     ({state.selectedIngredients.length} selected)

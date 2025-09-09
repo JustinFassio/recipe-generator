@@ -110,7 +110,7 @@ export function FilterBar({
               updateFilters({ availableIngredients: ingredients })
             }
             availableIngredients={availableIngredients}
-            placeholder="Filter by available ingredients..."
+            placeholder="Filter by ingredients..."
             className="w-full sm:w-48"
           />
         </div>
