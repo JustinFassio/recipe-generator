@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus, Loader2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useGlobalIngredients } from '@/hooks/useGlobalIngredients';
@@ -27,10 +27,21 @@ export function SaveToGlobalButton({
   const groceries = useGroceries();
   const [selectedCategory, setSelectedCategory] = useState<string>('pantry');
   const [isOpen, setIsOpen] = useState(false);
+  const [editableIngredient, setEditableIngredient] =
+    useState<string>(ingredient);
+
+  // Reset editable ingredient when the prop changes
+  useEffect(() => {
+    setEditableIngredient(ingredient);
+  }, [ingredient]);
 
   const handleSave = async () => {
+    // Validate that ingredient name is not empty
+    if (!editableIngredient.trim()) {
+      return;
+    }
     const success = await saveIngredientToGlobal(
-      ingredient,
+      editableIngredient.trim(),
       selectedCategory,
       recipeContext
     );
@@ -38,10 +49,10 @@ export function SaveToGlobalButton({
       // Also add to user's groceries immediately so it appears in the category
       const alreadySelected = groceries.hasIngredient(
         selectedCategory,
-        ingredient
+        editableIngredient.trim()
       );
       if (!alreadySelected) {
-        groceries.toggleIngredient(selectedCategory, ingredient);
+        groceries.toggleIngredient(selectedCategory, editableIngredient.trim());
         await groceries.saveGroceries();
       }
       setIsOpen(false);
@@ -52,6 +63,12 @@ export function SaveToGlobalButton({
   const handleCancel = () => {
     setIsOpen(false);
     setSelectedCategory('pantry'); // Reset to default
+    setEditableIngredient(ingredient); // Reset to original parsed name
+  };
+
+  const handleOpen = () => {
+    setEditableIngredient(ingredient); // Initialize with parsed name
+    setIsOpen(true);
   };
 
   if (!isOpen) {
@@ -59,7 +76,7 @@ export function SaveToGlobalButton({
       <Button
         variant={variant}
         size={size}
-        onClick={() => setIsOpen(true)}
+        onClick={handleOpen}
         className="text-blue-600 border-blue-300 hover:bg-blue-50"
         disabled={loading}
       >
@@ -72,13 +89,18 @@ export function SaveToGlobalButton({
   return (
     <div className="flex items-center space-x-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
       <div className="flex-1">
-        <div className="flex items-center space-x-2 mb-2">
+        <div className="flex flex-col space-y-2 mb-2">
           <span className="text-sm font-medium text-blue-800">
             Save to Global Ingredients:
           </span>
-          <span className="text-sm text-blue-700 font-medium">
-            "{ingredient}"
-          </span>
+          <input
+            type="text"
+            value={editableIngredient}
+            onChange={(e) => setEditableIngredient(e.target.value)}
+            className="text-sm border border-blue-300 rounded px-2 py-1 bg-white text-blue-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="Enter ingredient name..."
+            disabled={loading}
+          />
         </div>
 
         <div className="flex items-center space-x-2">
@@ -103,8 +125,8 @@ export function SaveToGlobalButton({
         <Button
           size="sm"
           onClick={handleSave}
-          disabled={loading}
-          className="bg-blue-600 hover:bg-blue-700 text-white"
+          disabled={loading || !editableIngredient.trim()}
+          className="bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50"
         >
           {loading ? (
             <Loader2 className="h-3 w-3 animate-spin" />
