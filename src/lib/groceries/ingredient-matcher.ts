@@ -196,7 +196,6 @@ export class IngredientMatcher {
 
     for (const [groceryNormalized, { category }] of this
       .preprocessedGroceries) {
-
       // Check if recipe ingredient contains grocery ingredient
       if (normalized.includes(groceryNormalized)) {
         const confidence = Math.round(

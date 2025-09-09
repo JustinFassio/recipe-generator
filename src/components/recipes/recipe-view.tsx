@@ -305,7 +305,9 @@ export function RecipeView({ recipe, onEdit, onBack }: RecipeViewProps) {
                 className="mt-3 border-blue-300 text-blue-700 hover:bg-blue-100"
                 onClick={() => {
                   // Export shopping list as a text file
-                  const text = missingIngredients.map(match => match.recipeIngredient).join('\n');
+                  const text = missingIngredients
+                    .map((match) => match.recipeIngredient)
+                    .join('\n');
                   const blob = new Blob([text], { type: 'text/plain' });
                   const url = URL.createObjectURL(blob);
                   const a = document.createElement('a');
