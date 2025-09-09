@@ -83,6 +83,22 @@ export type CookingPreferences = {
   updated_at: string;
 };
 
+// Grocery types
+export type UserGroceries = {
+  user_id: string;
+  groceries: Record<string, string[]>;
+  created_at: string;
+  updated_at: string;
+};
+
+export type GroceryCategory = {
+  name: string;
+  icon: string;
+  items: string[];
+};
+
+export type GroceryCategories = Record<string, GroceryCategory>;
+
 // Audit trail
 export type AccountEvent = {
   id: string;

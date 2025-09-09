@@ -51,6 +51,7 @@ type SeedUser = {
     disliked_ingredients: string[];
     spice_tolerance: number;
   }>;
+  groceries?: Record<string, string[]>;
 };
 
 const users: SeedUser[] = [
@@ -76,6 +77,37 @@ const users: SeedUser[] = [
       disliked_ingredients: ['anchovies'],
       spice_tolerance: 2,
     },
+    groceries: {
+      proteins: [
+        'tofu',
+        'tempeh',
+        'eggs',
+        'lentils',
+        'chickpeas',
+        'quinoa',
+        'greek yogurt',
+      ],
+      vegetables: [
+        'onions',
+        'garlic',
+        'tomatoes',
+        'spinach',
+        'bell peppers',
+        'mushrooms',
+        'avocados',
+      ],
+      spices: ['salt', 'black pepper', 'basil', 'oregano', 'cumin', 'paprika'],
+      pantry: [
+        'olive oil',
+        'pasta',
+        'rice',
+        'canned tomatoes',
+        'vegetable stock',
+        'soy sauce',
+      ],
+      dairy: ['milk', 'mozzarella', 'parmesan', 'yogurt'],
+      fruits: ['lemons', 'limes', 'apples', 'berries'],
+    },
   },
   {
     email: 'bob@example.com',
@@ -98,6 +130,42 @@ const users: SeedUser[] = [
       available_equipment: ['grill', 'slow_cooker'],
       disliked_ingredients: [],
       spice_tolerance: 4,
+    },
+    groceries: {
+      proteins: [
+        'chicken breast',
+        'chicken thighs',
+        'ground beef',
+        'salmon',
+        'pork chops',
+        'turkey',
+      ],
+      vegetables: [
+        'onions',
+        'garlic',
+        'bell peppers',
+        'corn',
+        'potatoes',
+        'mushrooms',
+      ],
+      spices: [
+        'salt',
+        'black pepper',
+        'paprika',
+        'chili powder',
+        'cumin',
+        'garlic powder',
+      ],
+      pantry: [
+        'olive oil',
+        'vegetable oil',
+        'brown sugar',
+        'chicken stock',
+        'soy sauce',
+        'vinegar',
+      ],
+      dairy: ['butter', 'cheddar', 'milk'],
+      fruits: ['lemons', 'limes'],
     },
   },
   {
@@ -122,6 +190,38 @@ const users: SeedUser[] = [
       disliked_ingredients: [],
       spice_tolerance: 5,
     },
+    groceries: {
+      proteins: ['chicken thighs', 'ground beef', 'eggs', 'beans', 'lentils'],
+      vegetables: [
+        'onions',
+        'garlic',
+        'tomatoes',
+        'bell peppers',
+        'carrots',
+        'spinach',
+      ],
+      spices: [
+        'salt',
+        'black pepper',
+        'paprika',
+        'cumin',
+        'turmeric',
+        'chili powder',
+        'curry powder',
+        'ginger',
+      ],
+      pantry: [
+        'olive oil',
+        'rice',
+        'pasta',
+        'canned tomatoes',
+        'chicken stock',
+        'soy sauce',
+        'coconut milk',
+      ],
+      dairy: ['cheese', 'butter'],
+      fruits: ['lemons', 'limes', 'coconut'],
+    },
   },
   {
     email: 'david@example.com',
@@ -144,6 +244,22 @@ const users: SeedUser[] = [
       available_equipment: ['stand_mixer', 'food_processor', 'oven'],
       disliked_ingredients: ['artificial_sweeteners'],
       spice_tolerance: 1,
+    },
+    groceries: {
+      proteins: ['eggs', 'greek yogurt', 'nuts'],
+      vegetables: ['tomatoes', 'cucumbers', 'lettuce', 'avocados'],
+      spices: ['salt', 'black pepper', 'vanilla extract', 'cinnamon'],
+      pantry: [
+        'olive oil',
+        'gluten-free flour',
+        'sugar',
+        'brown sugar',
+        'honey',
+        'baking powder',
+        'baking soda',
+      ],
+      dairy: ['butter', 'cream cheese', 'heavy cream', 'milk', 'mozzarella'],
+      fruits: ['lemons', 'strawberries', 'apples', 'berries'],
     },
   },
   {
@@ -168,6 +284,35 @@ const users: SeedUser[] = [
       disliked_ingredients: ['processed_sugars'],
       spice_tolerance: 3,
     },
+    groceries: {
+      proteins: [
+        'salmon',
+        'tuna',
+        'eggs',
+        'tofu',
+        'quinoa',
+        'nuts',
+        'chickpeas',
+      ],
+      vegetables: [
+        'spinach',
+        'broccoli',
+        'cauliflower',
+        'zucchini',
+        'bell peppers',
+        'avocados',
+        'cucumbers',
+      ],
+      spices: ['salt', 'black pepper', 'ginger', 'turmeric', 'garlic powder'],
+      pantry: [
+        'olive oil',
+        'coconut oil',
+        'rice',
+        'chia seeds',
+        'almond flour',
+      ],
+      fruits: ['berries', 'apples', 'lemons', 'limes', 'bananas'],
+    },
   },
   {
     email: 'frank@example.com',
@@ -190,6 +335,40 @@ const users: SeedUser[] = [
       available_equipment: ['wok', 'cast_iron_pan', 'dutch_oven'],
       disliked_ingredients: [],
       spice_tolerance: 5,
+    },
+    groceries: {
+      proteins: ['chicken thighs', 'ground beef', 'shrimp', 'tofu', 'eggs'],
+      vegetables: [
+        'onions',
+        'garlic',
+        'ginger',
+        'bell peppers',
+        'tomatoes',
+        'carrots',
+        'spinach',
+      ],
+      spices: [
+        'salt',
+        'black pepper',
+        'chili powder',
+        'curry powder',
+        'cumin',
+        'turmeric',
+        'paprika',
+        'ginger',
+        'cinnamon',
+      ],
+      pantry: [
+        'olive oil',
+        'sesame oil',
+        'rice',
+        'noodles',
+        'soy sauce',
+        'fish sauce',
+        'coconut milk',
+      ],
+      dairy: ['cheese', 'yogurt'],
+      fruits: ['limes', 'lemons', 'coconut'],
     },
   },
 ];
@@ -262,6 +441,17 @@ async function upsertCooking(userId: string, cooking: SeedUser['cooking']) {
   const { error } = await admin
     .from('cooking_preferences')
     .upsert({ user_id: userId, ...cooking });
+  if (error) throw error;
+}
+
+async function upsertGroceries(
+  userId: string,
+  groceries: SeedUser['groceries']
+) {
+  if (!groceries) return;
+  const { error } = await admin
+    .from('user_groceries')
+    .upsert({ user_id: userId, groceries });
   if (error) throw error;
 }
 
@@ -2988,6 +3178,7 @@ async function main() {
     await createProfile(effectiveUserId, u.fullName, u.profile || {});
     await upsertSafety(effectiveUserId, u.safety);
     await upsertCooking(effectiveUserId, u.cooking);
+    await upsertGroceries(effectiveUserId, u.groceries);
   }
 
   // Seed recipes after all users are created

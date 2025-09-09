@@ -11,8 +11,11 @@ import {
   Check,
   Loader2,
   MoreHorizontal,
+  ShoppingCart,
 } from 'lucide-react';
 import CategoryChip from '@/components/ui/CategoryChip';
+import { Badge } from '@/components/ui/badge';
+import { useIngredientMatching } from '@/hooks/useIngredientMatching';
 import type { Recipe } from '@/lib/types';
 import { useDeleteRecipe } from '@/hooks/use-recipes';
 import { useState } from 'react';
@@ -54,12 +57,30 @@ export function RecipeCard({
   const [isPublic, setIsPublic] = useState(recipe.is_public);
   const deleteRecipe = useDeleteRecipe();
   const { user } = useAuth();
+  const ingredientMatching = useIngredientMatching();
+
+  // Calculate compatibility
+  const compatibility = ingredientMatching.calculateCompatibility(recipe);
+  const availabilityPercentage = compatibility.compatibilityScore;
+  const hasGroceries = ingredientMatching.groceriesCount > 0;
 
   // Only show share button if explicitly requested and user owns the recipe
   const canShare = showShareButton && user?.id === recipe.user_id;
 
   // Unique drawer ID for this recipe card
   const drawerId = `recipe-actions-${recipe.id}`;
+
+  const getCompatibilityColor = (score: number) => {
+    if (score >= 80) return 'text-green-600 bg-green-100 border-green-200';
+    if (score >= 60) return 'text-yellow-600 bg-yellow-100 border-yellow-200';
+    if (score >= 40) return 'text-orange-600 bg-orange-100 border-orange-200';
+    return 'text-red-600 bg-red-100 border-red-200';
+  };
+
+  const getCompatibilityIcon = (score: number) => {
+    if (score >= 70) return <Check className="h-3 w-3" />;
+    return <ShoppingCart className="h-3 w-3" />;
+  };
 
   const handleDelete = () => {
     deleteRecipe.mutate(recipe.id);
@@ -142,18 +163,58 @@ export function RecipeCard({
             <div className="card-body pb-3 pt-0">
               <div className="space-y-3">
                 <div className="flex items-center justify-between text-sm text-gray-500">
-                  <span
-                    className={createDaisyUIBadgeClasses(
-                      'secondary',
-                      'text-xs'
+                  <div className="flex items-center space-x-2">
+                    <span
+                      className={createDaisyUIBadgeClasses(
+                        'secondary',
+                        'text-xs'
+                      )}
+                    >
+                      {recipe.ingredients.length} ingredients
+                    </span>
+
+                    {/* Grocery Compatibility Badge */}
+                    {hasGroceries && ingredientMatching.isReady && (
+                      <Badge
+                        variant="outline"
+                        className={`text-xs border ${getCompatibilityColor(availabilityPercentage)}`}
+                      >
+                        <div className="flex items-center space-x-1">
+                          {getCompatibilityIcon(availabilityPercentage)}
+                          <span>{availabilityPercentage}% match</span>
+                        </div>
+                      </Badge>
                     )}
-                  >
-                    {recipe.ingredients.length} ingredients
-                  </span>
+                  </div>
+
                   <span className="text-xs">
                     {new Date(recipe.created_at).toLocaleDateString('en-US')}
                   </span>
                 </div>
+
+                {/* Available ingredients preview */}
+                {hasGroceries &&
+                  ingredientMatching.isReady &&
+                  compatibility.availableIngredients.length > 0 && (
+                    <div className="text-xs text-green-600">
+                      <div className="flex items-center space-x-1">
+                        <Check className="h-3 w-3" />
+                        <span>
+                          You have:{' '}
+                          {compatibility.availableIngredients
+                            .slice(0, 3)
+                            .map(
+                              (match) =>
+                                match.matchedGroceryIngredient ||
+                                match.recipeIngredient
+                            )
+                            .join(', ')}
+                          {compatibility.availableIngredients.length > 3 &&
+                            ` +${compatibility.availableIngredients.length - 3} more`}
+                        </span>
+                      </div>
+                    </div>
+                  )}
 
                 {recipe.categories && recipe.categories.length > 0 && (
                   <div className="flex flex-wrap gap-1">
@@ -199,6 +260,32 @@ export function RecipeCard({
                 Recipe Actions
               </h3>
               <p className="text-sm text-gray-600">{recipe.title}</p>
+
+              {/* Compatibility Info in Drawer */}
+              {hasGroceries && ingredientMatching.isReady && (
+                <div
+                  className={`mt-3 p-3 rounded-lg border ${getCompatibilityColor(availabilityPercentage)}`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      {getCompatibilityIcon(availabilityPercentage)}
+                      <span className="font-medium">
+                        {availabilityPercentage}% ingredient match
+                      </span>
+                    </div>
+                  </div>
+                  <div className="text-xs mt-1 opacity-80">
+                    {compatibility.availableIngredients.length} of{' '}
+                    {compatibility.totalIngredients} ingredients available
+                  </div>
+                  {compatibility.missingIngredients.length > 0 && (
+                    <div className="text-xs mt-2 opacity-70">
+                      Missing: {compatibility.missingIngredients.length}{' '}
+                      ingredients
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             <ul className="space-y-2">

@@ -4,9 +4,20 @@ import {
 } from '@/lib/card-migration';
 import { createDaisyUIBadgeClasses } from '@/lib/badge-migration';
 import { createDaisyUISeparatorClasses } from '@/lib/separator-migration';
-import { ArrowLeft, Clock, Users, Edit, Calendar } from 'lucide-react';
+import {
+  ArrowLeft,
+  Clock,
+  Users,
+  Edit,
+  Calendar,
+  Check,
+  ShoppingCart,
+  AlertCircle,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import CategoryChip from '@/components/ui/CategoryChip';
+import { useIngredientMatching } from '@/hooks/useIngredientMatching';
 import type { Recipe } from '@/lib/types';
 
 interface RecipeViewProps {
@@ -16,6 +27,37 @@ interface RecipeViewProps {
 }
 
 export function RecipeView({ recipe, onEdit, onBack }: RecipeViewProps) {
+  const ingredientMatching = useIngredientMatching();
+
+  const compatibility = ingredientMatching.calculateCompatibility(recipe);
+  const availabilityPercentage = compatibility.compatibilityScore;
+  const missingIngredients = compatibility.missingIngredients;
+
+  const getIngredientStatusIcon = (match: { matchType: string }) => {
+    switch (match.matchType) {
+      case 'exact':
+        return <Check className="h-4 w-4 text-green-600" />;
+      case 'partial':
+      case 'fuzzy':
+        return <Check className="h-4 w-4 text-yellow-600" />;
+      default:
+        return <ShoppingCart className="h-4 w-4 text-gray-400" />;
+    }
+  };
+
+  const getIngredientBadge = (match: { matchType: string }) => {
+    if (match.matchType === 'none') return null;
+
+    const variant = match.matchType === 'exact' ? 'default' : 'secondary';
+    const text = match.matchType === 'exact' ? 'You have this' : 'Similar item';
+
+    return (
+      <Badge variant={variant} className="ml-2 text-xs">
+        {text}
+      </Badge>
+    );
+  };
+
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       {/* Header */}
@@ -96,44 +138,180 @@ export function RecipeView({ recipe, onEdit, onBack }: RecipeViewProps) {
         </div>
       </div>
 
+      {/* Grocery Compatibility Section */}
+      {ingredientMatching.isReady && ingredientMatching.groceriesCount > 0 && (
+        <div
+          className={createDaisyUICardClasses(
+            'bordered bg-gradient-to-r from-green-50 to-blue-50'
+          )}
+        >
+          <div className="card-body">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="card-title text-green-800">
+                <ShoppingCart className="h-5 w-5 mr-2" />
+                Grocery Compatibility
+              </h3>
+              <div className="text-right">
+                <div className="text-3xl font-bold text-green-600">
+                  {availabilityPercentage}%
+                </div>
+                <div className="text-sm text-green-700">
+                  {compatibility.availableIngredients.length} of{' '}
+                  {compatibility.totalIngredients} ingredients
+                </div>
+              </div>
+            </div>
+
+            {/* Compatibility Progress Bar */}
+            <div className="w-full bg-gray-200 rounded-full h-3 mb-4">
+              <div
+                className={`h-3 rounded-full transition-all duration-500 ${
+                  availabilityPercentage >= 80
+                    ? 'bg-green-500'
+                    : availabilityPercentage >= 60
+                      ? 'bg-yellow-500'
+                      : availabilityPercentage >= 40
+                        ? 'bg-orange-500'
+                        : 'bg-red-500'
+                }`}
+                style={{ width: `${availabilityPercentage}%` }}
+              />
+            </div>
+
+            {/* Compatibility Messages */}
+            {availabilityPercentage >= 80 && (
+              <div className="alert alert-success">
+                <Check className="h-4 w-4" />
+                <span>Excellent match! You have most ingredients needed.</span>
+              </div>
+            )}
+
+            {availabilityPercentage >= 50 && availabilityPercentage < 80 && (
+              <div className="alert alert-info">
+                <AlertCircle className="h-4 w-4" />
+                <span>
+                  Good match! You have many of the ingredients needed.
+                </span>
+              </div>
+            )}
+
+            {availabilityPercentage < 50 && (
+              <div className="alert alert-warning">
+                <AlertCircle className="h-4 w-4" />
+                <span>
+                  You'll need to shop for several ingredients for this recipe.
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Ingredients */}
       <div className={createDaisyUICardClasses('bordered')}>
         <div className="card-body">
-          <h3
-            className={`${createDaisyUICardTitleClasses()} text-xl font-semibold`}
-          >
+          <h3 className="card-title text-xl font-semibold mb-4">
             Ingredients
+            {ingredientMatching.isReady && (
+              <span className="text-sm font-normal text-gray-600">
+                ({compatibility.availableIngredients.length} available)
+              </span>
+            )}
           </h3>
+
           <div className="space-y-3">
-            {recipe.ingredients.map((ingredient, index) => (
-              <div key={index} className="flex items-start">
-                {ingredient.startsWith('---') && ingredient.endsWith('---') ? (
-                  // Category header
-                  <div className="w-full">
-                    <div
-                      className={createDaisyUISeparatorClasses(
-                        'horizontal',
-                        'mb-2'
-                      )}
-                    />
-                    <h4 className="mb-2 text-lg font-semibold text-gray-800">
-                      {ingredient.replace(/^---\s*/, '').replace(/\s*---$/, '')}
-                    </h4>
-                  </div>
-                ) : (
-                  // Regular ingredient
-                  <>
-                    <div className="mt-0.5 mr-3 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-orange-100">
-                      <div className="h-2 w-2 rounded-full bg-orange-500"></div>
+            {recipe.ingredients.map((ingredient, index) => {
+              const match = ingredientMatching.matchIngredient(ingredient);
+              const isAvailable =
+                match.matchType !== 'none' && match.confidence >= 50;
+
+              return (
+                <div key={index} className="flex items-start">
+                  {ingredient.startsWith('---') &&
+                  ingredient.endsWith('---') ? (
+                    // Category header (existing code)
+                    <div className="w-full">
+                      <div
+                        className={createDaisyUISeparatorClasses(
+                          'horizontal',
+                          'mb-2'
+                        )}
+                      />
+                      <h4 className="mb-2 text-lg font-semibold text-gray-800">
+                        {ingredient
+                          .replace(/^---\s*/, '')
+                          .replace(/\s*---$/, '')}
+                      </h4>
                     </div>
-                    <p className="leading-relaxed text-gray-700">
-                      {ingredient}
-                    </p>
-                  </>
-                )}
-              </div>
-            ))}
+                  ) : (
+                    // Enhanced ingredient with availability indicator
+                    <div className="flex items-center w-full">
+                      <div className="mt-0.5 mr-3 flex h-6 w-6 flex-shrink-0 items-center justify-center">
+                        {ingredientMatching.isReady ? (
+                          getIngredientStatusIcon(match)
+                        ) : (
+                          <div className="h-2 w-2 rounded-full bg-orange-500"></div>
+                        )}
+                      </div>
+                      <div className="flex-1 flex items-center justify-between">
+                        <p
+                          className={`leading-relaxed ${
+                            isAvailable
+                              ? 'text-gray-900 font-medium'
+                              : 'text-gray-700'
+                          }`}
+                        >
+                          {ingredient}
+                        </p>
+                        {ingredientMatching.isReady && (
+                          <div className="flex items-center">
+                            {getIngredientBadge(match)}
+                            {match.matchedGroceryIngredient && (
+                              <span className="text-xs text-gray-500 ml-2">
+                                (matches: {match.matchedGroceryIngredient})
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
+
+          {/* Shopping List for Missing Ingredients */}
+          {missingIngredients.length > 0 && (
+            <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <h4 className="font-medium text-blue-800 mb-3 flex items-center">
+                <ShoppingCart className="h-4 w-4 mr-2" />
+                Shopping List ({missingIngredients.length} items)
+              </h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {missingIngredients.map((match, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center text-sm text-blue-700"
+                  >
+                    <div className="w-2 h-2 bg-blue-400 rounded-full mr-2" />
+                    {match.recipeIngredient}
+                  </div>
+                ))}
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="mt-3 border-blue-300 text-blue-700 hover:bg-blue-100"
+                onClick={() => {
+                  // Future: Export shopping list functionality
+                  console.log('Export shopping list:', missingIngredients);
+                }}
+              >
+                Export Shopping List
+              </Button>
+            </div>
+          )}
         </div>
       </div>
 

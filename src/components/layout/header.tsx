@@ -47,7 +47,7 @@ export function Header() {
               onClick={() => navigate('/recipes')}
               className={
                 location.pathname === '/recipes'
-                  ? 'bg-success text-success-content hover:bg-success/80'
+                  ? 'bg-info text-info-content hover:bg-info/80'
                   : ''
               }
             >
@@ -58,6 +58,17 @@ export function Header() {
               onClick={() => navigate('/explore')}
             >
               Explore
+            </Button>
+            <Button
+              variant={location.pathname === '/groceries' ? 'default' : 'ghost'}
+              onClick={() => navigate('/groceries')}
+              className={
+                location.pathname === '/groceries'
+                  ? 'bg-success text-success-content hover:bg-success/80'
+                  : ''
+              }
+            >
+              My Groceries
             </Button>
             <Button
               variant={

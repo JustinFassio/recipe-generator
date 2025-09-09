@@ -6,6 +6,7 @@ import type {
   Username,
   UserSafety,
   CookingPreferences,
+  UserGroceries,
   AccountEvent,
 } from './types';
 
@@ -59,5 +60,6 @@ export type {
   Username,
   UserSafety,
   CookingPreferences,
+  UserGroceries,
   AccountEvent,
 };
