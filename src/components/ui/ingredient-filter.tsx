@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { Filter, X, ChevronDown } from 'lucide-react';
 import { Button } from './button';
 import { CategoryChip } from './category-chip';
@@ -7,6 +7,7 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from './dropdown-menu';
+import { GROCERY_CATEGORIES } from '@/lib/groceries/categories';
 
 export interface IngredientFilterProps {
   selectedIngredients: string[];
@@ -35,10 +36,43 @@ export function IngredientFilter({
     }
   }, [isOpen]);
 
-  // Filter ingredients based on search term
-  const filteredIngredients = availableIngredients.filter((ingredient) =>
-    ingredient.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Group ingredients by category and filter based on search term
+  const groupedIngredients = useMemo(() => {
+    const groups: Record<string, string[]> = {};
+
+    availableIngredients.forEach((ingredient) => {
+      // Skip if doesn't match search term
+      if (
+        searchTerm &&
+        !ingredient.toLowerCase().includes(searchTerm.toLowerCase())
+      ) {
+        return;
+      }
+
+      // Find which category this ingredient belongs to
+      let foundCategory = 'other';
+      for (const [categoryKey, categoryData] of Object.entries(
+        GROCERY_CATEGORIES
+      )) {
+        if (categoryData.items.includes(ingredient)) {
+          foundCategory = categoryKey;
+          break;
+        }
+      }
+
+      if (!groups[foundCategory]) {
+        groups[foundCategory] = [];
+      }
+      groups[foundCategory].push(ingredient);
+    });
+
+    // Sort ingredients within each category
+    Object.keys(groups).forEach((category) => {
+      groups[category].sort((a, b) => a.localeCompare(b));
+    });
+
+    return groups;
+  }, [availableIngredients, searchTerm]);
 
   const toggleIngredient = (ingredient: string) => {
     if (selectedIngredients.includes(ingredient)) {
@@ -110,39 +144,56 @@ export function IngredientFilter({
               </div>
             )}
 
-            {/* Available ingredients */}
+            {/* Available ingredients grouped by category */}
             <div className="space-y-3 max-h-60 overflow-y-auto">
-              <div className="space-y-2">
-                <h4 className="text-xs font-semibold text-base-content opacity-70 uppercase tracking-wide">
-                  Available Ingredients
-                </h4>
-                <div className="flex flex-wrap gap-1">
-                  {filteredIngredients.map((ingredient, index) => (
-                    <CategoryChip
-                      key={`ingredient-${ingredient}-${index}`}
-                      category={ingredient}
-                      variant={
-                        selectedIngredients.includes(ingredient)
-                          ? 'selected'
-                          : 'clickable'
-                      }
-                      size="sm"
-                      onClick={() => toggleIngredient(ingredient)}
-                    />
-                  ))}
-                </div>
-              </div>
-            </div>
+              {Object.keys(groupedIngredients).length > 0 ? (
+                Object.entries(groupedIngredients).map(
+                  ([categoryKey, ingredients]) => {
+                    const categoryData =
+                      GROCERY_CATEGORIES[
+                        categoryKey as keyof typeof GROCERY_CATEGORIES
+                      ];
+                    const categoryName = categoryData?.name || categoryKey;
+                    const categoryIcon = categoryData?.icon || '📦';
 
-            {filteredIngredients.length === 0 && (
-              <div className="text-center py-4">
-                <p className="text-sm text-base-content opacity-50">
-                  {availableIngredients.length === 0
-                    ? 'No ingredients available. Add ingredients to your grocery list first.'
-                    : 'No ingredients found matching your search.'}
-                </p>
-              </div>
-            )}
+                    return (
+                      <div key={categoryKey} className="space-y-2">
+                        <h4 className="text-xs font-semibold text-base-content opacity-70 uppercase tracking-wide flex items-center gap-1">
+                          <span>{categoryIcon}</span>
+                          <span>{categoryName}</span>
+                          <span className="text-xs opacity-50">
+                            ({ingredients.length})
+                          </span>
+                        </h4>
+                        <div className="flex flex-wrap gap-1">
+                          {ingredients.map((ingredient, index) => (
+                            <CategoryChip
+                              key={`${categoryKey}-${ingredient}-${index}`}
+                              category={ingredient}
+                              variant={
+                                selectedIngredients.includes(ingredient)
+                                  ? 'selected'
+                                  : 'clickable'
+                              }
+                              size="sm"
+                              onClick={() => toggleIngredient(ingredient)}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  }
+                )
+              ) : (
+                <div className="text-center py-4">
+                  <p className="text-sm text-base-content opacity-50">
+                    {availableIngredients.length === 0
+                      ? 'No ingredients available'
+                      : 'No ingredients found matching your search'}
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         </DropdownMenuContent>
       </DropdownMenu>

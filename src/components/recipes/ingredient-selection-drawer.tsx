@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { NestedDrawer } from '@/components/ui/nested-drawer';
 import { useGroceries } from '@/hooks/useGroceries';
+import { GROCERY_CATEGORIES } from '@/lib/groceries/categories';
 
 interface IngredientSelectionDrawerProps {
   isOpen: boolean;
@@ -31,13 +32,42 @@ export function IngredientSelectionDrawer({
     return Object.values(groceries.groceries).flat();
   }, [groceries.groceries]);
 
-  // Filter ingredients based on search term
-  const filteredIngredients = useMemo(() => {
-    if (!searchTerm) return availableIngredients;
+  // Group ingredients by category and filter based on search term
+  const groupedIngredients = useMemo(() => {
+    const groups: Record<string, string[]> = {};
 
-    return availableIngredients.filter((ingredient) =>
-      ingredient.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    availableIngredients.forEach((ingredient) => {
+      // Skip if doesn't match search term
+      if (
+        searchTerm &&
+        !ingredient.toLowerCase().includes(searchTerm.toLowerCase())
+      ) {
+        return;
+      }
+
+      // Find which category this ingredient belongs to
+      let foundCategory = 'other';
+      for (const [categoryKey, categoryData] of Object.entries(
+        GROCERY_CATEGORIES
+      )) {
+        if (categoryData.items.includes(ingredient)) {
+          foundCategory = categoryKey;
+          break;
+        }
+      }
+
+      if (!groups[foundCategory]) {
+        groups[foundCategory] = [];
+      }
+      groups[foundCategory].push(ingredient);
+    });
+
+    // Sort ingredients within each category
+    Object.keys(groups).forEach((category) => {
+      groups[category].sort((a, b) => a.localeCompare(b));
+    });
+
+    return groups;
   }, [availableIngredients, searchTerm]);
 
   const toggleIngredient = (ingredient: string) => {
@@ -104,9 +134,9 @@ export function IngredientSelectionDrawer({
           </div>
         </div>
 
-        {/* Ingredients List */}
-        <div className="space-y-2 max-h-96 overflow-y-auto">
-          {filteredIngredients.length === 0 ? (
+        {/* Ingredients List Grouped by Category */}
+        <div className="space-y-4 max-h-96 overflow-y-auto">
+          {Object.keys(groupedIngredients).length === 0 ? (
             <div className="text-center py-8">
               <p className="text-gray-500">
                 {availableIngredients.length === 0
@@ -115,23 +145,50 @@ export function IngredientSelectionDrawer({
               </p>
             </div>
           ) : (
-            filteredIngredients.map((ingredient) => {
-              const isSelected = selectedIngredients.includes(ingredient);
-              return (
-                <button
-                  key={ingredient}
-                  onClick={() => toggleIngredient(ingredient)}
-                  className={`w-full flex items-center justify-between p-3 rounded-lg border transition-colors ${
-                    isSelected
-                      ? 'bg-primary text-primary-content border-primary'
-                      : 'bg-base-100 hover:bg-base-200 border-base-300'
-                  }`}
-                >
-                  <span className="text-left font-medium">{ingredient}</span>
-                  {isSelected && <Check className="h-4 w-4" />}
-                </button>
-              );
-            })
+            Object.entries(groupedIngredients).map(
+              ([categoryKey, ingredients]) => {
+                const categoryData =
+                  GROCERY_CATEGORIES[
+                    categoryKey as keyof typeof GROCERY_CATEGORIES
+                  ];
+                const categoryName = categoryData?.name || categoryKey;
+                const categoryIcon = categoryData?.icon || '📦';
+
+                return (
+                  <div key={categoryKey} className="space-y-2">
+                    <h3 className="text-sm font-semibold text-gray-700 flex items-center gap-2 sticky top-0 bg-base-100 py-1">
+                      <span>{categoryIcon}</span>
+                      <span>{categoryName}</span>
+                      <span className="text-xs text-gray-500">
+                        ({ingredients.length})
+                      </span>
+                    </h3>
+                    <div className="space-y-1">
+                      {ingredients.map((ingredient) => {
+                        const isSelected =
+                          selectedIngredients.includes(ingredient);
+                        return (
+                          <button
+                            key={ingredient}
+                            onClick={() => toggleIngredient(ingredient)}
+                            className={`w-full flex items-center justify-between p-2 rounded-lg border transition-colors ${
+                              isSelected
+                                ? 'bg-primary text-primary-content border-primary'
+                                : 'bg-base-100 hover:bg-base-200 border-base-300'
+                            }`}
+                          >
+                            <span className="text-left font-medium text-sm">
+                              {ingredient}
+                            </span>
+                            {isSelected && <Check className="h-4 w-4" />}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              }
+            )
           )}
         </div>
 
