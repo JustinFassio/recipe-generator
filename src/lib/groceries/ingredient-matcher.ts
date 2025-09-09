@@ -24,7 +24,7 @@ export class IngredientMatcher {
   private groceries: Record<string, string[]>;
   private preprocessedGroceries: Map<
     string,
-    { category: string; normalized: string }
+    { category: string; normalized: string; original: string }
   >;
 
   constructor(groceries: Record<string, string[]>) {
@@ -124,14 +124,28 @@ export class IngredientMatcher {
 
   private preprocessGroceries(): Map<
     string,
-    { category: string; normalized: string }
+    { category: string; normalized: string; original: string }
   > {
     const processed = new Map();
 
     Object.entries(this.groceries).forEach(([category, ingredients]) => {
       ingredients.forEach((ingredient) => {
         const normalized = this.normalizeIngredient(ingredient);
-        processed.set(normalized, { category, normalized });
+
+        // Store with original ingredient for better matching
+        if (!processed.has(normalized)) {
+          processed.set(normalized, {
+            category,
+            normalized,
+            original: ingredient,
+          });
+        } else {
+          // If ingredient exists in multiple categories, keep track of all categories
+          const existing = processed.get(normalized)!;
+          if (!existing.category.includes(category)) {
+            existing.category = `${existing.category},${category}`;
+          }
+        }
 
         // Add plurals and singulars
         const variants = this.generateVariants(ingredient);
@@ -141,7 +155,14 @@ export class IngredientMatcher {
             processed.set(normalizedVariant, {
               category,
               normalized: normalizedVariant,
+              original: ingredient,
             });
+          } else {
+            // Handle duplicates across variants too
+            const existing = processed.get(normalizedVariant)!;
+            if (!existing.category.includes(category)) {
+              existing.category = `${existing.category},${category}`;
+            }
           }
         });
       });
@@ -150,22 +171,28 @@ export class IngredientMatcher {
     return processed;
   }
 
-  private normalizeIngredient(ingredient: string): string {
+  protected normalizeIngredient(ingredient: string): string {
     return ingredient
       .toLowerCase()
       .replace(/[^\w\s]/g, ' ') // Remove punctuation
       .replace(
-        /\b(fresh|dried|ground|whole|chopped|diced|sliced|minced)\b/g,
+        /\b(fresh|dried|ground|whole|chopped|diced|sliced|minced|melted|softened|room temperature)\b/g,
         ''
       ) // Remove prep words
       .replace(
-        /\b(cups?|cup|tbsp|tablespoons?|tsp|teaspoons?|oz|ounces?|lbs?|pounds?|grams?|g)\b/g,
+        /\b(cups?|cup|tbsp|tablespoons?|tsp|teaspoons?|oz|ounces?|lbs?|pounds?|grams?|g|ml|liters?)\b/g,
         ''
       ) // Remove measurements
-      .replace(/\b(large|medium|small|extra)\b/g, '') // Remove size descriptors
-      .replace(/\b(\d+)\b/g, '') // Remove numbers
+      .replace(/\b(large|medium|small|extra|about|approximately)\b/g, '') // Remove size descriptors
+      .replace(/\b(\d+(?:\.\d+)?)\b/g, '') // Remove numbers (including decimals)
+      .replace(/\b(slices?|cloves?|pieces?|strips?|chunks?)\b/g, '') // Remove quantity words
       .replace(/\s+/g, ' ') // Normalize whitespace
       .trim();
+  }
+
+  // Public helper to normalize from outside (e.g., hooks/components)
+  public normalizeName(ingredient: string): string {
+    return this.normalizeIngredient(ingredient);
   }
 
   private findExactMatch(
@@ -173,13 +200,11 @@ export class IngredientMatcher {
   ): { ingredient: string; category: string } | null {
     const match = this.preprocessedGroceries.get(normalized);
     if (match) {
-      const originalIngredient = Object.entries(this.groceries)
-        .find(([cat]) => cat === match.category)?.[1]
-        ?.find((ing) => this.normalizeIngredient(ing) === normalized);
-
-      if (originalIngredient) {
-        return { ingredient: originalIngredient, category: match.category };
-      }
+      // Use the original ingredient from the match
+      return {
+        ingredient: match.original,
+        category: match.category.split(',')[0], // Use first category if multiple
+      };
     }
     return null;
   }
@@ -194,27 +219,21 @@ export class IngredientMatcher {
       confidence: number;
     } | null = null;
 
-    for (const [groceryNormalized, { category }] of this
+    for (const [groceryNormalized, { category, original }] of this
       .preprocessedGroceries) {
       // Check if recipe ingredient contains grocery ingredient
       if (normalized.includes(groceryNormalized)) {
-        const confidence = Math.round(
-          (groceryNormalized.length / normalized.length) * 80
+        // Improved confidence calculation for exact word matches
+        const confidence = this.calculateContainsConfidence(
+          normalized,
+          groceryNormalized
         );
         if (!bestMatch || confidence > bestMatch.confidence) {
-          const originalIngredient = Object.entries(this.groceries)
-            .find(([cat]) => cat === category)?.[1]
-            ?.find(
-              (ing) => this.normalizeIngredient(ing) === groceryNormalized
-            );
-
-          if (originalIngredient) {
-            bestMatch = {
-              ingredient: originalIngredient,
-              category,
-              confidence,
-            };
-          }
+          bestMatch = {
+            ingredient: original,
+            category: category.split(',')[0], // Use first category if multiple
+            confidence,
+          };
         }
       }
 
@@ -223,28 +242,24 @@ export class IngredientMatcher {
         groceryNormalized.includes(word)
       );
       if (matchingWords.length > 0) {
-        const confidence = Math.round(
-          (matchingWords.length / words.length) * 70
+        // Improved confidence calculation for word matches
+        const confidence = this.calculateWordMatchConfidence(
+          normalized,
+          matchingWords,
+          groceryNormalized
         );
         if (!bestMatch || confidence > bestMatch.confidence) {
-          const originalIngredient = Object.entries(this.groceries)
-            .find(([cat]) => cat === category)?.[1]
-            ?.find(
-              (ing) => this.normalizeIngredient(ing) === groceryNormalized
-            );
-
-          if (originalIngredient) {
-            bestMatch = {
-              ingredient: originalIngredient,
-              category,
-              confidence,
-            };
-          }
+          bestMatch = {
+            ingredient: original,
+            category: category.split(',')[0], // Use first category if multiple
+            confidence,
+          };
         }
       }
     }
 
-    return bestMatch && bestMatch.confidence >= 50 ? bestMatch : null;
+    // Lower threshold for better matching of basic ingredients
+    return bestMatch && bestMatch.confidence >= 30 ? bestMatch : null;
   }
 
   private findFuzzyMatch(
@@ -319,5 +334,61 @@ export class IngredientMatcher {
     });
 
     return synonyms;
+  }
+
+  /**
+   * Calculate confidence for when recipe ingredient contains grocery ingredient
+   */
+  private calculateContainsConfidence(
+    recipeNormalized: string,
+    groceryNormalized: string
+  ): number {
+    // If it's an exact match, give high confidence
+    if (recipeNormalized === groceryNormalized) {
+      return 100;
+    }
+
+    // For partial matches, use a more generous calculation
+    const groceryLength = groceryNormalized.length;
+    const recipeLength = recipeNormalized.length;
+
+    // Base confidence on how much of the grocery ingredient is in the recipe
+    const baseConfidence = Math.round((groceryLength / recipeLength) * 100);
+
+    // Boost confidence for common single-word ingredients
+    if (groceryLength <= 8 && !groceryNormalized.includes(' ')) {
+      return Math.min(baseConfidence + 20, 85); // Cap at 85% for partial matches
+    }
+
+    return Math.min(baseConfidence, 80);
+  }
+
+  /**
+   * Calculate confidence for word-based matches
+   */
+  private calculateWordMatchConfidence(
+    recipeNormalized: string,
+    matchingWords: string[],
+    groceryNormalized: string
+  ): number {
+    const totalWords = recipeNormalized
+      .split(' ')
+      .filter((word) => word.length > 2).length;
+    const matchRatio = matchingWords.length / totalWords;
+
+    // Base confidence on word match ratio
+    let confidence = Math.round(matchRatio * 100);
+
+    // Boost confidence if the grocery ingredient is a single word that matches
+    if (matchingWords.length === 1 && !groceryNormalized.includes(' ')) {
+      confidence = Math.min(confidence + 15, 75); // Cap at 75% for word matches
+    }
+
+    // Boost confidence for exact word matches
+    if (matchingWords.some((word) => groceryNormalized === word)) {
+      confidence = Math.min(confidence + 10, 80);
+    }
+
+    return confidence;
   }
 }

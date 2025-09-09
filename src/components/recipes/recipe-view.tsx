@@ -13,11 +13,17 @@ import {
   Check,
   ShoppingCart,
   AlertCircle,
+  Globe,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import CategoryChip from '@/components/ui/CategoryChip';
-import { useIngredientMatching } from '@/hooks/useIngredientMatching';
+import { useMemo } from 'react';
+import { useGlobalIngredients } from '@/hooks/useGlobalIngredients';
+import { SaveToGlobalButton } from '@/components/groceries/save-to-global-button';
+import { parseIngredientText } from '@/lib/groceries/ingredient-parser';
+import { EnhancedIngredientMatcher } from '@/lib/groceries/enhanced-ingredient-matcher';
+import { useGroceries } from '@/hooks/useGroceries';
 import type { Recipe } from '@/lib/types';
 
 interface RecipeViewProps {
@@ -27,9 +33,37 @@ interface RecipeViewProps {
 }
 
 export function RecipeView({ recipe, onEdit, onBack }: RecipeViewProps) {
-  const ingredientMatching = useIngredientMatching();
+  const { groceries } = useGroceries();
+  const {
+    /* saveIngredientToGlobal, */ refreshGlobalIngredients,
+    globalIngredients,
+  } = useGlobalIngredients();
 
-  const compatibility = ingredientMatching.calculateCompatibility(recipe);
+  // Create enhanced matcher that includes global ingredients
+  const enhancedMatcher = useMemo(() => {
+    if (Object.keys(groceries).length === 0) return null;
+    return new EnhancedIngredientMatcher(groceries);
+  }, [groceries, globalIngredients]); // Recreate when global ingredients change
+
+  // Calculate compatibility using enhanced matcher
+  const compatibility = useMemo(() => {
+    if (!enhancedMatcher) {
+      return {
+        recipeId: recipe.id,
+        totalIngredients: recipe.ingredients.length,
+        availableIngredients: [],
+        missingIngredients: recipe.ingredients.map((ing) => ({
+          recipeIngredient: ing,
+          confidence: 0,
+          matchType: 'none' as const,
+        })),
+        compatibilityScore: 0,
+        confidenceScore: 0,
+      };
+    }
+    return enhancedMatcher.calculateRecipeCompatibility(recipe);
+  }, [enhancedMatcher, recipe]);
+
   const availabilityPercentage = compatibility.compatibilityScore;
   const missingIngredients = compatibility.missingIngredients;
 
@@ -40,13 +74,29 @@ export function RecipeView({ recipe, onEdit, onBack }: RecipeViewProps) {
       case 'partial':
       case 'fuzzy':
         return <Check className="h-4 w-4 text-yellow-600" />;
+      case 'global':
+        return <Globe className="h-4 w-4 text-blue-600" />;
       default:
         return <ShoppingCart className="h-4 w-4 text-gray-400" />;
     }
   };
 
   const getIngredientBadge = (match: { matchType: string }) => {
-    if (match.matchType === 'none') return null;
+    if (match.matchType === 'none') {
+      return (
+        <Badge variant="outline" className="text-red-600 bg-red-50">
+          Not Available
+        </Badge>
+      );
+    }
+
+    if (match.matchType === 'global') {
+      return (
+        <Badge variant="outline" className="text-blue-600 bg-blue-50">
+          Global Ingredient
+        </Badge>
+      );
+    }
 
     const variant = match.matchType === 'exact' ? 'default' : 'secondary';
     const text = match.matchType === 'exact' ? 'You have this' : 'Similar item';
@@ -139,7 +189,7 @@ export function RecipeView({ recipe, onEdit, onBack }: RecipeViewProps) {
       </div>
 
       {/* Grocery Compatibility Section */}
-      {ingredientMatching.isReady && ingredientMatching.groceriesCount > 0 && (
+      {enhancedMatcher && Object.keys(groceries).length > 0 && (
         <div
           className={createDaisyUICardClasses(
             'bordered bg-gradient-to-r from-green-50 to-blue-50'
@@ -212,7 +262,7 @@ export function RecipeView({ recipe, onEdit, onBack }: RecipeViewProps) {
         <div className="card-body">
           <h3 className="card-title text-xl font-semibold mb-4">
             Ingredients
-            {ingredientMatching.isReady && (
+            {enhancedMatcher && (
               <span className="text-sm font-normal text-gray-600">
                 ({compatibility.availableIngredients.length} available)
               </span>
@@ -221,7 +271,13 @@ export function RecipeView({ recipe, onEdit, onBack }: RecipeViewProps) {
 
           <div className="space-y-3">
             {recipe.ingredients.map((ingredient, index) => {
-              const match = ingredientMatching.matchIngredient(ingredient);
+              const match = enhancedMatcher
+                ? enhancedMatcher.matchIngredient(ingredient)
+                : {
+                    recipeIngredient: ingredient,
+                    confidence: 0,
+                    matchType: 'none' as const,
+                  };
               const isAvailable =
                 match.matchType !== 'none' && match.confidence >= 50;
 
@@ -247,7 +303,7 @@ export function RecipeView({ recipe, onEdit, onBack }: RecipeViewProps) {
                     // Enhanced ingredient with availability indicator
                     <div className="flex items-center w-full">
                       <div className="mt-0.5 mr-3 flex h-6 w-6 flex-shrink-0 items-center justify-center">
-                        {ingredientMatching.isReady ? (
+                        {enhancedMatcher ? (
                           getIngredientStatusIcon(match)
                         ) : (
                           <div className="h-2 w-2 rounded-full bg-orange-500"></div>
@@ -263,13 +319,25 @@ export function RecipeView({ recipe, onEdit, onBack }: RecipeViewProps) {
                         >
                           {ingredient}
                         </p>
-                        {ingredientMatching.isReady && (
-                          <div className="flex items-center">
+                        {enhancedMatcher && (
+                          <div className="flex items-center space-x-2">
                             {getIngredientBadge(match)}
                             {match.matchedGroceryIngredient && (
-                              <span className="text-xs text-gray-500 ml-2">
+                              <span className="text-xs text-gray-500">
                                 (matches: {match.matchedGroceryIngredient})
                               </span>
+                            )}
+                            {match.matchType === 'none' && (
+                              <SaveToGlobalButton
+                                ingredient={
+                                  parseIngredientText(ingredient).name
+                                }
+                                recipeContext={{
+                                  recipeId: recipe.id,
+                                  recipeCategories: recipe.categories || [],
+                                }}
+                                onSaved={refreshGlobalIngredients}
+                              />
                             )}
                           </div>
                         )}
