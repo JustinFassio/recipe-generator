@@ -65,7 +65,8 @@ export default function GlobalIngredientsPage() {
 
   const handleAddToGroceries = async (category: string, name: string) => {
     // Add exactly what the user clicked (alias allowed), do not canonicalize
-    groceries.toggleIngredient(category, name);
+    // Use addIngredients to add as unselected staple (not active)
+    groceries.addIngredients(category, [name]);
     await groceries.saveGroceries();
   };
 
