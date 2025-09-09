@@ -304,11 +304,20 @@ export function RecipeView({ recipe, onEdit, onBack }: RecipeViewProps) {
                 size="sm"
                 className="mt-3 border-blue-300 text-blue-700 hover:bg-blue-100"
                 onClick={() => {
-                  // Future: Export shopping list functionality
-                  console.log('Export shopping list:', missingIngredients);
+                  // Export shopping list as a text file
+                  const text = missingIngredients.map(match => match.recipeIngredient).join('\n');
+                  const blob = new Blob([text], { type: 'text/plain' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = 'shopping-list.txt';
+                  document.body.appendChild(a);
+                  a.click();
+                  document.body.removeChild(a);
+                  URL.revokeObjectURL(url);
                 }}
               >
-                Export Shopping List
+                📋 Export Shopping List
               </Button>
             </div>
           )}

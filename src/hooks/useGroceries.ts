@@ -105,8 +105,9 @@ export function useGroceries(): UseGroceriesReturn {
           // Remove ingredient
           const newItems = categoryItems.filter((item) => item !== ingredient);
           if (newItems.length === 0) {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const { [category]: _removed, ...rest } = prev;
+            const { [category]: removed, ...rest } = prev;
+            // Use the removed variable to avoid eslint warning
+            void removed;
             return rest;
           }
           return { ...prev, [category]: newItems };
@@ -136,8 +137,9 @@ export function useGroceries(): UseGroceriesReturn {
   // Remove entire category
   const removeCategory = useCallback((category: string) => {
     setGroceries((prev) => {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { [category]: _removed, ...rest } = prev;
+      const { [category]: removed, ...rest } = prev;
+      // Use the removed variable to avoid eslint warning
+      void removed;
       return rest;
     });
   }, []);
