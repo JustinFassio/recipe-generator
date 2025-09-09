@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 import { useGlobalIngredients } from '@/hooks/useGlobalIngredients';
 // no matcher needed here; use a simple UI normalizer aligned with matcher semantics
 import { useGroceries } from '@/hooks/useGroceries';
@@ -7,8 +7,11 @@ import { Button } from '@/components/ui/button';
 import { Search, Plus, Check, RefreshCw, Trash2, Shield } from 'lucide-react';
 import { GROCERY_CATEGORIES } from '@/lib/groceries/categories';
 import type { GlobalIngredient } from '@/lib/groceries/enhanced-ingredient-matcher';
+import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/contexts/AuthProvider';
 
 export default function GlobalIngredientsPage() {
+  const { user } = useAuth();
   const {
     globalIngredients,
     hiddenNormalizedNames,
@@ -21,6 +24,39 @@ export default function GlobalIngredientsPage() {
   const groceries = useGroceries();
   const [query, setQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<string>('all');
+
+  // State for user's grocery cart (from user_groceries table)
+  const [userGroceryCart, setUserGroceryCart] = useState<
+    Record<string, string[]>
+  >({});
+
+  // Load user's grocery cart from user_groceries table
+  const loadUserGroceryCart = useCallback(async () => {
+    if (!user?.id) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('user_groceries')
+        .select('groceries')
+        .eq('user_id', user.id)
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        // PGRST116 = no rows returned
+        console.error('Error loading grocery cart:', error);
+        return;
+      }
+
+      setUserGroceryCart(data?.groceries || {});
+    } catch (error) {
+      console.error('Error loading grocery cart:', error);
+    }
+  }, [user?.id]);
+
+  // Load grocery cart when user changes
+  useEffect(() => {
+    loadUserGroceryCart();
+  }, [user?.id, loadUserGroceryCart]);
 
   const grouped = useMemo(() => {
     const items = globalIngredients
@@ -40,6 +76,12 @@ export default function GlobalIngredientsPage() {
     return map;
   }, [globalIngredients, query, activeCategory]);
 
+  // Get available categories from global ingredients data
+  const availableCategories = useMemo(() => {
+    const categories = [...new Set(globalIngredients.map((g) => g.category))];
+    return categories.sort();
+  }, [globalIngredients]);
+
   // lightweight normalizer only for UI comparisons
   const normalizeName = (s: string) =>
     s
@@ -48,51 +90,95 @@ export default function GlobalIngredientsPage() {
       .replace(/\s+/g, ' ')
       .trim();
 
-  // REAL fix: build a normalized set of ALL user groceries using the same normalizer
+  // Build a normalized set of ALL user groceries from the grocery cart (user_groceries table)
   const userNormalizedSet = useMemo(() => {
     const set = new Set<string>();
-    const g: Record<string, string[]> = (groceries.groceries || {}) as Record<
-      string,
-      string[]
-    >;
-    Object.values(g).forEach((arr) => {
+    // Get ingredients from the grocery cart (user_groceries table) instead of groceries.groceries state
+    Object.values(userGroceryCart).forEach((arr) => {
       (arr || []).forEach((item) => {
         set.add(normalizeName(item));
       });
     });
     return set;
-  }, [groceries.groceries]);
+  }, [userGroceryCart]);
 
   const handleAddToGroceries = async (category: string, name: string) => {
-    // Add exactly what the user clicked (alias allowed), do not canonicalize
-    groceries.toggleIngredient(category, name);
-    await groceries.saveGroceries();
+    try {
+      // Direct database operation - no complex state management
+      const { data: currentData, error: fetchError } = await supabase
+        .from('user_groceries')
+        .select('groceries')
+        .eq('user_id', user?.id)
+        .single();
+
+      if (fetchError) {
+        console.error('Error fetching groceries:', fetchError);
+        return;
+      }
+
+      // Add ingredient directly to the database
+      const updatedGroceries = {
+        ...currentData.groceries,
+        [category]: [...(currentData.groceries[category] || []), name],
+      };
+
+      const { error: saveError } = await supabase
+        .from('user_groceries')
+        .upsert({
+          user_id: user?.id,
+          groceries: updatedGroceries,
+          updated_at: new Date().toISOString(),
+        });
+
+      if (saveError) {
+        console.error('Error saving groceries:', saveError);
+        return;
+      }
+
+      // Reload the grocery cart to update UI
+      await loadUserGroceryCart();
+    } catch (error) {
+      console.error('Error in handleAddToGroceries:', error);
+    }
   };
 
   const handleRemoveFromGroceries = async (name: string) => {
-    // Remove this name from any category in the user's staples
-    const updated: Record<string, string[]> = {
-      ...(groceries.groceries || {}),
-    } as Record<string, string[]>;
-    let changed = false;
-    Object.keys(updated).forEach((cat) => {
-      const before = updated[cat] || [];
-      const after = before.filter((i) => i !== name);
-      if (after.length !== before.length) {
-        updated[cat] = after;
-        changed = true;
-      }
-    });
-    if (changed) {
-      // Use existing API: toggle calls setState; here we persist via saveGroceries after setting state
-      // We can't directly set groceries.groceries here, so we simulate by removing via toggle where present
-      Object.keys(groceries.groceries || {}).forEach((cat) => {
-        const arr = (groceries.groceries as Record<string, string[]>)[
-          cat
-        ] as string[];
-        if (arr?.includes(name)) groceries.toggleIngredient(cat, name);
+    try {
+      // Remove this name from any category in the user's grocery cart
+      const updated: Record<string, string[]> = {
+        ...userGroceryCart,
+      };
+      let changed = false;
+
+      Object.keys(updated).forEach((cat) => {
+        const before = updated[cat] || [];
+        const after = before.filter((i) => i !== name);
+        if (after.length !== before.length) {
+          updated[cat] = after;
+          changed = true;
+        }
       });
-      await groceries.saveGroceries();
+
+      if (changed) {
+        // Update the database
+        const { error: saveError } = await supabase
+          .from('user_groceries')
+          .upsert({
+            user_id: user?.id,
+            groceries: updated,
+            updated_at: new Date().toISOString(),
+          });
+
+        if (saveError) {
+          console.error('Error removing from grocery cart:', saveError);
+          return;
+        }
+
+        // Reload the grocery cart to update UI
+        await loadUserGroceryCart();
+      }
+    } catch (error) {
+      console.error('Error in handleRemoveFromGroceries:', error);
     }
   };
 
@@ -154,18 +240,26 @@ export default function GlobalIngredientsPage() {
               >
                 All
               </button>
-              {Object.entries(GROCERY_CATEGORIES).map(([key, val]) => (
-                <button
-                  key={key}
-                  className={`tab ${activeCategory === key ? 'tab-active' : ''}`}
-                  onClick={() => setActiveCategory(key)}
-                >
-                  <span className="flex items-center space-x-2">
-                    <span>{val.icon}</span>
-                    <span className="hidden sm:inline">{val.name}</span>
-                  </span>
-                </button>
-              ))}
+              {availableCategories.map((category) => {
+                const categoryMeta =
+                  GROCERY_CATEGORIES[
+                    category as keyof typeof GROCERY_CATEGORIES
+                  ];
+                return (
+                  <button
+                    key={category}
+                    className={`tab ${activeCategory === category ? 'tab-active' : ''}`}
+                    onClick={() => setActiveCategory(category)}
+                  >
+                    <span className="flex items-center space-x-2">
+                      <span>{categoryMeta?.icon || '📦'}</span>
+                      <span className="hidden sm:inline">
+                        {categoryMeta?.name || category}
+                      </span>
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -297,7 +391,8 @@ export default function GlobalIngredientsPage() {
                               <span className="inline-flex items-center text-xs px-2 py-1 rounded border border-green-300 text-green-700 bg-green-50">
                                 <Check className="h-3 w-3 mr-1" /> Added
                               </span>
-                            ) : !isInCatalog ? (
+                            ) : !isInCatalog && !ing.is_system ? (
+                              // Only show "Add" button for user-added global ingredients, not system ingredients
                               <Button
                                 size="sm"
                                 onClick={() =>

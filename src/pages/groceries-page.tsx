@@ -1,28 +1,78 @@
-import { useState } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthProvider';
 import { useGroceries } from '@/hooks/useGroceries';
 import { Button } from '@/components/ui/button';
-import {
-  GROCERY_CATEGORIES,
-  GROCERY_CATEGORY_KEYS,
-} from '@/lib/groceries/categories';
+import { GROCERY_CATEGORIES } from '@/lib/groceries/categories';
 import { createDaisyUICardClasses } from '@/lib/card-migration';
 import { IngredientMatchingTest } from '@/components/groceries/ingredient-matching-test';
 import { Save, RefreshCw, Globe } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useGlobalIngredients } from '@/hooks/useGlobalIngredients';
+import { supabase } from '@/lib/supabase';
 
 export function GroceriesPage() {
   const { user } = useAuth();
   const groceries = useGroceries();
-  const { hiddenNormalizedNames } = useGlobalIngredients();
-  const [activeCategory, setActiveCategory] = useState<string>('proteins');
+  const { hiddenNormalizedNames, globalIngredients } = useGlobalIngredients();
+  const [activeCategory, setActiveCategory] = useState<string>('');
+
+  // State for user's grocery cart (from user_groceries table)
+  const [userGroceryCart, setUserGroceryCart] = useState<
+    Record<string, string[]>
+  >({});
+
+  // Load user's grocery cart from user_groceries table
+  const loadUserGroceryCart = useCallback(async () => {
+    if (!user?.id) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('user_groceries')
+        .select('groceries')
+        .eq('user_id', user.id)
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        // PGRST116 = no rows returned
+        console.error('Error loading grocery cart:', error);
+        return;
+      }
+
+      setUserGroceryCart(data?.groceries || {});
+    } catch (error) {
+      console.error('Error loading grocery cart:', error);
+    }
+  }, [user?.id]);
+
+  // Load grocery cart when user changes
+  useEffect(() => {
+    loadUserGroceryCart();
+  }, [loadUserGroceryCart]);
+
+  // Get available categories from global ingredients data (source of truth)
+  const availableCategories = useMemo(() => {
+    const categories = [...new Set(globalIngredients.map((g) => g.category))];
+    return categories.sort();
+  }, [globalIngredients]);
+
+  // Set default active category to first available category
+  useEffect(() => {
+    if (availableCategories.length > 0 && !activeCategory) {
+      setActiveCategory(availableCategories[0]);
+    }
+  }, [availableCategories, activeCategory]);
+
+  // Get category count from grocery cart
+  const getCategoryCount = (category: string) => {
+    return userGroceryCart[category]?.length || 0;
+  };
 
   const handleSave = async () => {
     await groceries.saveGroceries();
   };
 
   const handleRefresh = async () => {
+    await loadUserGroceryCart();
     await groceries.loadGroceries();
   };
 
@@ -43,22 +93,18 @@ export function GroceriesPage() {
     );
   }
 
-  const activeCategoryData =
-    GROCERY_CATEGORIES[activeCategory as keyof typeof GROCERY_CATEGORIES];
+  const activeCategoryData = GROCERY_CATEGORIES[
+    activeCategory as keyof typeof GROCERY_CATEGORIES
+  ] || {
+    name: activeCategory,
+    icon: '📦',
+  };
 
-  // Merge predefined category items with any user-added ingredients in this category
-  const mergedCategoryItems = (() => {
-    const predefined = activeCategoryData.items;
-    const userSelected = groceries.groceries[activeCategory] || [];
-    const set = new Set<string>(predefined);
-    // Add any user-selected ingredients that aren't part of predefined list
-    userSelected.forEach((ing) => {
-      if (!set.has(ing)) set.add(ing);
-    });
-    // Preserve predefined order, then append user-added in alpha order
-    const extras = [...set]
-      .filter((i) => !predefined.includes(i))
-      .sort((a, b) => a.localeCompare(b));
+  // Show ALL ingredients that user has added to their grocery cart (both selected and unselected)
+  const userCategoryItems = (() => {
+    // Get ingredients from the user's grocery cart (user_groceries table)
+    const cartIngredients = userGroceryCart[activeCategory] || [];
+
     // Filter out any system-hidden items
     const filterHidden = (name: string) => {
       // best-effort normalize similar to matcher (lightweight)
@@ -69,7 +115,10 @@ export function GroceriesPage() {
         .trim();
       return !hiddenNormalizedNames.has(normalized);
     };
-    return [...predefined.filter(filterHidden), ...extras.filter(filterHidden)];
+
+    return cartIngredients
+      .filter(filterHidden)
+      .sort((a, b) => a.localeCompare(b));
   })();
 
   return (
@@ -81,13 +130,14 @@ export function GroceriesPage() {
             <div>
               <h1 className="text-3xl font-bold text-gray-900">My Groceries</h1>
               <p className="text-gray-600">
-                Select ingredients you have available for personalized recipe
-                suggestions
+                Manage your personal ingredient collection. Mark items as
+                available (have it) or unavailable (need to buy).
               </p>
               {groceries.selectedCount > 0 && (
                 <p className="text-sm text-green-600 font-medium">
                   {groceries.selectedCount} ingredient
-                  {groceries.selectedCount !== 1 ? 's' : ''} selected
+                  {groceries.selectedCount !== 1 ? 's' : ''} available in your
+                  kitchen
                 </p>
               )}
             </div>
@@ -129,9 +179,12 @@ export function GroceriesPage() {
         <div className={createDaisyUICardClasses('bordered mb-6')}>
           <div className="card-body p-0">
             <div className="tabs tabs-boxed p-4 overflow-x-auto">
-              {GROCERY_CATEGORY_KEYS.map((categoryKey) => {
-                const category = GROCERY_CATEGORIES[categoryKey];
-                const count = groceries.getCategoryCount(categoryKey);
+              {availableCategories.map((categoryKey) => {
+                const category =
+                  GROCERY_CATEGORIES[
+                    categoryKey as keyof typeof GROCERY_CATEGORIES
+                  ];
+                const count = getCategoryCount(categoryKey);
                 return (
                   <button
                     key={categoryKey}
@@ -139,10 +192,12 @@ export function GroceriesPage() {
                     onClick={() => setActiveCategory(categoryKey)}
                   >
                     <span className="flex items-center space-x-2">
-                      <span>{category.icon}</span>
-                      <span className="hidden sm:inline">{category.name}</span>
+                      <span>{category?.icon || '📦'}</span>
+                      <span className="hidden sm:inline">
+                        {category?.name || categoryKey}
+                      </span>
                       <span className="sm:hidden">
-                        {category.name.split(' ')[0]}
+                        {category?.name?.split(' ')[0] || categoryKey}
                       </span>
                       {count > 0 && (
                         <span className="badge badge-sm badge-primary">
@@ -164,7 +219,7 @@ export function GroceriesPage() {
               {activeCategoryData.icon} {activeCategoryData.name}
             </h2>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-              {mergedCategoryItems.map((ingredient) => {
+              {userCategoryItems.map((ingredient) => {
                 const isSelected = groceries.hasIngredient(
                   activeCategory,
                   ingredient
@@ -181,6 +236,11 @@ export function GroceriesPage() {
                         ? 'btn-primary'
                         : 'btn-outline btn-ghost hover:btn-outline'
                     } ${groceries.loading ? 'btn-disabled' : ''}`}
+                    title={
+                      isSelected
+                        ? 'Available - you have this'
+                        : 'Unavailable - you need to buy this'
+                    }
                   >
                     {ingredient}
                   </button>
@@ -198,7 +258,7 @@ export function GroceriesPage() {
             <div className="card-body">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="card-title text-lg">
-                  Selected Ingredients ({groceries.selectedCount})
+                  Available in Your Kitchen ({groceries.selectedCount})
                 </h3>
                 <Button
                   variant="ghost"

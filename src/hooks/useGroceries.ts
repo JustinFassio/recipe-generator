@@ -72,6 +72,9 @@ export function useGroceries(): UseGroceriesReturn {
       const result = await updateUserGroceries(user.id, groceries);
 
       if (result.success) {
+        // Reload data from database to ensure sync
+        await loadGroceries();
+
         toast({
           title: 'Success',
           description: 'Groceries saved successfully!',
@@ -92,7 +95,7 @@ export function useGroceries(): UseGroceriesReturn {
     } finally {
       setLoading(false);
     }
-  }, [user?.id, groceries, toast]);
+  }, [user?.id, groceries, toast, loadGroceries]);
 
   // Toggle ingredient selection
   const toggleIngredient = useCallback(
