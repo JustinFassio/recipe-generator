@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 import { useGlobalIngredients } from '@/hooks/useGlobalIngredients';
 // no matcher needed here; use a simple UI normalizer aligned with matcher semantics
 import { useGroceries } from '@/hooks/useGroceries';
@@ -24,6 +24,39 @@ export default function GlobalIngredientsPage() {
   const groceries = useGroceries();
   const [query, setQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<string>('all');
+
+  // State for user's grocery cart (from user_groceries table)
+  const [userGroceryCart, setUserGroceryCart] = useState<
+    Record<string, string[]>
+  >({});
+
+  // Load user's grocery cart from user_groceries table
+  const loadUserGroceryCart = useCallback(async () => {
+    if (!user?.id) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('user_groceries')
+        .select('groceries')
+        .eq('user_id', user.id)
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        // PGRST116 = no rows returned
+        console.error('Error loading grocery cart:', error);
+        return;
+      }
+
+      setUserGroceryCart(data?.groceries || {});
+    } catch (error) {
+      console.error('Error loading grocery cart:', error);
+    }
+  }, [user?.id]);
+
+  // Load grocery cart when user changes
+  useEffect(() => {
+    loadUserGroceryCart();
+  }, [user?.id, loadUserGroceryCart]);
 
   const grouped = useMemo(() => {
     const items = globalIngredients
@@ -57,20 +90,17 @@ export default function GlobalIngredientsPage() {
       .replace(/\s+/g, ' ')
       .trim();
 
-  // REAL fix: build a normalized set of ALL user groceries using the same normalizer
+  // Build a normalized set of ALL user groceries from the grocery cart (user_groceries table)
   const userNormalizedSet = useMemo(() => {
     const set = new Set<string>();
-    const g: Record<string, string[]> = (groceries.groceries || {}) as Record<
-      string,
-      string[]
-    >;
-    Object.values(g).forEach((arr) => {
+    // Get ingredients from the grocery cart (user_groceries table) instead of groceries.groceries state
+    Object.values(userGroceryCart).forEach((arr) => {
       (arr || []).forEach((item) => {
         set.add(normalizeName(item));
       });
     });
     return set;
-  }, [groceries.groceries]);
+  }, [userGroceryCart]);
 
   const handleAddToGroceries = async (category: string, name: string) => {
     try {
@@ -105,37 +135,50 @@ export default function GlobalIngredientsPage() {
         return;
       }
 
-      // Force reload the groceries hook to update UI
-      await groceries.loadGroceries();
+      // Reload the grocery cart to update UI
+      await loadUserGroceryCart();
     } catch (error) {
       console.error('Error in handleAddToGroceries:', error);
     }
   };
 
   const handleRemoveFromGroceries = async (name: string) => {
-    // Remove this name from any category in the user's staples
-    const updated: Record<string, string[]> = {
-      ...(groceries.groceries || {}),
-    } as Record<string, string[]>;
-    let changed = false;
-    Object.keys(updated).forEach((cat) => {
-      const before = updated[cat] || [];
-      const after = before.filter((i) => i !== name);
-      if (after.length !== before.length) {
-        updated[cat] = after;
-        changed = true;
-      }
-    });
-    if (changed) {
-      // Use existing API: toggle calls setState; here we persist via saveGroceries after setting state
-      // We can't directly set groceries.groceries here, so we simulate by removing via toggle where present
-      Object.keys(groceries.groceries || {}).forEach((cat) => {
-        const arr = (groceries.groceries as Record<string, string[]>)[
-          cat
-        ] as string[];
-        if (arr?.includes(name)) groceries.toggleIngredient(cat, name);
+    try {
+      // Remove this name from any category in the user's grocery cart
+      const updated: Record<string, string[]> = {
+        ...userGroceryCart,
+      };
+      let changed = false;
+
+      Object.keys(updated).forEach((cat) => {
+        const before = updated[cat] || [];
+        const after = before.filter((i) => i !== name);
+        if (after.length !== before.length) {
+          updated[cat] = after;
+          changed = true;
+        }
       });
-      await groceries.saveGroceries();
+
+      if (changed) {
+        // Update the database
+        const { error: saveError } = await supabase
+          .from('user_groceries')
+          .upsert({
+            user_id: user?.id,
+            groceries: updated,
+            updated_at: new Date().toISOString(),
+          });
+
+        if (saveError) {
+          console.error('Error removing from grocery cart:', saveError);
+          return;
+        }
+
+        // Reload the grocery cart to update UI
+        await loadUserGroceryCart();
+      }
+    } catch (error) {
+      console.error('Error in handleRemoveFromGroceries:', error);
     }
   };
 

@@ -60,9 +60,28 @@ export function GroceriesPage() {
     icon: '📦',
   };
 
-  // Show ONLY the user's personal ingredient collection (what they've added from Global Ingredients)
+  // Show ALL ingredients that user has added from Global Ingredients (both selected and unselected)
   const userCategoryItems = (() => {
-    const userIngredients = groceries.groceries[activeCategory] || [];
+    // Get all ingredients from global ingredients that the user has added to their collection
+    const userAddedIngredients = globalIngredients.filter((ingredient) => {
+      // Show all system ingredients that are not hidden
+      const isSystemNotHidden =
+        ingredient.is_system &&
+        !hiddenNormalizedNames.has(ingredient.normalized_name);
+
+      // Show all ingredients that the user has ever added (regardless of current selection state)
+      // The groceries.groceries state now only tracks selection state, not the ingredient list
+      // We need to show ALL ingredients that the user has added from Global Ingredients
+      const isInUserGroceries = Object.values(groceries.groceries).some(
+        (categoryIngredients) => categoryIngredients.includes(ingredient.name)
+      );
+
+      return (
+        (isInUserGroceries || isSystemNotHidden) &&
+        ingredient.category === activeCategory
+      );
+    });
+
     // Filter out any system-hidden items
     const filterHidden = (name: string) => {
       // best-effort normalize similar to matcher (lightweight)
@@ -73,7 +92,9 @@ export function GroceriesPage() {
         .trim();
       return !hiddenNormalizedNames.has(normalized);
     };
-    return userIngredients
+
+    return userAddedIngredients
+      .map((ingredient) => ingredient.name)
       .filter(filterHidden)
       .sort((a, b) => a.localeCompare(b));
   })();
