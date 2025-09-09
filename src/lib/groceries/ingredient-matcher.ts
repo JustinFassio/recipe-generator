@@ -5,7 +5,7 @@ export interface IngredientMatch {
   matchedGroceryIngredient?: string;
   matchedCategory?: string;
   confidence: number; // 0-100
-  matchType: 'exact' | 'partial' | 'fuzzy' | 'none';
+  matchType: 'exact' | 'partial' | 'fuzzy' | 'global' | 'none';
 }
 
 export interface RecipeCompatibility {
@@ -24,7 +24,14 @@ export class IngredientMatcher {
   private groceries: Record<string, string[]>;
   private preprocessedGroceries: Map<
     string,
-    { category: string; normalized: string; original: string }
+    {
+      categories: string[];
+      normalized: string;
+      /**
+       * Stores the original ingredient name for better matching results.
+       */
+      original: string;
+    }
   >;
 
   constructor(groceries: Record<string, string[]>) {
@@ -124,7 +131,14 @@ export class IngredientMatcher {
 
   private preprocessGroceries(): Map<
     string,
-    { category: string; normalized: string; original: string }
+    {
+      categories: string[];
+      normalized: string;
+      /**
+       * Stores the original ingredient name for better matching results.
+       */
+      original: string;
+    }
   > {
     const processed = new Map();
 
@@ -135,15 +149,15 @@ export class IngredientMatcher {
         // Store with original ingredient for better matching
         if (!processed.has(normalized)) {
           processed.set(normalized, {
-            category,
+            categories: [category],
             normalized,
             original: ingredient,
           });
         } else {
           // If ingredient exists in multiple categories, keep track of all categories
           const existing = processed.get(normalized)!;
-          if (!existing.category.includes(category)) {
-            existing.category = `${existing.category},${category}`;
+          if (!existing.categories.includes(category)) {
+            existing.categories.push(category);
           }
         }
 
@@ -153,15 +167,15 @@ export class IngredientMatcher {
           const normalizedVariant = this.normalizeIngredient(variant);
           if (!processed.has(normalizedVariant)) {
             processed.set(normalizedVariant, {
-              category,
+              categories: [category],
               normalized: normalizedVariant,
               original: ingredient,
             });
           } else {
             // Handle duplicates across variants too
             const existing = processed.get(normalizedVariant)!;
-            if (!existing.category.includes(category)) {
-              existing.category = `${existing.category},${category}`;
+            if (!existing.categories.includes(category)) {
+              existing.categories.push(category);
             }
           }
         });
@@ -203,7 +217,7 @@ export class IngredientMatcher {
       // Use the original ingredient from the match
       return {
         ingredient: match.original,
-        category: match.category.split(',')[0], // Use first category if multiple
+        category: match.categories[0], // Use first category if multiple
       };
     }
     return null;
@@ -219,7 +233,7 @@ export class IngredientMatcher {
       confidence: number;
     } | null = null;
 
-    for (const [groceryNormalized, { category, original }] of this
+    for (const [groceryNormalized, { categories, original }] of this
       .preprocessedGroceries) {
       // Check if recipe ingredient contains grocery ingredient
       if (normalized.includes(groceryNormalized)) {
@@ -231,7 +245,7 @@ export class IngredientMatcher {
         if (!bestMatch || confidence > bestMatch.confidence) {
           bestMatch = {
             ingredient: original,
-            category: category.split(',')[0], // Use first category if multiple
+            category: categories[0], // Use first category if multiple
             confidence,
           };
         }
@@ -251,7 +265,7 @@ export class IngredientMatcher {
         if (!bestMatch || confidence > bestMatch.confidence) {
           bestMatch = {
             ingredient: original,
-            category: category.split(',')[0], // Use first category if multiple
+            category: categories[0], // Use first category if multiple
             confidence,
           };
         }

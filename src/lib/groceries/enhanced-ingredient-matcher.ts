@@ -65,11 +65,7 @@ export class EnhancedIngredientMatcher extends IngredientMatcher {
         matchedGroceryIngredient: globalMatch.name,
         matchedCategory: globalMatch.category,
         confidence: 85, // High confidence for global ingredients
-        matchType: 'global' as unknown as
-          | 'exact'
-          | 'partial'
-          | 'fuzzy'
-          | 'none',
+        matchType: 'global',
       };
     }
 
@@ -104,11 +100,7 @@ export class EnhancedIngredientMatcher extends IngredientMatcher {
         matchedGroceryIngredient: globalMatch.name,
         matchedCategory: globalMatch.category,
         confidence: 85, // High confidence for global ingredients
-        matchType: 'global' as unknown as
-          | 'exact'
-          | 'partial'
-          | 'fuzzy'
-          | 'none',
+        matchType: 'global',
         isGlobalIngredient: true,
         globalIngredient: globalMatch,
         canSaveToGlobal: false,
