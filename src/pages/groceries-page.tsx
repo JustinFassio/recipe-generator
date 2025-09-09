@@ -8,11 +8,14 @@ import {
 } from '@/lib/groceries/categories';
 import { createDaisyUICardClasses } from '@/lib/card-migration';
 import { IngredientMatchingTest } from '@/components/groceries/ingredient-matching-test';
-import { Save, RefreshCw } from 'lucide-react';
+import { Save, RefreshCw, Globe } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { useGlobalIngredients } from '@/hooks/useGlobalIngredients';
 
 export function GroceriesPage() {
   const { user } = useAuth();
   const groceries = useGroceries();
+  const { hiddenNormalizedNames } = useGlobalIngredients();
   const [activeCategory, setActiveCategory] = useState<string>('proteins');
 
   const handleSave = async () => {
@@ -43,6 +46,32 @@ export function GroceriesPage() {
   const activeCategoryData =
     GROCERY_CATEGORIES[activeCategory as keyof typeof GROCERY_CATEGORIES];
 
+  // Merge predefined category items with any user-added ingredients in this category
+  const mergedCategoryItems = (() => {
+    const predefined = activeCategoryData.items;
+    const userSelected = groceries.groceries[activeCategory] || [];
+    const set = new Set<string>(predefined);
+    // Add any user-selected ingredients that aren't part of predefined list
+    userSelected.forEach((ing) => {
+      if (!set.has(ing)) set.add(ing);
+    });
+    // Preserve predefined order, then append user-added in alpha order
+    const extras = [...set]
+      .filter((i) => !predefined.includes(i))
+      .sort((a, b) => a.localeCompare(b));
+    // Filter out any system-hidden items
+    const filterHidden = (name: string) => {
+      // best-effort normalize similar to matcher (lightweight)
+      const normalized = name
+        .toLowerCase()
+        .replace(/[^\w\s]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+      return !hiddenNormalizedNames.has(normalized);
+    };
+    return [...predefined.filter(filterHidden), ...extras.filter(filterHidden)];
+  })();
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50">
       <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
@@ -63,6 +92,9 @@ export function GroceriesPage() {
               )}
             </div>
             <div className="flex space-x-2">
+              <Link to="/global-ingredients" className="btn btn-outline">
+                <Globe className="mr-2 h-4 w-4" /> Global Ingredients
+              </Link>
               <Button
                 variant="outline"
                 onClick={handleRefresh}
@@ -132,7 +164,7 @@ export function GroceriesPage() {
               {activeCategoryData.icon} {activeCategoryData.name}
             </h2>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-              {activeCategoryData.items.map((ingredient) => {
+              {mergedCategoryItems.map((ingredient) => {
                 const isSelected = groceries.hasIngredient(
                   activeCategory,
                   ingredient

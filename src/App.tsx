@@ -17,6 +17,7 @@ import { ThemeProvider } from '@/components/ui/theme-provider';
 import Phase4Demo from '@/components/demo/Phase4Demo';
 import EvaluationReportPage from '@/pages/evaluation-reports/EvaluationReportPage';
 import { GroceriesPage } from '@/pages/groceries-page';
+import GlobalIngredientsPage from '@/pages/global-ingredients-page';
 import { SelectionProvider } from '@/contexts/SelectionContext';
 
 import { Toaster } from '@/components/ui/toaster';
@@ -178,6 +179,20 @@ function AppContent() {
               <Header />
               <main>
                 <GroceriesPage />
+              </main>
+            </div>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/global-ingredients"
+        element={
+          <ProtectedRoute>
+            <div className="bg-base-100 min-h-screen">
+              <Header />
+              <main>
+                <GlobalIngredientsPage />
               </main>
             </div>
           </ProtectedRoute>
