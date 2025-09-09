@@ -16,6 +16,7 @@ import { AuthForm } from '@/components/auth/auth-form';
 import { ThemeProvider } from '@/components/ui/theme-provider';
 import Phase4Demo from '@/components/demo/Phase4Demo';
 import EvaluationReportPage from '@/pages/evaluation-reports/EvaluationReportPage';
+import { GroceriesPage } from '@/pages/groceries-page';
 import { SelectionProvider } from '@/contexts/SelectionContext';
 
 import { Toaster } from '@/components/ui/toaster';
@@ -164,6 +165,19 @@ function AppContent() {
               <Header />
               <main>
                 <EvaluationReportPage />
+              </main>
+            </div>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/groceries"
+        element={
+          <ProtectedRoute>
+            <div className="bg-base-100 min-h-screen">
+              <Header />
+              <main>
+                <GroceriesPage />
               </main>
             </div>
           </ProtectedRoute>

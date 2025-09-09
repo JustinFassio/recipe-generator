@@ -33,6 +33,13 @@ All recipes are automatically tagged with 1-2 mood tags based on their existing 
 - **Cuisines**: italian, mexican
 - **Equipment**: oven, skillet, blender
 - **Spice Level**: 2 (mild)
+- **Groceries**:
+  - **Proteins**: tofu, tempeh, eggs, lentils, chickpeas, quinoa, greek yogurt
+  - **Vegetables**: onions, garlic, tomatoes, spinach, bell peppers, mushrooms, avocados
+  - **Spices**: salt, black pepper, basil, oregano, cumin, paprika
+  - **Pantry**: olive oil, pasta, rice, canned tomatoes, vegetable stock, soy sauce
+  - **Dairy**: milk, mozzarella, parmesan, yogurt
+  - **Fruits**: lemons, limes, apples, berries
 - **Recipes**: 10 total (4 private, 6 shared)
   - Avocado Toast (shared) - Course: Breakfast, Collection: Vegetarian, Collection: Quick & Easy, Technique: No-Cook, Occasion: Weekday, Dietary: Plant-Based, **Mood: Quick, Mood: Simple**
   - Caprese Salad (shared) - Course: Appetizer, Dish Type: Salad, Cuisine: Italian, Collection: Vegetarian, Collection: Fresh & Light, Technique: No-Cook, Occasion: Summer, Dietary: Plant-Based, **Mood: Refreshing, Mood: Simple**
@@ -54,6 +61,13 @@ All recipes are automatically tagged with 1-2 mood tags based on their existing 
 - **Cuisines**: bbq, american
 - **Equipment**: grill, slow_cooker
 - **Spice Level**: 4 (hot)
+- **Groceries**:
+  - **Proteins**: chicken breast, chicken thighs, ground beef, salmon, pork chops, turkey
+  - **Vegetables**: onions, garlic, bell peppers, corn, potatoes, mushrooms
+  - **Spices**: salt, black pepper, paprika, chili powder, cumin, garlic powder
+  - **Pantry**: olive oil, vegetable oil, brown sugar, chicken stock, soy sauce, vinegar
+  - **Dairy**: butter, cheddar, milk
+  - **Fruits**: lemons, limes
 - **Recipes**: 9 total (6 private, 3 shared)
   - Classic Caesar Salad (shared) - Course: Appetizer, Dish Type: Salad, Cuisine: American, Collection: Classic, Technique: No-Cook, Occasion: Any, Dietary: Gluten-Free, Time: Under 15 Minutes, **Mood: Traditional, Mood: Quick**
   - Grilled Chicken Breast (shared) - Course: Main, Technique: Grill, Collection: High-Protein, Collection: Lean Protein, Occasion: Meal Prep, Occasion: Weeknight, Dietary: Low-Carb, Time: Under 30 Minutes, **Mood: Quick, Mood: High-Protein**
@@ -74,6 +88,13 @@ All recipes are automatically tagged with 1-2 mood tags based on their existing 
 - **Cuisines**: spanish, thai
 - **Equipment**: pressure_cooker, rice_cooker
 - **Spice Level**: 5 (very hot)
+- **Groceries**:
+  - **Proteins**: chicken thighs, ground beef, eggs, beans, lentils
+  - **Vegetables**: onions, garlic, tomatoes, bell peppers, carrots, spinach
+  - **Spices**: salt, black pepper, paprika, cumin, turmeric, chili powder, curry powder, ginger
+  - **Pantry**: olive oil, rice, pasta, canned tomatoes, chicken stock, soy sauce, coconut milk
+  - **Dairy**: cheese, butter
+  - **Fruits**: lemons, limes, coconut
 - **Recipes**: 10 total (5 private, 5 shared)
   - One-Pot Pasta (shared) - Course: Main, Dish Type: Pasta, Cuisine: Italian, Occasion: Weeknight, Collection: One-Pot, Collection: Quick & Easy, Technique: Simmer, Dietary: Vegetarian, Time: Under 30 Minutes, **Mood: Quick, Mood: Simple**
   - Spanish Paella (shared) - Course: Main, Cuisine: Spanish, Cuisine: Mediterranean, Technique: Simmer, Technique: Paella, Occasion: Weekend, Occasion: Special Occasion, Collection: Seafood, Collection: Rice Dishes, Time: 1-2 Hours, **Mood: Patient, Mood: Sharing**
@@ -95,6 +116,13 @@ All recipes are automatically tagged with 1-2 mood tags based on their existing 
 - **Cuisines**: french, mediterranean
 - **Equipment**: stand_mixer, food_processor, oven
 - **Spice Level**: 1 (very mild)
+- **Groceries**:
+  - **Proteins**: eggs, greek yogurt, nuts
+  - **Vegetables**: tomatoes, cucumbers, lettuce, avocados
+  - **Spices**: salt, black pepper, vanilla extract, cinnamon
+  - **Pantry**: olive oil, gluten-free flour, sugar, brown sugar, honey, baking powder, baking soda
+  - **Dairy**: butter, cream cheese, heavy cream, milk, mozzarella
+  - **Fruits**: lemons, strawberries, apples, berries
 - **Recipes**: 9 total (6 private, 3 shared)
   - Gluten-Free Bread (shared) - Course: Side, Dish Type: Bread, Collection: Gluten-Free, Collection: Homemade, Technique: Bake, Technique: Yeast, Occasion: Any, Dietary: Gluten-Free, Time: 2-3 Hours, **Mood: Patient, Mood: Homemade**
   - French Macarons (shared) - Course: Dessert, Cuisine: French, Cuisine: European, Technique: Bake, Technique: Pastry, Collection: Sweet Treats, Occasion: Special Occasion, Dietary: Vegetarian, Time: 1-2 Hours, **Mood: Sweet, Mood: Elegant**
@@ -115,6 +143,12 @@ All recipes are automatically tagged with 1-2 mood tags based on their existing 
 - **Cuisines**: greek, japanese
 - **Equipment**: air_fryer, blender, food_processor
 - **Spice Level**: 3 (medium)
+- **Groceries**:
+  - **Proteins**: salmon, tuna, eggs, tofu, quinoa, nuts, chickpeas
+  - **Vegetables**: spinach, broccoli, cauliflower, zucchini, bell peppers, avocados, cucumbers
+  - **Spices**: salt, black pepper, ginger, turmeric, garlic powder
+  - **Pantry**: olive oil, coconut oil, rice, chia seeds, almond flour
+  - **Fruits**: berries, apples, lemons, limes, bananas
 - **Recipes**: 10 total (6 private, 4 shared)
   - Greek Yogurt Bowl (shared) - Course: Breakfast, Cuisine: Greek, Cuisine: Mediterranean, Collection: High-Protein, Collection: Dairy-Free, Collection: Healthy, Technique: No-Cook, Occasion: Morning, Dietary: Dairy-Free, Time: Under 10 Minutes, **Mood: Quick, Mood: Healthy**
   - Sushi Roll (shared) - Course: Main, Cuisine: Japanese, Cuisine: Asian, Technique: No-Cook, Collection: Seafood, Collection: Homemade, Occasion: Special Occasion, Dietary: Gluten-Free, Time: 30-60 Minutes, **Mood: Patient, Mood: Celebratory**
@@ -136,6 +170,13 @@ All recipes are automatically tagged with 1-2 mood tags based on their existing 
 - **Cuisines**: indian, korean, vietnamese
 - **Equipment**: wok, cast_iron_pan, dutch_oven
 - **Spice Level**: 5 (very hot)
+- **Groceries**:
+  - **Proteins**: chicken thighs, ground beef, shrimp, tofu, eggs
+  - **Vegetables**: onions, garlic, ginger, bell peppers, tomatoes, carrots, spinach
+  - **Spices**: salt, black pepper, chili powder, curry powder, cumin, turmeric, paprika, ginger, cinnamon
+  - **Pantry**: olive oil, sesame oil, rice, noodles, soy sauce, fish sauce, coconut milk
+  - **Dairy**: cheese, yogurt
+  - **Fruits**: limes, lemons, coconut
 - **Recipes**: 9 total (5 private, 4 shared)
   - Spicy Tacos (shared) - Course: Main, Dish Type: Taco, Cuisine: Mexican, Cuisine: Latin American, Collection: Spicy, Collection: Street Food, Technique: Sauté, Occasion: Weeknight, Occasion: Party, Dietary: Gluten-Free, Time: Under 30 Minutes, **Mood: Spicy, Mood: Sharing**
   - Korean BBQ (shared) - Course: Main, Cuisine: Korean, Cuisine: Asian, Collection: BBQ, Collection: Meat Lover, Technique: Grill, Technique: Marinate, Occasion: Weekend, Occasion: Special Occasion, Dietary: Gluten-Free, Time: 1-2 Hours, **Mood: Sharing, Mood: Patient**

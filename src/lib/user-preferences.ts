@@ -1,4 +1,9 @@
-import { supabase, type UserSafety, type CookingPreferences } from './supabase';
+import {
+  supabase,
+  type UserSafety,
+  type CookingPreferences,
+  type UserGroceries,
+} from './supabase';
 import { createLogger } from './logger';
 
 /**
@@ -286,4 +291,72 @@ export function validateTimePerMeal(minutes: number): boolean {
     minutes >= MIN_TIME_PER_MEAL &&
     minutes <= MAX_TIME_PER_MEAL
   );
+}
+
+/**
+ * Get user grocery data
+ */
+export async function getUserGroceries(
+  userId: string
+): Promise<UserGroceries | null> {
+  try {
+    const { data, error } = await supabase
+      .from('user_groceries')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        // No data found - this is expected for new users
+        logger.debug('No user grocery data found for user:', userId);
+        return null;
+      }
+      // If the table doesn't exist yet (migrations not run), fail gracefully
+      if (error.code === '42P01' || error.code === 'PGRST205') {
+        logger.warn('user_groceries table does not exist yet');
+        return null;
+      }
+      throw error;
+    }
+
+    return data;
+  } catch (error) {
+    logger.error('Error fetching user groceries:', error);
+    throw error;
+  }
+}
+
+/**
+ * Update user grocery data
+ */
+export async function updateUserGroceries(
+  userId: string,
+  groceries: Record<string, string[]>
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    logger.debug('Updating user groceries for user:', userId);
+
+    const { error } = await supabase.from('user_groceries').upsert({
+      user_id: userId,
+      groceries,
+      updated_at: new Date().toISOString(),
+    });
+
+    if (error) {
+      logger.error('Error updating user groceries:', error);
+      throw error;
+    }
+
+    logger.debug('Successfully updated user groceries for user:', userId);
+    return { success: true };
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error';
+    logger.error('Failed to update user groceries:', errorMessage);
+    return {
+      success: false,
+      error: errorMessage,
+    };
+  }
 }
