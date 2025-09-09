@@ -56,7 +56,7 @@ export default function GlobalIngredientsPage() {
   // Load grocery cart when user changes
   useEffect(() => {
     loadUserGroceryCart();
-  }, [user?.id, loadUserGroceryCart]);
+  }, [loadUserGroceryCart]);
 
   const grouped = useMemo(() => {
     const items = globalIngredients
@@ -111,15 +111,16 @@ export default function GlobalIngredientsPage() {
         .eq('user_id', user?.id)
         .single();
 
-      if (fetchError) {
+      if (fetchError && fetchError.code !== 'PGRST116') {
+        // PGRST116 = no rows returned (user has no groceries yet)
         console.error('Error fetching groceries:', fetchError);
         return;
       }
 
       // Add ingredient directly to the database
       const updatedGroceries = {
-        ...currentData.groceries,
-        [category]: [...(currentData.groceries[category] || []), name],
+        ...(currentData?.groceries || {}),
+        [category]: [...(currentData?.groceries[category] || []), name],
       };
 
       const { error: saveError } = await supabase

@@ -95,7 +95,7 @@ export function useGroceries(): UseGroceriesReturn {
     } finally {
       setLoading(false);
     }
-  }, [user?.id, groceries, toast, loadGroceries]);
+  }, [user?.id, groceries, toast]);
 
   // Toggle ingredient selection
   const toggleIngredient = useCallback(
