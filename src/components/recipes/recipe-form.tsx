@@ -14,7 +14,6 @@ import {
   useUpdateRecipe,
   useUploadImage,
 } from '@/hooks/use-recipes';
-import { useQueryClient } from '@tanstack/react-query';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { X, Upload, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -48,7 +47,6 @@ export function RecipeForm({
   const createRecipe = useCreateRecipe();
   const updateRecipe = useUpdateRecipe();
   const uploadImage = useUploadImage();
-  const queryClient = useQueryClient();
 
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>('');
@@ -224,11 +222,8 @@ export function RecipeForm({
 
       if (isMobile) console.log('Recipe operation completed successfully');
 
-      // Force refresh of recipes page and navigate back with a refresh hint
-      await queryClient.invalidateQueries({
-        queryKey: ['recipes'],
-        exact: false,
-      });
+      // The hooks now handle optimistic cache updates, so we just need to navigate
+      // The refresh state is kept as a safety net for any edge cases
       onSuccess?.();
       navigate('/', { state: { refresh: Date.now() } });
     } catch (error) {

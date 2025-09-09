@@ -43,12 +43,27 @@ export const useCreateRecipe = () => {
   return useMutation({
     mutationFn: recipeApi.createRecipe,
     onSuccess: (newRecipe) => {
-      // More strategic invalidation - only invalidate recipes list, not individual recipes
-      queryClient.invalidateQueries({ queryKey: ['recipes'], exact: false });
-      // Optionally set the new recipe in cache to avoid refetch
+      // Update detail cache
       if (newRecipe?.id) {
         queryClient.setQueryData(['recipe', newRecipe.id], newRecipe);
+
+        // Optimistically update all recipes list caches so UI reflects immediately
+        queryClient.setQueriesData(
+          { queryKey: ['recipes'], exact: false },
+          (oldData: unknown) => {
+            if (!oldData) return oldData;
+            // Expect oldData to be Recipe[]; preserve structure if not an array
+            if (Array.isArray(oldData)) {
+              // Add the new recipe to the beginning of the array
+              return [newRecipe, ...oldData];
+            }
+            return oldData;
+          }
+        );
       }
+
+      // Still invalidate in background to ensure fresh server state
+      queryClient.invalidateQueries({ queryKey: ['recipes'], exact: false });
       toast({
         title: 'Success',
         description: 'Recipe created successfully!',
