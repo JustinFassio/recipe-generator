@@ -391,7 +391,8 @@ export default function GlobalIngredientsPage() {
                               <span className="inline-flex items-center text-xs px-2 py-1 rounded border border-green-300 text-green-700 bg-green-50">
                                 <Check className="h-3 w-3 mr-1" /> Added
                               </span>
-                            ) : !isInCatalog ? (
+                            ) : !isInCatalog && !ing.is_system ? (
+                              // Only show "Add" button for user-added global ingredients, not system ingredients
                               <Button
                                 size="sm"
                                 onClick={() =>
