@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthProvider';
 import { useGroceries } from '@/hooks/useGroceries';
 import { Button } from '@/components/ui/button';
@@ -8,12 +8,46 @@ import { IngredientMatchingTest } from '@/components/groceries/ingredient-matchi
 import { Save, RefreshCw, Globe } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useGlobalIngredients } from '@/hooks/useGlobalIngredients';
+import { supabase } from '@/lib/supabase';
 
 export function GroceriesPage() {
   const { user } = useAuth();
   const groceries = useGroceries();
   const { hiddenNormalizedNames, globalIngredients } = useGlobalIngredients();
   const [activeCategory, setActiveCategory] = useState<string>('');
+
+  // State for user's grocery cart (from user_groceries table)
+  const [userGroceryCart, setUserGroceryCart] = useState<
+    Record<string, string[]>
+  >({});
+
+  // Load user's grocery cart from user_groceries table
+  const loadUserGroceryCart = useCallback(async () => {
+    if (!user?.id) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('user_groceries')
+        .select('groceries')
+        .eq('user_id', user.id)
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        // PGRST116 = no rows returned
+        console.error('Error loading grocery cart:', error);
+        return;
+      }
+
+      setUserGroceryCart(data?.groceries || {});
+    } catch (error) {
+      console.error('Error loading grocery cart:', error);
+    }
+  }, [user?.id]);
+
+  // Load grocery cart when user changes
+  useEffect(() => {
+    loadUserGroceryCart();
+  }, [loadUserGroceryCart]);
 
   // Get available categories from global ingredients data (source of truth)
   const availableCategories = useMemo(() => {
@@ -28,11 +62,17 @@ export function GroceriesPage() {
     }
   }, [availableCategories, activeCategory]);
 
+  // Get category count from grocery cart
+  const getCategoryCount = (category: string) => {
+    return userGroceryCart[category]?.length || 0;
+  };
+
   const handleSave = async () => {
     await groceries.saveGroceries();
   };
 
   const handleRefresh = async () => {
+    await loadUserGroceryCart();
     await groceries.loadGroceries();
   };
 
@@ -60,27 +100,10 @@ export function GroceriesPage() {
     icon: '📦',
   };
 
-  // Show ALL ingredients that user has added from Global Ingredients (both selected and unselected)
+  // Show ALL ingredients that user has added to their grocery cart (both selected and unselected)
   const userCategoryItems = (() => {
-    // Get all ingredients from global ingredients that the user has added to their collection
-    const userAddedIngredients = globalIngredients.filter((ingredient) => {
-      // Show all system ingredients that are not hidden
-      const isSystemNotHidden =
-        ingredient.is_system &&
-        !hiddenNormalizedNames.has(ingredient.normalized_name);
-
-      // Show all ingredients that the user has ever added (regardless of current selection state)
-      // The groceries.groceries state now only tracks selection state, not the ingredient list
-      // We need to show ALL ingredients that the user has added from Global Ingredients
-      const isInUserGroceries = Object.values(groceries.groceries).some(
-        (categoryIngredients) => categoryIngredients.includes(ingredient.name)
-      );
-
-      return (
-        (isInUserGroceries || isSystemNotHidden) &&
-        ingredient.category === activeCategory
-      );
-    });
+    // Get ingredients from the user's grocery cart (user_groceries table)
+    const cartIngredients = userGroceryCart[activeCategory] || [];
 
     // Filter out any system-hidden items
     const filterHidden = (name: string) => {
@@ -93,8 +116,7 @@ export function GroceriesPage() {
       return !hiddenNormalizedNames.has(normalized);
     };
 
-    return userAddedIngredients
-      .map((ingredient) => ingredient.name)
+    return cartIngredients
       .filter(filterHidden)
       .sort((a, b) => a.localeCompare(b));
   })();
@@ -162,7 +184,7 @@ export function GroceriesPage() {
                   GROCERY_CATEGORIES[
                     categoryKey as keyof typeof GROCERY_CATEGORIES
                   ];
-                const count = groceries.getCategoryCount(categoryKey);
+                const count = getCategoryCount(categoryKey);
                 return (
                   <button
                     key={categoryKey}
