@@ -1,11 +1,8 @@
-import { useState } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthProvider';
 import { useGroceries } from '@/hooks/useGroceries';
 import { Button } from '@/components/ui/button';
-import {
-  GROCERY_CATEGORIES,
-  GROCERY_CATEGORY_KEYS,
-} from '@/lib/groceries/categories';
+import { GROCERY_CATEGORIES } from '@/lib/groceries/categories';
 import { createDaisyUICardClasses } from '@/lib/card-migration';
 import { IngredientMatchingTest } from '@/components/groceries/ingredient-matching-test';
 import { Save, RefreshCw, Globe } from 'lucide-react';
@@ -15,8 +12,21 @@ import { useGlobalIngredients } from '@/hooks/useGlobalIngredients';
 export function GroceriesPage() {
   const { user } = useAuth();
   const groceries = useGroceries();
-  const { hiddenNormalizedNames } = useGlobalIngredients();
-  const [activeCategory, setActiveCategory] = useState<string>('proteins');
+  const { hiddenNormalizedNames, globalIngredients } = useGlobalIngredients();
+  const [activeCategory, setActiveCategory] = useState<string>('');
+
+  // Get available categories from global ingredients data (source of truth)
+  const availableCategories = useMemo(() => {
+    const categories = [...new Set(globalIngredients.map((g) => g.category))];
+    return categories.sort();
+  }, [globalIngredients]);
+
+  // Set default active category to first available category
+  useEffect(() => {
+    if (availableCategories.length > 0 && !activeCategory) {
+      setActiveCategory(availableCategories[0]);
+    }
+  }, [availableCategories, activeCategory]);
 
   const handleSave = async () => {
     await groceries.saveGroceries();
@@ -43,8 +53,12 @@ export function GroceriesPage() {
     );
   }
 
-  const activeCategoryData =
-    GROCERY_CATEGORIES[activeCategory as keyof typeof GROCERY_CATEGORIES];
+  const activeCategoryData = GROCERY_CATEGORIES[
+    activeCategory as keyof typeof GROCERY_CATEGORIES
+  ] || {
+    name: activeCategory,
+    icon: '📦',
+  };
 
   // Show ONLY the user's personal ingredient collection (what they've added from Global Ingredients)
   const userCategoryItems = (() => {
@@ -122,8 +136,11 @@ export function GroceriesPage() {
         <div className={createDaisyUICardClasses('bordered mb-6')}>
           <div className="card-body p-0">
             <div className="tabs tabs-boxed p-4 overflow-x-auto">
-              {GROCERY_CATEGORY_KEYS.map((categoryKey) => {
-                const category = GROCERY_CATEGORIES[categoryKey];
+              {availableCategories.map((categoryKey) => {
+                const category =
+                  GROCERY_CATEGORIES[
+                    categoryKey as keyof typeof GROCERY_CATEGORIES
+                  ];
                 const count = groceries.getCategoryCount(categoryKey);
                 return (
                   <button
@@ -132,10 +149,12 @@ export function GroceriesPage() {
                     onClick={() => setActiveCategory(categoryKey)}
                   >
                     <span className="flex items-center space-x-2">
-                      <span>{category.icon}</span>
-                      <span className="hidden sm:inline">{category.name}</span>
+                      <span>{category?.icon || '📦'}</span>
+                      <span className="hidden sm:inline">
+                        {category?.name || categoryKey}
+                      </span>
                       <span className="sm:hidden">
-                        {category.name.split(' ')[0]}
+                        {category?.name?.split(' ')[0] || categoryKey}
                       </span>
                       {count > 0 && (
                         <span className="badge badge-sm badge-primary">

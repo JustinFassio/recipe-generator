@@ -43,6 +43,12 @@ export default function GlobalIngredientsPage() {
     return map;
   }, [globalIngredients, query, activeCategory]);
 
+  // Get available categories from global ingredients data
+  const availableCategories = useMemo(() => {
+    const categories = [...new Set(globalIngredients.map((g) => g.category))];
+    return categories.sort();
+  }, [globalIngredients]);
+
   // lightweight normalizer only for UI comparisons
   const normalizeName = (s: string) =>
     s
@@ -191,18 +197,26 @@ export default function GlobalIngredientsPage() {
               >
                 All
               </button>
-              {Object.entries(GROCERY_CATEGORIES).map(([key, val]) => (
-                <button
-                  key={key}
-                  className={`tab ${activeCategory === key ? 'tab-active' : ''}`}
-                  onClick={() => setActiveCategory(key)}
-                >
-                  <span className="flex items-center space-x-2">
-                    <span>{val.icon}</span>
-                    <span className="hidden sm:inline">{val.name}</span>
-                  </span>
-                </button>
-              ))}
+              {availableCategories.map((category) => {
+                const categoryMeta =
+                  GROCERY_CATEGORIES[
+                    category as keyof typeof GROCERY_CATEGORIES
+                  ];
+                return (
+                  <button
+                    key={category}
+                    className={`tab ${activeCategory === category ? 'tab-active' : ''}`}
+                    onClick={() => setActiveCategory(category)}
+                  >
+                    <span className="flex items-center space-x-2">
+                      <span>{categoryMeta?.icon || '📦'}</span>
+                      <span className="hidden sm:inline">
+                        {categoryMeta?.name || category}
+                      </span>
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>
