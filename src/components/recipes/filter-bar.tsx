@@ -11,11 +11,13 @@ import {
 import { CategoryFilter } from '@/components/ui/category-filter';
 import { CuisineFilter } from '@/components/ui/cuisine-filter';
 import { MoodFilter } from '@/components/ui/mood-filter';
+import { IngredientFilter } from '@/components/ui/ingredient-filter';
 import CategoryChip from '@/components/ui/CategoryChip';
 // Domain-specific data imports - each from their specialized source
 import { CUISINE_OPTIONS, CUISINE_LABELS } from '@/lib/cuisines'; // Regional cuisine definitions
 import { CANONICAL_CATEGORIES } from '@/lib/categories'; // Namespaced category system
 import { MOOD_OPTIONS } from '@/lib/moods'; // Flavor and mood definitions
+import { useGroceries } from '@/hooks/useGroceries';
 
 // Type definitions
 import type { RecipeFilters, Cuisine, Mood, SortOption } from '@/lib/types';
@@ -31,9 +33,14 @@ export function FilterBar({
   onFiltersChange,
   className = '',
 }: FilterBarProps) {
+  const groceries = useGroceries();
+
   const updateFilters = (updates: Partial<RecipeFilters>) => {
     onFiltersChange({ ...filters, ...updates });
   };
+
+  // Get available ingredients from selected groceries
+  const availableIngredients = Object.values(groceries.groceries).flat();
 
   const clearAllFilters = () => {
     onFiltersChange({
@@ -93,6 +100,17 @@ export function FilterBar({
             onMoodsChange={(moods) => updateFilters({ moods })}
             availableMoods={MOOD_OPTIONS}
             placeholder="Filter by mood..."
+            className="w-full sm:w-48"
+          />
+
+          {/* Ingredient Filter */}
+          <IngredientFilter
+            selectedIngredients={filters.availableIngredients || []}
+            onIngredientsChange={(ingredients) =>
+              updateFilters({ availableIngredients: ingredients })
+            }
+            availableIngredients={availableIngredients}
+            placeholder="Filter by available ingredients..."
             className="w-full sm:w-48"
           />
         </div>

@@ -15,6 +15,7 @@ interface FilterDrawerProps {
   onOpenCategories: () => void;
   onOpenCuisines: () => void;
   onOpenMoods: () => void;
+  onOpenIngredients: () => void;
   totalRecipes?: number;
   filteredCount?: number;
   className?: string;
@@ -28,6 +29,7 @@ export function FilterDrawer({
   onOpenCategories,
   onOpenCuisines,
   onOpenMoods,
+  onOpenIngredients,
   totalRecipes = 0,
   filteredCount = 0,
   className = '',
@@ -153,6 +155,30 @@ export function FilterDrawer({
                 {state.selectedMoods.length > 0
                   ? `${state.selectedMoods.length} moods selected`
                   : 'Select moods'}
+              </span>
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+
+          {/* Available Ingredients */}
+          <div>
+            <label className="label">
+              <span className="label-text font-medium">
+                Available Ingredients
+              </span>
+              <span className="label-text-alt text-gray-500">
+                {state.selectedIngredients.length} selected
+              </span>
+            </label>
+            <Button
+              variant="outline"
+              className="w-full justify-between"
+              onClick={onOpenIngredients}
+            >
+              <span>
+                {state.selectedIngredients.length > 0
+                  ? `${state.selectedIngredients.length} ingredients selected`
+                  : 'Select available ingredients'}
               </span>
               <ChevronRight className="h-4 w-4" />
             </Button>

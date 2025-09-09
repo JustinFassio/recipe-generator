@@ -5,6 +5,7 @@ import { FilterDrawer } from './filter-drawer';
 import { CategorySelectionDrawer } from './category-selection-drawer';
 import { CuisineSelectionDrawer } from './cuisine-selection-drawer';
 import { MoodSelectionDrawer } from './mood-selection-drawer';
+import { IngredientSelectionDrawer } from './ingredient-selection-drawer';
 import { useNestedDrawer } from '@/hooks/use-nested-drawer';
 import { useMobileDetection } from '@/hooks/use-mobile-detection';
 import type { RecipeFilters } from '@/lib/types';
@@ -36,7 +37,8 @@ export function FilterDrawerContainer({
     filters.searchTerm ||
     filters.categories?.length ||
     filters.cuisine?.length ||
-    filters.moods?.length
+    filters.moods?.length ||
+    filters.availableIngredients?.length
   );
 
   const activeFilterCount = [
@@ -44,6 +46,7 @@ export function FilterDrawerContainer({
     filters.categories?.length || 0,
     filters.cuisine?.length || 0,
     filters.moods?.length || 0,
+    filters.availableIngredients?.length || 0,
   ].reduce((sum, count) => sum + count, 0);
 
   return (
@@ -74,6 +77,7 @@ export function FilterDrawerContainer({
         onOpenCategories={actions.openCategories}
         onOpenCuisines={actions.openCuisines}
         onOpenMoods={actions.openMoods}
+        onOpenIngredients={actions.openIngredients}
         totalRecipes={totalRecipes}
         filteredCount={filteredCount}
       />
@@ -111,6 +115,17 @@ export function FilterDrawerContainer({
         selectedMoods={filters.moods || []}
         onMoodsChange={(moods) => {
           onFiltersChange({ ...filters, moods });
+        }}
+      />
+
+      {/* Ingredient Selection Drawer */}
+      <IngredientSelectionDrawer
+        isOpen={drawerState.isIngredientsOpen}
+        onClose={actions.closeIngredients}
+        onBack={actions.closeIngredients}
+        selectedIngredients={filters.availableIngredients || []}
+        onIngredientsChange={(ingredients) => {
+          onFiltersChange({ ...filters, availableIngredients: ingredients });
         }}
       />
     </>

@@ -30,6 +30,7 @@ export type RecipeFilters = {
   categories?: string[];
   cuisine?: Cuisine[];
   moods?: Mood[];
+  availableIngredients?: string[];
   sortBy?: SortOption;
   sortOrder?: 'asc' | 'desc';
 };
