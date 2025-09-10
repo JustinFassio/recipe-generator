@@ -5,9 +5,8 @@ import { ChatInterface } from '@/components/chat/ChatInterface';
 import { RecipeForm } from '@/components/recipes/recipe-form';
 import { Button } from '@/components/ui/button';
 import type { RecipeFormData } from '@/lib/schemas';
-import { HybridFilterBar } from '@/components/recipes/hybrid-filter-bar';
-import { useSelections } from '@/contexts/SelectionContext';
-import type { RecipeFilters, Cuisine, Mood } from '@/lib/types';
+import { FilterBar } from '@/components/recipes/FilterBar';
+import { useSelectionFilters } from '@/hooks/useSelectionFilters';
 
 export function ChatRecipePage() {
   const navigate = useNavigate();
@@ -15,7 +14,7 @@ export function ChatRecipePage() {
     null
   );
   const [showEditor, setShowEditor] = useState(false);
-  const { selections, updateSelections } = useSelections();
+  const { filters, updateFilters } = useSelectionFilters();
 
   const handleRecipeGenerated = (recipe: RecipeFormData) => {
     setGeneratedRecipe(recipe);
@@ -70,23 +69,9 @@ export function ChatRecipePage() {
         </div>
 
         {/* AI Filters (desktop bar + mobile drawer) */}
-        <HybridFilterBar
-          filters={
-            {
-              categories: selections.categories,
-              cuisine: selections.cuisines as Cuisine[],
-              moods: selections.moods as Mood[],
-              availableIngredients: selections.availableIngredients,
-            } as Partial<RecipeFilters> as RecipeFilters
-          }
-          onFiltersChange={(f: RecipeFilters) => {
-            updateSelections({
-              categories: f.categories || [],
-              cuisines: (f.cuisine as string[]) || [],
-              moods: (f.moods as string[]) || [],
-              availableIngredients: f.availableIngredients || [],
-            });
-          }}
+        <FilterBar
+          filters={filters}
+          onFiltersChange={updateFilters}
           className="mb-6"
         />
 

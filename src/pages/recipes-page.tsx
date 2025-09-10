@@ -4,7 +4,7 @@ import { Plus, ChefHat, Sparkles } from 'lucide-react';
 import { useRecipes } from '@/hooks/use-recipes';
 import { useRecipeFilters } from '@/hooks/use-recipe-filters';
 import { RecipeCard } from '@/components/recipes/recipe-card';
-import { HybridFilterBar } from '@/components/recipes/hybrid-filter-bar';
+import { FilterBar } from '@/components/recipes/FilterBar';
 import { Button } from '@/components/ui/button';
 import { FloatingActionButton } from '@/components/ui/fab';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -110,7 +110,7 @@ export function RecipesPage() {
         </div>
 
         {/* Filter Bar */}
-        <HybridFilterBar
+        <FilterBar
           filters={filters}
           onFiltersChange={updateFilters}
           totalRecipes={recipes.length}

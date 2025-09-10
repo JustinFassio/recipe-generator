@@ -106,8 +106,8 @@ export function IngredientFilterSection({
         </Button>
 
         {isOpen && (
-          <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border rounded-md shadow-lg max-h-80 overflow-y-auto">
-            <div className="p-3 border-b">
+          <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border rounded-lg shadow-lg max-h-80 overflow-y-auto w-96">
+            <div className="p-4 border-b">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 text-gray-400 -translate-y-1/2" />
                 <Input
@@ -119,43 +119,45 @@ export function IngredientFilterSection({
               </div>
             </div>
 
-            <div className="p-2 space-y-2">
+            <div className="p-4 space-y-4">
               {Object.entries(groupedIngredients).map(
                 ([categoryName, ingredients]) => (
-                  <div key={categoryName}>
-                    <div className="px-2 py-1 text-sm font-medium text-gray-600">
+                  <div key={categoryName} className="space-y-2">
+                    <h5 className="text-sm font-medium text-gray-700 border-b pb-1">
                       {categoryName}
+                    </h5>
+                    <div className="grid grid-cols-3 gap-2">
+                      {ingredients.map((ingredient) => {
+                        const isSelected =
+                          selectedIngredients.includes(ingredient);
+                        return (
+                          <Button
+                            key={ingredient}
+                            variant={isSelected ? 'default' : 'outline'}
+                            size="sm"
+                            className="justify-start text-xs h-9 hover:bg-gray-50 transition-colors"
+                            onClick={() => toggleIngredient(ingredient)}
+                          >
+                            {isSelected && <Check className="h-3 w-3 mr-1" />}
+                            <span className="truncate">{ingredient}</span>
+                          </Button>
+                        );
+                      })}
                     </div>
-                    {ingredients.map((ingredient) => {
-                      const isSelected =
-                        selectedIngredients.includes(ingredient);
-                      return (
-                        <Button
-                          key={ingredient}
-                          variant={isSelected ? 'default' : 'ghost'}
-                          size="sm"
-                          className="w-full justify-start text-xs h-8"
-                          onClick={() => toggleIngredient(ingredient)}
-                        >
-                          {isSelected && <Check className="h-3 w-3 mr-1" />}
-                          <span className="truncate">{ingredient}</span>
-                        </Button>
-                      );
-                    })}
                   </div>
                 )
               )}
             </div>
 
             {selectedIngredients.length > 0 && (
-              <div className="p-2 border-t">
+              <div className="p-4 border-t">
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={clearAllIngredients}
-                  className="w-full text-xs"
+                  className="w-full text-xs hover:bg-gray-50"
                 >
-                  Clear All
+                  Clear All Ingredients
                 </Button>
               </div>
             )}

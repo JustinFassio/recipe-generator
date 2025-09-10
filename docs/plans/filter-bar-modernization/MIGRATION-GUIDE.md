@@ -365,7 +365,7 @@ The new FilterBar automatically adapts to different screen sizes:
 #### **Tablet (768-1023px)**
 
 - **Layout**: Collapsible filter sections
-- **Interaction**: Expandable accordions
+- **Interaction**: Nested drawer navigation
 - **Display**: Touch-optimized controls
 
 #### **Mobile (<768px)**

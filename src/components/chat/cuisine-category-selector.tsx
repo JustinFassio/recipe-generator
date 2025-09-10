@@ -1,15 +1,11 @@
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { CategoryFilter } from '@/components/ui/category-filter';
-import { CuisineFilter } from '@/components/ui/cuisine-filter';
-import { MoodFilter } from '@/components/ui/mood-filter';
-import { IngredientFilter } from '@/components/ui/ingredient-filter';
+import { CategoryFilterSection } from '@/components/recipes/filters/CategoryFilterSection';
+import { CuisineFilterSection } from '@/components/recipes/filters/CuisineFilterSection';
+import { MoodFilterSection } from '@/components/recipes/filters/MoodFilterSection';
+import { IngredientFilterSection } from '@/components/recipes/filters/IngredientFilterSection';
 import CategoryChip from '@/components/ui/CategoryChip';
-import { CANONICAL_CATEGORIES } from '@/lib/categories';
-import { CUISINE_OPTIONS } from '@/lib/cuisines';
-import { MOOD_OPTIONS } from '@/lib/moods';
 import { useSelections } from '@/contexts/SelectionContext';
-import { useGroceries } from '@/hooks/useGroceries';
 
 export interface CuisineCategorySelectorProps {
   onSelectionChange: (selection: {
@@ -33,12 +29,6 @@ export function CuisineCategorySelector({
     removeCuisine,
     removeMood,
   } = useSelections();
-
-  // Pull available ingredients from user's groceries (selected pantry items)
-  const groceries = useGroceries();
-  const allAvailableIngredients = Object.values(groceries.groceries)
-    .flat()
-    .sort((a, b) => a.localeCompare(b));
 
   const {
     categories: selectedCategories,
@@ -133,38 +123,34 @@ export function CuisineCategorySelector({
         {/* Left side - All selectors grouped together */}
         <div className="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:gap-4">
           {/* Categories Filter */}
-          <CategoryFilter
+          <CategoryFilterSection
             selectedCategories={selectedCategories}
             onCategoriesChange={handleCategoriesChange}
-            availableCategories={CANONICAL_CATEGORIES}
-            placeholder="Select categories..."
+            variant="dropdown"
             className="w-full sm:w-48"
           />
 
           {/* Cuisine Filter */}
-          <CuisineFilter
+          <CuisineFilterSection
             selectedCuisines={selectedCuisines}
             onCuisinesChange={handleCuisinesChange}
-            availableCuisines={CUISINE_OPTIONS}
-            placeholder="Select cuisines..."
+            variant="dropdown"
             className="w-full sm:w-48"
           />
 
           {/* Mood Filter */}
-          <MoodFilter
+          <MoodFilterSection
             selectedMoods={selectedMoods}
             onMoodsChange={handleMoodsChange}
-            availableMoods={MOOD_OPTIONS}
-            placeholder="Select moods..."
+            variant="dropdown"
             className="w-full sm:w-48"
           />
 
           {/* Ingredients Filter */}
-          <IngredientFilter
+          <IngredientFilterSection
             selectedIngredients={selectedIngredients}
             onIngredientsChange={handleIngredientsChange}
-            availableIngredients={allAvailableIngredients}
-            placeholder="Select available ingredients..."
+            variant="dropdown"
             className="w-full sm:w-48"
           />
         </div>
