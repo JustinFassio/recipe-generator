@@ -335,7 +335,7 @@ export function FilterBar({
                 </Button>
               )}
               <Button onClick={() => setIsDrawerOpen(false)} className="flex-1">
-                Apply Filters
+                Done
               </Button>
             </div>
           </div>
