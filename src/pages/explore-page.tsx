@@ -135,6 +135,20 @@ export default function ExplorePage() {
       );
     }
 
+    // Available Ingredients filter
+    if (
+      filters.availableIngredients &&
+      filters.availableIngredients.length > 0
+    ) {
+      filtered = filtered.filter((recipe) =>
+        filters.availableIngredients!.some((ingredient) =>
+          recipe.ingredients.some((recipeIngredient) =>
+            recipeIngredient.toLowerCase().includes(ingredient.toLowerCase())
+          )
+        )
+      );
+    }
+
     // Sorting
     const sorted = [...filtered].sort((a, b) => {
       let comparison = 0;
@@ -207,7 +221,8 @@ export default function ExplorePage() {
                 filters.searchTerm ||
                 filters.categories?.length ||
                 filters.cuisine?.length ||
-                filters.moods?.length
+                filters.moods?.length ||
+                filters.availableIngredients?.length
                   ? ' matching your filters'
                   : ''
               }`}
@@ -220,7 +235,8 @@ export default function ExplorePage() {
             {filters.searchTerm ||
             filters.categories?.length ||
             filters.cuisine?.length ||
-            filters.moods?.length
+            filters.moods?.length ||
+            filters.availableIngredients?.length
               ? 'No recipes found matching your filters. Try adjusting your search criteria.'
               : 'No public recipes available yet.'}
           </p>
