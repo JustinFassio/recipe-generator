@@ -71,16 +71,16 @@ export function FilterBar({
       </div>
 
       {/* Filter Controls */}
-      <div className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:space-y-0 sm:gap-3">
-        {/* Left side - All filters grouped together */}
-        <div className="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:gap-3">
+      <div className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:space-y-0">
+        {/* Left side - Main filters (Categories, Cuisine, Mood, Ingredients) */}
+        <div className="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:gap-2">
           {/* Categories Filter */}
           <CategoryFilter
             selectedCategories={filters.categories || []}
             onCategoriesChange={(categories) => updateFilters({ categories })}
             availableCategories={CANONICAL_CATEGORIES}
             placeholder="Filter by categories..."
-            className="w-full sm:w-48"
+            className="w-full sm:w-36"
           />
 
           {/* Cuisine Filter */}
@@ -91,7 +91,7 @@ export function FilterBar({
             }
             availableCuisines={CUISINE_OPTIONS}
             placeholder="Filter by cuisine..."
-            className="w-full sm:w-48"
+            className="w-full sm:w-36"
           />
 
           {/* Mood Filter */}
@@ -100,7 +100,7 @@ export function FilterBar({
             onMoodsChange={(moods) => updateFilters({ moods })}
             availableMoods={MOOD_OPTIONS}
             placeholder="Filter by mood..."
-            className="w-full sm:w-48"
+            className="w-full sm:w-36"
           />
 
           {/* Ingredient Filter */}
@@ -111,11 +111,11 @@ export function FilterBar({
             }
             availableIngredients={availableIngredients}
             placeholder="Filter by ingredients..."
-            className="w-full sm:w-48"
+            className="w-full sm:w-36"
           />
         </div>
 
-        {/* Right side - Sort options and clear filters */}
+        {/* Right side - Date/Sort options and clear filters */}
         <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:gap-2 sm:ml-auto">
           {/* Sort Options */}
           <Select
