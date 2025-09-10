@@ -224,10 +224,20 @@ export function FilterBar({
       {/* Drawer Implementation - will use existing NestedDrawer component */}
       {/* For now, show a placeholder - full drawer implementation will be added */}
       {isDrawerOpen && (
-        <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-end">
+        <div
+          className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-end"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="filter-bar-drawer-title"
+        >
           <div className="bg-white w-full max-h-[90vh] rounded-t-lg p-4 space-y-4">
             <div className="flex justify-between items-center">
-              <h3 className="text-lg font-semibold">Filters & Search</h3>
+              <h3
+                id="filter-bar-drawer-title"
+                className="text-lg font-semibold"
+              >
+                Filters & Search
+              </h3>
               <Button
                 variant="ghost"
                 size="sm"
