@@ -668,6 +668,7 @@ class OpenAIAPI {
       categories: string[];
       cuisines: string[];
       moods: string[];
+      availableIngredients?: string[];
     }
   ): Promise<ChatResponse> {
     const personaConfig = RECIPE_BOT_PERSONAS[persona];
@@ -693,7 +694,9 @@ class OpenAIAPI {
           liveSelections &&
           (liveSelections.categories.length > 0 ||
             liveSelections.cuisines.length > 0 ||
-            liveSelections.moods.length > 0)
+            liveSelections.moods.length > 0 ||
+            (liveSelections.availableIngredients &&
+              liveSelections.availableIngredients.length > 0))
         ) {
           systemPrompt = buildEnhancedAIPromptWithOverrides(
             personaConfig.systemPrompt,

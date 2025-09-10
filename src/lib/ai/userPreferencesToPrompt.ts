@@ -30,6 +30,8 @@ export interface UserPreferencesForAI {
     available_equipment: string[];
     disliked_ingredients: string[];
     spice_tolerance?: number;
+    // live-available ingredients can be injected at runtime; we keep the type here for symmetry
+    available_ingredients?: string[];
   };
 }
 

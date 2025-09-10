@@ -3,17 +3,20 @@ import { Button } from '@/components/ui/button';
 import { CategoryFilter } from '@/components/ui/category-filter';
 import { CuisineFilter } from '@/components/ui/cuisine-filter';
 import { MoodFilter } from '@/components/ui/mood-filter';
+import { IngredientFilter } from '@/components/ui/ingredient-filter';
 import CategoryChip from '@/components/ui/CategoryChip';
 import { CANONICAL_CATEGORIES } from '@/lib/categories';
 import { CUISINE_OPTIONS } from '@/lib/cuisines';
 import { MOOD_OPTIONS } from '@/lib/moods';
 import { useSelections } from '@/contexts/SelectionContext';
+import { useGroceries } from '@/hooks/useGroceries';
 
 export interface CuisineCategorySelectorProps {
   onSelectionChange: (selection: {
     categories: string[];
     cuisines: string[];
     moods: string[];
+    availableIngredients?: string[];
   }) => void;
   className?: string;
 }
@@ -31,10 +34,17 @@ export function CuisineCategorySelector({
     removeMood,
   } = useSelections();
 
+  // Pull available ingredients from user's groceries (selected pantry items)
+  const groceries = useGroceries();
+  const allAvailableIngredients = Object.values(groceries.groceries)
+    .flat()
+    .sort((a, b) => a.localeCompare(b));
+
   const {
     categories: selectedCategories,
     cuisines: selectedCuisines,
     moods: selectedMoods,
+    availableIngredients: selectedIngredients,
   } = selections;
 
   const handleCategoriesChange = (categories: string[]) => {
@@ -61,6 +71,16 @@ export function CuisineCategorySelector({
       categories: selectedCategories,
       cuisines: selectedCuisines,
       moods,
+    });
+  };
+
+  const handleIngredientsChange = (availableIngredients: string[]) => {
+    updateSelections({ availableIngredients });
+    onSelectionChange({
+      categories: selectedCategories,
+      cuisines: selectedCuisines,
+      moods: selectedMoods,
+      availableIngredients,
     });
   };
 
@@ -103,7 +123,8 @@ export function CuisineCategorySelector({
   const hasSelections =
     selectedCategories.length > 0 ||
     selectedCuisines.length > 0 ||
-    selectedMoods.length > 0;
+    selectedMoods.length > 0 ||
+    selectedIngredients.length > 0;
 
   return (
     <div className={`space-y-4 ${className}`}>
@@ -135,6 +156,15 @@ export function CuisineCategorySelector({
             onMoodsChange={handleMoodsChange}
             availableMoods={MOOD_OPTIONS}
             placeholder="Select moods..."
+            className="w-full sm:w-48"
+          />
+
+          {/* Ingredients Filter */}
+          <IngredientFilter
+            selectedIngredients={selectedIngredients}
+            onIngredientsChange={handleIngredientsChange}
+            availableIngredients={allAvailableIngredients}
+            placeholder="Select available ingredients..."
             className="w-full sm:w-48"
           />
         </div>

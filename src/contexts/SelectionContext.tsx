@@ -9,6 +9,7 @@ export interface SelectionState {
   categories: string[];
   cuisines: string[];
   moods: string[];
+  availableIngredients: string[];
 }
 
 interface SelectionContextType {
@@ -49,6 +50,7 @@ export const SelectionProvider: React.FC<SelectionProviderProps> = ({
     categories: [],
     cuisines: [],
     moods: [],
+    availableIngredients: [],
   });
 
   const updateSelections = (newSelections: Partial<SelectionState>) => {
@@ -63,6 +65,7 @@ export const SelectionProvider: React.FC<SelectionProviderProps> = ({
       categories: [],
       cuisines: [],
       moods: [],
+      availableIngredients: [],
     });
   };
 

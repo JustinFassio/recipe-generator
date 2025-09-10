@@ -54,6 +54,8 @@ import {
   buildUserContextPrompt,
   buildCulturalPrompt,
 } from './userPreferencesToPrompt';
+// Expose Ingredients agent alongside other agents
+export * from '@/lib/ai-agents/ingredients-agent';
 import {
   validateRecipeSafety,
   estimateRecipeTime,
@@ -114,6 +116,7 @@ export const buildEnhancedAIPromptWithOverrides = (
     categories: string[];
     cuisines: string[];
     moods: string[];
+    availableIngredients?: string[];
   }
 ): string => {
   // Build base user context (safety and core preferences)
@@ -136,7 +139,9 @@ export const buildEnhancedAIPromptWithOverrides = (
   if (
     liveSelections.categories.length > 0 ||
     liveSelections.cuisines.length > 0 ||
-    liveSelections.moods.length > 0
+    liveSelections.moods.length > 0 ||
+    (liveSelections.availableIngredients &&
+      liveSelections.availableIngredients.length > 0)
   ) {
     liveSelectionContext =
       '\nLIVE MEAL PREFERENCES (Override account preferences):\n';
@@ -149,6 +154,12 @@ export const buildEnhancedAIPromptWithOverrides = (
     }
     if (liveSelections.moods.length > 0) {
       liveSelectionContext += `• **Moods:** ${liveSelections.moods.join(', ')}\n`;
+    }
+    if (
+      liveSelections.availableIngredients &&
+      liveSelections.availableIngredients.length > 0
+    ) {
+      liveSelectionContext += `• **Available ingredients:** ${liveSelections.availableIngredients.join(', ')}\n`;
     }
 
     liveSelectionContext +=

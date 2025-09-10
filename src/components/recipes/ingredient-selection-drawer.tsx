@@ -150,8 +150,26 @@ export function IngredientSelectionDrawer({
               </p>
             </div>
           ) : (
-            Object.entries(groupedIngredients).map(
-              ([categoryKey, ingredients]) => {
+            Object.entries(groupedIngredients)
+              // Sort categories by priority for better UX
+              .sort(([a], [b]) => {
+                const PRIORITY = [
+                  'proteins',
+                  'vegetables',
+                  'pantry',
+                  'dairy',
+                  'spices',
+                  'fruits',
+                  'other',
+                ];
+                const ia = PRIORITY.indexOf(a);
+                const ib = PRIORITY.indexOf(b);
+                return (
+                  (ia === -1 ? PRIORITY.length : ia) -
+                  (ib === -1 ? PRIORITY.length : ib)
+                );
+              })
+              .map(([categoryKey, ingredients]) => {
                 const categoryData =
                   GROCERY_CATEGORIES[
                     categoryKey as keyof typeof GROCERY_CATEGORIES
@@ -225,8 +243,7 @@ export function IngredientSelectionDrawer({
                     </div>
                   </div>
                 );
-              }
-            )
+              })
           )}
         </div>
 
