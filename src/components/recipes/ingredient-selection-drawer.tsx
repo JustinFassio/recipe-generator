@@ -99,13 +99,18 @@ export function IngredientSelectionDrawer({
       id="ingredient-selection-drawer"
       isOpen={isOpen}
       onClose={onClose}
+      showBackButton={true}
       onBack={onBack}
-      title="Select Available Ingredients"
+      title="Select Ingredients"
+      backButtonText="Back to Filters"
       className={className}
     >
-      <div className="space-y-4 pb-20">
+      <div className="space-y-6 pb-20">
         {/* Search */}
-        <div className="form-control">
+        <div>
+          <label className="label">
+            <span className="label-text font-medium">Filter ingredients</span>
+          </label>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 text-gray-400" />
             <Input
@@ -135,7 +140,7 @@ export function IngredientSelectionDrawer({
         </div>
 
         {/* Ingredients List Grouped by Category */}
-        <div className="space-y-4 max-h-96 overflow-y-auto">
+        <div className="space-y-6">
           {Object.keys(groupedIngredients).length === 0 ? (
             <div className="text-center py-8">
               <p className="text-gray-500">
@@ -155,33 +160,66 @@ export function IngredientSelectionDrawer({
                 const categoryIcon = categoryData?.icon || '📦';
 
                 return (
-                  <div key={categoryKey} className="space-y-2">
-                    <h3 className="text-sm font-semibold text-gray-700 flex items-center gap-2 sticky top-0 bg-base-100 py-1">
-                      <span>{categoryIcon}</span>
-                      <span>{categoryName}</span>
-                      <span className="text-xs text-gray-500">
-                        ({ingredients.length})
-                      </span>
-                    </h3>
-                    <div className="space-y-1">
+                  <div key={categoryKey} className="space-y-3">
+                    {/* Group Header with Actions (match Categories drawer) */}
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-medium text-gray-800 flex items-center gap-2">
+                        <span>{categoryIcon}</span>
+                        <span>{categoryName}</span>
+                        <span className="text-xs text-gray-500">
+                          ({ingredients.length})
+                        </span>
+                      </h4>
+                      <div className="flex gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() =>
+                            onIngredientsChange([
+                              ...new Set([
+                                ...selectedIngredients,
+                                ...ingredients,
+                              ]),
+                            ])
+                          }
+                          className="text-xs px-2 py-1 h-6"
+                        >
+                          All
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() =>
+                            onIngredientsChange(
+                              selectedIngredients.filter(
+                                (ing) => !ingredients.includes(ing)
+                              )
+                            )
+                          }
+                          className="text-xs px-2 py-1 h-6"
+                        >
+                          None
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* Two-column buttons matching Categories drawer */}
+                    <div className="grid grid-cols-2 gap-2">
                       {ingredients.map((ingredient) => {
                         const isSelected =
                           selectedIngredients.includes(ingredient);
                         return (
-                          <button
+                          <Button
                             key={ingredient}
+                            variant={isSelected ? 'default' : 'outline'}
+                            size="sm"
+                            className="justify-start text-xs h-10"
                             onClick={() => toggleIngredient(ingredient)}
-                            className={`w-full flex items-center justify-between p-2 rounded-lg border transition-colors ${
-                              isSelected
-                                ? 'bg-primary text-primary-content border-primary'
-                                : 'bg-base-100 hover:bg-base-200 border-base-300'
-                            }`}
+                            title={ingredient}
                           >
-                            <span className="text-left font-medium text-sm">
-                              {ingredient}
-                            </span>
-                            {isSelected && <Check className="h-4 w-4" />}
-                          </button>
+                            {isSelected && <Check className="h-3 w-3 mr-1" />}
+                            <span className="truncate">{ingredient}</span>
+                          </Button>
                         );
                       })}
                     </div>
