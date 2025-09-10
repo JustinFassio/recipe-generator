@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { FilterBar } from '@/components/recipes/FilterBar';
 import type { RecipeFilters } from '@/lib/types';
@@ -149,6 +149,79 @@ describe('FilterBar', () => {
     it('does not show clear button when no active filters', () => {
       render(<FilterBar {...mockProps} />);
       expect(screen.queryByText('Clear All Filters')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Drawer Interaction', () => {
+    it('opens drawer when filter button is clicked in drawer variant', () => {
+      render(<FilterBar {...mockProps} variant="drawer" />);
+
+      // Initially drawer should be closed
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+
+      const filterButton = screen.getByRole('button', {
+        name: /filters & search/i,
+      });
+      fireEvent.click(filterButton);
+
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+      expect(
+        screen.getByRole('heading', { name: /filters & search/i })
+      ).toBeInTheDocument();
+    });
+
+    it('closes drawer when escape key is pressed', () => {
+      render(<FilterBar {...mockProps} variant="drawer" />);
+
+      // Open drawer
+      const filterButton = screen.getByRole('button', {
+        name: /filters & search/i,
+      });
+      fireEvent.click(filterButton);
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+
+      // Press escape key
+      fireEvent.keyDown(document, { key: 'Escape' });
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+
+    it('closes drawer when backdrop is clicked', () => {
+      render(<FilterBar {...mockProps} variant="drawer" />);
+
+      // Open drawer
+      const filterButton = screen.getByRole('button', {
+        name: /filters & search/i,
+      });
+      fireEvent.click(filterButton);
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+
+      // Click backdrop (the dialog container itself)
+      const backdrop = screen.getByRole('dialog');
+      fireEvent.click(backdrop);
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+
+    it('closes drawer when close button is clicked', () => {
+      render(<FilterBar {...mockProps} variant="drawer" />);
+
+      // Open drawer
+      const filterButton = screen.getByRole('button', {
+        name: /filters & search/i,
+      });
+      fireEvent.click(filterButton);
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+
+      // Click the close button (X button)
+      const closeButton = screen
+        .getAllByRole('button')
+        .find((button) =>
+          button.querySelector('svg')?.querySelector('path[d="M18 6 6 18"]')
+        );
+      expect(closeButton).toBeDefined();
+      fireEvent.click(closeButton!);
+
+      // Should close the drawer
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     });
   });
 });

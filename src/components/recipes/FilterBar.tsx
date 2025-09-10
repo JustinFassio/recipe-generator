@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, Filter, X, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -36,6 +36,33 @@ export function FilterBar({
   } = useFilterBar(filters, onFiltersChange);
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  // Handle keyboard events for drawer
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && isDrawerOpen) {
+        setIsDrawerOpen(false);
+      }
+    };
+
+    if (isDrawerOpen) {
+      document.addEventListener('keydown', handleKeyDown);
+      // Prevent body scroll when drawer is open
+      document.body.style.overflow = 'hidden';
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'unset';
+    };
+  }, [isDrawerOpen]);
+
+  // Handle backdrop click
+  const handleBackdropClick = (event: React.MouseEvent) => {
+    if (event.target === event.currentTarget) {
+      setIsDrawerOpen(false);
+    }
+  };
 
   // Determine effective variant based on screen size
   const effectiveVariant =
@@ -229,6 +256,7 @@ export function FilterBar({
           role="dialog"
           aria-modal="true"
           aria-labelledby="filter-bar-drawer-title"
+          onClick={handleBackdropClick}
         >
           <div className="bg-white w-full max-h-[90vh] rounded-t-lg p-4 space-y-4">
             <div className="flex justify-between items-center">
