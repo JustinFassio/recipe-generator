@@ -1,5 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Search, Filter, X, ChevronDown } from 'lucide-react';
+import {
+  Search,
+  Filter,
+  X,
+  ChevronDown,
+  ChevronRight,
+  ArrowLeft,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -31,17 +38,25 @@ export function FilterBar({
     clearAllFilters,
     hasActiveFilters,
     activeFilterCount,
-    isTablet,
     isDesktop,
   } = useFilterBar(filters, onFiltersChange);
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [activeNestedDrawer, setActiveNestedDrawer] = useState<
+    'categories' | 'cuisines' | 'moods' | 'ingredients' | null
+  >(null);
 
   // Handle keyboard events for drawer
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && isDrawerOpen) {
-        setIsDrawerOpen(false);
+        if (activeNestedDrawer) {
+          // If in nested drawer, go back to main drawer
+          setActiveNestedDrawer(null);
+        } else {
+          // If in main drawer, close completely
+          setIsDrawerOpen(false);
+        }
       }
     };
 
@@ -55,23 +70,61 @@ export function FilterBar({
       document.removeEventListener('keydown', handleKeyDown);
       document.body.style.overflow = 'unset';
     };
-  }, [isDrawerOpen]);
+  }, [isDrawerOpen, activeNestedDrawer]);
 
   // Handle backdrop click
   const handleBackdropClick = (event: React.MouseEvent) => {
     if (event.target === event.currentTarget) {
       setIsDrawerOpen(false);
+      setActiveNestedDrawer(null);
     }
   };
+
+  // Helper functions for drawer management
+  const openNestedDrawer = (
+    drawerType: 'categories' | 'cuisines' | 'moods' | 'ingredients'
+  ) => {
+    setActiveNestedDrawer(drawerType);
+  };
+
+  const closeNestedDrawer = () => {
+    setActiveNestedDrawer(null);
+  };
+
+  const closeAllDrawers = () => {
+    setIsDrawerOpen(false);
+    setActiveNestedDrawer(null);
+  };
+
+  // FilterTypeButton component for main drawer
+  const FilterTypeButton = ({
+    label,
+    count,
+    onClick,
+  }: {
+    label: string;
+    count: number;
+    onClick: () => void;
+  }) => (
+    <Button
+      variant="outline"
+      className="w-full justify-between p-4 h-auto"
+      onClick={onClick}
+    >
+      <span className="font-medium">{label}</span>
+      <div className="flex items-center gap-2">
+        {count > 0 && <Badge variant="secondary">{count}</Badge>}
+        <ChevronRight className="h-4 w-4" />
+      </div>
+    </Button>
+  );
 
   // Determine effective variant based on screen size
   const effectiveVariant =
     variant === 'auto'
       ? isDesktop
         ? 'horizontal'
-        : isTablet
-          ? 'accordion'
-          : 'drawer'
+        : 'drawer' // Use drawer for both tablet and mobile
       : variant;
 
   // Desktop Horizontal Layout
@@ -97,14 +150,14 @@ export function FilterBar({
           {/* Filter Controls */}
           <div className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:space-y-0">
             {/* Main Filters */}
-            <div className="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:gap-2">
+            <div className="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:gap-3">
               <CategoryFilterSection
                 selectedCategories={localFilters.categories || []}
                 onCategoriesChange={(categories) =>
                   updateFilter({ categories })
                 }
                 variant="dropdown"
-                className="w-full sm:w-36"
+                className="w-full sm:w-40"
               />
 
               <CuisineFilterSection
@@ -113,14 +166,14 @@ export function FilterBar({
                   updateFilter({ cuisine: cuisines })
                 }
                 variant="dropdown"
-                className="w-full sm:w-36"
+                className="w-full sm:w-40"
               />
 
               <MoodFilterSection
                 selectedMoods={localFilters.moods || []}
                 onMoodsChange={(moods) => updateFilter({ moods })}
                 variant="dropdown"
-                className="w-full sm:w-36"
+                className="w-full sm:w-40"
               />
 
               <IngredientFilterSection
@@ -129,7 +182,7 @@ export function FilterBar({
                   updateFilter({ availableIngredients: ingredients })
                 }
                 variant="dropdown"
-                className="w-full sm:w-36"
+                className="w-full sm:w-40"
               />
             </div>
 
@@ -248,8 +301,7 @@ export function FilterBar({
         <ChevronDown className="ml-auto h-4 w-4" />
       </Button>
 
-      {/* Drawer Implementation - will use existing NestedDrawer component */}
-      {/* For now, show a placeholder - full drawer implementation will be added */}
+      {/* Nested Drawer Implementation */}
       {isDrawerOpen && (
         <div
           className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-end"
@@ -261,83 +313,166 @@ export function FilterBar({
             className="bg-white w-full max-h-[90vh] rounded-t-lg p-4 space-y-4"
             aria-labelledby="filter-bar-drawer-title"
           >
-            <div className="flex justify-between items-center">
-              <h3
-                id="filter-bar-drawer-title"
-                className="text-lg font-semibold"
-              >
-                Filters & Search
-              </h3>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsDrawerOpen(false)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
+            {/* Main Drawer Content */}
+            {!activeNestedDrawer && (
+              <>
+                <div className="flex justify-between items-center">
+                  <h3
+                    id="filter-bar-drawer-title"
+                    className="text-lg font-semibold"
+                  >
+                    Filters & Search
+                  </h3>
+                  <Button variant="ghost" size="sm" onClick={closeAllDrawers}>
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
 
-            {/* Search Bar */}
-            <div className="relative">
-              <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
-              <Input
-                type="text"
-                placeholder="Search recipes..."
-                value={localFilters.searchTerm || ''}
-                onChange={(e) => updateFilter({ searchTerm: e.target.value })}
-                className="pl-10"
-              />
-            </div>
+                {/* Search Bar */}
+                <div className="relative">
+                  <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                  <Input
+                    type="text"
+                    placeholder="Search recipes..."
+                    value={localFilters.searchTerm || ''}
+                    onChange={(e) =>
+                      updateFilter({ searchTerm: e.target.value })
+                    }
+                    className="pl-10"
+                  />
+                </div>
 
-            {/* Filter Sections in Drawer Variant */}
-            <div className="space-y-3 max-h-[60vh] overflow-y-auto">
-              <CategoryFilterSection
-                selectedCategories={localFilters.categories || []}
-                onCategoriesChange={(categories) =>
-                  updateFilter({ categories })
-                }
-                variant="drawer"
-              />
+                {/* Filter Type Buttons */}
+                <div className="space-y-2">
+                  <FilterTypeButton
+                    label="Categories"
+                    count={localFilters.categories?.length || 0}
+                    onClick={() => openNestedDrawer('categories')}
+                  />
+                  <FilterTypeButton
+                    label="Cuisines"
+                    count={localFilters.cuisine?.length || 0}
+                    onClick={() => openNestedDrawer('cuisines')}
+                  />
+                  <FilterTypeButton
+                    label="Moods"
+                    count={localFilters.moods?.length || 0}
+                    onClick={() => openNestedDrawer('moods')}
+                  />
+                  <FilterTypeButton
+                    label="Available Ingredients"
+                    count={localFilters.availableIngredients?.length || 0}
+                    onClick={() => openNestedDrawer('ingredients')}
+                  />
+                </div>
 
-              <CuisineFilterSection
-                selectedCuisines={localFilters.cuisine || []}
-                onCuisinesChange={(cuisines) =>
-                  updateFilter({ cuisine: cuisines })
-                }
-                variant="drawer"
-              />
+                {/* Main Drawer Actions */}
+                <div className="flex gap-2">
+                  {hasActiveFilters && (
+                    <Button
+                      variant="outline"
+                      onClick={clearAllFilters}
+                      className="flex-1"
+                    >
+                      <X className="mr-2 h-4 w-4" />
+                      Clear All
+                    </Button>
+                  )}
+                  <Button onClick={closeAllDrawers} className="flex-1">
+                    Done
+                  </Button>
+                </div>
+              </>
+            )}
 
-              <MoodFilterSection
-                selectedMoods={localFilters.moods || []}
-                onMoodsChange={(moods) => updateFilter({ moods })}
-                variant="drawer"
-              />
+            {/* Nested Drawer Content */}
+            {activeNestedDrawer && (
+              <>
+                <div className="flex items-center gap-3">
+                  <Button variant="ghost" size="sm" onClick={closeNestedDrawer}>
+                    <ArrowLeft className="h-4 w-4" />
+                  </Button>
+                  <h3 className="text-lg font-semibold capitalize">
+                    {activeNestedDrawer === 'ingredients'
+                      ? 'Available Ingredients'
+                      : activeNestedDrawer}
+                  </h3>
+                </div>
 
-              <IngredientFilterSection
-                selectedIngredients={localFilters.availableIngredients || []}
-                onIngredientsChange={(ingredients) =>
-                  updateFilter({ availableIngredients: ingredients })
-                }
-                variant="drawer"
-              />
-            </div>
+                {/* Filter-Specific Content */}
+                <div className="max-h-[65vh] overflow-y-auto">
+                  {activeNestedDrawer === 'categories' && (
+                    <CategoryFilterSection
+                      selectedCategories={localFilters.categories || []}
+                      onCategoriesChange={(categories) =>
+                        updateFilter({ categories })
+                      }
+                      variant="drawer"
+                    />
+                  )}
+                  {activeNestedDrawer === 'cuisines' && (
+                    <CuisineFilterSection
+                      selectedCuisines={localFilters.cuisine || []}
+                      onCuisinesChange={(cuisines) =>
+                        updateFilter({ cuisine: cuisines })
+                      }
+                      variant="drawer"
+                    />
+                  )}
+                  {activeNestedDrawer === 'moods' && (
+                    <MoodFilterSection
+                      selectedMoods={localFilters.moods || []}
+                      onMoodsChange={(moods) => updateFilter({ moods })}
+                      variant="drawer"
+                    />
+                  )}
+                  {activeNestedDrawer === 'ingredients' && (
+                    <IngredientFilterSection
+                      selectedIngredients={
+                        localFilters.availableIngredients || []
+                      }
+                      onIngredientsChange={(ingredients) =>
+                        updateFilter({ availableIngredients: ingredients })
+                      }
+                      variant="drawer"
+                    />
+                  )}
+                </div>
 
-            {/* Action Buttons */}
-            <div className="flex gap-2">
-              {hasActiveFilters && (
-                <Button
-                  variant="outline"
-                  onClick={clearAllFilters}
-                  className="flex-1"
-                >
-                  <X className="mr-2 h-4 w-4" />
-                  Clear All
-                </Button>
-              )}
-              <Button onClick={() => setIsDrawerOpen(false)} className="flex-1">
-                Done
-              </Button>
-            </div>
+                {/* Nested Drawer Actions */}
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      // Clear specific filter type
+                      switch (activeNestedDrawer) {
+                        case 'categories':
+                          updateFilter({ categories: [] });
+                          break;
+                        case 'cuisines':
+                          updateFilter({ cuisine: [] });
+                          break;
+                        case 'moods':
+                          updateFilter({ moods: [] });
+                          break;
+                        case 'ingredients':
+                          updateFilter({ availableIngredients: [] });
+                          break;
+                      }
+                    }}
+                    className="flex-1"
+                  >
+                    Clear{' '}
+                    {activeNestedDrawer === 'ingredients'
+                      ? 'Ingredients'
+                      : activeNestedDrawer}
+                  </Button>
+                  <Button onClick={closeAllDrawers} className="flex-1">
+                    Done
+                  </Button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}

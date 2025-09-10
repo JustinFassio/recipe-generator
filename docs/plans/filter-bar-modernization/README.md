@@ -444,7 +444,8 @@ docs/plans/filter-bar-modernization/
 ├── PHASE-3.md (Integration & Migration)
 ├── PHASE-4.md (Cleanup & Optimization)
 ├── MIGRATION-GUIDE.md (Developer migration guide)
-└── TESTING-STRATEGY.md (Detailed testing approach)
+├── TESTING-STRATEGY.md (Detailed testing approach)
+└── NESTED-DRAWER-DESIGN.md (Nested drawer implementation)
 
 src/components/recipes/
 ├── FilterBar.tsx (new unified component)

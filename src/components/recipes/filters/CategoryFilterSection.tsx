@@ -99,8 +99,8 @@ export function CategoryFilterSection({
         </Button>
 
         {isOpen && (
-          <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border rounded-md shadow-lg max-h-80 overflow-y-auto">
-            <div className="p-3 border-b">
+          <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border rounded-lg shadow-lg max-h-80 overflow-y-auto w-96">
+            <div className="p-4 border-b">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 text-gray-400 -translate-y-1/2" />
                 <Input
@@ -112,43 +112,45 @@ export function CategoryFilterSection({
               </div>
             </div>
 
-            <div className="p-2 space-y-2">
+            <div className="p-4 space-y-4">
               {Object.entries(filteredGroups).map(([groupName, categories]) => (
-                <div key={groupName}>
-                  <div className="px-2 py-1 text-sm font-medium text-gray-600">
+                <div key={groupName} className="space-y-2">
+                  <h5 className="text-sm font-medium text-gray-700 border-b pb-1">
                     {groupName}
+                  </h5>
+                  <div className="grid grid-cols-3 gap-2">
+                    {categories.map((category) => {
+                      const isSelected = selectedCategories.includes(category);
+                      const displayValue = category.includes(': ')
+                        ? category.split(': ')[1]
+                        : category;
+                      return (
+                        <Button
+                          key={category}
+                          variant={isSelected ? 'default' : 'outline'}
+                          size="sm"
+                          className="justify-start text-xs h-9 hover:bg-gray-50 transition-colors"
+                          onClick={() => toggleCategory(category)}
+                        >
+                          {isSelected && <Check className="h-3 w-3 mr-1" />}
+                          <span className="truncate">{displayValue}</span>
+                        </Button>
+                      );
+                    })}
                   </div>
-                  {categories.map((category) => {
-                    const isSelected = selectedCategories.includes(category);
-                    const displayValue = category.includes(': ')
-                      ? category.split(': ')[1]
-                      : category;
-                    return (
-                      <Button
-                        key={category}
-                        variant={isSelected ? 'default' : 'ghost'}
-                        size="sm"
-                        className="w-full justify-start text-xs h-8"
-                        onClick={() => toggleCategory(category)}
-                      >
-                        {isSelected && <Check className="h-3 w-3 mr-1" />}
-                        <span className="truncate">{displayValue}</span>
-                      </Button>
-                    );
-                  })}
                 </div>
               ))}
             </div>
 
             {selectedCategories.length > 0 && (
-              <div className="p-2 border-t">
+              <div className="p-4 border-t">
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={clearAllCategories}
-                  className="w-full text-xs"
+                  className="w-full text-xs hover:bg-gray-50"
                 >
-                  Clear All
+                  Clear All Categories
                 </Button>
               </div>
             )}
