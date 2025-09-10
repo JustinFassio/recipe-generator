@@ -255,10 +255,12 @@ export function FilterBar({
           className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-end"
           role="dialog"
           aria-modal="true"
-          aria-labelledby="filter-bar-drawer-title"
           onClick={handleBackdropClick}
         >
-          <div className="bg-white w-full max-h-[90vh] rounded-t-lg p-4 space-y-4">
+          <div
+            className="bg-white w-full max-h-[90vh] rounded-t-lg p-4 space-y-4"
+            aria-labelledby="filter-bar-drawer-title"
+          >
             <div className="flex justify-between items-center">
               <h3
                 id="filter-bar-drawer-title"
