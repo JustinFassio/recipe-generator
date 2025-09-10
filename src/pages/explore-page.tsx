@@ -1,24 +1,18 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { RecipeCard } from '../components/recipes/recipe-card';
 import { recipeApi } from '../lib/api';
-import type { PublicRecipe, RecipeFilters, Recipe } from '@/lib/types';
+import type { PublicRecipe, Recipe } from '@/lib/types';
 import { Button } from '../components/ui/button';
 import { Save } from 'lucide-react';
 import { useToast } from '../hooks/use-toast';
-import { HybridFilterBar } from '../components/recipes/hybrid-filter-bar';
+import { FilterBar } from '@/components/recipes/FilterBar';
+import { useRecipeFilters } from '@/hooks/use-recipe-filters';
 
 export default function ExplorePage() {
   const [recipes, setRecipes] = useState<PublicRecipe[]>([]);
   const [loading, setLoading] = useState(true);
   const [savingRecipeId, setSavingRecipeId] = useState<string | null>(null);
-  const [filters, setFilters] = useState<RecipeFilters>({
-    searchTerm: '',
-    categories: [],
-    cuisine: [],
-    moods: [],
-    sortBy: 'date',
-    sortOrder: 'desc',
-  });
+  const { filters, updateFilters } = useRecipeFilters();
   const { toast } = useToast();
 
   const loadPublicRecipes = useCallback(async () => {
@@ -85,10 +79,6 @@ export default function ExplorePage() {
       title: 'Info',
       description: 'This recipe is already public',
     });
-  };
-
-  const handleFiltersChange = (newFilters: RecipeFilters) => {
-    setFilters(newFilters);
   };
 
   // Comprehensive filtering logic for public recipes
@@ -201,9 +191,9 @@ export default function ExplorePage() {
         </p>
 
         {/* Comprehensive Filter Bar */}
-        <HybridFilterBar
+        <FilterBar
           filters={filters}
-          onFiltersChange={handleFiltersChange}
+          onFiltersChange={updateFilters}
           totalRecipes={recipes.length}
           filteredCount={filteredRecipes.length}
           className="mb-6"
