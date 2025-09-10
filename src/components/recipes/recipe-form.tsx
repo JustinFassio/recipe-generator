@@ -578,7 +578,7 @@ export function RecipeForm({
               ? 'No Connection'
               : existingRecipe
                 ? 'Update Recipe'
-                : 'Create Recipe'}
+                : 'Save Recipe'}
         </Button>
       </div>
     </form>

@@ -22,7 +22,7 @@ import { RECIPE_BOT_PERSONAS, type PersonaType } from '@/lib/openai';
 import type { RecipeFormData } from '@/lib/schemas';
 import { useSelections } from '@/contexts/SelectionContext';
 import { UserProfileDisplay } from './UserProfileDisplay';
-import { SmartSaveRecipeButton } from './SmartSaveRecipeButton';
+import { SmartCreateRecipeButton } from './SmartCreateRecipeButton';
 import { useAuth } from '@/contexts/AuthProvider';
 
 interface ChatInterfaceProps {
@@ -206,7 +206,17 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
         generatedRecipe={generatedRecipe}
         isLoading={isLoading}
         onSaveRecipe={handleSaveRecipe}
-        onConvertToRecipe={async () => {}}
+        onConvertToRecipe={async () => {
+          // Clear live filter selections when user explicitly chooses to create a recipe
+          // (Back to Chat should preserve selections; only this action resets.)
+          updateSelections({
+            categories: [],
+            cuisines: [],
+            moods: [],
+            availableIngredients: [],
+          });
+          handleSaveRecipe();
+        }}
         onNewRecipe={startNewRecipe}
         onChangeAssistant={changePersona}
       />
@@ -362,7 +372,7 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
 
       {/* Smart Save Recipe Button - Shows when there's conversation content */}
       {persona && messages.length > 2 && (
-        <SmartSaveRecipeButton
+        <SmartCreateRecipeButton
           conversationContent={messages
             .map((m) => `${m.role}: ${m.content}`)
             .join('\n\n')}

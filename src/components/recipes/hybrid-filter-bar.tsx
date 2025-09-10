@@ -34,7 +34,7 @@ export function HybridFilterBar({
     );
   }
 
-  // Show traditional filter bar on desktop
+  // Show filter bar on desktop
   if (shouldShowTraditionalFilters()) {
     return (
       <FilterBar
@@ -45,7 +45,7 @@ export function HybridFilterBar({
     );
   }
 
-  // Fallback to traditional filters
+  // Fallback to filter bar
   return (
     <FilterBar
       filters={filters}

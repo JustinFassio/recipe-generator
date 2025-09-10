@@ -4,23 +4,21 @@ import { parseRecipeUnified } from '@/lib/recipe-parser-unified';
 import { toast } from '@/hooks/use-toast';
 import type { RecipeFormData } from '@/lib/schemas';
 
-interface SmartSaveRecipeButtonProps {
+interface SmartCreateRecipeButtonProps {
   conversationContent: string;
   onRecipeParsed: (recipe: RecipeFormData) => void;
   className?: string;
 }
 
-export const SmartSaveRecipeButton: React.FC<SmartSaveRecipeButtonProps> = ({
-  conversationContent,
-  onRecipeParsed,
-  className = '',
-}) => {
+export const SmartCreateRecipeButton: React.FC<
+  SmartCreateRecipeButtonProps
+> = ({ conversationContent, onRecipeParsed, className = '' }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [parseStatus, setParseStatus] = useState<'idle' | 'success' | 'error'>(
     'idle'
   );
 
-  const handleSaveRecipe = async () => {
+  const handleCreateRecipe = async () => {
     setIsLoading(true);
     setParseStatus('idle');
 
@@ -34,6 +32,7 @@ export const SmartSaveRecipeButton: React.FC<SmartSaveRecipeButtonProps> = ({
         toast({
           title: 'Recipe Parsed Successfully!',
           description: `"${result.recipe.title}" is ready to save. Please review and save it to your collection.`,
+          duration: 1500,
         });
 
         // Show warnings if any
@@ -101,7 +100,7 @@ export const SmartSaveRecipeButton: React.FC<SmartSaveRecipeButtonProps> = ({
     return (
       <>
         <Save className="h-5 w-5" />
-        <span>Save Recipe</span>
+        <span>Create Recipe</span>
       </>
     );
   };
@@ -131,7 +130,7 @@ export const SmartSaveRecipeButton: React.FC<SmartSaveRecipeButtonProps> = ({
   return (
     <div className={`flex justify-center p-4 ${className}`}>
       <button
-        onClick={handleSaveRecipe}
+        onClick={handleCreateRecipe}
         disabled={isLoading}
         className={getButtonClasses()}
       >

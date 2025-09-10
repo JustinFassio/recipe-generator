@@ -5,6 +5,9 @@ import { ChatInterface } from '@/components/chat/ChatInterface';
 import { RecipeForm } from '@/components/recipes/recipe-form';
 import { Button } from '@/components/ui/button';
 import type { RecipeFormData } from '@/lib/schemas';
+import { HybridFilterBar } from '@/components/recipes/hybrid-filter-bar';
+import { useSelections } from '@/contexts/SelectionContext';
+import type { RecipeFilters, Cuisine, Mood } from '@/lib/types';
 
 export function ChatRecipePage() {
   const navigate = useNavigate();
@@ -12,6 +15,7 @@ export function ChatRecipePage() {
     null
   );
   const [showEditor, setShowEditor] = useState(false);
+  const { selections, updateSelections } = useSelections();
 
   const handleRecipeGenerated = (recipe: RecipeFormData) => {
     setGeneratedRecipe(recipe);
@@ -65,7 +69,36 @@ export function ChatRecipePage() {
           </div>
         </div>
 
-        {showEditor && generatedRecipe ? (
+        {/* AI Filters (desktop bar + mobile drawer) */}
+        <HybridFilterBar
+          filters={
+            {
+              categories: selections.categories,
+              cuisine: selections.cuisines as Cuisine[],
+              moods: selections.moods as Mood[],
+              availableIngredients: selections.availableIngredients,
+            } as Partial<RecipeFilters> as RecipeFilters
+          }
+          onFiltersChange={(f: RecipeFilters) => {
+            updateSelections({
+              categories: f.categories || [],
+              cuisines: (f.cuisine as string[]) || [],
+              moods: (f.moods as string[]) || [],
+              availableIngredients: f.availableIngredients || [],
+            });
+          }}
+          className="mb-6"
+        />
+
+        {/* Always render ChatInterface to preserve conversation state */}
+        <div
+          className={`bg-base-100 rounded-lg shadow-sm ${showEditor ? 'hidden' : ''}`}
+        >
+          <ChatInterface onRecipeGenerated={handleRecipeGenerated} />
+        </div>
+
+        {/* Show RecipeForm when editor is active */}
+        {showEditor && generatedRecipe && (
           <div className="bg-base-100 rounded-lg shadow-sm">
             <div className="p-6">
               <RecipeForm
@@ -73,10 +106,6 @@ export function ChatRecipePage() {
                 onSuccess={handleRecipeSaved}
               />
             </div>
-          </div>
-        ) : (
-          <div className="bg-base-100 rounded-lg shadow-sm">
-            <ChatInterface onRecipeGenerated={handleRecipeGenerated} />
           </div>
         )}
       </div>
