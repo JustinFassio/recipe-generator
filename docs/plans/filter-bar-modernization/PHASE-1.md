@@ -212,7 +212,7 @@ interface FilterSectionProps {
   onValuesChange: (values: string[]) => void;
   searchable?: boolean;
   grouped?: boolean;
-  variant: 'dropdown' | 'accordion' | 'drawer';
+  variant: 'dropdown' | 'drawer';
   placeholder?: string;
   className?: string;
 }
@@ -239,7 +239,7 @@ import { parseCategory } from '@/lib/category-parsing';
 interface CategoryFilterSectionProps {
   selectedCategories: string[];
   onCategoriesChange: (categories: string[]) => void;
-  variant: 'dropdown' | 'accordion' | 'drawer';
+  variant: 'dropdown' | 'drawer';
   className?: string;
 }
 
@@ -300,10 +300,10 @@ export function CategoryFilterSection({
     );
   }
 
-  if (variant === 'accordion') {
+  if (variant === 'drawer') {
     return (
-      <div className={`category-filter-accordion ${className}`}>
-        {/* Mobile accordion implementation */}
+      <div className={`category-filter-drawer ${className}`}>
+        {/* Mobile drawer implementation */}
       </div>
     );
   }

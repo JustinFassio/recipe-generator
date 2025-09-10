@@ -93,7 +93,7 @@ export function FilterBar({
 
   // Determine effective variant based on screen size
   const effectiveVariant = variant === 'auto'
-    ? (isDesktop ? 'horizontal' : (isTablet ? 'accordion' : 'drawer'))
+    ? (isDesktop ? 'horizontal' : 'drawer')
     : variant;
 
   // Desktop Horizontal Layout
@@ -171,10 +171,11 @@ export function FilterBar({
     );
   }
 
-  // Tablet Accordion Layout
-  if (effectiveVariant === 'accordion') {
+  // Mobile/Tablet Drawer Layout - now uses nested drawer system
+  // See NESTED-DRAWER-DESIGN.md for implementation details
+  if (effectiveVariant === 'drawer') {
     return (
-      <div className={`filter-bar-accordion ${className}`}>
+      <div className={`filter-bar-drawer ${className}`}>
         <div className="space-y-4">
           {/* Search Bar */}
           <div className="relative">
@@ -188,30 +189,30 @@ export function FilterBar({
             />
           </div>
 
-          {/* Collapsible Filter Sections */}
+          {/* Nested Drawer Filter Navigation */}
           <div className="space-y-2">
             <CategoryFilterSection
               selectedCategories={localFilters.categories || []}
               onCategoriesChange={(categories) => updateFilter({ categories })}
-              variant="accordion"
+              variant="drawer"
             />
 
             <CuisineFilterSection
               selectedCuisines={localFilters.cuisine || []}
               onCuisinesChange={(cuisines) => updateFilter({ cuisine: cuisines })}
-              variant="accordion"
+              variant="drawer"
             />
 
             <MoodFilterSection
               selectedMoods={localFilters.moods || []}
               onMoodsChange={(moods) => updateFilter({ moods })}
-              variant="accordion"
+              variant="drawer"
             />
 
             <IngredientFilterSection
               selectedIngredients={localFilters.availableIngredients || []}
               onIngredientsChange={(ingredients) => updateFilter({ availableIngredients: ingredients })}
-              variant="accordion"
+              variant="drawer"
             />
           </div>
 
@@ -289,11 +290,11 @@ if (variant === 'dropdown') {
 }
 ```
 
-##### **Accordion Variant (Tablet)**
+##### **Drawer Variant (Mobile/Tablet)**
 
 ```typescript
-// Accordion implementation
-if (variant === 'accordion') {
+// Nested drawer implementation
+if (variant === 'drawer') {
   return (
     <div className="border rounded-lg">
       <Button
@@ -314,7 +315,7 @@ if (variant === 'accordion') {
 
       {isOpen && (
         <div className="p-4 pt-0 border-t">
-          {/* Accordion content */}
+          {/* Nested drawer content */}
         </div>
       )}
     </div>
@@ -357,7 +358,7 @@ if (variant === 'drawer') {
   @apply space-y-4;
 }
 
-.filter-bar-accordion {
+.filter-bar-drawer {
   @apply space-y-4;
 }
 
@@ -374,7 +375,7 @@ if (variant === 'drawer') {
 
 @media (min-width: 768px) and (max-width: 1023px) {
   .filter-bar-auto {
-    @apply filter-bar-accordion;
+    @apply filter-bar-drawer;
   }
 }
 
@@ -744,7 +745,7 @@ const ResultsCount = ({ totalRecipes, filteredCount, hasActiveFilters }) => {
 ```typescript
 describe('FilterBar Responsive Layout', () => {
   it('renders horizontal layout on desktop', () => {});
-  it('renders accordion layout on tablet', () => {});
+  it('renders drawer layout on tablet', () => {});
   it('renders drawer layout on mobile', () => {});
   it('adapts layout when screen size changes', () => {});
   it('maintains state across layout changes', () => {});

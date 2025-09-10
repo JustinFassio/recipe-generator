@@ -284,7 +284,7 @@ Create a new component in `src/components/recipes/filters/`:
 interface NewFilterSectionProps {
   selectedValues: string[];
   onValuesChange: (values: string[]) => void;
-  variant: 'dropdown' | 'accordion' | 'drawer';
+  variant: 'dropdown' | 'drawer';
 }
 
 export function NewFilterSection({ ... }) {

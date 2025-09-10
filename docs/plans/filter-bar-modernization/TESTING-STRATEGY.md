@@ -274,11 +274,11 @@ describe('FilterBar Responsive Behavior', () => {
     expect(screen.getByTestId('filter-bar-horizontal')).toBeInTheDocument();
   });
 
-  it('renders accordion layout on tablet', () => {
+  it('renders drawer layout on tablet', () => {
     mockMatchMedia(800);
     render(<FilterBar {...mockProps} />);
 
-    expect(screen.getByTestId('filter-bar-accordion')).toBeInTheDocument();
+    expect(screen.getByTestId('filter-bar-drawer')).toBeInTheDocument();
   });
 
   it('renders drawer layout on mobile', () => {
@@ -364,31 +364,30 @@ describe('CategoryFilterSection', () => {
     });
   });
 
-  describe('Accordion Variant', () => {
-    const accordionProps = { ...mockProps, variant: 'accordion' as const };
+  describe('Drawer Variant', () => {
+    const drawerProps = { ...mockProps, variant: 'drawer' as const };
 
-    it('renders accordion correctly', () => {
-      render(<CategoryFilterSection {...accordionProps} />);
+    it('renders drawer correctly', () => {
+      render(<CategoryFilterSection {...drawerProps} />);
 
-      const accordionButton = screen.getByRole('button', { name: /categories/i });
-      expect(accordionButton).toBeInTheDocument();
+      const drawerButton = screen.getByRole('button', { name: /categories/i });
+      expect(drawerButton).toBeInTheDocument();
     });
 
-    it('expands and collapses correctly', () => {
-      render(<CategoryFilterSection {...accordionProps} />);
+    it('opens nested drawer correctly', () => {
+      render(<CategoryFilterSection {...drawerProps} />);
 
-      const accordionButton = screen.getByRole('button', { name: /categories/i });
+      const drawerButton = screen.getByRole('button', { name: /categories/i });
 
-      // Should be collapsed initially
+      // Should be closed initially
       expect(screen.queryByText('Italian')).not.toBeInTheDocument();
 
-      // Click to expand
-      fireEvent.click(accordionButton);
+      // Click to open nested drawer
+      fireEvent.click(drawerButton);
       expect(screen.getByText('Italian')).toBeInTheDocument();
 
-      // Click to collapse
-      fireEvent.click(accordionButton);
-      expect(screen.queryByText('Italian')).not.toBeInTheDocument();
+      // Should show back button in nested drawer
+      expect(screen.getByRole('button', { name: /back/i })).toBeInTheDocument();
     });
   });
 

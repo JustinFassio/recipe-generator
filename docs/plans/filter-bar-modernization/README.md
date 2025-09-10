@@ -138,7 +138,7 @@ interface FilterBarProps {
   - `src/components/recipes/filters/MoodFilterSection.tsx`
   - `src/components/recipes/filters/IngredientFilterSection.tsx`
 - **Content**:
-  - Responsive filter sections (desktop dropdowns, mobile accordions)
+  - Responsive filter sections (desktop dropdowns, mobile nested drawers)
   - Shared filter logic extracted from existing components
   - Search functionality within each filter type
 - **Tests**: Unit tests for each filter section
@@ -257,7 +257,7 @@ interface FilterBarProps {
 
 ```typescript
 const breakpoints = {
-  mobile: '< 768px', // Accordion/drawer layout
+  mobile: '< 768px', // Nested drawer layout
   tablet: '768-1023px', // Collapsible sections
   desktop: '≥ 1024px', // Horizontal dropdowns
 };
@@ -267,7 +267,7 @@ const breakpoints = {
 
 - **Desktop**: Horizontal filter bar with dropdowns
 - **Tablet**: Collapsible filter sections
-- **Mobile**: Accordion or drawer-based interface
+- **Mobile/Tablet**: Nested drawer-based interface
 
 ### **State Management Consolidation**
 
@@ -302,7 +302,7 @@ interface FilterSectionProps {
   onValuesChange: (values: string[]) => void;
   searchable?: boolean;
   grouped?: boolean;
-  variant: 'dropdown' | 'accordion' | 'drawer';
+  variant: 'dropdown' | 'drawer';
 }
 ```
 
