@@ -6,6 +6,7 @@ export interface FilterDrawerState {
   selectedCategories: string[];
   selectedCuisines: Cuisine[];
   selectedMoods: Mood[];
+  selectedIngredients: string[];
   sortBy: RecipeFilters['sortBy'];
   sortOrder: RecipeFilters['sortOrder'];
 }
@@ -15,6 +16,7 @@ export interface FilterDrawerActions {
   toggleCategory: (category: string) => void;
   toggleCuisine: (cuisine: Cuisine) => void;
   toggleMood: (mood: Mood) => void;
+  toggleIngredient: (ingredient: string) => void;
   updateSortBy: (sortBy: RecipeFilters['sortBy']) => void;
   updateSortOrder: (sortOrder: RecipeFilters['sortOrder']) => void;
   clearAllFilters: () => void;
@@ -39,6 +41,7 @@ export function useFilterDrawer(
     selectedCategories: initialFilters.categories || [],
     selectedCuisines: initialFilters.cuisine || [],
     selectedMoods: initialFilters.moods || [],
+    selectedIngredients: initialFilters.availableIngredients || [],
     sortBy: initialSortValues.current.sortBy,
     sortOrder: initialSortValues.current.sortOrder,
   });
@@ -54,6 +57,7 @@ export function useFilterDrawer(
       selectedCategories: initialFilters.categories || [],
       selectedCuisines: initialFilters.cuisine || [],
       selectedMoods: initialFilters.moods || [],
+      selectedIngredients: initialFilters.availableIngredients || [],
       sortBy: newInitialSortBy,
       sortOrder: newInitialSortOrder,
     });
@@ -62,6 +66,7 @@ export function useFilterDrawer(
     initialFilters.categories,
     initialFilters.cuisine,
     initialFilters.moods,
+    initialFilters.availableIngredients,
     initialFilters.sortBy,
     initialFilters.sortOrder,
   ]);
@@ -97,6 +102,15 @@ export function useFilterDrawer(
     }));
   }, []);
 
+  const toggleIngredient = useCallback((ingredient: string) => {
+    setLocalState((prev) => ({
+      ...prev,
+      selectedIngredients: prev.selectedIngredients.includes(ingredient)
+        ? prev.selectedIngredients.filter((i) => i !== ingredient)
+        : [...prev.selectedIngredients, ingredient],
+    }));
+  }, []);
+
   const updateSortBy = useCallback((sortBy: RecipeFilters['sortBy']) => {
     setLocalState((prev) => ({ ...prev, sortBy }));
   }, []);
@@ -114,6 +128,7 @@ export function useFilterDrawer(
       selectedCategories: [],
       selectedCuisines: [],
       selectedMoods: [],
+      selectedIngredients: [],
       sortBy: initialSortValues.current.sortBy,
       sortOrder: initialSortValues.current.sortOrder,
     };
@@ -129,6 +144,7 @@ export function useFilterDrawer(
       categories: undefined,
       cuisine: undefined,
       moods: undefined,
+      availableIngredients: undefined,
       sortBy: initialSortValues.current.sortBy,
       sortOrder: initialSortValues.current.sortOrder,
     };
@@ -163,6 +179,10 @@ export function useFilterDrawer(
         localState.selectedMoods.length > 0
           ? localState.selectedMoods
           : undefined,
+      availableIngredients:
+        localState.selectedIngredients.length > 0
+          ? localState.selectedIngredients
+          : undefined,
       sortBy: localState.sortBy,
       sortOrder: localState.sortOrder,
     };
@@ -176,7 +196,8 @@ export function useFilterDrawer(
       localState.searchTerm ||
       localState.selectedCategories.length > 0 ||
       localState.selectedCuisines.length > 0 ||
-      localState.selectedMoods.length > 0
+      localState.selectedMoods.length > 0 ||
+      localState.selectedIngredients.length > 0
     );
   }, [localState]);
 
@@ -186,6 +207,7 @@ export function useFilterDrawer(
     if (localState.selectedCategories.length > 0) count++;
     if (localState.selectedCuisines.length > 0) count++;
     if (localState.selectedMoods.length > 0) count++;
+    if (localState.selectedIngredients.length > 0) count++;
     return count;
   }, [localState]);
 
@@ -194,6 +216,7 @@ export function useFilterDrawer(
     toggleCategory,
     toggleCuisine,
     toggleMood,
+    toggleIngredient,
     updateSortBy,
     updateSortOrder,
     clearAllFilters,

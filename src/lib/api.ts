@@ -78,6 +78,14 @@ export const recipeApi = {
       query = query.overlaps('categories', moodCategories);
     }
 
+    // Apply available ingredients filter
+    if (filters?.availableIngredients?.length) {
+      // Filter recipes that contain any of the selected available ingredients
+      // This uses the contains operator to check if any of the available ingredients
+      // are present in the recipe's ingredients array
+      query = query.overlaps('ingredients', filters.availableIngredients);
+    }
+
     // Apply sorting
     const sortBy = filters?.sortBy || 'date';
     const sortOrder = filters?.sortOrder || 'desc';

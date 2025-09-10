@@ -5,6 +5,7 @@ export interface DrawerState {
   isCategoriesOpen: boolean;
   isCuisinesOpen: boolean;
   isMoodsOpen: boolean;
+  isIngredientsOpen: boolean;
 }
 
 export interface DrawerActions {
@@ -16,6 +17,8 @@ export interface DrawerActions {
   closeCuisines: () => void;
   openMoods: () => void;
   closeMoods: () => void;
+  openIngredients: () => void;
+  closeIngredients: () => void;
   closeAll: () => void;
 }
 
@@ -25,6 +28,7 @@ export function useNestedDrawer() {
     isCategoriesOpen: false,
     isCuisinesOpen: false,
     isMoodsOpen: false,
+    isIngredientsOpen: false,
   });
 
   const openPrimary = useCallback(() => {
@@ -59,12 +63,21 @@ export function useNestedDrawer() {
     setDrawerState((prev) => ({ ...prev, isMoodsOpen: false }));
   }, []);
 
+  const openIngredients = useCallback(() => {
+    setDrawerState((prev) => ({ ...prev, isIngredientsOpen: true }));
+  }, []);
+
+  const closeIngredients = useCallback(() => {
+    setDrawerState((prev) => ({ ...prev, isIngredientsOpen: false }));
+  }, []);
+
   const closeAll = useCallback(() => {
     setDrawerState({
       isPrimaryOpen: false,
       isCategoriesOpen: false,
       isCuisinesOpen: false,
       isMoodsOpen: false,
+      isIngredientsOpen: false,
     });
   }, []);
 
@@ -77,6 +90,8 @@ export function useNestedDrawer() {
     closeCuisines,
     openMoods,
     closeMoods,
+    openIngredients,
+    closeIngredients,
     closeAll,
   };
 

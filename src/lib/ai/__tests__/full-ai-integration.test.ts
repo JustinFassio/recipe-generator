@@ -137,7 +137,8 @@ describe('Full AI Integration with Bio Field', () => {
       categories: ['Quick & Easy'],
       cuisines: ['thai', 'indian'],
       moods: ['comforting'],
-    };
+      availableIngredients: ['garlic', 'olive oil'],
+    } as const;
 
     const basePrompt = 'You are a helpful cooking assistant.';
     const userRequest = 'I want something quick and comforting.';
@@ -163,6 +164,9 @@ describe('Full AI Integration with Bio Field', () => {
     );
     expect(enhancedPrompt).toContain('**Categories:** Quick & Easy');
     expect(enhancedPrompt).toContain('**Moods:** comforting');
+    expect(enhancedPrompt).toContain(
+      '**Available ingredients:** garlic, olive oil'
+    );
 
     // Check that safety information is still present
     expect(enhancedPrompt).toContain(

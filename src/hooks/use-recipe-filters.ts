@@ -11,6 +11,7 @@ export function useRecipeFilters() {
       categories: searchParams.getAll('category').filter(Boolean),
       cuisine: searchParams.getAll('cuisine').filter(Boolean) as Cuisine[],
       moods: searchParams.getAll('mood').filter(Boolean) as Mood[],
+      availableIngredients: searchParams.getAll('ingredient').filter(Boolean),
       sortBy: (searchParams.get('sort') as RecipeFilters['sortBy']) || 'date',
       sortOrder: (searchParams.get('order') as 'asc' | 'desc') || 'desc',
     };
@@ -42,6 +43,12 @@ export function useRecipeFilters() {
     params.delete('mood');
     newFilters.moods?.forEach((mood) => {
       params.append('mood', mood);
+    });
+
+    // Update available ingredients
+    params.delete('ingredient');
+    newFilters.availableIngredients?.forEach((ingredient) => {
+      params.append('ingredient', ingredient);
     });
 
     // Update sort
