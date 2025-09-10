@@ -37,6 +37,31 @@ vi.mock('@/hooks/useFilterBar', () => ({
   })),
 }));
 
+// Mock the filter section components
+vi.mock('@/components/recipes/filters/CategoryFilterSection', () => ({
+  CategoryFilterSection: vi.fn(({ variant }) => (
+    <div data-testid={`category-filter-${variant}`}>Categories</div>
+  )),
+}));
+
+vi.mock('@/components/recipes/filters/CuisineFilterSection', () => ({
+  CuisineFilterSection: vi.fn(({ variant }) => (
+    <div data-testid={`cuisine-filter-${variant}`}>Cuisines</div>
+  )),
+}));
+
+vi.mock('@/components/recipes/filters/MoodFilterSection', () => ({
+  MoodFilterSection: vi.fn(({ variant }) => (
+    <div data-testid={`mood-filter-${variant}`}>Moods</div>
+  )),
+}));
+
+vi.mock('@/components/recipes/filters/IngredientFilterSection', () => ({
+  IngredientFilterSection: vi.fn(({ variant }) => (
+    <div data-testid={`ingredient-filter-${variant}`}>Ingredients</div>
+  )),
+}));
+
 describe('FilterBar', () => {
   const mockProps = {
     filters: {
@@ -60,24 +85,34 @@ describe('FilterBar', () => {
   describe('Rendering', () => {
     it('renders without crashing', () => {
       render(<FilterBar {...mockProps} />);
-      expect(screen.getByText(/FilterBar Foundation/)).toBeInTheDocument();
+      expect(screen.getByTestId('filter-bar-horizontal')).toBeInTheDocument();
+      expect(
+        screen.getByPlaceholderText(
+          /Search recipes, ingredients, or instructions/
+        )
+      ).toBeInTheDocument();
     });
 
-    it('displays correct recipe counts', () => {
+    it('renders filter sections correctly', () => {
       render(<FilterBar {...mockProps} />);
-      expect(screen.getByText(/Total recipes: 100/)).toBeInTheDocument();
-      expect(screen.getByText(/Filtered: 25/)).toBeInTheDocument();
+      expect(screen.getByText('Categories')).toBeInTheDocument();
+      expect(screen.getByText('Cuisines')).toBeInTheDocument();
+      expect(screen.getByText('Moods')).toBeInTheDocument();
+      expect(screen.getByText('Ingredients')).toBeInTheDocument();
     });
 
     it('shows horizontal layout by default on desktop', () => {
       render(<FilterBar {...mockProps} />);
       expect(screen.getByTestId('filter-bar-horizontal')).toBeInTheDocument();
-      expect(screen.getByText(/horizontal layout/)).toBeInTheDocument();
     });
 
-    it('shows active filter count', () => {
+    it('renders search input with correct placeholder', () => {
       render(<FilterBar {...mockProps} />);
-      expect(screen.getByText(/Active filters: 0/)).toBeInTheDocument();
+      const searchInput = screen.getByPlaceholderText(
+        /Search recipes, ingredients, or instructions/
+      );
+      expect(searchInput).toBeInTheDocument();
+      expect(searchInput).toHaveValue('');
     });
   });
 
@@ -87,9 +122,26 @@ describe('FilterBar', () => {
       expect(screen.getByTestId('filter-bar-horizontal')).toBeInTheDocument();
     });
 
-    it('respects manual variant override', () => {
+    it('respects manual variant override - drawer', () => {
       render(<FilterBar {...mockProps} variant="drawer" />);
       expect(screen.getByTestId('filter-bar-drawer')).toBeInTheDocument();
+    });
+
+    it('respects manual variant override - accordion', () => {
+      render(<FilterBar {...mockProps} variant="accordion" />);
+      expect(screen.getByTestId('filter-bar-accordion')).toBeInTheDocument();
+    });
+
+    it('renders filter sections with correct variant prop in horizontal layout', () => {
+      render(<FilterBar {...mockProps} variant="horizontal" />);
+      expect(
+        screen.getByTestId('category-filter-dropdown')
+      ).toBeInTheDocument();
+      expect(screen.getByTestId('cuisine-filter-dropdown')).toBeInTheDocument();
+      expect(screen.getByTestId('mood-filter-dropdown')).toBeInTheDocument();
+      expect(
+        screen.getByTestId('ingredient-filter-dropdown')
+      ).toBeInTheDocument();
     });
   });
 
