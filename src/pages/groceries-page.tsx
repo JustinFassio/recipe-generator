@@ -40,7 +40,10 @@ export function GroceriesPage() {
   // Get category count from grocery cart
   const getCategoryCount = (category: string) => {
     if (category === 'all') {
-      return Object.values(userGroceryCart).reduce((total, items) => total + (items?.length || 0), 0);
+      return Object.values(userGroceryCart).reduce(
+        (total, items) => total + (items?.length || 0),
+        0
+      );
     }
     return userGroceryCart[category]?.length || 0;
   };
@@ -71,14 +74,15 @@ export function GroceriesPage() {
     );
   }
 
-  const activeCategoryData = activeCategory === 'all' 
-    ? { name: 'All Categories', subtitle: 'All Your Ingredients', icon: '📋' }
-    : getCategoryMetadata(activeCategory);
+  const activeCategoryData =
+    activeCategory === 'all'
+      ? { name: 'All Categories', subtitle: 'All Your Ingredients', icon: '📋' }
+      : getCategoryMetadata(activeCategory);
 
   // Show ALL ingredients that user has added to their grocery cart (both selected and unselected)
   const userCategoryItems = (() => {
     let cartIngredients: string[] = [];
-    
+
     if (activeCategory === 'all') {
       // For 'all' view, get ingredients from all categories
       cartIngredients = Object.values(userGroceryCart).flat();
@@ -162,9 +166,10 @@ export function GroceriesPage() {
           <div className="card-body p-0">
             <div className="tabs tabs-boxed p-4 overflow-x-auto">
               {availableCategories.map((categoryKey) => {
-                const category = categoryKey === 'all' 
-                  ? { name: 'All Categories', icon: '📋' }
-                  : getCategoryMetadata(categoryKey);
+                const category =
+                  categoryKey === 'all'
+                    ? { name: 'All Categories', icon: '📋' }
+                    : getCategoryMetadata(categoryKey);
                 const count = getCategoryCount(categoryKey);
                 return (
                   <button
@@ -176,7 +181,9 @@ export function GroceriesPage() {
                       <span>{category.icon}</span>
                       <span className="hidden sm:inline">{category.name}</span>
                       <span className="sm:hidden">
-                        {categoryKey === 'all' ? 'All' : category.name.split(' ')[0]}
+                        {categoryKey === 'all'
+                          ? 'All'
+                          : category.name.split(' ')[0]}
                       </span>
                       {count > 0 && (
                         <span className="badge badge-sm badge-primary">
@@ -200,17 +207,18 @@ export function GroceriesPage() {
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
               {userCategoryItems.map((ingredient) => {
                 // For "all" view, we need to find which category this ingredient belongs to
-                const ingredientCategory = activeCategory === 'all' 
-                  ? Object.keys(userGroceryCart).find(cat => 
-                      userGroceryCart[cat]?.includes(ingredient)
-                    ) || activeCategory
-                  : activeCategory;
-                
+                const ingredientCategory =
+                  activeCategory === 'all'
+                    ? Object.keys(userGroceryCart).find((cat) =>
+                        userGroceryCart[cat]?.includes(ingredient)
+                      ) || activeCategory
+                    : activeCategory;
+
                 const isSelected = groceries.hasIngredient(
                   ingredientCategory,
                   ingredient
                 );
-                
+
                 return (
                   <button
                     key={ingredient}
