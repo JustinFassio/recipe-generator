@@ -1,13 +1,31 @@
 /**
  * Multi-Category Ingredient Management
  *
- * Handles ingredients that appear in multiple categories (like "Chicken Stock"
- * in both cooking_essentials and pantry_staples) and keeps their state synchronized.
+ * Handles ingredients that appear in multiple UI categories based on user mental models.
+ * This is NOT about duplicate ingredients - each ingredient is unique, but users may
+ * logically categorize the same ingredient in different ways.
+ *
+ * Examples:
+ * - "Vanilla Extract": Users think of it as both a cooking tool AND a pantry item
+ * - "Garlic": Fresh vs dried forms create different mental categorization
+ * - "Chicken Stock": Fresh (cooking essential) vs shelf-stable (pantry staple)
+ *
+ * This system maps one database ingredient to multiple UI categories to match
+ * how different users naturally think about ingredient organization.
  */
 
-// Ingredients that appear in multiple categories based on Chef Isabella's catalog
+/**
+ * Multi-Category Ingredient Mapping
+ *
+ * Maps ingredients to multiple UI categories based on user mental models.
+ * Each entry represents how users naturally categorize ingredients differently.
+ *
+ * IMPORTANT: This is the single source of truth for multi-category behavior.
+ * Do NOT auto-derive this - it represents intentional UX design decisions.
+ */
 export const MULTI_CATEGORY_INGREDIENTS: Record<string, string[]> = {
-  // Stocks and broths - appear in both cooking essentials and pantry staples
+  // === COOKING FOUNDATIONS (Fresh vs Shelf-Stable Mental Model) ===
+  // Users think: "Fresh from deli" vs "Shelf-stable backup"
   'Chicken Stock': ['cooking_essentials', 'pantry_staples'],
   'Chicken Broth': ['cooking_essentials', 'pantry_staples'],
   'Vegetable Stock': ['cooking_essentials', 'pantry_staples'],
@@ -16,18 +34,21 @@ export const MULTI_CATEGORY_INGREDIENTS: Record<string, string[]> = {
   'Beef Broth': ['cooking_essentials', 'pantry_staples'],
   'Bone Broth': ['cooking_essentials', 'pantry_staples'],
 
-  // Cooking oils - could appear in cooking essentials and pantry
+  // === SPECIALTY OILS (Cooking Tool vs Pantry Item Mental Model) ===
+  // Users think: "Daily cooking" vs "Special occasion ingredient"
   'Coconut Oil': ['cooking_essentials', 'pantry_staples'],
   'Sesame Oil': ['cooking_essentials', 'pantry_staples'],
 
-  // Common seasonings that cross categories
+  // === EXTRACTS (Baking Tool vs Pantry Ingredient Mental Model) ===
+  // Users think: "Baking essential" vs "Pantry flavoring"
   'Vanilla Extract': ['cooking_essentials', 'pantry_staples'],
   'Almond Extract': ['cooking_essentials', 'pantry_staples'],
 
-  // Versatile ingredients
+  // === VERSATILE LIQUIDS (Fresh vs Shelf-Stable Mental Model) ===
+  // Users think: "Refrigerated section" vs "Canned goods"
   'Coconut Milk': ['dairy_cold', 'pantry_staples'],
 
-  // Add more as needed based on Chef Isabella's catalog
+  // === Add new mappings here with clear mental model reasoning ===
 };
 
 /**
@@ -145,4 +166,74 @@ export function getPrimaryCategory(
   }
 
   return null;
+}
+
+/**
+ * Validation: Check if all multi-category ingredients exist in the system catalog
+ * Returns array of missing ingredients for debugging/development
+ */
+export async function validateMultiCategoryIngredients(): Promise<string[]> {
+  // Dynamic import to avoid circular dependencies
+  const { CHEF_ISABELLA_SYSTEM_CATALOG } = await import('./system-catalog');
+  const allSystemIngredients = new Set<string>();
+  
+  // Collect all ingredients from system catalog
+  Object.values(CHEF_ISABELLA_SYSTEM_CATALOG).forEach((ingredients: string[]) => {
+    ingredients.forEach(ingredient => allSystemIngredients.add(ingredient));
+  });
+
+  // Find multi-category ingredients that don't exist in system catalog
+  const missingIngredients: string[] = [];
+  Object.keys(MULTI_CATEGORY_INGREDIENTS).forEach(ingredient => {
+    if (!allSystemIngredients.has(ingredient)) {
+      missingIngredients.push(ingredient);
+    }
+  });
+
+  return missingIngredients;
+}
+
+/**
+ * Validation: Check if multi-category mappings reference valid categories
+ * Returns array of invalid categories for debugging/development
+ */
+export async function validateMultiCategoryMappings(): Promise<string[]> {
+  // Dynamic import to avoid circular dependencies
+  const { CHEF_ISABELLA_SYSTEM_CATALOG } = await import('./system-catalog');
+  const validCategories = new Set(Object.keys(CHEF_ISABELLA_SYSTEM_CATALOG));
+  const invalidCategories: string[] = [];
+
+  Object.entries(MULTI_CATEGORY_INGREDIENTS).forEach(([ingredient, categories]) => {
+    categories.forEach(category => {
+      if (!validCategories.has(category)) {
+        invalidCategories.push(`${ingredient} -> ${category}`);
+      }
+    });
+  });
+
+  return invalidCategories;
+}
+
+/**
+ * Development helper: Run all validations and log results
+ * Should be called during development to ensure consistency
+ */
+export async function runMultiCategoryValidations(): Promise<boolean> {
+  const missingIngredients = await validateMultiCategoryIngredients();
+  const invalidMappings = await validateMultiCategoryMappings();
+
+  if (missingIngredients.length > 0) {
+    console.warn('⚠️ Multi-category ingredients not found in system catalog:', missingIngredients);
+  }
+
+  if (invalidMappings.length > 0) {
+    console.warn('⚠️ Multi-category mappings reference invalid categories:', invalidMappings);
+  }
+
+  const isValid = missingIngredients.length === 0 && invalidMappings.length === 0;
+  if (isValid) {
+    console.log('✅ Multi-category ingredient validations passed');
+  }
+
+  return isValid;
 }
