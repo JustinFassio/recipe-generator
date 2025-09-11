@@ -23,7 +23,7 @@ import {
 enum UpsertStatus {
   INSERTED = 'inserted',
   UPDATED = 'updated',
-  UNCHANGED = 'unchanged'
+  UNCHANGED = 'unchanged',
 }
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'http://127.0.0.1:54321';

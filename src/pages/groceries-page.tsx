@@ -57,34 +57,12 @@ export function GroceriesPage() {
     await groceries.loadGroceries();
   };
 
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50">
-        <div className="mx-auto max-w-4xl px-4 py-8">
-          <div className={createDaisyUICardClasses('bordered')}>
-            <div className="card-body text-center">
-              <h2 className="card-title justify-center">
-                Authentication Required
-              </h2>
-              <p>Please sign in to manage your groceries.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  const activeCategoryData =
-    activeCategory === 'all'
-      ? { name: 'All Categories', subtitle: 'All Your Ingredients', icon: '📋' }
-      : getCategoryMetadata(activeCategory);
-
   // Pre-compute ingredient-to-category lookup for performance optimization
   // This avoids O(n*m) nested loops in the 'all' view rendering
   const ingredientToCategoryMap = useMemo(() => {
     const map = new Map<string, string>();
     Object.entries(userGroceryCart).forEach(([category, ingredients]) => {
-      ingredients.forEach(ingredient => {
+      ingredients.forEach((ingredient) => {
         map.set(ingredient, category);
       });
     });
@@ -118,6 +96,28 @@ export function GroceriesPage() {
       .filter(filterHidden)
       .sort((a, b) => a.localeCompare(b));
   }, [activeCategory, userGroceryCart, hiddenNormalizedNames]);
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50">
+        <div className="mx-auto max-w-4xl px-4 py-8">
+          <div className={createDaisyUICardClasses('bordered')}>
+            <div className="card-body text-center">
+              <h2 className="card-title justify-center">
+                Authentication Required
+              </h2>
+              <p>Please sign in to manage your groceries.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const activeCategoryData =
+    activeCategory === 'all'
+      ? { name: 'All Categories', subtitle: 'All Your Ingredients', icon: '📋' }
+      : getCategoryMetadata(activeCategory);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50">

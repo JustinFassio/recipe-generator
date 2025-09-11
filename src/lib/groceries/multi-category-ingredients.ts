@@ -176,15 +176,17 @@ export async function validateMultiCategoryIngredients(): Promise<string[]> {
   // Dynamic import to avoid circular dependencies
   const { CHEF_ISABELLA_SYSTEM_CATALOG } = await import('./system-catalog');
   const allSystemIngredients = new Set<string>();
-  
+
   // Collect all ingredients from system catalog
-  Object.values(CHEF_ISABELLA_SYSTEM_CATALOG).forEach((ingredients: string[]) => {
-    ingredients.forEach(ingredient => allSystemIngredients.add(ingredient));
-  });
+  Object.values(CHEF_ISABELLA_SYSTEM_CATALOG).forEach(
+    (ingredients: string[]) => {
+      ingredients.forEach((ingredient) => allSystemIngredients.add(ingredient));
+    }
+  );
 
   // Find multi-category ingredients that don't exist in system catalog
   const missingIngredients: string[] = [];
-  Object.keys(MULTI_CATEGORY_INGREDIENTS).forEach(ingredient => {
+  Object.keys(MULTI_CATEGORY_INGREDIENTS).forEach((ingredient) => {
     if (!allSystemIngredients.has(ingredient)) {
       missingIngredients.push(ingredient);
     }
@@ -203,13 +205,15 @@ export async function validateMultiCategoryMappings(): Promise<string[]> {
   const validCategories = new Set(Object.keys(CHEF_ISABELLA_SYSTEM_CATALOG));
   const invalidCategories: string[] = [];
 
-  Object.entries(MULTI_CATEGORY_INGREDIENTS).forEach(([ingredient, categories]) => {
-    categories.forEach(category => {
-      if (!validCategories.has(category)) {
-        invalidCategories.push(`${ingredient} -> ${category}`);
-      }
-    });
-  });
+  Object.entries(MULTI_CATEGORY_INGREDIENTS).forEach(
+    ([ingredient, categories]) => {
+      categories.forEach((category) => {
+        if (!validCategories.has(category)) {
+          invalidCategories.push(`${ingredient} -> ${category}`);
+        }
+      });
+    }
+  );
 
   return invalidCategories;
 }
@@ -223,14 +227,21 @@ export async function runMultiCategoryValidations(): Promise<boolean> {
   const invalidMappings = await validateMultiCategoryMappings();
 
   if (missingIngredients.length > 0) {
-    console.warn('⚠️ Multi-category ingredients not found in system catalog:', missingIngredients);
+    console.warn(
+      '⚠️ Multi-category ingredients not found in system catalog:',
+      missingIngredients
+    );
   }
 
   if (invalidMappings.length > 0) {
-    console.warn('⚠️ Multi-category mappings reference invalid categories:', invalidMappings);
+    console.warn(
+      '⚠️ Multi-category mappings reference invalid categories:',
+      invalidMappings
+    );
   }
 
-  const isValid = missingIngredients.length === 0 && invalidMappings.length === 0;
+  const isValid =
+    missingIngredients.length === 0 && invalidMappings.length === 0;
   if (isValid) {
     console.log('✅ Multi-category ingredient validations passed');
   }
