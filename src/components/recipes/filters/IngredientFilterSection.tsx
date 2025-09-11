@@ -2,8 +2,10 @@ import { useState, useMemo } from 'react';
 import { Search, Check, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useGroceries } from '@/hooks/useGroceries';
-import { GROCERY_CATEGORIES } from '@/lib/groceries/categories';
+import { 
+  CHEF_ISABELLA_SYSTEM_CATALOG,
+  CATEGORY_METADATA 
+} from '@/lib/groceries/system-catalog';
 
 interface IngredientFilterSectionProps {
   selectedIngredients: string[];
@@ -23,48 +25,34 @@ export function IngredientFilterSection({
     new Set()
   );
   const [isOpen, setIsOpen] = useState(false);
-  const groceries = useGroceries();
-
-  // Get available ingredients from selected groceries
-  const availableIngredients = useMemo(() => {
-    return Object.values(groceries.groceries).flat();
-  }, [groceries.groceries]);
 
   // Group ingredients by category and filter based on search term
   const groupedIngredients = useMemo(() => {
     const groups: Record<string, string[]> = {};
 
-    availableIngredients.forEach((ingredient) => {
-      // Skip if doesn't match search term
-      if (
-        searchTerm &&
-        !ingredient.toLowerCase().includes(searchTerm.toLowerCase())
-      ) {
-        return;
-      }
+    // Process each category and its ingredients from the system catalog
+    Object.entries(CHEF_ISABELLA_SYSTEM_CATALOG).forEach(([categoryKey, ingredients]) => {
+      const categoryMetadata = CATEGORY_METADATA[categoryKey as keyof typeof CATEGORY_METADATA];
+      const categoryName = categoryMetadata?.name || categoryKey;
 
-      // Find which category this ingredient belongs to
-      let foundCategory = 'Other';
-      for (const [, categoryData] of Object.entries(GROCERY_CATEGORIES)) {
-        if (categoryData.items.includes(ingredient)) {
-          foundCategory = categoryData.name;
-          break;
+      const filteredIngredients = ingredients.filter((ingredient) => {
+        // Skip if doesn't match search term
+        if (
+          searchTerm &&
+          !ingredient.toLowerCase().includes(searchTerm.toLowerCase())
+        ) {
+          return false;
         }
-      }
+        return true;
+      });
 
-      if (!groups[foundCategory]) {
-        groups[foundCategory] = [];
+      if (filteredIngredients.length > 0) {
+        groups[categoryName] = filteredIngredients.sort();
       }
-      groups[foundCategory].push(ingredient);
-    });
-
-    // Sort ingredients within each group
-    Object.keys(groups).forEach((category) => {
-      groups[category].sort();
     });
 
     return groups;
-  }, [availableIngredients, searchTerm]);
+  }, [searchTerm]);
 
   const toggleIngredient = (ingredient: string) => {
     const newIngredients = selectedIngredients.includes(ingredient)
@@ -127,12 +115,12 @@ export function IngredientFilterSection({
                       {categoryName}
                     </h5>
                     <div className="grid grid-cols-3 gap-2">
-                      {ingredients.map((ingredient) => {
+                      {ingredients.map((ingredient, index) => {
                         const isSelected =
                           selectedIngredients.includes(ingredient);
                         return (
                           <Button
-                            key={ingredient}
+                            key={`${categoryName}-${ingredient}-${index}`}
                             variant={isSelected ? 'default' : 'outline'}
                             size="sm"
                             className="justify-start text-xs h-9 hover:bg-gray-50 transition-colors"
@@ -213,12 +201,12 @@ export function IngredientFilterSection({
 
                   {isExpanded && (
                     <div className="p-3 pt-0 grid grid-cols-2 gap-2">
-                      {ingredients.map((ingredient) => {
+                      {ingredients.map((ingredient, index) => {
                         const isSelected =
                           selectedIngredients.includes(ingredient);
                         return (
                           <Button
-                            key={ingredient}
+                            key={`${categoryName}-${ingredient}-${index}`}
                             variant={isSelected ? 'default' : 'outline'}
                             size="sm"
                             className="justify-start text-xs h-8"
@@ -270,11 +258,11 @@ export function IngredientFilterSection({
                 {categoryName}
               </h5>
               <div className="grid grid-cols-2 gap-2">
-                {ingredients.map((ingredient) => {
+                {ingredients.map((ingredient, index) => {
                   const isSelected = selectedIngredients.includes(ingredient);
                   return (
                     <Button
-                      key={ingredient}
+                      key={`${categoryName}-${ingredient}-${index}`}
                       variant={isSelected ? 'default' : 'outline'}
                       size="sm"
                       className="justify-start text-xs h-9"
