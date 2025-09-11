@@ -122,21 +122,21 @@ export const recipeApi = {
         const matcher = new IngredientMatcher(groceriesData);
 
         // Filter recipes based on sophisticated ingredient matching
+        // Create a Set for fast lookup of selected ingredients
+        const selectedIngredientsSet = new Set(filters.availableIngredients);
         recipes = recipes.filter((recipe) => {
-          // Check if recipe contains any of the selected available ingredients
-          return filters.availableIngredients!.some((selectedIngredient) => {
-            // Check each recipe ingredient against the selected ingredient
-            return recipe.ingredients.some((recipeIngredient) => {
-              const match = matcher.matchIngredient(recipeIngredient);
-              // Consider it a match if:
-              // 1. The matcher found a match with good confidence, AND
-              // 2. The matched ingredient is the selected ingredient we're filtering for
-              return (
-                match.matchType !== 'none' &&
-                match.confidence >= 50 &&
-                match.matchedGroceryIngredient === selectedIngredient
-              );
-            });
+          // Check if any recipe ingredient matches any selected ingredient
+          return recipe.ingredients.some((recipeIngredient) => {
+            const match = matcher.matchIngredient(recipeIngredient);
+            // Consider it a match if:
+            // 1. The matcher found a match with good confidence, AND
+            // 2. The matched ingredient is in the selected ingredients set
+            return (
+              match.matchType !== 'none' &&
+              match.confidence >= 50 &&
+              match.matchedGroceryIngredient &&
+              selectedIngredientsSet.has(match.matchedGroceryIngredient)
+            );
           });
         });
       } catch (error) {
