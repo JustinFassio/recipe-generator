@@ -22,9 +22,6 @@ export function IngredientFilterSection({
   className = '',
 }: IngredientFilterSectionProps) {
   const [searchTerm, setSearchTerm] = useState('');
-  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
-    new Set()
-  );
   const [isOpen, setIsOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'global' | 'available'>('global');
   const groceries = useGroceries();
@@ -32,24 +29,28 @@ export function IngredientFilterSection({
   // Get available ingredients organized by category (like groceries page structure)
   const availableIngredientsByCategory = useMemo(() => {
     const categoryGroups: Record<string, string[]> = {};
-    
+
     // Safety check for groceries hook
-    if (!groceries?.groceries || typeof groceries.hasIngredient !== 'function') {
+    if (
+      !groceries?.groceries ||
+      typeof groceries.hasIngredient !== 'function'
+    ) {
       return categoryGroups;
     }
-    
+
     Object.entries(groceries.groceries).forEach(([category, ingredients]) => {
       const availableInCategory = ingredients.filter((ingredient) =>
         groceries.hasIngredient(category, ingredient)
       );
-      
+
       if (availableInCategory.length > 0) {
-        const categoryMetadata = CATEGORY_METADATA[category as keyof typeof CATEGORY_METADATA];
+        const categoryMetadata =
+          CATEGORY_METADATA[category as keyof typeof CATEGORY_METADATA];
         const categoryName = categoryMetadata?.name || category;
         categoryGroups[categoryName] = availableInCategory.sort();
       }
     });
-    
+
     return categoryGroups;
   }, [groceries, groceries.groceries, groceries.hasIngredient]);
 
@@ -59,21 +60,23 @@ export function IngredientFilterSection({
 
     if (viewMode === 'available') {
       // Use available ingredients organized by category
-      Object.entries(availableIngredientsByCategory).forEach(([categoryName, ingredients]) => {
-        const filteredIngredients = ingredients.filter((ingredient) => {
-          if (
-            searchTerm &&
-            !ingredient.toLowerCase().includes(searchTerm.toLowerCase())
-          ) {
-            return false;
-          }
-          return true;
-        });
+      Object.entries(availableIngredientsByCategory).forEach(
+        ([categoryName, ingredients]) => {
+          const filteredIngredients = ingredients.filter((ingredient) => {
+            if (
+              searchTerm &&
+              !ingredient.toLowerCase().includes(searchTerm.toLowerCase())
+            ) {
+              return false;
+            }
+            return true;
+          });
 
-        if (filteredIngredients.length > 0) {
-          groups[categoryName] = filteredIngredients;
+          if (filteredIngredients.length > 0) {
+            groups[categoryName] = filteredIngredients;
+          }
         }
-      });
+      );
     } else {
       // Use global system catalog
       Object.entries(CHEF_ISABELLA_SYSTEM_CATALOG).forEach(
@@ -113,15 +116,6 @@ export function IngredientFilterSection({
     onIngredientsChange([]);
   };
 
-  const toggleCategory = (categoryName: string) => {
-    const newExpanded = new Set(expandedCategories);
-    if (newExpanded.has(categoryName)) {
-      newExpanded.delete(categoryName);
-    } else {
-      newExpanded.add(categoryName);
-    }
-    setExpandedCategories(newExpanded);
-  };
 
   const totalIngredients = Object.values(groupedIngredients).reduce(
     (sum, ingredients) => sum + ingredients.length,
@@ -156,60 +150,32 @@ export function IngredientFilterSection({
     </div>
   );
 
-  // Search input component
-  const SearchInput = () => (
-    <div className="relative mb-4">
-      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-      <Input
-        type="text"
-        placeholder={`Search ${viewMode === 'global' ? 'global' : 'available'} ingredients...`}
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        className="pl-10"
-      />
-    </div>
-  );
 
   // Category content component
   const CategoryContent = () => (
     <div className="space-y-4">
       {Object.entries(groupedIngredients).map(([categoryName, ingredients]) => (
         <div key={categoryName} className="space-y-2">
-          {/* Category Header */}
-          <button
-            className="flex items-center justify-between w-full text-left p-2 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors"
-            onClick={() => toggleCategory(categoryName)}
-          >
-            <span className="font-medium text-gray-900">
-              {categoryName} ({ingredients.length})
-            </span>
-            <ChevronDown
-              className={`h-4 w-4 text-gray-500 transition-transform ${
-                expandedCategories.has(categoryName) ? 'rotate-180' : ''
-              }`}
-            />
-          </button>
-
-          {/* Category Ingredients */}
-          {expandedCategories.has(categoryName) && (
-            <div className="grid grid-cols-3 gap-2">
-              {ingredients.map((ingredient, index) => {
-                const isSelected = selectedIngredients.includes(ingredient);
-                return (
-                  <Button
-                    key={`${categoryName}-${ingredient}-${index}`}
-                    variant={isSelected ? 'default' : 'outline'}
-                    size="sm"
-                    className="justify-start text-xs h-9 hover:bg-gray-50 transition-colors"
-                    onClick={() => toggleIngredient(ingredient)}
-                  >
-                    {isSelected && <Check className="h-3 w-3 mr-1" />}
-                    <span className="truncate">{ingredient}</span>
-                  </Button>
-                );
-              })}
-            </div>
-          )}
+          <h5 className="text-sm font-medium text-gray-700 border-b pb-1">
+            {categoryName} ({ingredients.length})
+          </h5>
+          <div className="grid grid-cols-3 gap-2">
+            {ingredients.map((ingredient, index) => {
+              const isSelected = selectedIngredients.includes(ingredient);
+              return (
+                <Button
+                  key={`${categoryName}-${ingredient}-${index}`}
+                  variant={isSelected ? 'default' : 'outline'}
+                  size="sm"
+                  className="justify-start text-xs h-9 hover:bg-gray-50 transition-colors"
+                  onClick={() => toggleIngredient(ingredient)}
+                >
+                  {isSelected && <Check className="h-3 w-3 mr-1" />}
+                  <span className="truncate">{ingredient}</span>
+                </Button>
+              );
+            })}
+          </div>
         </div>
       ))}
     </div>
@@ -219,18 +185,16 @@ export function IngredientFilterSection({
   const EmptyState = () => (
     <div className="text-center py-8 text-gray-500">
       <div className="text-lg font-medium mb-2">
-        {viewMode === 'available' 
-          ? 'No available ingredients found' 
-          : 'No ingredients found'
-        }
+        {viewMode === 'available'
+          ? 'No available ingredients found'
+          : 'No ingredients found'}
       </div>
       <div className="text-sm">
-        {viewMode === 'available' 
+        {viewMode === 'available'
           ? 'Mark ingredients as available in your groceries to see them here.'
-          : searchTerm 
+          : searchTerm
             ? 'Try adjusting your search terms.'
-            : 'No ingredients available in the system catalog.'
-        }
+            : 'No ingredients available in the system catalog.'}
       </div>
     </div>
   );
@@ -246,7 +210,9 @@ export function IngredientFilterSection({
           <span>
             Ingredients{' '}
             {selectedIngredients.length > 0 && (
-              <span className="text-blue-600">({selectedIngredients.length})</span>
+              <span className="text-blue-600">
+                ({selectedIngredients.length})
+              </span>
             )}
           </span>
           <ChevronDown
@@ -255,29 +221,36 @@ export function IngredientFilterSection({
         </Button>
 
         {isOpen && (
-          <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border rounded-md shadow-lg max-h-96 overflow-y-auto">
-            <div className="p-4">
+          <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border rounded-lg shadow-lg max-h-80 overflow-y-auto w-96">
+            <div className="p-4 border-b">
               <ViewModeToggle />
-              <SearchInput />
-              
-              {selectedIngredients.length > 0 && (
-                <div className="flex justify-between items-center mb-4 pb-2 border-b">
-                  <span className="text-sm text-gray-600">
-                    {selectedIngredients.length} selected
-                  </span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={clearAllIngredients}
-                    className="text-red-600 hover:text-red-700"
-                  >
-                    Clear All
-                  </Button>
-                </div>
-              )}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 text-gray-400 -translate-y-1/2" />
+                <Input
+                  placeholder={`Search ${viewMode === 'global' ? 'global' : 'available'} ingredients...`}
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
 
+            <div className="p-4 space-y-4">
               {totalIngredients === 0 ? <EmptyState /> : <CategoryContent />}
             </div>
+
+            {selectedIngredients.length > 0 && (
+              <div className="p-4 border-t">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={clearAllIngredients}
+                  className="text-red-600 hover:text-red-700"
+                >
+                  Clear All ({selectedIngredients.length})
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -302,7 +275,15 @@ export function IngredientFilterSection({
         </div>
 
         <ViewModeToggle />
-        <SearchInput />
+        <div className="relative mb-4">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 text-gray-400 -translate-y-1/2" />
+          <Input
+            placeholder={`Search ${viewMode === 'global' ? 'global' : 'available'} ingredients...`}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
+          />
+        </div>
 
         {totalIngredients === 0 ? <EmptyState /> : <CategoryContent />}
       </div>
@@ -329,13 +310,22 @@ export function IngredientFilterSection({
         {selectedIngredients.length > 0 && (
           <div className="mb-4 p-3 bg-blue-50 rounded-md">
             <div className="text-sm font-medium text-blue-900">
-              {selectedIngredients.length} ingredient{selectedIngredients.length !== 1 ? 's' : ''} selected
+              {selectedIngredients.length} ingredient
+              {selectedIngredients.length !== 1 ? 's' : ''} selected
             </div>
           </div>
         )}
 
         <ViewModeToggle />
-        <SearchInput />
+        <div className="relative mb-4">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 text-gray-400 -translate-y-1/2" />
+          <Input
+            placeholder={`Search ${viewMode === 'global' ? 'global' : 'available'} ingredients...`}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
+          />
+        </div>
 
         <div className="flex-1 overflow-y-auto">
           {totalIngredients === 0 ? <EmptyState /> : <CategoryContent />}
