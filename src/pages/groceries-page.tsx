@@ -79,8 +79,20 @@ export function GroceriesPage() {
       ? { name: 'All Categories', subtitle: 'All Your Ingredients', icon: '📋' }
       : getCategoryMetadata(activeCategory);
 
+  // Pre-compute ingredient-to-category lookup for performance optimization
+  // This avoids O(n*m) nested loops in the 'all' view rendering
+  const ingredientToCategoryMap = useMemo(() => {
+    const map = new Map<string, string>();
+    Object.entries(userGroceryCart).forEach(([category, ingredients]) => {
+      ingredients.forEach(ingredient => {
+        map.set(ingredient, category);
+      });
+    });
+    return map;
+  }, [userGroceryCart]);
+
   // Show ALL ingredients that user has added to their grocery cart (both selected and unselected)
-  const userCategoryItems = (() => {
+  const userCategoryItems = useMemo(() => {
     let cartIngredients: string[] = [];
 
     if (activeCategory === 'all') {
@@ -105,7 +117,7 @@ export function GroceriesPage() {
     return cartIngredients
       .filter(filterHidden)
       .sort((a, b) => a.localeCompare(b));
-  })();
+  }, [activeCategory, userGroceryCart, hiddenNormalizedNames]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50">
@@ -206,12 +218,10 @@ export function GroceriesPage() {
             </h2>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
               {userCategoryItems.map((ingredient) => {
-                // For "all" view, we need to find which category this ingredient belongs to
+                // Use pre-computed lookup map for O(1) category resolution
                 const ingredientCategory =
                   activeCategory === 'all'
-                    ? Object.keys(userGroceryCart).find((cat) =>
-                        userGroceryCart[cat]?.includes(ingredient)
-                      ) || activeCategory
+                    ? ingredientToCategoryMap.get(ingredient) || activeCategory
                     : activeCategory;
 
                 const isSelected = groceries.hasIngredient(
