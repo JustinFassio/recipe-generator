@@ -2,6 +2,8 @@ import { supabase } from './supabase';
 import type { Recipe, PublicRecipe, RecipeFilters } from './types';
 import { parseRecipeFromText } from './recipe-parser';
 import { trackDatabaseError, trackAPIError } from './error-tracking';
+import { IngredientMatcher } from './groceries/ingredient-matcher';
+import { getUserGroceries } from './user-preferences';
 
 // Type for profile summary data used in API responses
 interface ProfileSummary {
@@ -111,12 +113,6 @@ export const recipeApi = {
 
     // Apply client-side ingredient filtering using sophisticated IngredientMatcher
     if (filters?.availableIngredients?.length) {
-      // Import the IngredientMatcher dynamically to avoid circular dependencies
-      const { IngredientMatcher } = await import(
-        '@/lib/groceries/ingredient-matcher'
-      );
-      const { getUserGroceries } = await import('@/lib/user-preferences');
-
       try {
         // Get user's available groceries for matching
         const userGroceries = await getUserGroceries(user.id);
