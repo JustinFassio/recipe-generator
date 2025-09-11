@@ -5,6 +5,9 @@ import { trackDatabaseError, trackAPIError } from './error-tracking';
 import { IngredientMatcher } from './groceries/ingredient-matcher';
 import { getUserGroceries } from './user-preferences';
 
+// Configuration constants for ingredient filtering
+const INGREDIENT_MATCH_CONFIDENCE_THRESHOLD = 50; // Minimum confidence score for ingredient matching (0-100)
+
 // Type for profile summary data used in API responses
 interface ProfileSummary {
   id: string;
@@ -133,7 +136,7 @@ export const recipeApi = {
             // 2. The matched ingredient is in the selected ingredients set
             return (
               match.matchType !== 'none' &&
-              match.confidence >= 50 &&
+              match.confidence >= INGREDIENT_MATCH_CONFIDENCE_THRESHOLD &&
               match.matchedGroceryIngredient &&
               selectedIngredientsSet.has(match.matchedGroceryIngredient)
             );
