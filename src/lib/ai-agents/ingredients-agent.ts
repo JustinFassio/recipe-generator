@@ -53,22 +53,24 @@ export class IngredientsAgent {
       ([categoryKey, ingredients]) => {
         const categoryMetadata =
           CATEGORY_METADATA[categoryKey as keyof typeof CATEGORY_METADATA];
-        
+
         // Validate that all categories have metadata - fail fast if missing
         if (!categoryMetadata) {
           console.error(
             `Missing category metadata for "${categoryKey}" in CHEF_ISABELLA_SYSTEM_CATALOG. ` +
-            `Please add corresponding entry to CATEGORY_METADATA.`
+              `Please add corresponding entry to CATEGORY_METADATA.`
           );
           // Fallback for development, but this should be fixed
           return ingredients.map((ingredient) => ({
             key: categoryKey,
-            name: categoryKey.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+            name: categoryKey
+              .replace(/_/g, ' ')
+              .replace(/\b\w/g, (l) => l.toUpperCase()),
             icon: '🍽️',
             item: ingredient,
           }));
         }
-        
+
         return ingredients.map((ingredient) => ({
           key: categoryKey,
           name: categoryMetadata.name,
