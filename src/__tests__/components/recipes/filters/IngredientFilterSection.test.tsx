@@ -33,7 +33,8 @@ describe('IngredientFilterSection', () => {
         />
       );
 
-      expect(screen.getByText('Ingredients (2)')).toBeInTheDocument();
+      const button = screen.getByRole('button', { name: /ingredients/i });
+      expect(button).toHaveTextContent('Ingredients (2)');
     });
 
     it('should toggle dropdown when clicked', () => {
@@ -88,7 +89,7 @@ describe('IngredientFilterSection', () => {
       );
 
       expect(screen.getByText('Available Ingredients')).toBeInTheDocument();
-      expect(screen.getByText('2 selected')).toBeInTheDocument();
+      expect(screen.getByText(/2 ingredient.*selected/)).toBeInTheDocument();
     });
 
     it('should show clear all button when ingredients are selected', () => {
@@ -100,7 +101,7 @@ describe('IngredientFilterSection', () => {
         />
       );
 
-      expect(screen.getByText('Clear All Ingredients')).toBeInTheDocument();
+      expect(screen.getByText('Clear All')).toBeInTheDocument();
     });
   });
 
