@@ -2,6 +2,11 @@ import { supabase } from './supabase';
 import type { Recipe, PublicRecipe, RecipeFilters } from './types';
 import { parseRecipeFromText } from './recipe-parser';
 import { trackDatabaseError, trackAPIError } from './error-tracking';
+import { IngredientMatcher } from './groceries/ingredient-matcher';
+import { getUserGroceries } from './user-preferences';
+
+// Configuration constants for ingredient filtering
+const INGREDIENT_MATCH_CONFIDENCE_THRESHOLD = 50; // Minimum confidence score for ingredient matching (0-100)
 
 // Type for profile summary data used in API responses
 interface ProfileSummary {
@@ -78,13 +83,12 @@ export const recipeApi = {
       query = query.overlaps('categories', moodCategories);
     }
 
-    // Apply available ingredients filter
-    if (filters?.availableIngredients?.length) {
-      // Filter recipes that contain any of the selected available ingredients
-      // This uses the contains operator to check if any of the available ingredients
-      // are present in the recipe's ingredients array
-      query = query.overlaps('ingredients', filters.availableIngredients);
-    }
+    // NOTE: availableIngredients filtering is now handled client-side
+    // using sophisticated IngredientMatcher for better accuracy.
+    // The old simple string matching was removed because it couldn't handle:
+    // - Recipe ingredients with measurements ("2 cups diced onions")
+    // - Synonyms and variations
+    // - Normalization and fuzzy matching
 
     // Apply sorting
     const sortBy = filters?.sortBy || 'date';
@@ -108,7 +112,46 @@ export const recipeApi = {
     const { data, error } = await query;
 
     if (error) handleError(error, 'Get user recipes');
-    return (data as unknown as Recipe[]) || [];
+    let recipes = (data as unknown as Recipe[]) || [];
+
+    // Apply client-side ingredient filtering using sophisticated IngredientMatcher
+    if (filters?.availableIngredients?.length) {
+      try {
+        // Get user's available groceries for matching
+        const userGroceries = await getUserGroceries(user.id);
+        const groceriesData = userGroceries?.groceries || {};
+
+        // Create matcher with user's available groceries
+        const matcher = new IngredientMatcher(groceriesData);
+
+        // Filter recipes based on sophisticated ingredient matching
+        // Create a Set for fast lookup of selected ingredients
+        const selectedIngredientsSet = new Set(filters.availableIngredients);
+        recipes = recipes.filter((recipe) => {
+          // Check if any recipe ingredient matches any selected ingredient
+          return recipe.ingredients.some((recipeIngredient) => {
+            const match = matcher.matchIngredient(recipeIngredient);
+            // Consider it a match if:
+            // 1. The matcher found a match with good confidence, AND
+            // 2. The matched ingredient is in the selected ingredients set
+            return (
+              match.matchType !== 'none' &&
+              match.confidence >= INGREDIENT_MATCH_CONFIDENCE_THRESHOLD &&
+              match.matchedGroceryIngredient &&
+              selectedIngredientsSet.has(match.matchedGroceryIngredient)
+            );
+          });
+        });
+      } catch (error) {
+        console.warn(
+          'Failed to apply client-side ingredient filtering:',
+          error
+        );
+        // Fall back to no filtering if there's an error
+      }
+    }
+
+    return recipes;
   },
 
   // Get a single recipe by ID
