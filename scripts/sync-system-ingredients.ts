@@ -1,14 +1,23 @@
 /*
- * Sync predefined system ingredients (from GROCERY_CATEGORIES) into global_ingredients
+ * Chef Isabella's "Kitchen Reality" System Ingredients Sync
+ *
+ * "Group by BEHAVIOR, not biology!" - Chef Isabella
+ *
+ * Syncs Chef Isabella's comprehensive ingredient catalog into global_ingredients
  * - Marks items as is_system = true
  * - Idempotent upserts by normalized_name
+ * - Organizes ingredients by kitchen behavior, not scientific classification
  *
  * Usage (local):
  *   SUPABASE_SERVICE_ROLE_KEY=... npm run tsx scripts/sync-system-ingredients.ts
  */
 
 import { createClient } from '@supabase/supabase-js';
-import { GROCERY_CATEGORIES } from '@/lib/groceries/categories';
+import {
+  getAllSystemIngredients,
+  CATEGORY_METADATA,
+  getCategoryStats,
+} from '@/lib/groceries/system-catalog';
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'http://127.0.0.1:54321';
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -28,7 +37,10 @@ function normalizeName(s: string): string {
     .trim();
 }
 
-async function upsertSystemIngredient(name: string, category: string) {
+async function upsertSystemIngredient(
+  name: string,
+  category: string
+): Promise<'inserted' | 'updated' | 'unchanged'> {
   const normalized_name = normalizeName(name);
 
   const { data: existing, error: fetchError } = await admin
@@ -52,8 +64,7 @@ async function upsertSystemIngredient(name: string, category: string) {
         is_system: true,
       });
     if (insertError) throw insertError;
-    console.log(`➕ Inserted system ingredient: ${name} [${category}]`);
-    return;
+    return 'inserted';
   }
 
   // Ensure category remains accurate and is_system is true
@@ -67,27 +78,83 @@ async function upsertSystemIngredient(name: string, category: string) {
       .update({ is_system: true, category, name })
       .eq('id', existing.id);
     if (updateError) throw updateError;
-    console.log(`♻️  Updated system ingredient: ${name} [${category}]`);
+    return 'updated';
   }
+
+  return 'unchanged';
 }
 
 async function main() {
-  const entries = Object.entries(GROCERY_CATEGORIES) as Array<
-    [keyof typeof GROCERY_CATEGORIES, { items: string[] }]
-  >;
+  console.log("🍽️  Chef Isabella's Kitchen Reality Ingredient Sync");
+  console.log('📚 "Group by BEHAVIOR, not biology!" - Chef Isabella');
+  console.log('');
 
-  for (const [categoryKey, meta] of entries) {
-    for (const item of meta.items) {
-      try {
-        await upsertSystemIngredient(item, categoryKey as string);
-      } catch (e) {
-        console.error(`Failed upserting ${item} [${categoryKey}]:`, e);
-        process.exitCode = 1;
+  const systemIngredients = getAllSystemIngredients();
+  const categoryCount = new Set(systemIngredients.map((i) => i.category)).size;
+  const { stats, total } = getCategoryStats();
+
+  console.log(`📊 Processing ${total} system ingredients`);
+  console.log(`🏷️  Across ${categoryCount} "Kitchen Reality" categories`);
+  console.log('');
+
+  // Show category breakdown with Chef Isabella's personality
+  console.log('📋 Category Breakdown (organized by kitchen behavior):');
+  Object.entries(stats).forEach(([category, count]) => {
+    const meta = CATEGORY_METADATA[category as keyof typeof CATEGORY_METADATA];
+    console.log(
+      `   ${meta?.icon} ${meta?.name} - "${meta?.subtitle}": ${count} items`
+    );
+  });
+  console.log('');
+
+  let insertedCount = 0;
+  let updatedCount = 0;
+  let unchangedCount = 0;
+  let errorCount = 0;
+
+  for (const { name, category } of systemIngredients) {
+    try {
+      const result = await upsertSystemIngredient(name, category);
+      if (result === 'inserted') {
+        insertedCount++;
+        console.log(`➕ Inserted: ${name} [${category}]`);
+      } else if (result === 'updated') {
+        updatedCount++;
+        console.log(`♻️  Updated: ${name} [${category}]`);
+      } else {
+        unchangedCount++;
       }
+    } catch (e) {
+      console.error(`❌ Failed upserting ${name} [${category}]:`, e);
+      errorCount++;
+      process.exitCode = 1;
     }
   }
 
-  console.log('✅ System ingredients sync complete');
+  console.log('');
+  console.log("🎉 Chef Isabella's Kitchen Reality Sync Complete!");
+  console.log('📈 Final Summary:');
+  console.log(`  ➕ Inserted: ${insertedCount} new ingredients`);
+  console.log(`  ♻️  Updated: ${updatedCount} existing ingredients`);
+  console.log(`  ✅ Unchanged: ${unchangedCount} already perfect`);
+  console.log(
+    `  ❌ Errors: ${errorCount} ingredients couldn't find their home`
+  );
+  console.log(`  📊 Total Processed: ${total} ingredients`);
+
+  if (errorCount === 0) {
+    console.log('');
+    console.log(
+      "🍽️  Your kitchen is now organized like a professional chef's!"
+    );
+    console.log('🔍 Ingredients grouped by behavior, not biology');
+    console.log('👩‍🍳 Ready for intuitive, accessible cooking');
+    console.log('🏠 Following the "grandmother\'s kitchen" principle');
+  } else {
+    console.log('');
+    console.log("⚠️  Some ingredients couldn't find their kitchen home");
+    console.log('🔧 Please review errors above and adjust as needed');
+  }
 }
 
 main();
