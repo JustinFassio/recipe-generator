@@ -116,7 +116,6 @@ export function IngredientFilterSection({
     onIngredientsChange([]);
   };
 
-
   const totalIngredients = Object.values(groupedIngredients).reduce(
     (sum, ingredients) => sum + ingredients.length,
     0
@@ -149,7 +148,6 @@ export function IngredientFilterSection({
       </button>
     </div>
   );
-
 
   // Category content component
   const CategoryContent = () => (

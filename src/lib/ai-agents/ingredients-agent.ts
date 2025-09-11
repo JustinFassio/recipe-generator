@@ -4,7 +4,10 @@
  * intelligent access to the grocery ingredient/category system for filtering.
  */
 
-import { GROCERY_CATEGORIES } from '@/lib/groceries/categories';
+import {
+  CHEF_ISABELLA_SYSTEM_CATALOG,
+  CATEGORY_METADATA,
+} from '@/lib/groceries/system-catalog';
 
 export interface IngredientsAgentOptions {
   maxSuggestions?: number;
@@ -45,15 +48,18 @@ export class IngredientsAgent {
       ...options,
     };
 
-    // Build a flat searchable index of all canonical ingredients
-    this.allIngredients = Object.entries(GROCERY_CATEGORIES).flatMap(
-      ([key, value]) =>
-        (value.items || []).map((item) => ({
-          key,
-          name: value.name,
-          icon: value.icon,
-          item,
-        }))
+    // Build a flat searchable index of all canonical ingredients from Chef Isabella's system
+    this.allIngredients = Object.entries(CHEF_ISABELLA_SYSTEM_CATALOG).flatMap(
+      ([categoryKey, ingredients]) => {
+        const categoryMetadata =
+          CATEGORY_METADATA[categoryKey as keyof typeof CATEGORY_METADATA];
+        return ingredients.map((ingredient) => ({
+          key: categoryKey,
+          name: categoryMetadata?.name || categoryKey,
+          icon: categoryMetadata?.icon || '🍽️',
+          item: ingredient,
+        }));
+      }
     );
   }
 
@@ -113,10 +119,12 @@ export class IngredientsAgent {
    * Get all ingredients in a category (by key), sorted alphabetically.
    */
   getIngredientsByCategory(categoryKey: string): string[] {
-    const group =
-      GROCERY_CATEGORIES[categoryKey as keyof typeof GROCERY_CATEGORIES];
-    if (!group) return [];
-    return [...(group.items || [])].sort((a, b) => a.localeCompare(b));
+    const ingredients =
+      CHEF_ISABELLA_SYSTEM_CATALOG[
+        categoryKey as keyof typeof CHEF_ISABELLA_SYSTEM_CATALOG
+      ];
+    if (!ingredients) return [];
+    return [...ingredients].sort((a, b) => a.localeCompare(b));
   }
 
   /**
@@ -177,18 +185,20 @@ export class IngredientsAgent {
    * Provide category-level summaries for UI (counts and samples).
    */
   getCategorySummaries(): CategorySummary[] {
-    return Object.entries(GROCERY_CATEGORIES).map(([key, value]) => {
-      const list = (value.items || [])
-        .slice()
-        .sort((a, b) => a.localeCompare(b));
-      return {
-        key,
-        name: value.name,
-        icon: value.icon,
-        count: list.length,
-        sample: list.slice(0, 5),
-      } as CategorySummary;
-    });
+    return Object.entries(CHEF_ISABELLA_SYSTEM_CATALOG).map(
+      ([categoryKey, ingredients]) => {
+        const categoryMetadata =
+          CATEGORY_METADATA[categoryKey as keyof typeof CATEGORY_METADATA];
+        const list = [...ingredients].sort((a, b) => a.localeCompare(b));
+        return {
+          key: categoryKey,
+          name: categoryMetadata?.name || categoryKey,
+          icon: categoryMetadata?.icon || '🍽️',
+          count: list.length,
+          sample: list.slice(0, 5),
+        } as CategorySummary;
+      }
+    );
   }
 }
 
