@@ -2,10 +2,11 @@ import { useState, useMemo } from 'react';
 import { Search, Check, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { 
+import {
   CHEF_ISABELLA_SYSTEM_CATALOG,
-  CATEGORY_METADATA 
+  CATEGORY_METADATA,
 } from '@/lib/groceries/system-catalog';
+import { useGroceries } from '@/hooks/useGroceries';
 
 interface IngredientFilterSectionProps {
   selectedIngredients: string[];
@@ -25,17 +26,34 @@ export function IngredientFilterSection({
     new Set()
   );
   const [isOpen, setIsOpen] = useState(false);
+  const groceries = useGroceries();
+
+  // Get available ingredients from user's groceries (ingredients they have)
+  const availableIngredients = useMemo(() => {
+    const available: string[] = [];
+    
+    // Safety check for groceries hook
+    if (!groceries?.groceries || typeof groceries.hasIngredient !== 'function') {
+      return available;
+    }
+    
+    Object.entries(groceries.groceries).forEach(([category, ingredients]) => {
+      ingredients.forEach((ingredient) => {
+        if (groceries.hasIngredient(category, ingredient)) {
+          available.push(ingredient);
+        }
+      });
+    });
+    return available.sort();
+  }, [groceries.groceries, groceries.hasIngredient]);
 
   // Group ingredients by category and filter based on search term
   const groupedIngredients = useMemo(() => {
     const groups: Record<string, string[]> = {};
 
-    // Process each category and its ingredients from the system catalog
-    Object.entries(CHEF_ISABELLA_SYSTEM_CATALOG).forEach(([categoryKey, ingredients]) => {
-      const categoryMetadata = CATEGORY_METADATA[categoryKey as keyof typeof CATEGORY_METADATA];
-      const categoryName = categoryMetadata?.name || categoryKey;
-
-      const filteredIngredients = ingredients.filter((ingredient) => {
+    // First, add "Available Ingredients" section if user has available ingredients
+    if (availableIngredients.length > 0) {
+      const filteredAvailable = availableIngredients.filter((ingredient) => {
         // Skip if doesn't match search term
         if (
           searchTerm &&
@@ -46,13 +64,37 @@ export function IngredientFilterSection({
         return true;
       });
 
-      if (filteredIngredients.length > 0) {
-        groups[categoryName] = filteredIngredients.sort();
+      if (filteredAvailable.length > 0) {
+        groups['🍽️ Available Ingredients'] = filteredAvailable;
       }
-    });
+    }
+
+    // Then, process each category and its ingredients from the system catalog
+    Object.entries(CHEF_ISABELLA_SYSTEM_CATALOG).forEach(
+      ([categoryKey, ingredients]) => {
+        const categoryMetadata =
+          CATEGORY_METADATA[categoryKey as keyof typeof CATEGORY_METADATA];
+        const categoryName = categoryMetadata?.name || categoryKey;
+
+        const filteredIngredients = ingredients.filter((ingredient) => {
+          // Skip if doesn't match search term
+          if (
+            searchTerm &&
+            !ingredient.toLowerCase().includes(searchTerm.toLowerCase())
+          ) {
+            return false;
+          }
+          return true;
+        });
+
+        if (filteredIngredients.length > 0) {
+          groups[categoryName] = filteredIngredients.sort();
+        }
+      }
+    );
 
     return groups;
-  }, [searchTerm]);
+  }, [searchTerm, availableIngredients]);
 
   const toggleIngredient = (ingredient: string) => {
     const newIngredients = selectedIngredients.includes(ingredient)
