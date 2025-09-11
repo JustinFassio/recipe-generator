@@ -78,13 +78,12 @@ export const recipeApi = {
       query = query.overlaps('categories', moodCategories);
     }
 
-    // Apply available ingredients filter
-    if (filters?.availableIngredients?.length) {
-      // Filter recipes that contain any of the selected available ingredients
-      // This uses the contains operator to check if any of the available ingredients
-      // are present in the recipe's ingredients array
-      query = query.overlaps('ingredients', filters.availableIngredients);
-    }
+    // NOTE: availableIngredients filtering is now handled client-side
+    // using sophisticated IngredientMatcher for better accuracy.
+    // The old simple string matching was removed because it couldn't handle:
+    // - Recipe ingredients with measurements ("2 cups diced onions")
+    // - Synonyms and variations
+    // - Normalization and fuzzy matching
 
     // Apply sorting
     const sortBy = filters?.sortBy || 'date';
@@ -108,7 +107,52 @@ export const recipeApi = {
     const { data, error } = await query;
 
     if (error) handleError(error, 'Get user recipes');
-    return (data as unknown as Recipe[]) || [];
+    let recipes = (data as unknown as Recipe[]) || [];
+
+    // Apply client-side ingredient filtering using sophisticated IngredientMatcher
+    if (filters?.availableIngredients?.length) {
+      // Import the IngredientMatcher dynamically to avoid circular dependencies
+      const { IngredientMatcher } = await import(
+        '@/lib/groceries/ingredient-matcher'
+      );
+      const { getUserGroceries } = await import('@/lib/user-preferences');
+
+      try {
+        // Get user's available groceries for matching
+        const userGroceries = await getUserGroceries(user.id);
+        const groceriesData = userGroceries?.groceries || {};
+
+        // Create matcher with user's available groceries
+        const matcher = new IngredientMatcher(groceriesData);
+
+        // Filter recipes based on sophisticated ingredient matching
+        recipes = recipes.filter((recipe) => {
+          // Check if recipe contains any of the selected available ingredients
+          return filters.availableIngredients!.some((selectedIngredient) => {
+            // Check each recipe ingredient against the selected ingredient
+            return recipe.ingredients.some((recipeIngredient) => {
+              const match = matcher.matchIngredient(recipeIngredient);
+              // Consider it a match if:
+              // 1. The matcher found a match with good confidence, AND
+              // 2. The matched ingredient is the selected ingredient we're filtering for
+              return (
+                match.matchType !== 'none' &&
+                match.confidence >= 50 &&
+                match.matchedGroceryIngredient === selectedIngredient
+              );
+            });
+          });
+        });
+      } catch (error) {
+        console.warn(
+          'Failed to apply client-side ingredient filtering:',
+          error
+        );
+        // Fall back to no filtering if there's an error
+      }
+    }
+
+    return recipes;
   },
 
   // Get a single recipe by ID
