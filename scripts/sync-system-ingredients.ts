@@ -19,6 +19,13 @@ import {
   getCategoryStats,
 } from '@/lib/groceries/system-catalog';
 
+// Operation status enum for better type safety and maintainability
+enum UpsertStatus {
+  INSERTED = 'inserted',
+  UPDATED = 'updated',
+  UNCHANGED = 'unchanged'
+}
+
 const SUPABASE_URL = process.env.SUPABASE_URL || 'http://127.0.0.1:54321';
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
@@ -40,7 +47,7 @@ function normalizeName(s: string): string {
 async function upsertSystemIngredient(
   name: string,
   category: string
-): Promise<'inserted' | 'updated' | 'unchanged'> {
+): Promise<UpsertStatus> {
   const normalized_name = normalizeName(name);
 
   const { data: existing, error: fetchError } = await admin
@@ -64,7 +71,7 @@ async function upsertSystemIngredient(
         is_system: true,
       });
     if (insertError) throw insertError;
-    return 'inserted';
+    return UpsertStatus.INSERTED;
   }
 
   // Ensure category remains accurate and is_system is true
@@ -78,10 +85,10 @@ async function upsertSystemIngredient(
       .update({ is_system: true, category, name })
       .eq('id', existing.id);
     if (updateError) throw updateError;
-    return 'updated';
+    return UpsertStatus.UPDATED;
   }
 
-  return 'unchanged';
+  return UpsertStatus.UNCHANGED;
 }
 
 async function main() {
@@ -115,10 +122,10 @@ async function main() {
   for (const { name, category } of systemIngredients) {
     try {
       const result = await upsertSystemIngredient(name, category);
-      if (result === 'inserted') {
+      if (result === UpsertStatus.INSERTED) {
         insertedCount++;
         console.log(`➕ Inserted: ${name} [${category}]`);
-      } else if (result === 'updated') {
+      } else if (result === UpsertStatus.UPDATED) {
         updatedCount++;
         console.log(`♻️  Updated: ${name} [${category}]`);
       } else {
