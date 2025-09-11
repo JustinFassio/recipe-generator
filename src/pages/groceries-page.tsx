@@ -1,69 +1,50 @@
-import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthProvider';
 import { useGroceries } from '@/hooks/useGroceries';
+import { useUserGroceryCart } from '@/hooks/useUserGroceryCart';
 import { Button } from '@/components/ui/button';
-import { GROCERY_CATEGORIES } from '@/lib/groceries/categories';
+import {
+  getCategoryMetadata,
+  getAvailableCategories,
+} from '@/lib/groceries/category-mapping';
 import { createDaisyUICardClasses } from '@/lib/card-migration';
 import { IngredientMatchingTest } from '@/components/groceries/ingredient-matching-test';
 import { Save, RefreshCw, Globe } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useGlobalIngredients } from '@/hooks/useGlobalIngredients';
-import { supabase } from '@/lib/supabase';
 
 export function GroceriesPage() {
   const { user } = useAuth();
   const groceries = useGroceries();
   const { hiddenNormalizedNames, globalIngredients } = useGlobalIngredients();
+  const {
+    userGroceryCart,
+    loading: cartLoading,
+    error: cartError,
+    refreshCart,
+  } = useUserGroceryCart();
   const [activeCategory, setActiveCategory] = useState<string>('');
 
-  // State for user's grocery cart (from user_groceries table)
-  const [userGroceryCart, setUserGroceryCart] = useState<
-    Record<string, string[]>
-  >({});
-
-  // Load user's grocery cart from user_groceries table
-  const loadUserGroceryCart = useCallback(async () => {
-    if (!user?.id) return;
-
-    try {
-      const { data, error } = await supabase
-        .from('user_groceries')
-        .select('groceries')
-        .eq('user_id', user.id)
-        .single();
-
-      if (error && error.code !== 'PGRST116') {
-        // PGRST116 = no rows returned
-        console.error('Error loading grocery cart:', error);
-        return;
-      }
-
-      setUserGroceryCart(data?.groceries || {});
-    } catch (error) {
-      console.error('Error loading grocery cart:', error);
-    }
-  }, [user?.id]);
-
-  // Load grocery cart when user changes
-  useEffect(() => {
-    loadUserGroceryCart();
-  }, [loadUserGroceryCart]);
-
-  // Get available categories from global ingredients data (source of truth)
+  // Get available categories from global ingredients data using consistent mapping
   const availableCategories = useMemo(() => {
-    const categories = [...new Set(globalIngredients.map((g) => g.category))];
-    return categories.sort();
+    return ['all', ...getAvailableCategories(globalIngredients)];
   }, [globalIngredients]);
 
-  // Set default active category to first available category
+  // Set default active category to 'all'
   useEffect(() => {
     if (availableCategories.length > 0 && !activeCategory) {
-      setActiveCategory(availableCategories[0]);
+      setActiveCategory('all');
     }
   }, [availableCategories, activeCategory]);
 
   // Get category count from grocery cart
   const getCategoryCount = (category: string) => {
+    if (category === 'all') {
+      return Object.values(userGroceryCart).reduce(
+        (total, items) => total + (items?.length || 0),
+        0
+      );
+    }
     return userGroceryCart[category]?.length || 0;
   };
 
@@ -72,9 +53,49 @@ export function GroceriesPage() {
   };
 
   const handleRefresh = async () => {
-    await loadUserGroceryCart();
+    await refreshCart();
     await groceries.loadGroceries();
   };
+
+  // Pre-compute ingredient-to-category lookup for performance optimization
+  // This avoids O(n*m) nested loops in the 'all' view rendering
+  const ingredientToCategoryMap = useMemo(() => {
+    const map = new Map<string, string>();
+    Object.entries(userGroceryCart).forEach(([category, ingredients]) => {
+      ingredients.forEach((ingredient) => {
+        map.set(ingredient, category);
+      });
+    });
+    return map;
+  }, [userGroceryCart]);
+
+  // Show ALL ingredients that user has added to their grocery cart (both selected and unselected)
+  const userCategoryItems = useMemo(() => {
+    let cartIngredients: string[] = [];
+
+    if (activeCategory === 'all') {
+      // For 'all' view, get ingredients from all categories
+      cartIngredients = Object.values(userGroceryCart).flat();
+    } else {
+      // For specific category, get ingredients from that category
+      cartIngredients = userGroceryCart[activeCategory] || [];
+    }
+
+    // Filter out any system-hidden items
+    const filterHidden = (name: string) => {
+      // best-effort normalize similar to matcher (lightweight)
+      const normalized = name
+        .toLowerCase()
+        .replace(/[^\w\s]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+      return !hiddenNormalizedNames.has(normalized);
+    };
+
+    return cartIngredients
+      .filter(filterHidden)
+      .sort((a, b) => a.localeCompare(b));
+  }, [activeCategory, userGroceryCart, hiddenNormalizedNames]);
 
   if (!user) {
     return (
@@ -93,33 +114,10 @@ export function GroceriesPage() {
     );
   }
 
-  const activeCategoryData = GROCERY_CATEGORIES[
-    activeCategory as keyof typeof GROCERY_CATEGORIES
-  ] || {
-    name: activeCategory,
-    icon: '📦',
-  };
-
-  // Show ALL ingredients that user has added to their grocery cart (both selected and unselected)
-  const userCategoryItems = (() => {
-    // Get ingredients from the user's grocery cart (user_groceries table)
-    const cartIngredients = userGroceryCart[activeCategory] || [];
-
-    // Filter out any system-hidden items
-    const filterHidden = (name: string) => {
-      // best-effort normalize similar to matcher (lightweight)
-      const normalized = name
-        .toLowerCase()
-        .replace(/[^\w\s]/g, ' ')
-        .replace(/\s+/g, ' ')
-        .trim();
-      return !hiddenNormalizedNames.has(normalized);
-    };
-
-    return cartIngredients
-      .filter(filterHidden)
-      .sort((a, b) => a.localeCompare(b));
-  })();
+  const activeCategoryData =
+    activeCategory === 'all'
+      ? { name: 'All Categories', subtitle: 'All Your Ingredients', icon: '📋' }
+      : getCategoryMetadata(activeCategory);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50">
@@ -148,7 +146,7 @@ export function GroceriesPage() {
               <Button
                 variant="outline"
                 onClick={handleRefresh}
-                disabled={groceries.loading}
+                disabled={groceries.loading || cartLoading}
               >
                 <RefreshCw
                   className={`mr-2 h-4 w-4 ${groceries.loading ? 'animate-spin' : ''}`}
@@ -157,7 +155,7 @@ export function GroceriesPage() {
               </Button>
               <Button
                 onClick={handleSave}
-                disabled={groceries.loading}
+                disabled={groceries.loading || cartLoading}
                 className="bg-orange-500 hover:bg-orange-600"
               >
                 <Save className="mr-2 h-4 w-4" />
@@ -181,9 +179,9 @@ export function GroceriesPage() {
             <div className="tabs tabs-boxed p-4 overflow-x-auto">
               {availableCategories.map((categoryKey) => {
                 const category =
-                  GROCERY_CATEGORIES[
-                    categoryKey as keyof typeof GROCERY_CATEGORIES
-                  ];
+                  categoryKey === 'all'
+                    ? { name: 'All Categories', icon: '📋' }
+                    : getCategoryMetadata(categoryKey);
                 const count = getCategoryCount(categoryKey);
                 return (
                   <button
@@ -192,12 +190,12 @@ export function GroceriesPage() {
                     onClick={() => setActiveCategory(categoryKey)}
                   >
                     <span className="flex items-center space-x-2">
-                      <span>{category?.icon || '📦'}</span>
-                      <span className="hidden sm:inline">
-                        {category?.name || categoryKey}
-                      </span>
+                      <span>{category.icon}</span>
+                      <span className="hidden sm:inline">{category.name}</span>
                       <span className="sm:hidden">
-                        {category?.name?.split(' ')[0] || categoryKey}
+                        {categoryKey === 'all'
+                          ? 'All'
+                          : category.name.split(' ')[0]}
                       </span>
                       {count > 0 && (
                         <span className="badge badge-sm badge-primary">
@@ -220,17 +218,24 @@ export function GroceriesPage() {
             </h2>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
               {userCategoryItems.map((ingredient) => {
+                // Use pre-computed lookup map for O(1) category resolution
+                const ingredientCategory =
+                  activeCategory === 'all'
+                    ? ingredientToCategoryMap.get(ingredient) || activeCategory
+                    : activeCategory;
+
                 const isSelected = groceries.hasIngredient(
-                  activeCategory,
+                  ingredientCategory,
                   ingredient
                 );
+
                 return (
                   <button
                     key={ingredient}
                     onClick={() =>
-                      groceries.toggleIngredient(activeCategory, ingredient)
+                      groceries.toggleIngredient(ingredientCategory, ingredient)
                     }
-                    disabled={groceries.loading}
+                    disabled={groceries.loading || cartLoading}
                     className={`btn btn-sm transition-all duration-200 ${
                       isSelected
                         ? 'btn-primary'
@@ -250,55 +255,14 @@ export function GroceriesPage() {
           </div>
         </div>
 
-        {/* Selected Ingredients Summary */}
-        {groceries.selectedCount > 0 && (
-          <div
-            className={createDaisyUICardClasses('bordered mt-6 bg-base-200')}
-          >
-            <div className="card-body">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="card-title text-lg">
-                  Available in Your Kitchen ({groceries.selectedCount})
-                </h3>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={groceries.clearAll}
-                  disabled={groceries.loading}
-                  className="text-red-600 hover:text-red-700"
-                >
-                  Clear All
-                </Button>
-              </div>
-
-              <div className="space-y-3">
-                {Object.entries(groceries.groceries).map(
-                  ([category, ingredients]) => (
-                    <div key={category}>
-                      <h4 className="text-sm font-medium text-gray-600 mb-2 capitalize">
-                        {category} ({ingredients.length})
-                      </h4>
-                      <div className="flex flex-wrap gap-2">
-                        {ingredients.map((ingredient) => (
-                          <span
-                            key={`${category}-${ingredient}`}
-                            className="badge badge-primary gap-2 cursor-pointer hover:badge-primary-focus"
-                            onClick={() =>
-                              groceries.toggleIngredient(category, ingredient)
-                            }
-                          >
-                            {ingredient}
-                            <span className="text-xs">×</span>
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )
-                )}
-              </div>
-            </div>
+        {/* Cart Error Display */}
+        {cartError && (
+          <div className="alert alert-warning mb-4">
+            <span>Cart Error: {cartError}</span>
           </div>
         )}
+
+        {/* Selected Ingredients Summary */}
 
         {/* Ingredient Matching Test Section */}
         {groceries.selectedCount > 0 && (

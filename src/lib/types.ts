@@ -94,6 +94,7 @@ export type UserGroceries = {
 
 export type GroceryCategory = {
   name: string;
+  subtitle: string;
   icon: string;
   items: string[];
 };
