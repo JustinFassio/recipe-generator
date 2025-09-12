@@ -1,15 +1,15 @@
 {
   "redirects": [
     {
-      "source": "/(.*)",
+      "source": "/:path*",
       "has": [{ "type": "host", "value": "www.recipegenerator.app" }],
-      "destination": "https://recipegenerator.app/$1",
+      "destination": "https://recipegenerator.app/:path*",
       "permanent": true
     }
   ],
   "rewrites": [
     {
-      "source": "/(.*)",
+      "source": "/((?!api/).*)",
       "destination": "/index.html"
     }
   ]
