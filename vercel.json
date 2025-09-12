@@ -3,7 +3,7 @@
     {
       "source": "/(.*)",
       "has": [{ "type": "host", "value": "www.recipegenerator.app" }],
-      "destination": "https://recipegenerator.app/:splat",
+      "destination": "https://recipegenerator.app/$1",
       "permanent": true
     }
   ],
