@@ -8,6 +8,21 @@ import { getUserGroceries } from './user-preferences';
 // Configuration constants for ingredient filtering
 const INGREDIENT_MATCH_CONFIDENCE_THRESHOLD = 50; // Minimum confidence score for ingredient matching (0-100)
 
+// Simple string-based fallback matching (mirrors explore page)
+function applySimpleIngredientFilter(
+  list: Recipe[],
+  selected: string[]
+): Recipe[] {
+  const selectedIngredientsSet = new Set(
+    selected.map((s) => s.toLowerCase().trim())
+  );
+  return list.filter((recipe) =>
+    recipe.ingredients.some((recipeIngredient) =>
+      selectedIngredientsSet.has(recipeIngredient.toLowerCase().trim())
+    )
+  );
+}
+
 // Type for profile summary data used in API responses
 interface ProfileSummary {
   id: string;
@@ -121,33 +136,89 @@ export const recipeApi = {
         const userGroceries = await getUserGroceries(user.id);
         const groceriesData = userGroceries?.groceries || {};
 
-        // Create matcher with user's available groceries
-        const matcher = new IngredientMatcher(groceriesData);
+        // Check if user has grocery data set up
+        const hasGroceryData = Object.keys(groceriesData).length > 0;
 
-        // Filter recipes based on sophisticated ingredient matching
-        // Create a Set for fast lookup of selected ingredients
-        const selectedIngredientsSet = new Set(filters.availableIngredients);
-        recipes = recipes.filter((recipe) => {
-          // Check if any recipe ingredient matches any selected ingredient
-          return recipe.ingredients.some((recipeIngredient) => {
-            const match = matcher.matchIngredient(recipeIngredient);
-            // Consider it a match if:
-            // 1. The matcher found a match with good confidence, AND
-            // 2. The matched ingredient is in the selected ingredients set
-            return (
-              match.matchType !== 'none' &&
-              match.confidence >= INGREDIENT_MATCH_CONFIDENCE_THRESHOLD &&
-              match.matchedGroceryIngredient &&
-              selectedIngredientsSet.has(match.matchedGroceryIngredient)
-            );
+        if (hasGroceryData) {
+          // Use sophisticated IngredientMatcher when grocery data is available
+          const matcher = new IngredientMatcher(groceriesData);
+
+          // Create a function to check if a matched grocery ingredient relates to selected global ingredients
+          const isIngredientMatch = (
+            matchedGroceryIngredient: string,
+            selectedIngredients: string[]
+          ): boolean => {
+            const normalizedMatched = matchedGroceryIngredient
+              .toLowerCase()
+              .trim();
+
+            return selectedIngredients.some((selectedIngredient) => {
+              const normalizedSelected = selectedIngredient
+                .toLowerCase()
+                .trim();
+
+              // Exact match
+              if (normalizedMatched === normalizedSelected) return true;
+
+              // Check if matched ingredient contains the selected ingredient
+              if (normalizedMatched.includes(normalizedSelected)) return true;
+
+              // Check if selected ingredient contains the matched ingredient
+              if (normalizedSelected.includes(normalizedMatched)) return true;
+
+              // Check for common variations (e.g., "Yellow Onions" vs "Onions")
+              const matchedWords = normalizedMatched.split(/\s+/);
+              const selectedWords = normalizedSelected.split(/\s+/);
+
+              // If any word from selected matches any word from matched
+              return selectedWords.some((selectedWord) =>
+                matchedWords.some(
+                  (matchedWord) =>
+                    selectedWord === matchedWord ||
+                    matchedWord.includes(selectedWord) ||
+                    selectedWord.includes(matchedWord)
+                )
+              );
+            });
+          };
+
+          // Filter recipes based on sophisticated ingredient matching
+          recipes = recipes.filter((recipe) => {
+            // Check if any recipe ingredient matches any selected ingredient
+            return recipe.ingredients.some((recipeIngredient) => {
+              const match = matcher.matchIngredient(recipeIngredient);
+              // Consider it a match if:
+              // 1. The matcher found a match with good confidence, AND
+              // 2. The matched ingredient relates to any selected ingredient
+              return (
+                match.matchType !== 'none' &&
+                match.confidence >= INGREDIENT_MATCH_CONFIDENCE_THRESHOLD &&
+                match.matchedGroceryIngredient &&
+                isIngredientMatch(
+                  match.matchedGroceryIngredient,
+                  filters.availableIngredients!
+                )
+              );
+            });
           });
-        });
+        } else {
+          // Fall back to simple string matching when no grocery data is available
+          // This matches the behavior of the explore page
+          recipes = applySimpleIngredientFilter(
+            recipes,
+            filters.availableIngredients
+          );
+        }
       } catch (error) {
         console.warn(
           'Failed to apply client-side ingredient filtering:',
           error
         );
-        // Fall back to no filtering if there's an error
+        // Fall back to simple string matching if there's an error
+        recipes = applySimpleIngredientFilter(
+          recipes,
+          filters.availableIngredients
+        );
       }
     }
 
