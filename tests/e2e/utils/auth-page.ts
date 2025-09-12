@@ -98,9 +98,9 @@ export class AuthPage {
         'nav a[href="/profile"]',
         'nav a[href="/add"]',
         '.user-menu',
-        '[data-testid="user-menu"]'
+        '[data-testid="user-menu"]',
       ];
-      
+
       // Check if any auth indicator is present
       for (const selector of authIndicators) {
         try {
@@ -110,13 +110,14 @@ export class AuthPage {
           // Continue to next selector
         }
       }
-      
+
       // Fallback: check if we're NOT on auth pages
       const currentUrl = this.page.url();
-      const isOnAuthPage = currentUrl.includes('/auth/signin') || 
-                          currentUrl.includes('/auth/signup') ||
-                          currentUrl.includes('/auth/callback');
-      
+      const isOnAuthPage =
+        currentUrl.includes('/auth/signin') ||
+        currentUrl.includes('/auth/signup') ||
+        currentUrl.includes('/auth/callback');
+
       return !isOnAuthPage;
     } catch {
       return false;
