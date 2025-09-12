@@ -130,7 +130,6 @@ export const recipeApi = {
           )
         );
       };
-
       try {
         // Get user's available groceries for matching
         const userGroceries = await getUserGroceries(user.id);
