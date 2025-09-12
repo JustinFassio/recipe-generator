@@ -5,11 +5,16 @@ export class AuthPage {
 
   // Selectors
   private emailInput = () => this.page.getByRole('textbox', { name: 'Email' });
-  private passwordInput = () => this.page.getByRole('textbox', { name: 'Password' });
-  private signInButton = () => this.page.getByRole('button', { name: 'Sign In' });
-  private createAccountButton = () => this.page.getByRole('button', { name: 'Create account' });
-  private magicLinkButton = () => this.page.getByRole('button', { name: 'Magic link' });
-  private resetPasswordButton = () => this.page.getByRole('button', { name: 'Reset password' });
+  private passwordInput = () =>
+    this.page.getByRole('textbox', { name: 'Password' });
+  private signInButton = () =>
+    this.page.getByRole('button', { name: 'Sign In' });
+  private createAccountButton = () =>
+    this.page.getByRole('button', { name: 'Create account' });
+  private magicLinkButton = () =>
+    this.page.getByRole('button', { name: 'Magic link' });
+  private resetPasswordButton = () =>
+    this.page.getByRole('button', { name: 'Reset password' });
 
   // Navigation methods
   async gotoSignIn() {

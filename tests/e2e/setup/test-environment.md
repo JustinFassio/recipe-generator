@@ -112,22 +112,27 @@ npx playwright test --project=chromium
 ## Debugging Tests
 
 ### 1. Debug Mode
+
 ```bash
 npm run test:e2e:debug
 ```
 
 ### 2. Headed Mode
+
 ```bash
 npm run test:e2e:headed
 ```
 
 ### 3. Screenshots and Videos
+
 Tests automatically capture:
+
 - Screenshots on failure
 - Videos on failure
 - Traces for debugging
 
 ### 4. Console Logs
+
 ```typescript
 // In your test
 await page.screenshot({ path: 'debug.png' });

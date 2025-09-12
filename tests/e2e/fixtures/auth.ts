@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import { test as base, expect } from '@playwright/test';
 import { AuthPage } from '../utils/auth-page';
 
@@ -12,7 +13,7 @@ export const TEST_USER = {
 // Extended test type with authentication fixtures
 export type AuthFixtures = {
   authPage: AuthPage;
-  authenticatedPage: any;
+  authenticatedPage: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 };
 
 export const test = base.extend<AuthFixtures>({
@@ -26,13 +27,13 @@ export const test = base.extend<AuthFixtures>({
   authenticatedPage: async ({ page, authPage }, use) => {
     // Navigate to sign in page
     await page.goto('/auth/signin');
-    
+
     // Sign in with test credentials
     await authPage.signIn(TEST_USER.email, TEST_USER.password);
-    
+
     // Wait for successful authentication and redirect
     await expect(page).toHaveURL('/recipes');
-    
+
     // Pass the authenticated page to the test
     await use(page);
   },

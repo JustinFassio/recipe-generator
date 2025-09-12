@@ -20,7 +20,7 @@ export const TEST_USERS = {
     fullName: 'Alice Baker',
     username: 'alice',
   },
-  
+
   // Secondary test user (Bob from seed script)
   secondary: {
     email: 'bob@example.com',
@@ -28,7 +28,7 @@ export const TEST_USERS = {
     fullName: 'Bob Chef',
     username: 'bob',
   },
-  
+
   // Third test user (Charlie from seed script)
   admin: {
     email: 'charlie@example.com',
@@ -42,18 +42,21 @@ export const TEST_USERS = {
  * Creates a test user in the database
  * This should be called in test setup or beforeEach hooks
  */
-export async function createTestUser(page: Page, user: TestUser): Promise<void> {
+export async function createTestUser(
+  page: Page,
+  user: TestUser
+): Promise<void> {
   // Navigate to sign up page
   await page.goto('/auth/signup');
-  
+
   // Fill out the sign up form
   await page.getByRole('textbox', { name: 'Full Name' }).fill(user.fullName);
   await page.getByRole('textbox', { name: 'Email' }).fill(user.email);
   await page.getByRole('textbox', { name: 'Password' }).fill(user.password);
-  
+
   // Submit the form
   await page.getByRole('button', { name: 'Create account' }).click();
-  
+
   // Wait for successful sign up and redirect
   await page.waitForURL('/recipes');
 }
@@ -61,13 +64,16 @@ export async function createTestUser(page: Page, user: TestUser): Promise<void> 
 /**
  * Signs in a test user
  */
-export async function signInTestUser(page: Page, user: TestUser): Promise<void> {
+export async function signInTestUser(
+  page: Page,
+  user: TestUser
+): Promise<void> {
   await page.goto('/auth/signin');
-  
+
   await page.getByRole('textbox', { name: 'Email' }).fill(user.email);
   await page.getByRole('textbox', { name: 'Password' }).fill(user.password);
   await page.getByRole('button', { name: 'Sign In' }).click();
-  
+
   // Wait for successful sign in and redirect
   await page.waitForURL('/recipes');
 }
@@ -80,7 +86,7 @@ export async function signOutUser(page: Page): Promise<void> {
   // Adjust selector based on your actual UI
   const signOutButton = page.getByRole('button', { name: /sign out|logout/i });
   await signOutButton.click();
-  
+
   // Wait for redirect to sign in page
   await page.waitForURL('/auth/signin');
 }
@@ -102,13 +108,16 @@ export async function isUserSignedIn(page: Page): Promise<boolean> {
  * Sets up a test user session by creating the user if needed
  * This is useful for tests that need a guaranteed authenticated state
  */
-export async function ensureTestUserExists(page: Page, user: TestUser): Promise<void> {
+export async function ensureTestUserExists(
+  page: Page,
+  user: TestUser
+): Promise<void> {
   // Try to sign in first
   await page.goto('/auth/signin');
   await page.getByRole('textbox', { name: 'Email' }).fill(user.email);
   await page.getByRole('textbox', { name: 'Password' }).fill(user.password);
   await page.getByRole('button', { name: 'Sign In' }).click();
-  
+
   // If sign in fails, create the user
   try {
     await page.waitForURL('/recipes', { timeout: 5000 });
