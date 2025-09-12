@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthProvider';
 import { toast } from '@/hooks/use-toast';
 import {
@@ -35,7 +35,7 @@ import {
 import { EmailCard, PasswordCard } from '@/components/profile/account';
 
 export default function ProfilePage() {
-  const { user, profile, loading, refreshProfile } = useAuth();
+  const { user, profile } = useAuth();
 
   // All profile functionality via hooks
   const userSafety = useUserSafety();
@@ -66,14 +66,7 @@ export default function ProfilePage() {
     loadData();
   }, [user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Ensure profile is loaded after refresh/navigation with guard to avoid duplicates
-  const attemptedRefreshRef = useRef(false);
-  useEffect(() => {
-    if (!loading && user?.id && !profile && !attemptedRefreshRef.current) {
-      attemptedRefreshRef.current = true;
-      void refreshProfile();
-    }
-  }, [loading, user?.id, profile, refreshProfile]);
+  // Note: Profile loading is handled by AuthProvider automatically
 
   // Profile form submission state
   const [profileSubmitting, setProfileSubmitting] = useState(false);
