@@ -129,31 +129,39 @@ export const recipeApi = {
           const matcher = new IngredientMatcher(groceriesData);
 
           // Create a function to check if a matched grocery ingredient relates to selected global ingredients
-          const isIngredientMatch = (matchedGroceryIngredient: string, selectedIngredients: string[]): boolean => {
-            const normalizedMatched = matchedGroceryIngredient.toLowerCase().trim();
-            
-            return selectedIngredients.some(selectedIngredient => {
-              const normalizedSelected = selectedIngredient.toLowerCase().trim();
-              
+          const isIngredientMatch = (
+            matchedGroceryIngredient: string,
+            selectedIngredients: string[]
+          ): boolean => {
+            const normalizedMatched = matchedGroceryIngredient
+              .toLowerCase()
+              .trim();
+
+            return selectedIngredients.some((selectedIngredient) => {
+              const normalizedSelected = selectedIngredient
+                .toLowerCase()
+                .trim();
+
               // Exact match
               if (normalizedMatched === normalizedSelected) return true;
-              
+
               // Check if matched ingredient contains the selected ingredient
               if (normalizedMatched.includes(normalizedSelected)) return true;
-              
+
               // Check if selected ingredient contains the matched ingredient
               if (normalizedSelected.includes(normalizedMatched)) return true;
-              
+
               // Check for common variations (e.g., "Yellow Onions" vs "Onions")
               const matchedWords = normalizedMatched.split(/\s+/);
               const selectedWords = normalizedSelected.split(/\s+/);
-              
+
               // If any word from selected matches any word from matched
-              return selectedWords.some(selectedWord => 
-                matchedWords.some(matchedWord => 
-                  selectedWord === matchedWord || 
-                  matchedWord.includes(selectedWord) || 
-                  selectedWord.includes(matchedWord)
+              return selectedWords.some((selectedWord) =>
+                matchedWords.some(
+                  (matchedWord) =>
+                    selectedWord === matchedWord ||
+                    matchedWord.includes(selectedWord) ||
+                    selectedWord.includes(matchedWord)
                 )
               );
             });
@@ -171,7 +179,10 @@ export const recipeApi = {
                 match.matchType !== 'none' &&
                 match.confidence >= INGREDIENT_MATCH_CONFIDENCE_THRESHOLD &&
                 match.matchedGroceryIngredient &&
-                isIngredientMatch(match.matchedGroceryIngredient, filters.availableIngredients!)
+                isIngredientMatch(
+                  match.matchedGroceryIngredient,
+                  filters.availableIngredients!
+                )
               );
             });
           });
