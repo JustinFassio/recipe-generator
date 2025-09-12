@@ -13,8 +13,13 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Production project reference
-PROD_PROJECT_REF="sxvdkipywmjycithdfpp"
+# Production project reference (read from environment)
+# export PROD_PROJECT_REF=your_prod_ref before running this script
+PROD_PROJECT_REF="${PROD_PROJECT_REF:-}"
+if [ -z "$PROD_PROJECT_REF" ]; then
+    echo -e "${YELLOW}⚠️ Warning: PROD_PROJECT_REF environment variable is not set. Please export it before running this script.${NC}"
+    exit 1
+fi
 
 echo -e "${BLUE}🚀 Grocery Workflow System - Production Deployment Verification${NC}"
 echo "=================================================================="
