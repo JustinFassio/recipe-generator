@@ -8,6 +8,14 @@ export default defineConfig({
     setupFiles: ['./src/test/load-env.ts', './src/test/setup.ts'],
     environment: 'jsdom',
     globals: true,
+    exclude: [
+      '**/node_modules/**',
+      '**/dist/**',
+      '**/cypress/**',
+      '**/.{idea,git,cache,output,temp}/**',
+      '**/{karma,rollup,webpack,vite,vitest,jest,ava,babel,nyc,cypress,tsup,build}.config.*',
+      '**/tests/e2e/**', // Exclude Playwright E2E tests
+    ],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
