@@ -138,7 +138,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const timeoutPromise = new Promise<never>((_, reject) => {
           setTimeout(
             () => reject(new Error('Profile query timeout')),
-            import.meta.env.DEV ? 5000 : 10000
+            import.meta.env.DEV ? 15000 : 10000
           );
         });
 

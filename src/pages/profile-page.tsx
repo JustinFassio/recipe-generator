@@ -66,6 +66,8 @@ export default function ProfilePage() {
     loadData();
   }, [user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Note: Profile loading is handled by AuthProvider automatically
+
   // Profile form submission state
   const [profileSubmitting, setProfileSubmitting] = useState(false);
 
