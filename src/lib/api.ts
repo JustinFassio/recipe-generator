@@ -8,6 +8,21 @@ import { getUserGroceries } from './user-preferences';
 // Configuration constants for ingredient filtering
 const INGREDIENT_MATCH_CONFIDENCE_THRESHOLD = 50; // Minimum confidence score for ingredient matching (0-100)
 
+// Simple string-based fallback matching (mirrors explore page)
+function applySimpleIngredientFilter(
+  list: Recipe[],
+  selected: string[]
+): Recipe[] {
+  const selectedIngredientsSet = new Set(
+    selected.map((s) => s.toLowerCase().trim())
+  );
+  return list.filter((recipe) =>
+    recipe.ingredients.some((recipeIngredient) =>
+      selectedIngredientsSet.has(recipeIngredient.toLowerCase().trim())
+    )
+  );
+}
+
 // Type for profile summary data used in API responses
 interface ProfileSummary {
   id: string;
@@ -116,20 +131,6 @@ export const recipeApi = {
 
     // Apply client-side ingredient filtering using sophisticated IngredientMatcher
     if (filters?.availableIngredients?.length) {
-      // Helper: simple string-based fallback matching (mirrors explore page)
-      const applySimpleIngredientFilter = (
-        list: Recipe[],
-        selected: string[]
-      ): Recipe[] => {
-        const selectedIngredientsSet = new Set(
-          selected.map((s) => s.toLowerCase().trim())
-        );
-        return list.filter((recipe) =>
-          recipe.ingredients.some((recipeIngredient) =>
-            selectedIngredientsSet.has(recipeIngredient.toLowerCase().trim())
-          )
-        );
-      };
       try {
         // Get user's available groceries for matching
         const userGroceries = await getUserGroceries(user.id);
