@@ -96,9 +96,34 @@ export async function signOutUser(page: Page): Promise<void> {
  */
 export async function isUserSignedIn(page: Page): Promise<boolean> {
   try {
-    // Check if we're on an authenticated page
-    await page.waitForURL('/recipes', { timeout: 1000 });
-    return true;
+    // Check for authentication indicators instead of specific URL
+    // Look for user avatar, profile elements, or navigation that indicates auth
+    const authIndicators = [
+      '[data-testid="user-avatar"]',
+      '[data-testid="profile-button"]',
+      'nav a[href="/profile"]',
+      'nav a[href="/add"]',
+      '.user-menu',
+      '[data-testid="user-menu"]'
+    ];
+    
+    // Check if any auth indicator is present
+    for (const selector of authIndicators) {
+      try {
+        await page.waitForSelector(selector, { timeout: 1000 });
+        return true;
+      } catch {
+        // Continue to next selector
+      }
+    }
+    
+    // Fallback: check if we're NOT on auth pages
+    const currentUrl = page.url();
+    const isOnAuthPage = currentUrl.includes('/auth/signin') || 
+                        currentUrl.includes('/auth/signup') ||
+                        currentUrl.includes('/auth/callback');
+    
+    return !isOnAuthPage;
   } catch {
     return false;
   }
@@ -112,11 +137,8 @@ export async function ensureTestUserExists(
   page: Page,
   user: TestUser
 ): Promise<void> {
-  // Try to sign in first
-  await page.goto('/auth/signin');
-  await page.getByRole('textbox', { name: 'Email' }).fill(user.email);
-  await page.getByRole('textbox', { name: 'Password' }).fill(user.password);
-  await page.getByRole('button', { name: 'Sign In' }).click();
+  // Try to sign in first using the existing function
+  await signInTestUser(page, user);
 
   // If sign in fails, create the user
   try {

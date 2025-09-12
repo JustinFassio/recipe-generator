@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/rules-of-hooks */
-import { test as base, expect } from '@playwright/test';
+import { test as base, expect, Page } from '@playwright/test';
 import { AuthPage } from '../utils/auth-page';
 
 // Test user credentials for testing (using seeded user with recipes)
@@ -13,7 +13,7 @@ export const TEST_USER = {
 // Extended test type with authentication fixtures
 export type AuthFixtures = {
   authPage: AuthPage;
-  authenticatedPage: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+  authenticatedPage: Page;
 };
 
 export const test = base.extend<AuthFixtures>({
