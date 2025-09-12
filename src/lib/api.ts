@@ -116,6 +116,21 @@ export const recipeApi = {
 
     // Apply client-side ingredient filtering using sophisticated IngredientMatcher
     if (filters?.availableIngredients?.length) {
+      // Helper: simple string-based fallback matching (mirrors explore page)
+      const applySimpleIngredientFilter = (
+        list: Recipe[],
+        selected: string[]
+      ): Recipe[] => {
+        const selectedIngredientsSet = new Set(
+          selected.map((s) => s.toLowerCase().trim())
+        );
+        return list.filter((recipe) =>
+          recipe.ingredients.some((recipeIngredient) =>
+            selectedIngredientsSet.has(recipeIngredient.toLowerCase().trim())
+          )
+        );
+      };
+
       try {
         // Get user's available groceries for matching
         const userGroceries = await getUserGroceries(user.id);
@@ -189,11 +204,9 @@ export const recipeApi = {
         } else {
           // Fall back to simple string matching when no grocery data is available
           // This matches the behavior of the explore page
-          const selectedIngredientsSet = new Set(filters.availableIngredients);
-          recipes = recipes.filter((recipe) =>
-            recipe.ingredients.some((recipeIngredient) =>
-              selectedIngredientsSet.has(recipeIngredient.toLowerCase().trim())
-            )
+          recipes = applySimpleIngredientFilter(
+            recipes,
+            filters.availableIngredients
           );
         }
       } catch (error) {
@@ -202,11 +215,9 @@ export const recipeApi = {
           error
         );
         // Fall back to simple string matching if there's an error
-        const selectedIngredientsSet = new Set(filters.availableIngredients);
-        recipes = recipes.filter((recipe) =>
-          recipe.ingredients.some((recipeIngredient) =>
-            selectedIngredientsSet.has(recipeIngredient.toLowerCase().trim())
-          )
+        recipes = applySimpleIngredientFilter(
+          recipes,
+          filters.availableIngredients
         );
       }
     }
