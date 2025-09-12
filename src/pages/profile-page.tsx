@@ -35,7 +35,7 @@ import {
 import { EmailCard, PasswordCard } from '@/components/profile/account';
 
 export default function ProfilePage() {
-  const { user, profile } = useAuth();
+  const { user, profile, refreshProfile } = useAuth();
 
   // All profile functionality via hooks
   const userSafety = useUserSafety();
@@ -65,6 +65,13 @@ export default function ProfilePage() {
 
     loadData();
   }, [user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Ensure profile is loaded after refresh/navigation
+  useEffect(() => {
+    if (user?.id && !profile) {
+      void refreshProfile();
+    }
+  }, [user?.id, profile, refreshProfile]);
 
   // Profile form submission state
   const [profileSubmitting, setProfileSubmitting] = useState(false);
