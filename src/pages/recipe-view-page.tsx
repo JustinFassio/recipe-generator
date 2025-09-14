@@ -4,10 +4,19 @@ import { RecipeView } from '@/components/recipes/recipe-view';
 import { createDaisyUICardClasses } from '@/lib/card-migration';
 import { createDaisyUISkeletonClasses } from '@/lib/skeleton-migration';
 import { ChefHat } from 'lucide-react';
+import { RecipeDiagnostic } from '@/components/debug/RecipeDiagnostic';
 
 export function RecipeViewPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+
+  // Debug logging
+  console.log('🔍 [RecipeViewPage] Component initialized:', {
+    recipeId: id,
+    timestamp: new Date().toISOString(),
+    url: window.location.href,
+    isProduction: import.meta.env.PROD,
+  });
 
   // Try to fetch as user recipe first
   const {
@@ -33,6 +42,21 @@ export function RecipeViewPage() {
     !userLoading && !publicLoading && !recipe
       ? userError || publicError || new Error('Recipe not found')
       : null;
+
+  // Enhanced debugging
+  console.log('📊 [RecipeViewPage] State summary:', {
+    recipeId: id,
+    userRecipe: userRecipe ? 'Found' : 'Not found',
+    publicRecipe: publicRecipe ? 'Found' : 'Not found',
+    finalRecipe: recipe ? 'Found' : 'Not found',
+    userLoading,
+    publicLoading,
+    isLoading,
+    userError: userError?.message,
+    publicError: publicError?.message,
+    finalError: error?.message,
+    shouldFetchPublic,
+  });
 
   if (isLoading) {
     return (
@@ -69,6 +93,15 @@ export function RecipeViewPage() {
   }
 
   if (error || !recipe) {
+    console.error('❌ [RecipeViewPage] Error state reached:', {
+      recipeId: id,
+      error: error?.message,
+      userError: userError?.message,
+      publicError: publicError?.message,
+      hasRecipe: !!recipe,
+      stack: error?.stack,
+    });
+
     return (
       <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50 p-4">
         <div className="mx-auto max-w-2xl pt-20">
@@ -81,6 +114,46 @@ export function RecipeViewPage() {
               <p className="mb-4 text-gray-600">
                 The recipe you're looking for doesn't exist or has been deleted.
               </p>
+
+              {/* Debug info for production troubleshooting */}
+              {import.meta.env.PROD && (
+                <div className="mb-4 rounded-lg bg-gray-100 p-3 text-left text-sm">
+                  <p className="font-medium text-gray-800">Debug Info:</p>
+                  <p className="text-gray-600">Recipe ID: {id}</p>
+                  <p className="text-gray-600">
+                    Error: {error?.message || 'No error message'}
+                  </p>
+                  <p className="text-gray-600">
+                    User Error: {userError?.message || 'None'}
+                  </p>
+                  <p className="text-gray-600">
+                    Public Error: {publicError?.message || 'None'}
+                  </p>
+                  <p className="text-gray-600">
+                    Has Recipe: {recipe ? 'Yes' : 'No'}
+                  </p>
+                </div>
+              )}
+
+              {/* Recipe Diagnostic Tool */}
+              <div className="mb-4">
+                <RecipeDiagnostic recipeId={id} />
+              </div>
+
+              <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
+                <Button onClick={() => navigate('/')} variant="outline">
+                  Back to Home
+                </Button>
+                <Button onClick={() => navigate('/explore')} variant="outline">
+                  Browse Public Recipes
+                </Button>
+                <Button
+                  onClick={() => window.location.reload()}
+                  variant="outline"
+                >
+                  Retry
+                </Button>
+              </div>
             </div>
           </div>
         </div>

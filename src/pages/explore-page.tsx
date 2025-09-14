@@ -58,8 +58,54 @@ export default function ExplorePage() {
 
   // Add handlers for RecipeCard functionality
   const handleViewRecipe = (recipe: Recipe) => {
-    // Navigate to recipe view page
-    window.open(`/recipe/${recipe.id}`, '_blank');
+    console.log('🔍 [Explore] View recipe clicked:', {
+      recipeId: recipe.id,
+      recipeTitle: recipe.title,
+      isPublic: recipe.is_public,
+      authorName: recipe.author_name,
+      timestamp: new Date().toISOString(),
+    });
+
+    // Log current authentication state
+    console.log('🔐 [Explore] Current auth state check...');
+
+    // Log environment info
+    console.log('🌍 [Explore] Environment info:', {
+      isProduction: import.meta.env.PROD,
+      supabaseUrl: import.meta.env.VITE_SUPABASE_URL ? 'Set' : 'Missing',
+      supabaseKey: import.meta.env.VITE_SUPABASE_ANON_KEY ? 'Set' : 'Missing',
+      userAgent: navigator.userAgent,
+      url: window.location.href,
+    });
+
+    // Test the API call directly before navigation
+    console.log('🧪 [Explore] Testing getPublicRecipe API call...');
+    recipeApi
+      .getPublicRecipe(recipe.id)
+      .then((result) => {
+        console.log('✅ [Explore] API test successful:', {
+          found: !!result,
+          title: result?.title,
+          author: result?.author_name,
+        });
+
+        // Navigate to recipe view page
+        console.log('🚀 [Explore] Opening recipe page...');
+        window.open(`/recipe/${recipe.id}`, '_blank');
+      })
+      .catch((error) => {
+        console.error('❌ [Explore] API test failed:', {
+          error: error.message,
+          recipeId: recipe.id,
+          stack: error.stack,
+        });
+
+        toast({
+          title: 'Error',
+          description: `Failed to load recipe: ${error.message}`,
+          variant: 'destructive',
+        });
+      });
   };
 
   // Remove handleEditRecipe - community recipes should not be editable
