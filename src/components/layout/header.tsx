@@ -215,6 +215,16 @@ export function Header() {
               Explore
             </Button>
             <Button
+              variant={location.pathname === '/groceries' ? 'default' : 'ghost'}
+              onClick={() => {
+                navigate('/groceries');
+                closeMobileMenu();
+              }}
+              className={`w-full justify-start ${location.pathname === '/groceries' ? 'bg-success text-success-content hover:bg-success/80' : ''}`}
+            >
+              My Groceries
+            </Button>
+            <Button
               variant={
                 location.pathname === '/evaluation-report' ? 'default' : 'ghost'
               }

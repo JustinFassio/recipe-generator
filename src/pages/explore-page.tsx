@@ -62,16 +62,7 @@ export default function ExplorePage() {
     window.open(`/recipe/${recipe.id}`, '_blank');
   };
 
-  const handleEditRecipe = (recipe: Recipe) => {
-    // For public recipes, we can't edit them directly
-    // Instead, save them to user's collection first
-    toast({
-      title: 'Info',
-      description:
-        'Public recipes must be saved to your collection before editing',
-    });
-    handleSaveRecipe(recipe.id);
-  };
+  // Remove handleEditRecipe - community recipes should not be editable
 
   const handleShareToggle = () => {
     // For public recipes, sharing is already enabled
@@ -250,9 +241,9 @@ export default function ExplorePage() {
               <RecipeCard
                 recipe={recipe}
                 onView={handleViewRecipe}
-                onEdit={handleEditRecipe}
                 showShareButton={false}
                 onShareToggle={handleShareToggle}
+                showEditDelete={false} // Hide Edit/Delete for community recipes
               />
 
               {/* Author info and save button */}

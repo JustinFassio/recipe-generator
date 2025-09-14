@@ -43,6 +43,7 @@ interface RecipeCardProps {
   onShareToggle?:
     | ((recipeId: string, isPublic: boolean) => void)
     | (() => void);
+  showEditDelete?: boolean; // New prop to control Edit/Delete visibility
 }
 
 export function RecipeCard({
@@ -51,6 +52,7 @@ export function RecipeCard({
   onView,
   showShareButton,
   onShareToggle,
+  showEditDelete = true, // Default to true for backward compatibility
 }: RecipeCardProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
@@ -300,16 +302,18 @@ export function RecipeCard({
                 </button>
               </li>
 
-              {/* Edit Button */}
-              <li>
-                <button
-                  onClick={() => onEdit?.(recipe)}
-                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 transition-colors"
-                >
-                  <Edit className="h-5 w-5 text-green-600" />
-                  <span>Edit Recipe</span>
-                </button>
-              </li>
+              {/* Edit Button - Only show if showEditDelete is true */}
+              {showEditDelete && (
+                <li>
+                  <button
+                    onClick={() => onEdit?.(recipe)}
+                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 transition-colors"
+                  >
+                    <Edit className="h-5 w-5 text-green-600" />
+                    <span>Edit Recipe</span>
+                  </button>
+                </li>
+              )}
 
               {/* Share Button */}
               {canShare && (
@@ -337,16 +341,18 @@ export function RecipeCard({
                 </li>
               )}
 
-              {/* Delete Button */}
-              <li>
-                <button
-                  onClick={() => setShowDeleteDialog(true)}
-                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-red-50 transition-colors text-red-600"
-                >
-                  <Trash2 className="h-5 w-5" />
-                  <span>Delete Recipe</span>
-                </button>
-              </li>
+              {/* Delete Button - Only show if showEditDelete is true */}
+              {showEditDelete && (
+                <li>
+                  <button
+                    onClick={() => setShowDeleteDialog(true)}
+                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-red-50 transition-colors text-red-600"
+                  >
+                    <Trash2 className="h-5 w-5" />
+                    <span>Delete Recipe</span>
+                  </button>
+                </li>
+              )}
             </ul>
 
             {/* Close Button */}
