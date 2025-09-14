@@ -8,11 +8,19 @@ import { ChefHat } from 'lucide-react';
 export function RecipeViewPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  
+
   // Try to fetch as user recipe first, then as public recipe
-  const { data: userRecipe, isLoading: userLoading, error: userError } = useRecipe(id!);
-  const { data: publicRecipe, isLoading: publicLoading, error: publicError } = usePublicRecipe(id!);
-  
+  const {
+    data: userRecipe,
+    isLoading: userLoading,
+    error: userError,
+  } = useRecipe(id!);
+  const {
+    data: publicRecipe,
+    isLoading: publicLoading,
+    error: publicError,
+  } = usePublicRecipe(id!);
+
   // Use whichever one succeeds
   const recipe = userRecipe || publicRecipe;
   const isLoading = userLoading || publicLoading;

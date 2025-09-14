@@ -257,7 +257,10 @@ export const recipeApi = {
       .single();
 
     if (profileError) {
-      console.warn('Could not fetch author name for public recipe:', profileError);
+      console.warn(
+        'Could not fetch author name for public recipe:',
+        profileError
+      );
     }
 
     return {
