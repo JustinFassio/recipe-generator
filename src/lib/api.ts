@@ -261,6 +261,7 @@ export const recipeApi = {
         'Could not fetch author name for public recipe:',
         profileError
       );
+      trackAPIError('Fetch author profile for public recipe', profileError);
     }
 
     return {
