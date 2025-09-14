@@ -25,13 +25,16 @@ export const useRecipe = (id: string) => {
   });
 };
 
-export const usePublicRecipe = (id: string) => {
+export const usePublicRecipe = (
+  id: string,
+  options?: { enabled?: boolean }
+) => {
   return useQuery({
     queryKey: ['public-recipe', id],
     queryFn: () => recipeApi.getPublicRecipe(id),
-    enabled: !!id,
-    staleTime: 15 * 60 * 1000, // 15 minutes - public recipes change less frequently
-    gcTime: 60 * 60 * 1000, // 1 hour - keep public recipes cached longer
+    enabled: !!id && (options?.enabled ?? true),
+    staleTime: 10 * 60 * 1000, // 10 minutes - individual recipes change less frequently
+    gcTime: 30 * 60 * 1000, // 30 minutes - keep individual recipes cached longer
     refetchOnWindowFocus: false,
   });
 };

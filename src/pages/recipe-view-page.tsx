@@ -9,22 +9,30 @@ export function RecipeViewPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  // Try to fetch as user recipe first, then as public recipe
+  // Try to fetch as user recipe first
   const {
     data: userRecipe,
     isLoading: userLoading,
     error: userError,
   } = useRecipe(id!);
+
+  // Only fetch public recipe if user recipe has finished loading and failed
+  const shouldFetchPublic = !userLoading && !userRecipe && !!userError;
   const {
     data: publicRecipe,
     isLoading: publicLoading,
     error: publicError,
-  } = usePublicRecipe(id!);
+  } = usePublicRecipe(id!, { enabled: shouldFetchPublic });
 
   // Use whichever one succeeds
   const recipe = userRecipe || publicRecipe;
-  const isLoading = userLoading || publicLoading;
-  const error = userError && publicError ? userError : null;
+  // isLoading is true only if at least one query is loading and no data has been found yet
+  const isLoading = (userLoading || publicLoading) && !recipe;
+  // error if both queries have failed or neither query has returned data
+  const error =
+    !userLoading && !publicLoading && !recipe
+      ? userError || publicError || new Error('Recipe not found')
+      : null;
 
   if (isLoading) {
     return (
