@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { useRecipe } from '@/hooks/use-recipes';
+import { useRecipe, usePublicRecipe } from '@/hooks/use-recipes';
 import { RecipeView } from '@/components/recipes/recipe-view';
 import { createDaisyUICardClasses } from '@/lib/card-migration';
 import { createDaisyUISkeletonClasses } from '@/lib/skeleton-migration';
@@ -8,7 +8,31 @@ import { ChefHat } from 'lucide-react';
 export function RecipeViewPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { data: recipe, isLoading, error } = useRecipe(id!);
+
+  // Try to fetch as user recipe first
+  const {
+    data: userRecipe,
+    isLoading: userLoading,
+    error: userError,
+  } = useRecipe(id!);
+
+  // Only fetch public recipe if user recipe has finished loading and failed
+  const shouldFetchPublic = !userLoading && !userRecipe && !!userError;
+  const {
+    data: publicRecipe,
+    isLoading: publicLoading,
+    error: publicError,
+  } = usePublicRecipe(id!, { enabled: shouldFetchPublic });
+
+  // Use whichever one succeeds
+  const recipe = userRecipe || publicRecipe;
+  // isLoading is true only if at least one query is loading and no data has been found yet
+  const isLoading = (userLoading || publicLoading) && !recipe;
+  // error if both queries have failed or neither query has returned data
+  const error =
+    !userLoading && !publicLoading && !recipe
+      ? userError || publicError || new Error('Recipe not found')
+      : null;
 
   if (isLoading) {
     return (
