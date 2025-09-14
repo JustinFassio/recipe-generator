@@ -225,7 +225,7 @@ export const recipeApi = {
     return recipes;
   },
 
-  // Get a single recipe by ID
+  // Get a single recipe by ID (user's own recipes only)
   async getRecipe(id: string): Promise<Recipe | null> {
     const { data, error } = await supabase
       .from('recipes')
@@ -269,6 +269,7 @@ export const recipeApi = {
       author_name: profile?.full_name || 'Anonymous',
     } as PublicRecipe;
   },
+
   // Get recipe summary (optimized for list views)
   async getRecipeSummary(id: string): Promise<Partial<Recipe> | null> {
     const { data, error } = await supabase
