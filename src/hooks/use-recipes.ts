@@ -25,7 +25,10 @@ export const useRecipe = (id: string) => {
   });
 };
 
-export const usePublicRecipe = (id: string, options?: { enabled?: boolean }) => {
+export const usePublicRecipe = (
+  id: string,
+  options?: { enabled?: boolean }
+) => {
   return useQuery({
     queryKey: ['public-recipe', id],
     queryFn: () => recipeApi.getPublicRecipe(id),
