@@ -225,7 +225,7 @@ export const recipeApi = {
     return recipes;
   },
 
-  // Get a single recipe by ID
+  // Get a single recipe by ID (user's own recipes only)
   async getRecipe(id: string): Promise<Recipe | null> {
     const { data, error } = await supabase
       .from('recipes')
@@ -235,6 +235,35 @@ export const recipeApi = {
 
     if (error) handleError(error, 'Get recipe');
     return data;
+  },
+
+  // Get a single public recipe by ID (any public recipe)
+  async getPublicRecipe(id: string): Promise<PublicRecipe | null> {
+    const { data: recipe, error: recipeError } = await supabase
+      .from('recipes')
+      .select('*')
+      .eq('id', id)
+      .eq('is_public', true)
+      .single();
+
+    if (recipeError) handleError(recipeError, 'Get public recipe');
+    if (!recipe) return null;
+
+    // Get author name from profiles
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('full_name')
+      .eq('id', recipe.user_id)
+      .single();
+
+    if (profileError) {
+      console.warn('Could not fetch author name for public recipe:', profileError);
+    }
+
+    return {
+      ...recipe,
+      author_name: profile?.full_name || 'Anonymous',
+    } as PublicRecipe;
   },
 
   // Get recipe summary (optimized for list views)

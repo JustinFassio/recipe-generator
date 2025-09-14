@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { useRecipe } from '@/hooks/use-recipes';
+import { useRecipe, usePublicRecipe } from '@/hooks/use-recipes';
 import { RecipeView } from '@/components/recipes/recipe-view';
 import { createDaisyUICardClasses } from '@/lib/card-migration';
 import { createDaisyUISkeletonClasses } from '@/lib/skeleton-migration';
@@ -8,7 +8,15 @@ import { ChefHat } from 'lucide-react';
 export function RecipeViewPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { data: recipe, isLoading, error } = useRecipe(id!);
+  
+  // Try to fetch as user recipe first, then as public recipe
+  const { data: userRecipe, isLoading: userLoading, error: userError } = useRecipe(id!);
+  const { data: publicRecipe, isLoading: publicLoading, error: publicError } = usePublicRecipe(id!);
+  
+  // Use whichever one succeeds
+  const recipe = userRecipe || publicRecipe;
+  const isLoading = userLoading || publicLoading;
+  const error = userError && publicError ? userError : null;
 
   if (isLoading) {
     return (

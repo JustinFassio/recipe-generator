@@ -25,6 +25,17 @@ export const useRecipe = (id: string) => {
   });
 };
 
+export const usePublicRecipe = (id: string) => {
+  return useQuery({
+    queryKey: ['public-recipe', id],
+    queryFn: () => recipeApi.getPublicRecipe(id),
+    enabled: !!id,
+    staleTime: 15 * 60 * 1000, // 15 minutes - public recipes change less frequently
+    gcTime: 60 * 60 * 1000, // 1 hour - keep public recipes cached longer
+    refetchOnWindowFocus: false,
+  });
+};
+
 // New hook for recipe summaries (used in lists)
 export const useRecipeSummary = (id: string) => {
   return useQuery({
