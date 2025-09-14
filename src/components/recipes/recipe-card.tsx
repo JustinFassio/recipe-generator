@@ -16,7 +16,7 @@ import {
 import CategoryChip from '@/components/ui/CategoryChip';
 import { Badge } from '@/components/ui/badge';
 import { useIngredientMatching } from '@/hooks/useIngredientMatching';
-import type { Recipe } from '@/lib/types';
+import type { Recipe, PublicRecipe } from '@/lib/types';
 import { useDeleteRecipe } from '@/hooks/use-recipes';
 import { useState } from 'react';
 import { recipeApi } from '@/lib/api';
@@ -36,9 +36,9 @@ import {
 const RECIPE_TITLE_MAX_LENGTH = 45;
 
 interface RecipeCardProps {
-  recipe: Recipe;
+  recipe: Recipe | PublicRecipe;
   onEdit?: (recipe: Recipe) => void;
-  onView?: (recipe: Recipe) => void;
+  onView?: (recipe: Recipe | PublicRecipe) => void;
   showShareButton?: boolean;
   onShareToggle?:
     | ((recipeId: string, isPublic: boolean) => void)

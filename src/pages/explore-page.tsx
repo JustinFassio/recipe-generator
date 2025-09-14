@@ -57,12 +57,13 @@ export default function ExplorePage() {
   };
 
   // Add handlers for RecipeCard functionality
-  const handleViewRecipe = (recipe: Recipe) => {
+  const handleViewRecipe = (recipe: Recipe | PublicRecipe) => {
+    const authorName = 'author_name' in recipe ? recipe.author_name : 'Unknown';
     console.log('🔍 [Explore] View recipe clicked:', {
       recipeId: recipe.id,
       recipeTitle: recipe.title,
       isPublic: recipe.is_public,
-      authorName: recipe.author_name,
+      authorName,
       timestamp: new Date().toISOString(),
     });
 

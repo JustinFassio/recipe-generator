@@ -5,6 +5,7 @@ import { createDaisyUICardClasses } from '@/lib/card-migration';
 import { createDaisyUISkeletonClasses } from '@/lib/skeleton-migration';
 import { ChefHat } from 'lucide-react';
 import { RecipeDiagnostic } from '@/components/debug/RecipeDiagnostic';
+import { Button } from '@/components/ui/button';
 
 export function RecipeViewPage() {
   const { id } = useParams<{ id: string }>();
