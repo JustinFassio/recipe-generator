@@ -9,11 +9,11 @@ if [ ! -f .env.local ]; then
     exit 1
 fi
 
-# Extract OpenAI API key from .env.local
-OPENAI_KEY=$(grep "VITE_OPENAI_API_KEY=" .env.local | cut -d'=' -f2- | tr -d '"')
+# Extract OpenAI API key from .env.local (server-side only)
+OPENAI_KEY=$(grep "OPENAI_API_KEY=" .env.local | cut -d'=' -f2- | tr -d '"')
 
 if [ -z "$OPENAI_KEY" ]; then
-    echo "❌ VITE_OPENAI_API_KEY not found in .env.local"
+    echo "❌ OPENAI_API_KEY not found in .env.local"
     exit 1
 fi
 
@@ -24,7 +24,7 @@ echo "🔍 Checking current Vercel environment variable..."
 vercel env pull .env.vercel.tmp 2>/dev/null
 
 if [ -f .env.vercel.tmp ]; then
-    VERCEL_KEY=$(grep "VITE_OPENAI_API_KEY=" .env.vercel.tmp | cut -d'=' -f2- | tr -d '"')
+    VERCEL_KEY=$(grep "OPENAI_API_KEY=" .env.vercel.tmp | cut -d'=' -f2- | tr -d '"')
     rm .env.vercel.tmp
     
     if [ "$OPENAI_KEY" = "$VERCEL_KEY" ]; then
@@ -35,10 +35,10 @@ if [ -f .env.vercel.tmp ]; then
     fi
 fi
 
-# Update Vercel environment variable
+# Update Vercel environment variable (server-side only)
 echo "🔄 Updating Vercel environment variable..."
-vercel env rm VITE_OPENAI_API_KEY -y
-echo "$OPENAI_KEY" | vercel env add VITE_OPENAI_API_KEY
+vercel env rm OPENAI_API_KEY -y
+echo "$OPENAI_KEY" | vercel env add OPENAI_API_KEY
 
 echo "✅ Environment variables synced!"
 echo "🚀 Triggering new deployment..."

@@ -27,8 +27,8 @@ if (typeof window !== 'undefined') {
     import.meta.env.VITE_SUPABASE_ANON_KEY ? '***SET***' : 'NOT SET'
   );
   console.log(
-    '  VITE_OPENAI_API_KEY:',
-    import.meta.env.VITE_OPENAI_API_KEY ? '***SET***' : 'NOT SET'
+    '  OPENAI_API_KEY (server-side):',
+    'NOT ACCESSIBLE FROM CLIENT (secure)'
   );
   console.log('  MODE:', import.meta.env.MODE);
   console.log('  PROD:', import.meta.env.PROD);
@@ -72,8 +72,8 @@ if (typeof window !== 'undefined') {
     process.env.VITE_SUPABASE_ANON_KEY ? '***SET***' : 'NOT SET'
   );
   console.log(
-    'VITE_OPENAI_API_KEY:',
-    process.env.VITE_OPENAI_API_KEY ? '***SET***' : 'NOT SET'
+    'OPENAI_API_KEY (server-side):',
+    'NOT ACCESSIBLE FROM CLIENT (secure)'
   );
 }
 

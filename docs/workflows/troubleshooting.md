@@ -92,7 +92,7 @@ This guide covers the most common issues users and developers encounter with the
 
 **For Developers**:
 
-1. Check `.env` file for `VITE_OPENAI_API_KEY`
+1. Check `.env` file for `OPENAI_API_KEY` (server-side only)
 2. Verify key is valid and has credits
 3. Restart development server after changes
 
@@ -250,7 +250,7 @@ useEffect(() => {
 
 ```bash
 # ✅ Ensure all required env vars are set
-VITE_OPENAI_API_KEY=sk-proj-...
+# OPENAI_API_KEY=sk-proj-... (server-side only)
 VITE_OPENAI_MODEL=gpt-4o-mini
 VITE_SUPABASE_URL=https://...
 VITE_SUPABASE_ANON_KEY=...

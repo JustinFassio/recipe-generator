@@ -165,7 +165,7 @@ If you're an AI agent working on this project, please refer to:
    VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 
    # OpenAI Configuration (for AI Recipe Creator)
-   VITE_OPENAI_API_KEY=your_openai_api_key
+   # Note: OPENAI_API_KEY is configured server-side only for security
    VITE_OPENAI_MODEL=gpt-4-turbo-preview
    ```
 
@@ -237,7 +237,7 @@ The following environment variables are configured in Vercel:
 ```env
 VITE_SUPABASE_URL=your_supabase_url
 VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-VITE_OPENAI_API_KEY=your_openai_api_key
+# Note: OPENAI_API_KEY is configured server-side only for security
 VITE_OPENAI_MODEL=gpt-4o-mini
 ```
 
@@ -331,3 +331,5 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 **Recipe Generator** - Your digital cookbook companion 🍳
 
 **Live at**: [https://recipegenerator.app](https://recipegenerator.app)
+
+# Environment validation test - Mon Sep 15 13:38:19 PDT 2025

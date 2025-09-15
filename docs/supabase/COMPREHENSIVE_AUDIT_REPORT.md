@@ -36,7 +36,7 @@ Your Supabase setup is **architecturally excellent** and **production-ready**. T
 # .env.local (Working correctly)
 VITE_SUPABASE_URL=http://127.0.0.1:54321
 VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-VITE_OPENAI_API_KEY=sk-proj-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+# OPENAI_API_KEY=sk-proj-... (server-side only)
 VITE_OPENAI_MODEL=gpt-4o-mini
 ```
 
@@ -46,7 +46,7 @@ VITE_OPENAI_MODEL=gpt-4o-mini
 # All environment variables properly configured
 VITE_SUPABASE_URL=https://sxvdkipywmjycithdfpp.supabase.co
 VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-VITE_OPENAI_API_KEY=sk-proj-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+# OPENAI_API_KEY=sk-proj-... (server-side only)
 VITE_OPENAI_MODEL=gpt-4o-mini
 ```
 

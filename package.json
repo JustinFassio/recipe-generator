@@ -29,6 +29,7 @@
     "verify": "npm run lint && npm run format:check && tsc --noEmit && npm run test:core && npm run build",
     "verify:quick": "npm run lint && tsc --noEmit && npm run test:core && npm run build",
     "env:validate": "node scripts/validate-env.js",
+    "env:validate:ci": "node scripts/ci-env-validator.cjs",
     "env:sync": "./scripts/sync-env.sh",
     "perf:audit": "node scripts/performance-audit.cjs",
     "perf:build": "npm run build && npm run perf:audit",
@@ -109,8 +110,6 @@
   "devDependencies": {
     "@eslint/js": "^9.11.1",
     "@playwright/test": "^1.55.0",
-    "@sentry/react": "^10.11.0",
-    "@sentry/vite-plugin": "^4.3.0",
     "@testing-library/jest-dom": "^6.4.2",
     "@testing-library/react": "^14.2.1",
     "@testing-library/user-event": "^14.5.2",

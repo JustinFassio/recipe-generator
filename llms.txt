@@ -132,7 +132,8 @@ export class APIService {
   private readonly apiKey: string;
   
   constructor() {
-    this.apiKey = import.meta.env.VITE_API_KEY;
+    // SECURE: API key handled server-side only
+    // this.apiKey = process.env.API_KEY; // Server-side only
   }
   
   async makeRequest(): Promise<Response> {

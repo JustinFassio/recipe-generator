@@ -246,13 +246,13 @@ const stream = await fetch('/api/chat/stream', {
 ### **API Key Management**
 
 ```typescript
-// Environment variable validation
-if (!import.meta.env.VITE_OPENAI_API_KEY) {
+// Environment variable validation (server-side only)
+if (!process.env.OPENAI_API_KEY) {
   throw new Error('OpenAI API key not configured');
 }
 
-// Secure key storage
-private readonly apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+// Secure key storage (server-side only)
+private readonly apiKey = process.env.OPENAI_API_KEY;
 ```
 
 ### **Request Sanitization**
@@ -391,7 +391,7 @@ console.error('API Error Details', {
 
 ```bash
 # Required for Chat Completions API
-VITE_OPENAI_API_KEY=sk-proj-...
+# OPENAI_API_KEY=sk-proj-... (server-side only)
 VITE_OPENAI_MODEL=gpt-4o-mini
 
 # Optional for enhanced features
