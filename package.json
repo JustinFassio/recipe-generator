@@ -30,6 +30,8 @@
     "verify:quick": "npm run lint && tsc --noEmit && npm run test:core && npm run build",
     "env:validate": "node scripts/validate-env.js",
     "env:sync": "./scripts/sync-env.sh",
+    "perf:audit": "node scripts/performance-audit.js",
+    "perf:build": "npm run build && npm run perf:audit",
     "test:username": "./scripts/test-username-functions.sh",
     "prepare": "husky",
     "seed": "cross-env NODE_OPTIONS=--no-warnings tsx scripts/seed-users.ts",

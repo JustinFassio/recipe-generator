@@ -19,34 +19,44 @@ export default defineConfig({
     exclude: ['lucide-react'],
   },
   build: {
+    // Enable source maps for production debugging (hidden on network panel)
+    sourcemap: 'hidden',
     rollupOptions: {
       output: {
-        // Preserve touch event handling in production
-        manualChunks: undefined,
+        // Optimize chunk splitting for better caching
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-router-dom'],
+          ui: [
+            '@radix-ui/react-dialog',
+            '@radix-ui/react-dropdown-menu',
+            '@radix-ui/react-select',
+            '@radix-ui/react-tabs',
+          ],
+          supabase: ['@supabase/supabase-js'],
+          query: ['@tanstack/react-query'],
+          utils: ['date-fns', 'zod', 'clsx'],
+        },
         preserveModules: false,
       },
-      // Prevent tree-shaking of touch events
+      // Re-enable tree shaking with careful configuration
       treeshake: {
-        moduleSideEffects: true,
-        propertyReadSideEffects: true,
-        unknownGlobalSideEffects: true,
+        moduleSideEffects: false,
+        propertyReadSideEffects: false,
+        unknownGlobalSideEffects: false,
       },
     },
     // Use esbuild which is available everywhere
     minify: 'esbuild',
-    target: 'es2020', // Ensure modern touch event support
-    // Force preserve touch event code
-    sourcemap: false,
+    target: 'es2020',
+    chunkSizeWarningLimit: 1000,
   },
-  // Force preserve touch event code
+  // Feature flag preserved
   define: {
     __TOUCH_EVENTS__: true,
   },
-  // Configure esbuild to preserve touch events
+  // Configure esbuild to preserve clarity while allowing treeshaking
   esbuild: {
-    // Prevent aggressive tree-shaking
-    treeShaking: false,
-    // Keep touch event handling
-    keepNames: true,
+    treeShaking: true,
+    keepNames: false,
   },
 });
