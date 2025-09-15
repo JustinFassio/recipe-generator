@@ -48,22 +48,6 @@
     "OPENAI_API_KEY": {
       "pattern": "^sk-[A-Za-z0-9]{20,}$",
       "description": "OpenAI API key"
-    },
-    "VITE_SENTRY_DSN": {
-      "pattern": "^https://[a-f0-9]{32}@[0-9]+\\.ingest\\.sentry\\.io/[0-9]+$",
-      "description": "Sentry DSN for error tracking"
-    },
-    "SENTRY_AUTH_TOKEN": {
-      "pattern": "^[a-f0-9]{40,}$",
-      "description": "Sentry auth token for sourcemap uploads"
-    },
-    "SENTRY_ORG": {
-      "pattern": "^[a-z0-9-]+$",
-      "description": "Sentry organization slug"
-    },
-    "SENTRY_PROJECT": {
-      "pattern": "^[a-z0-9-]+$",
-      "description": "Sentry project slug"
     }
   },
   "security": {
@@ -79,8 +63,7 @@
     "safeForClient": [
       "VITE_SUPABASE_URL",
       "VITE_SUPABASE_ANON_KEY",
-      "VITE_OPENAI_MODEL",
-      "VITE_SENTRY_DSN"
+      "VITE_OPENAI_MODEL"
     ],
     "vercelInternal": [
       "VERCEL",

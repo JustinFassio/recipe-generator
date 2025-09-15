@@ -618,44 +618,13 @@ export class ErrorBoundary extends Component<Props, State> {
 }
 ```
 
-### 3.2 Sentry Integration (Optional but Recommended)
+### 3.2 Sentry Integration (Removed)
 
 **Time: 4-5 hours**
 
-```bash
-npm install @sentry/react @sentry/vite-plugin
-```
+<!-- Sentry installation removed -->
 
-Create `src/lib/sentry.ts`:
-
-```typescript
-import * as Sentry from '@sentry/react';
-
-export function initSentry() {
-  if (process.env.NODE_ENV === 'production' && process.env.VITE_SENTRY_DSN) {
-    Sentry.init({
-      dsn: process.env.VITE_SENTRY_DSN,
-      environment: process.env.NODE_ENV,
-      integrations: [
-        new Sentry.BrowserTracing({
-          tracePropagationTargets: [
-            'localhost',
-            /^https:\/\/recipegenerator\.app/,
-            /^https:\/\/.*\.supabase\.co/,
-          ],
-        }),
-        new Sentry.Replay({
-          maskAllText: true,
-          blockAllMedia: true,
-        }),
-      ],
-      tracesSampleRate: 0.1,
-      replaysSessionSampleRate: 0.01,
-      replaysOnErrorSampleRate: 1.0,
-    });
-  }
-}
-```
+<!-- Sentry setup section removed to simplify stack. -->
 
 ### 3.3 Custom Monitoring Dashboard
 
