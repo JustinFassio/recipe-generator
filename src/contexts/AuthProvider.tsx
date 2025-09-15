@@ -127,18 +127,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           `Querying profiles table for user: ${userId} (attempt ${attempt})`
         );
 
-        // Increased timeout for production network constraints
+        // Optimized timeout for better responsiveness
         const queryPromise = supabase
           .from('profiles')
           .select('*')
           .eq('id', userId)
           .single();
 
-        // Reduced timeout for better responsiveness
+        // Reduced timeout for faster user experience
         const timeoutPromise = new Promise<never>((_, reject) => {
           setTimeout(
             () => reject(new Error('Profile query timeout')),
-            import.meta.env.DEV ? 15000 : 10000
+            import.meta.env.DEV ? 8000 : 5000
           );
         });
 
@@ -324,8 +324,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         logger.auth('Initializing AuthProvider...');
 
-        // Session timeout configuration - increased for local development stability
-        const SESSION_TIMEOUT_MS = import.meta.env.DEV ? 15000 : 8000; // Much longer timeout for development
+        // Optimized session timeout for better performance
+        const SESSION_TIMEOUT_MS = import.meta.env.DEV ? 8000 : 4000; // Faster timeouts for better UX
         const sessionPromise = supabase.auth.getSession();
         const timeoutPromise = new Promise<never>((_, reject) => {
           setTimeout(

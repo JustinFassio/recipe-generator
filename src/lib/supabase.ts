@@ -30,7 +30,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
   );
 }
 
-// Create Supabase client with best practices for session management
+// Create Supabase client with optimized configuration for production
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     persistSession: true,
@@ -38,11 +38,23 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     detectSessionInUrl: true,
     storage: typeof window !== 'undefined' ? window.localStorage : undefined,
     storageKey: 'supabase-auth-token',
+    // Optimize auth flow for faster loading
+    flowType: 'pkce',
   },
   global: {
     headers: {
       Accept: 'application/json',
       'X-Client-Info': 'recipe-generator-web',
+    },
+  },
+  // Optimize database queries
+  db: {
+    schema: 'public',
+  },
+  // Optimize real-time connections
+  realtime: {
+    params: {
+      eventsPerSecond: 10,
     },
   },
 });
