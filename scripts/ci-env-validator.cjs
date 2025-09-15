@@ -264,6 +264,8 @@ function loadVercelEnv(environment = 'production') {
         if (value.startsWith('"') && value.endsWith('"')) {
           value = value.slice(1, -1);
         }
+        // Remove any trailing newlines or whitespace
+        value = value.replace(/\\n$/, '').trim();
         envVars[key] = value;
       }
     }
