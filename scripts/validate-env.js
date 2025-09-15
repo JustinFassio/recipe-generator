@@ -22,7 +22,7 @@ const requiredClientVars = [
 
 const requiredServerVars = ['OPENAI_API_KEY'];
 
-const optionalVars = ['VITE_OPENAI_API_KEY', 'SENTRY_DSN', 'VERCEL_URL'];
+const optionalVars = ['SENTRY_DSN', 'VERCEL_URL'];
 
 console.log('🔍 Validating environment variables...\n');
 

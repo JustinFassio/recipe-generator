@@ -139,7 +139,7 @@ const requiredClientVars = [
 const requiredServerVars = ['OPENAI_API_KEY'];
 
 const optionalVars = [
-  'VITE_OPENAI_API_KEY', // Client-side fallback
+  // 'VITE_OPENAI_API_KEY' removed - now using server-side OPENAI_API_KEY
   'SENTRY_DSN',
   'VERCEL_URL',
 ];
