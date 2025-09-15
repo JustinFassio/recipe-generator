@@ -24,6 +24,11 @@ jobs:
       VERCEL_ORG_ID: team_VZU6ueb8d87bTfJRAKJwvov5
       VERCEL_PROJECT_ID: prj_zfInTXIxP2XKALlnxO4elLt45Cxa
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      # Optional: provide Sentry vars via GitHub Secrets for validation
+      VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
+      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+      SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+      SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
 
     steps:
       - name: Checkout code
@@ -44,6 +49,15 @@ jobs:
       - name: Pull Vercel environment variables
         run: |
           vercel env pull .env.vercel.production --environment=production --yes --token "$VERCEL_TOKEN"
+
+      - name: Inject required secrets into pulled env file (for validation only)
+        run: |
+          touch .env.vercel.production
+          # Append only if set in GitHub Secrets
+          [ -n "${VITE_SENTRY_DSN}" ] && echo "VITE_SENTRY_DSN=${VITE_SENTRY_DSN}" >> .env.vercel.production
+          [ -n "${SENTRY_AUTH_TOKEN}" ] && echo "SENTRY_AUTH_TOKEN=${SENTRY_AUTH_TOKEN}" >> .env.vercel.production
+          [ -n "${SENTRY_ORG}" ] && echo "SENTRY_ORG=${SENTRY_ORG}" >> .env.vercel.production
+          [ -n "${SENTRY_PROJECT}" ] && echo "SENTRY_PROJECT=${SENTRY_PROJECT}" >> .env.vercel.production
 
       - name: Validate environment variables
         run: |
