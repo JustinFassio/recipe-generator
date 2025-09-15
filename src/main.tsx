@@ -5,7 +5,6 @@ import { ErrorBoundary } from './components/shared/feedback/ErrorBoundary';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 import { initWebVitals } from './lib/analytics';
-import { initSentry } from './lib/sentry';
 import './index.css';
 
 createRoot(document.getElementById('root')!).render(
