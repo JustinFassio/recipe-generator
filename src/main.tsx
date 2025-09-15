@@ -21,5 +21,4 @@ if (typeof window !== 'undefined') {
   initWebVitals();
 }
 
-// Initialize Sentry as early as possible
-initSentry();
+// Sentry removed
