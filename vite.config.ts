@@ -1,11 +1,21 @@
 import path from 'path';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
+import { sentryVitePlugin } from '@sentry/vite-plugin';
 
 export default defineConfig({
   // Use absolute base for proper asset serving in production
   base: '/',
-  plugins: [react()],
+  plugins: [
+    react(),
+    sentryVitePlugin({
+      org: process.env.SENTRY_ORG || '',
+      project: process.env.SENTRY_PROJECT || '',
+      authToken: process.env.SENTRY_AUTH_TOKEN || '',
+      sourcemaps: { assets: './dist/**' },
+      disable: !process.env.SENTRY_AUTH_TOKEN,
+    }),
+  ],
   server: {
     port: 5174,
     host: true,
