@@ -43,7 +43,22 @@ jobs:
 
       - name: Pull Vercel environment variables
         run: |
+          # Remove any existing environment file to ensure fresh pull
+          rm -f .env.vercel.production
           vercel env pull .env.vercel.production --environment=production --yes --token "$VERCEL_TOKEN"
+
+      - name: Debug environment variables
+        run: |
+          echo "🔍 Environment variables pulled from Vercel:"
+          echo "=========================================="
+          if [ -f .env.vercel.production ]; then
+            # Show variable names (but not values for security)
+            grep -E "^[A-Z_]+=" .env.vercel.production | cut -d'=' -f1 | sort
+            echo "=========================================="
+            echo "Total variables: $(grep -c "^[A-Z_]+=" .env.vercel.production)"
+          else
+            echo "❌ No environment file found!"
+          fi
 
       - name: Validate environment variables
         run: |
