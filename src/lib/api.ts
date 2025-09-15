@@ -239,35 +239,95 @@ export const recipeApi = {
 
   // Get a single public recipe by ID (any public recipe)
   async getPublicRecipe(id: string): Promise<PublicRecipe | null> {
-    const { data: recipe, error: recipeError } = await supabase
-      .from('recipes')
-      .select('*')
-      .eq('id', id)
-      .eq('is_public', true)
-      .single();
+    console.log('🔍 [API] getPublicRecipe called with ID:', id);
 
-    if (recipeError) handleError(recipeError, 'Get public recipe');
-    if (!recipe) return null;
-
-    // Get author name from profiles
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .select('full_name')
-      .eq('id', recipe.user_id)
-      .single();
-
-    if (profileError) {
-      console.warn(
-        'Could not fetch author name for public recipe:',
-        profileError
-      );
-      trackAPIError('Fetch author profile for public recipe', profileError);
+    // Input validation
+    if (!id || typeof id !== 'string' || id.trim() === '') {
+      console.error('❌ [API] getPublicRecipe: Invalid ID provided:', id);
+      throw new Error('Recipe ID is required and must be a non-empty string');
     }
 
-    return {
-      ...recipe,
-      author_name: profile?.full_name || 'Anonymous',
-    } as PublicRecipe;
+    try {
+      // Step 1: Fetch the recipe
+      console.log('📋 [API] Fetching public recipe from database...');
+      const { data: recipe, error: recipeError } = await supabase
+        .from('recipes')
+        .select('*')
+        .eq('id', id.trim())
+        .eq('is_public', true)
+        .single();
+
+      if (recipeError) {
+        console.error('❌ [API] Recipe fetch error:', {
+          code: recipeError.code,
+          message: recipeError.message,
+          details: recipeError.details,
+          hint: recipeError.hint,
+          recipeId: id,
+        });
+
+        // Handle specific error cases
+        if (recipeError.code === 'PGRST116') {
+          console.log('📝 [API] Recipe not found or not public:', id);
+          return null;
+        }
+
+        handleError(recipeError, 'Get public recipe');
+      }
+
+      if (!recipe) {
+        console.log('📝 [API] No recipe found for ID:', id);
+        return null;
+      }
+
+      console.log('✅ [API] Recipe found:', {
+        id: recipe.id,
+        title: recipe.title,
+        isPublic: recipe.is_public,
+        userId: recipe.user_id,
+      });
+
+      // Step 2: Fetch author profile (with graceful fallback)
+      console.log('👤 [API] Fetching author profile for user:', recipe.user_id);
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('id', recipe.user_id)
+        .single();
+
+      if (profileError) {
+        console.warn('⚠️ [API] Could not fetch author name:', {
+          code: profileError.code,
+          message: profileError.message,
+          userId: recipe.user_id,
+          recipeId: id,
+        });
+        trackAPIError('Fetch author profile for public recipe', profileError);
+      }
+
+      const authorName = profile?.full_name || 'Anonymous';
+      console.log('✅ [API] Author resolved:', authorName);
+
+      const result = {
+        ...recipe,
+        author_name: authorName,
+      } as PublicRecipe;
+
+      console.log('🎉 [API] getPublicRecipe success:', {
+        id: result.id,
+        title: result.title,
+        author: result.author_name,
+      });
+
+      return result;
+    } catch (error) {
+      console.error('💥 [API] getPublicRecipe unexpected error:', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        recipeId: id,
+        stack: error instanceof Error ? error.stack : undefined,
+      });
+      throw error;
+    }
   },
 
   // Get recipe summary (optimized for list views)
