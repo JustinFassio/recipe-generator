@@ -32,7 +32,7 @@ export function RecipeViewPage() {
     data: userRecipe,
     isLoading: userLoading,
     error: userError,
-  } = useRecipe(id!, { enabled: shouldFetchUser });
+  } = useRecipe(shouldFetchUser ? id! : '');
 
   // Use whichever one succeeds
   const recipe = userRecipe || publicRecipe;
@@ -56,7 +56,7 @@ export function RecipeViewPage() {
     userError: userError?.message,
     publicError: publicError?.message,
     finalError: error?.message,
-    shouldFetchPublic,
+    shouldFetchUser,
   });
 
   if (isLoading) {
