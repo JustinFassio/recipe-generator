@@ -122,7 +122,7 @@ function AppContent() {
       <Route
         path="/recipe/:id"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute requiresAuth={false}>
             <div className="bg-base-100 min-h-screen">
               <Header />
               <main>

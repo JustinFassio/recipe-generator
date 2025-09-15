@@ -19,20 +19,20 @@ export function RecipeViewPage() {
     isProduction: import.meta.env.PROD,
   });
 
-  // Try to fetch as user recipe first
-  const {
-    data: userRecipe,
-    isLoading: userLoading,
-    error: userError,
-  } = useRecipe(id!);
-
-  // Only fetch public recipe if user recipe has finished loading and failed
-  const shouldFetchPublic = !userLoading && !userRecipe && !!userError;
+  // Optimize: Try public recipe first for better performance on public recipe pages
   const {
     data: publicRecipe,
     isLoading: publicLoading,
     error: publicError,
-  } = usePublicRecipe(id!, { enabled: shouldFetchPublic });
+  } = usePublicRecipe(id!);
+
+  // Only fetch user recipe if public recipe failed and we have auth
+  const shouldFetchUser = !publicLoading && !publicRecipe && !!publicError;
+  const {
+    data: userRecipe,
+    isLoading: userLoading,
+    error: userError,
+  } = useRecipe(shouldFetchUser ? id! : '');
 
   // Use whichever one succeeds
   const recipe = userRecipe || publicRecipe;
@@ -56,7 +56,7 @@ export function RecipeViewPage() {
     userError: userError?.message,
     publicError: publicError?.message,
     finalError: error?.message,
-    shouldFetchPublic,
+    shouldFetchUser,
   });
 
   if (isLoading) {
