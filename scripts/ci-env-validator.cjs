@@ -35,6 +35,59 @@ function validatePattern(value, pattern, varName) {
   return regex.test(value);
 }
 
+function checkClientCodeForSensitiveVars() {
+  const violations = [];
+  const sensitiveVars = schema.security.neverExposeToClient;
+
+  // Check src directory for usage of sensitive variables
+  const srcDir = path.join(process.cwd(), 'src');
+  if (!fs.existsSync(srcDir)) {
+    return violations;
+  }
+
+  function scanDirectory(dir) {
+    const files = fs.readdirSync(dir);
+
+    for (const file of files) {
+      const filePath = path.join(dir, file);
+      const stat = fs.statSync(filePath);
+
+      if (stat.isDirectory()) {
+        scanDirectory(filePath);
+      } else if (
+        file.endsWith('.ts') ||
+        file.endsWith('.tsx') ||
+        file.endsWith('.js') ||
+        file.endsWith('.jsx')
+      ) {
+        const content = fs.readFileSync(filePath, 'utf8');
+
+        for (const varName of sensitiveVars) {
+          // Check for direct usage of the variable
+          const patterns = [
+            new RegExp(`\\b${varName}\\b`, 'g'),
+            new RegExp(`process\\.env\\.${varName}`, 'g'),
+            new RegExp(`import\\.meta\\.env\\.${varName}`, 'g'),
+          ];
+
+          for (const pattern of patterns) {
+            if (pattern.test(content)) {
+              violations.push({
+                var: varName,
+                file: path.relative(process.cwd(), filePath),
+              });
+              break; // Only report once per file per variable
+            }
+          }
+        }
+      }
+    }
+  }
+
+  scanDirectory(srcDir);
+  return violations;
+}
+
 function validateEnvironment(envVars, environment = 'production') {
   const envSchema = schema.environments[environment];
   if (!envSchema) {
@@ -112,16 +165,50 @@ function validateEnvironment(envVars, environment = 'production') {
     }
   }
 
-  // Security validation
+  // Security validation - check for client exposure violations
+  // Note: Variables in Vercel env can be server-only, so we need to check if they're actually exposed to client
   for (const varName of Object.keys(envVars)) {
     if (schema.security.neverExposeToClient.includes(varName)) {
-      log(
-        `🚨 SECURITY VIOLATION: ${varName} should never be exposed to client!`,
-        'red'
-      );
-      results.security.violations.push(varName);
-      hasErrors = true;
+      // Check if this variable is prefixed with VITE_ (which would expose it to client)
+      if (varName.startsWith('VITE_')) {
+        log(
+          `🚨 CRITICAL SECURITY VIOLATION: ${varName} is prefixed with VITE_ and will be exposed to client!`,
+          'red'
+        );
+        results.security.violations.push(varName);
+        hasErrors = true;
+      } else {
+        // Variable exists in env but not prefixed with VITE_ - this is OK for server-side use
+        log(
+          `⚠️  Server-only variable present: ${varName} (ensure it's not used in client code)`,
+          'yellow'
+        );
+      }
     }
+  }
+
+  // Special check for VITE_OPENAI_API_KEY - this should never exist
+  if (envVars['VITE_OPENAI_API_KEY']) {
+    log(
+      `🚨 CRITICAL SECURITY VIOLATION: VITE_OPENAI_API_KEY should never be exposed to client!`,
+      'red'
+    );
+    results.security.violations.push('VITE_OPENAI_API_KEY');
+    hasErrors = true;
+  }
+
+  // Additional security check: scan client-side code for usage of sensitive variables
+  const clientCodeUsage = checkClientCodeForSensitiveVars();
+  if (clientCodeUsage.length > 0) {
+    log(
+      `\n🚨 SECURITY VIOLATION: Sensitive variables found in client code!`,
+      'red'
+    );
+    clientCodeUsage.forEach(({ var: varName, file }) => {
+      log(`  ${varName} used in ${file}`, 'red');
+      results.security.violations.push(`${varName} (in ${file})`);
+      hasErrors = true;
+    });
   }
 
   // Check for unexpected variables
@@ -133,6 +220,9 @@ function validateEnvironment(envVars, environment = 'production') {
   const allowedInternalVars = [
     ...(schema.security.vercelInternal || []),
     ...(schema.security.supabaseInternal || []),
+    ...(schema.security.nextjsInternal || []),
+    ...(schema.security.buildTools || []),
+    ...(schema.security.vercelBuild || []),
   ];
 
   const unexpectedVars = Object.keys(envVars).filter(
@@ -169,10 +259,28 @@ function loadVercelEnv(environment = 'production') {
     if (trimmed && !trimmed.startsWith('#')) {
       const [key, ...valueParts] = trimmed.split('=');
       if (key && valueParts.length > 0) {
-        envVars[key] = valueParts.join('=');
+        // Clean up the value by removing quotes and newlines
+        let value = valueParts.join('=').trim();
+        if (value.startsWith('"') && value.endsWith('"')) {
+          value = value.slice(1, -1);
+        }
+        envVars[key] = value;
       }
     }
   });
+
+  // Map Next.js variables to Vite variables for validation
+  const nextjsToViteMapping = {
+    NEXT_PUBLIC_SUPABASE_URL: 'VITE_SUPABASE_URL',
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: 'VITE_SUPABASE_ANON_KEY',
+  };
+
+  for (const [nextjsVar, viteVar] of Object.entries(nextjsToViteMapping)) {
+    if (envVars[nextjsVar] && !envVars[viteVar]) {
+      envVars[viteVar] = envVars[nextjsVar];
+      log(`📝 Mapped ${nextjsVar} to ${viteVar} for validation`, 'blue');
+    }
+  }
 
   return envVars;
 }
