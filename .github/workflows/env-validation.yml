@@ -2,7 +2,7 @@ name: Environment Validation
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main, develop, obs/vercel-phase-3]
   pull_request:
     branches: [main, develop]
   workflow_dispatch:
