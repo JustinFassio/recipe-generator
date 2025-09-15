@@ -1,0 +1,169 @@
+name: Environment Validation
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to validate'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - development
+
+jobs:
+  validate-env:
+    name: Validate Environment Variables
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: Authenticate with Vercel
+        run: |
+          echo "${{ secrets.VERCEL_TOKEN }}" | vercel login --token
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+
+      - name: Pull Vercel environment variables
+        run: |
+          vercel env pull .env.vercel.production --environment=production --yes
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      - name: Validate environment variables
+        run: |
+          node scripts/ci-env-validator.cjs production
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      - name: Upload validation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: env-validation-report
+          path: |
+            .env.vercel.production
+            scripts/env-schema.json
+          retention-days: 7
+
+  validate-local-env:
+    name: Validate Local Environment
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate local environment schema
+        run: |
+          # Check if schema file exists and is valid JSON
+          node -e "JSON.parse(require('fs').readFileSync('scripts/env-schema.json', 'utf8')); console.log('✅ Schema is valid JSON')"
+
+          # Validate schema structure
+          node -e "
+            const schema = JSON.parse(require('fs').readFileSync('scripts/env-schema.json', 'utf8'));
+            const required = ['name', 'version', 'environments', 'validation', 'security'];
+            const missing = required.filter(key => !schema[key]);
+            if (missing.length > 0) {
+              console.error('❌ Schema missing required fields:', missing.join(', '));
+              process.exit(1);
+            }
+            console.log('✅ Schema structure is valid');
+          "
+
+      - name: Test environment validator script
+        run: |
+          # Test that the validator script can be loaded
+          node -e "
+            const validator = require('./scripts/ci-env-validator.cjs');
+            console.log('✅ Validator script loads successfully');
+          "
+
+  security-audit:
+    name: Security Audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Security audit
+        run: |
+          # Check for hardcoded secrets in code
+          echo "🔍 Scanning for potential secrets..."
+
+          # Check for common secret patterns
+          if grep -r -E "(sk-[A-Za-z0-9]{48}|eyJ[A-Za-z0-9+/=]{100,})" src/ --exclude-dir=node_modules; then
+            echo "❌ Potential secrets found in source code!"
+            exit 1
+          fi
+
+          # Check for .env files in git
+          if git ls-files | grep -E "\.env$|\.env\." | grep -v ".env.example"; then
+            echo "❌ .env files should not be committed to git!"
+            exit 1
+          fi
+
+          echo "✅ No secrets found in source code"
+
+      - name: Validate environment schema security
+        run: |
+          node -e "
+            const schema = JSON.parse(require('fs').readFileSync('scripts/env-schema.json', 'utf8'));
+            
+            // Check that security rules are defined
+            if (!schema.security || !schema.security.neverExposeToClient) {
+              console.error('❌ Security rules not defined in schema');
+              process.exit(1);
+            }
+            
+            // Check that sensitive variables are marked as never expose
+            const sensitive = ['OPENAI_API_KEY', 'SENTRY_AUTH_TOKEN'];
+            const notMarked = sensitive.filter(key => !schema.security.neverExposeToClient.includes(key));
+            if (notMarked.length > 0) {
+              console.error('❌ Sensitive variables not marked as never expose:', notMarked.join(', '));
+              process.exit(1);
+            }
+            
+            console.log('✅ Security schema is properly configured');
+          "

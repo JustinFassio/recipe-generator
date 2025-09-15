@@ -1,0 +1,113 @@
+{
+  "name": "Recipe Generator Environment Schema",
+  "version": "1.0.0",
+  "description": "Canonical schema for environment variables across all environments",
+  "environments": {
+    "development": {
+      "required": {
+        "client": [
+          "VITE_SUPABASE_URL",
+          "VITE_SUPABASE_ANON_KEY",
+          "VITE_OPENAI_MODEL"
+        ],
+        "server": ["OPENAI_API_KEY"]
+      },
+      "optional": {
+        "client": ["VITE_OPENAI_API_KEY", "VITE_SENTRY_DSN"],
+        "server": ["SENTRY_AUTH_TOKEN", "SENTRY_ORG", "SENTRY_PROJECT"]
+      }
+    },
+    "production": {
+      "required": {
+        "client": [
+          "VITE_SUPABASE_URL",
+          "VITE_SUPABASE_ANON_KEY",
+          "VITE_OPENAI_MODEL"
+        ],
+        "server": ["OPENAI_API_KEY"]
+      },
+      "optional": {
+        "client": ["VITE_OPENAI_API_KEY", "VITE_SENTRY_DSN"],
+        "server": ["SENTRY_AUTH_TOKEN", "SENTRY_ORG", "SENTRY_PROJECT"]
+      }
+    }
+  },
+  "validation": {
+    "VITE_SUPABASE_URL": {
+      "pattern": "^https://[a-z0-9]+\\.supabase\\.co$",
+      "description": "Supabase project URL"
+    },
+    "VITE_SUPABASE_ANON_KEY": {
+      "pattern": "^eyJ[A-Za-z0-9+/=]+$",
+      "description": "Supabase anonymous key (JWT format)"
+    },
+    "VITE_OPENAI_MODEL": {
+      "pattern": "^(gpt-4|gpt-3\\.5-turbo|gpt-4o|gpt-4o-mini|gpt-4-turbo)$",
+      "description": "OpenAI model identifier"
+    },
+    "OPENAI_API_KEY": {
+      "pattern": "^sk-[A-Za-z0-9]{20,}$",
+      "description": "OpenAI API key"
+    },
+    "VITE_OPENAI_API_KEY": {
+      "pattern": "^sk-[A-Za-z0-9]{20,}$",
+      "description": "OpenAI API key for client-side use (optional)"
+    },
+    "VITE_SENTRY_DSN": {
+      "pattern": "^https://[a-f0-9]{32}@[0-9]+\\.ingest\\.sentry\\.io/[0-9]+$",
+      "description": "Sentry DSN for error tracking"
+    },
+    "SENTRY_AUTH_TOKEN": {
+      "pattern": "^[a-f0-9]{40,}$",
+      "description": "Sentry auth token for sourcemap uploads"
+    },
+    "SENTRY_ORG": {
+      "pattern": "^[a-z0-9-]+$",
+      "description": "Sentry organization slug"
+    },
+    "SENTRY_PROJECT": {
+      "pattern": "^[a-z0-9-]+$",
+      "description": "Sentry project slug"
+    }
+  },
+  "security": {
+    "neverExposeToClient": [
+      "OPENAI_API_KEY",
+      "SENTRY_AUTH_TOKEN",
+      "SUPABASE_SERVICE_ROLE_KEY",
+      "SUPABASE_JWT_SECRET",
+      "POSTGRES_PASSWORD",
+      "POSTGRES_URL",
+      "POSTGRES_URL_NON_POOLING"
+    ],
+    "safeForClient": [
+      "VITE_SUPABASE_URL",
+      "VITE_SUPABASE_ANON_KEY",
+      "VITE_OPENAI_MODEL",
+      "VITE_OPENAI_API_KEY",
+      "VITE_SENTRY_DSN"
+    ],
+    "vercelInternal": [
+      "VERCEL",
+      "VERCEL_URL",
+      "VERCEL_ENV",
+      "VERCEL_GIT_COMMIT_SHA",
+      "VERCEL_GIT_COMMIT_REF",
+      "VERCEL_GIT_REPO_OWNER",
+      "VERCEL_GIT_REPO_SLUG"
+    ],
+    "supabaseInternal": [
+      "SUPABASE_URL",
+      "SUPABASE_ANON_KEY",
+      "SUPABASE_SERVICE_ROLE_KEY",
+      "SUPABASE_JWT_SECRET",
+      "POSTGRES_DATABASE",
+      "POSTGRES_HOST",
+      "POSTGRES_PASSWORD",
+      "POSTGRES_PRISMA_URL",
+      "POSTGRES_URL",
+      "POSTGRES_URL_NON_POOLING",
+      "POSTGRES_USER"
+    ]
+  }
+}
