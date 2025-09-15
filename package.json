@@ -32,6 +32,7 @@
     "env:sync": "./scripts/sync-env.sh",
     "perf:audit": "node scripts/performance-audit.cjs",
     "perf:build": "npm run build && npm run perf:audit",
+    "monitoring:setup": "node scripts/setup-monitoring.cjs",
     "test:username": "./scripts/test-username-functions.sh",
     "prepare": "husky",
     "seed": "cross-env NODE_OPTIONS=--no-warnings tsx scripts/seed-users.ts",
