@@ -122,14 +122,12 @@ function AppContent() {
       <Route
         path="/recipe/:id"
         element={
-          <ProtectedRoute requiresAuth={false}>
-            <div className="bg-base-100 min-h-screen">
-              <Header />
-              <main>
-                <RecipeViewPage />
-              </main>
-            </div>
-          </ProtectedRoute>
+          <div className="bg-base-100 min-h-screen">
+            <Header />
+            <main>
+              <RecipeViewPage />
+            </main>
+          </div>
         }
       />
       <Route
