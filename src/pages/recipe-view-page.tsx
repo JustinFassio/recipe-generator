@@ -6,10 +6,12 @@ import { createDaisyUISkeletonClasses } from '@/lib/skeleton-migration';
 import { ChefHat } from 'lucide-react';
 import { RecipeDiagnostic } from '@/components/debug/RecipeDiagnostic';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/contexts/AuthProvider';
 
 export function RecipeViewPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
 
   // Debug logging
   console.log('🔍 [RecipeViewPage] Component initialized:', {
@@ -17,6 +19,8 @@ export function RecipeViewPage() {
     timestamp: new Date().toISOString(),
     url: window.location.href,
     isProduction: import.meta.env.PROD,
+    hasUser: !!user,
+    authLoading,
   });
 
   // Optimize: Try public recipe first for better performance on public recipe pages
@@ -26,8 +30,12 @@ export function RecipeViewPage() {
     error: publicError,
   } = usePublicRecipe(id!);
 
-  // Only fetch user recipe if public recipe failed and we have auth
-  const shouldFetchUser = !publicLoading && !publicRecipe && !!publicError;
+  // Only fetch user recipe if:
+  // 1. Public recipe failed AND
+  // 2. We have a valid authenticated user AND
+  // 3. Auth is not still loading
+  const shouldFetchUser =
+    !publicLoading && !publicRecipe && !!publicError && !!user && !authLoading;
   const {
     data: userRecipe,
     isLoading: userLoading,
@@ -57,6 +65,8 @@ export function RecipeViewPage() {
     publicError: publicError?.message,
     finalError: error?.message,
     shouldFetchUser,
+    hasUser: !!user,
+    authLoading,
   });
 
   if (isLoading) {
