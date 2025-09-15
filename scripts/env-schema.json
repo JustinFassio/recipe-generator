@@ -13,8 +13,8 @@
         "server": ["OPENAI_API_KEY"]
       },
       "optional": {
-        "client": ["VITE_SENTRY_DSN"],
-        "server": ["SENTRY_AUTH_TOKEN", "SENTRY_ORG", "SENTRY_PROJECT"]
+        "client": [],
+        "server": []
       }
     },
     "production": {
@@ -27,8 +27,8 @@
         "server": ["OPENAI_API_KEY"]
       },
       "optional": {
-        "client": ["VITE_SENTRY_DSN"],
-        "server": ["SENTRY_AUTH_TOKEN", "SENTRY_ORG", "SENTRY_PROJECT"]
+        "client": [],
+        "server": []
       }
     }
   },
