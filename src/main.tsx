@@ -1,14 +1,18 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
+import { ErrorBoundary } from './components/shared/feedback/ErrorBoundary';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 import { initWebVitals } from './lib/analytics';
+import { initSentry } from './lib/sentry';
 import './index.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    <ErrorBoundary>
+      <App />
+    </ErrorBoundary>
     <Analytics />
     <SpeedInsights />
   </StrictMode>
@@ -17,3 +21,6 @@ createRoot(document.getElementById('root')!).render(
 if (typeof window !== 'undefined') {
   initWebVitals();
 }
+
+// Initialize Sentry as early as possible
+initSentry();
