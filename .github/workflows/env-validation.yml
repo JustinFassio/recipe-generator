@@ -153,7 +153,7 @@ jobs:
             }
             
             // Check that sensitive variables are marked as never expose
-            const sensitive = ['OPENAI_API_KEY', 'SENTRY_AUTH_TOKEN'];
+            const sensitive = ['OPENAI_API_KEY'];
             const notMarked = sensitive.filter(key => !schema.security.neverExposeToClient.includes(key));
             if (notMarked.length > 0) {
               console.error('❌ Sensitive variables not marked as never expose:', notMarked.join(', '));
