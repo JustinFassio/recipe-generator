@@ -1,5 +1,5 @@
 import type { RecipeFormData } from './schemas';
-import { AssistantAPI } from './assistantAPI';
+import { apiClient } from './api-client';
 
 // Constants for common prompts
 const SAVE_RECIPE_PROMPT = `IMPORTANT: After providing a complete recipe or when the user seems satisfied with a recipe discussion, always ask: "Ready to Create and Save the Recipe?" This will allow the user to save the recipe to their collection.
@@ -46,6 +46,11 @@ interface Message {
 interface ChatResponse {
   message: string;
   recipe?: RecipeFormData;
+  usage?: {
+    prompt_tokens?: number;
+    completion_tokens?: number;
+    total_tokens?: number;
+  };
 }
 
 // Define the persona configuration interface
@@ -582,83 +587,15 @@ When the assessment is complete, generate a comprehensive JSON evaluation report
 export type PersonaType = keyof typeof RECIPE_BOT_PERSONAS;
 
 class OpenAIAPI {
-  private readonly apiKey: string;
   private readonly model: string;
-  private readonly baseURL = 'https://api.openai.com/v1';
-  private readonly maxRetries = 3;
   private readonly maxConversationTurns = 10;
-  private assistantAPI: AssistantAPI | null = null;
 
   constructor() {
-    // Validate API key at construction time to fail fast
-    const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-    if (!apiKey) {
-      throw new Error(
-        'OpenAI API key not found. Please set VITE_OPENAI_API_KEY in your environment variables.'
-      );
-    }
-
-    // Validate API key format (should start with 'sk-')
-    if (!apiKey.startsWith('sk-')) {
-      throw new Error(
-        'Invalid OpenAI API key format. API key should start with "sk-".'
-      );
-    }
-
-    this.apiKey = apiKey;
+    // Only validate model, no API key needed (handled server-side)
     this.model = import.meta.env.VITE_OPENAI_MODEL || 'gpt-4o-mini';
   }
 
-  private getAssistantAPI(): AssistantAPI {
-    if (!this.assistantAPI) {
-      this.assistantAPI = new AssistantAPI(this.apiKey);
-    }
-    return this.assistantAPI;
-  }
-
-  private async requestWithRetry(
-    url: string,
-    init: RequestInit,
-    retries = this.maxRetries
-  ): Promise<Response> {
-    let delay = 500;
-    for (let attempt = 0; attempt <= retries; attempt++) {
-      try {
-        const response = await fetch(url, init);
-
-        // Success - return response
-        if (response.ok) {
-          return response;
-        }
-
-        // Rate limit or server error - retry with backoff
-        if (response.status === 429 || response.status >= 500) {
-          if (attempt === retries) {
-            return response; // Return the failed response on final attempt
-          }
-
-          // Add jitter to prevent thundering herd
-          const jitter = Math.random() * 200;
-          await new Promise((resolve) => setTimeout(resolve, delay + jitter));
-          delay *= 2; // Exponential backoff
-          continue;
-        }
-
-        // Other errors (4xx) - don't retry
-        return response;
-      } catch (error) {
-        if (attempt === retries) {
-          throw error;
-        }
-
-        // Network error - retry with backoff
-        const jitter = Math.random() * 200;
-        await new Promise((resolve) => setTimeout(resolve, delay + jitter));
-        delay *= 2;
-      }
-    }
-    throw new Error('Unreachable');
-  }
+  // Removed deprecated methods - now using server-side proxy
 
   async chatWithPersona(
     messages: Message[],
@@ -671,146 +608,32 @@ class OpenAIAPI {
       availableIngredients?: string[];
     }
   ): Promise<ChatResponse> {
-    const personaConfig = RECIPE_BOT_PERSONAS[persona];
-
     // Limit conversation history to save tokens and reduce 429 risk
     const recentMessages = messages.slice(-this.maxConversationTurns);
 
-    let systemPrompt = personaConfig.systemPrompt;
-
-    // Phase 4 Integration: Enhance system prompt with user data if available
-    if (userId) {
-      try {
-        // Dynamic import to avoid SSR issues
-        const {
-          getUserDataForAI,
-          buildEnhancedAIPrompt,
-          buildEnhancedAIPromptWithOverrides,
-        } = await import('./ai');
-        const userData = await getUserDataForAI(userId);
-
-        // Use enhanced prompt with live selection overrides if available
-        if (
-          liveSelections &&
-          (liveSelections.categories.length > 0 ||
-            liveSelections.cuisines.length > 0 ||
-            liveSelections.moods.length > 0 ||
-            (liveSelections.availableIngredients &&
-              liveSelections.availableIngredients.length > 0))
-        ) {
-          systemPrompt = buildEnhancedAIPromptWithOverrides(
-            personaConfig.systemPrompt,
-            'User is chatting with AI assistant',
-            userData,
-            liveSelections
-          );
-          console.log(
-            'Phase 4: Enhanced prompt with live selection overrides for',
-            persona
-          );
-        } else {
-          systemPrompt = buildEnhancedAIPrompt(
-            personaConfig.systemPrompt,
-            'User is chatting with AI assistant',
-            userData
-          );
-          console.log('Phase 4: Enhanced prompt with user data for', persona);
-        }
-      } catch (error) {
-        console.warn(
-          'Phase 4: Failed to load user data, using default prompt:',
-          error
-        );
-        // Continue with default prompt if user data loading fails
-      }
-    }
-
-    // Prepare messages for OpenAI API
-    const openAIMessages = [
-      {
-        role: 'system' as const,
-        content: systemPrompt,
-      },
-      ...recentMessages.map((msg) => ({
-        role: msg.role as 'user' | 'assistant',
-        content: msg.content,
-      })),
-    ];
-
     try {
-      // Use retry logic for the API call
-      const response = await this.requestWithRetry(
-        `${this.baseURL}/chat/completions`,
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${this.apiKey}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            model: this.model,
-            messages: openAIMessages,
-            temperature: 0.8, // Natural and creative for conversation
-            max_tokens: 800,
-            top_p: 1.0,
-            // No response_format - let it respond naturally
-          }),
-        }
-      );
+      const response = await apiClient.chatWithPersona({
+        messages: recentMessages.map((msg) => ({
+          role: msg.role as 'user' | 'assistant' | 'system',
+          content: msg.content,
+        })),
+        model: this.model,
+        temperature: 0.8,
+        max_tokens: 800,
+        persona,
+        userId,
+        liveSelections,
+      });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        if (response.status === 429) {
-          throw new Error(
-            'Rate limit exceeded. Please wait a moment and try again.'
-          );
-        }
-        if (response.status === 401) {
-          throw new Error(
-            'Invalid API key. Please check your OpenAI configuration.'
-          );
-        }
-        if (response.status === 403) {
-          throw new Error(
-            'Access denied. Please check your OpenAI account permissions.'
-          );
-        }
-        throw new Error(
-          `OpenAI API error: ${response.status} ${response.statusText}${errorText ? ` - ${errorText}` : ''}`
-        );
-      }
-
-      const data = await response.json();
-      const assistantMessage = data.choices[0]?.message?.content;
-
-      if (!assistantMessage) {
-        throw new Error('No response from OpenAI API');
-      }
-
-      // Simple natural text response - no JSON parsing during chat
-      // Recipe detection will happen when user clicks "Save Recipe"
       return {
-        message: assistantMessage,
+        message: response.message,
+        usage: response.usage,
       };
     } catch (error) {
       console.error('OpenAI API error:', error);
-
-      // Provide more specific error messages
-      if (error instanceof Error) {
-        if (error.message.includes('Rate limit')) {
-          throw new Error(
-            'Too many requests. Please wait 30 seconds and try again.'
-          );
-        }
-        if (error.message.includes('API key')) {
-          throw new Error(
-            'OpenAI API key issue. Please check your configuration.'
-          );
-        }
-        throw error;
-      }
-
-      throw new Error('Failed to get AI response. Please try again.');
+      throw new Error(
+        `AI API error: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
@@ -819,107 +642,44 @@ class OpenAIAPI {
     messages: Message[],
     persona: PersonaType
   ): Promise<ChatResponse> {
-    const personaConfig = RECIPE_BOT_PERSONAS[persona];
-
     // Limit conversation history
     const recentMessages = messages.slice(-this.maxConversationTurns);
 
-    const openAIMessages = [
-      {
-        role: 'system' as const,
-        content:
-          personaConfig.systemPrompt +
-          '\n\nPlease respond with a valid JSON object containing the complete recipe in this exact format: {"title": "Recipe Name", "ingredients": ["ingredient 1", "ingredient 2"], "instructions": "Step-by-step instructions", "notes": "Additional notes"}',
-      },
-      ...recentMessages.map((msg) => ({
-        role: msg.role as 'user' | 'assistant',
-        content: msg.content,
-      })),
-      {
-        role: 'user' as const,
-        content:
-          'Please create a complete, structured recipe based on our conversation.',
-      },
-    ];
-
     try {
-      const response = await this.requestWithRetry(
-        `${this.baseURL}/chat/completions`,
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${this.apiKey}`,
-            'Content-Type': 'application/json',
+      const response = await apiClient.chatWithPersona({
+        messages: [
+          ...recentMessages.map((msg) => ({
+            role: msg.role as 'user' | 'assistant' | 'system',
+            content: msg.content,
+          })),
+          {
+            role: 'user',
+            content:
+              'Please create a complete, structured recipe based on our conversation.',
           },
-          body: JSON.stringify({
-            model: this.model,
-            messages: openAIMessages,
-            temperature: 0.7,
-            max_tokens: 1000,
-            response_format: { type: 'json_object' }, // Only use JSON format when explicitly requesting structured recipe
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        if (response.status === 429) {
-          throw new Error(
-            'Rate limit exceeded. Please wait a moment and try again.'
-          );
-        }
-        throw new Error(
-          `OpenAI API error: ${response.status} ${response.statusText}${errorText ? ` - ${errorText}` : ''}`
-        );
-      }
-
-      const data = await response.json();
-      const assistantMessage = data.choices[0]?.message?.content;
-
-      if (!assistantMessage) {
-        throw new Error('No response from OpenAI API');
-      }
-
-      try {
-        const parsed = JSON.parse(assistantMessage);
-        if (parsed.title && parsed.ingredients && parsed.instructions) {
-          return {
-            message: `Perfect! I've created a complete recipe for you:`,
-            recipe: {
-              title: parsed.title,
-              ingredients: Array.isArray(parsed.ingredients)
-                ? parsed.ingredients
-                : [],
-              instructions: parsed.instructions,
-              notes: parsed.notes || '',
-              categories: parsed.categories || [],
-              setup: parsed.setup || [],
-            },
-          };
-        }
-      } catch {
-        // JSON parsing failed
-        throw new Error(
-          'Failed to generate structured recipe. Please try again.'
-        );
-      }
+        ],
+        model: this.model,
+        temperature: 0.7,
+        max_tokens: 1000,
+        persona,
+      });
 
       return {
-        message: assistantMessage,
+        message: response.message,
+        usage: response.usage,
       };
     } catch (error) {
-      console.error('OpenAI API error:', error);
-      if (error instanceof Error) {
-        throw error;
-      }
-      throw new Error('Failed to generate recipe. Please try again.');
+      console.error('Structured recipe generation error:', error);
+      throw new Error(
+        `AI API error: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
   // Removed: convertConversationToRecipe() - now using parseRecipeFromText() instead
 
   /**
-   * Send message using Assistant API
+   * Send message using Assistant API (deprecated - use server proxy)
    */
   async chatWithAssistant(
     threadId: string | null,
@@ -927,8 +687,13 @@ class OpenAIAPI {
     message: string
   ): Promise<{ response: ChatResponse; threadId: string }> {
     try {
-      // Standard Assistant API flow for all assistants
-      const result = await this.getAssistantAPI().sendMessage(
+      if (!threadId) {
+        // Create new thread
+        const threadResponse = await apiClient.createAssistantThread();
+        threadId = threadResponse.id;
+      }
+
+      const result = await apiClient.sendAssistantMessage(
         threadId,
         assistantId,
         message
@@ -936,14 +701,13 @@ class OpenAIAPI {
 
       return {
         response: {
-          message: result.response.message,
-          recipe: result.response.recipe,
+          message: result.message,
         },
-        threadId: result.threadId,
+        threadId: result.threadId || threadId,
       };
     } catch (error) {
       console.error('Assistant API error:', error);
-      throw error; // Re-throw to be handled by fallback logic
+      throw error;
     }
   }
 
