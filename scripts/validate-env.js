@@ -5,6 +5,15 @@
  * Ensures all required environment variables are present
  */
 
+// Load .env and .env.local
+try {
+  const { config } = await import('dotenv');
+  const fs = await import('fs');
+  if (fs.existsSync('.env')) config({ path: '.env', override: false });
+  if (fs.existsSync('.env.local'))
+    config({ path: '.env.local', override: true });
+} catch {}
+
 const requiredClientVars = [
   'VITE_SUPABASE_URL',
   'VITE_SUPABASE_ANON_KEY',
@@ -26,7 +35,7 @@ for (const varName of requiredClientVars) {
     console.log(`❌ ${varName}: Missing`);
     hasErrors = true;
   } else {
-    console.log(`✅ ${varName}: ${String(value).substring(0, 20)}...`);
+    console.log(`✅ ${varName}: present`);
   }
 }
 
@@ -37,7 +46,7 @@ for (const varName of requiredServerVars) {
     console.log(`❌ ${varName}: Missing`);
     hasErrors = true;
   } else {
-    console.log(`✅ ${varName}: ${String(value).substring(0, 20)}...`);
+    console.log(`✅ ${varName}: present`);
   }
 }
 
@@ -47,18 +56,18 @@ for (const varName of optionalVars) {
   if (!value) {
     console.log(`⚠️  ${varName}: Not set (optional)`);
   } else {
-    console.log(`✅ ${varName}: ${String(value).substring(0, 20)}...`);
+    console.log(`✅ ${varName}: present`);
   }
 }
 
 if (hasErrors) {
   console.log('\n❌ Environment validation failed!');
   console.log('\n📋 Setup Instructions:');
-  console.log('1. Local: Create/update .env.local file');
+  console.log('1. Local: Ensure .env.local exists with required keys');
   console.log(
     '2. Vercel: Add variables in Dashboard → Settings → Environment Variables'
   );
-  console.log('3. Run: npm run env:sync (if available)');
+  console.log('3. Optionally sync: npm run env:sync');
   process.exit(1);
 } else {
   console.log('\n✅ All required environment variables are present!');
