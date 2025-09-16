@@ -11,6 +11,13 @@
 
 import { createClient } from '@supabase/supabase-js';
 
+// Type definitions for better maintainability and type safety
+interface SupabaseAdminUser {
+  email?: string;
+  id?: string;
+  // Add other properties as needed for future use
+}
+
 const SUPABASE_URL = process.env.SUPABASE_URL || 'http://127.0.0.1:54321';
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
@@ -1172,7 +1179,7 @@ async function seedEvaluationReports() {
   for (const reportData of evaluationReports) {
     // Find user ID by email
     const userMatch = userList.users.find(
-      (x: { email?: string }) =>
+      (x: SupabaseAdminUser) =>
         x.email?.toLowerCase() === reportData.user_email.toLowerCase()
     );
 
@@ -2806,7 +2813,7 @@ async function seedRecipes() {
   for (const recipe of recipes) {
     // Get user ID for the recipe from cached user list
     const userMatch = userList.users.find(
-      (x: { email?: string }) =>
+      (x: SupabaseAdminUser) =>
         x.email?.toLowerCase() === recipe.user_email.toLowerCase()
     );
 
@@ -2977,7 +2984,7 @@ async function main() {
         });
       if (listError) throw listError;
       const match = existing.users.find(
-        (x: { email?: string }) =>
+        (x: SupabaseAdminUser) =>
           x.email?.toLowerCase() === u.email.toLowerCase()
       );
       if (!match) {
