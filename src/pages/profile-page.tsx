@@ -168,10 +168,18 @@ export default function ProfilePage() {
             <div className="mt-4 p-4 bg-base-200 rounded-lg text-left max-w-md mx-auto">
               <h3 className="font-bold text-sm mb-2">🔧 Profile Debug Info</h3>
               <div className="text-xs space-y-1 text-base-content/80">
-                <div>Auth Loading: <code>{authLoading ? 'true' : 'false'}</code></div>
-                <div>User: <code>{user ? user.email : 'null'}</code></div>
-                <div>Profile: <code>{profile ? 'loaded' : 'null'}</code></div>
-                <div>Auth Error: <code>{authError || 'null'}</code></div>
+                <div>
+                  Auth Loading: <code>{authLoading ? 'true' : 'false'}</code>
+                </div>
+                <div>
+                  User: <code>{user ? user.email : 'null'}</code>
+                </div>
+                <div>
+                  Profile: <code>{profile ? 'loaded' : 'null'}</code>
+                </div>
+                <div>
+                  Auth Error: <code>{authError || 'null'}</code>
+                </div>
               </div>
             </div>
           )}
@@ -211,7 +219,7 @@ export default function ProfilePage() {
             <div className="card-actions justify-end">
               <button
                 className="btn btn-outline"
-                onClick={() => window.location.href = '/auth/signin'}
+                onClick={() => (window.location.href = '/auth/signin')}
               >
                 Sign In
               </button>
@@ -230,14 +238,24 @@ export default function ProfilePage() {
           <p className="text-base-content/60">Loading profile data...</p>
           {import.meta.env.DEV && (
             <div className="mt-4 p-4 bg-base-200 rounded-lg text-left max-w-md mx-auto">
-              <h3 className="font-bold text-sm mb-2">🔧 Profile Loading Debug</h3>
+              <h3 className="font-bold text-sm mb-2">
+                🔧 Profile Loading Debug
+              </h3>
               <div className="text-xs space-y-1 text-base-content/80">
-                <div>User ID: <code>{user?.id || 'null'}</code></div>
-                <div>User Email: <code>{user?.email || 'null'}</code></div>
-                <div>Profile: <code>null</code></div>
-                <div>Auth Loading: <code>{authLoading ? 'true' : 'false'}</code></div>
+                <div>
+                  User ID: <code>{user?.id || 'null'}</code>
+                </div>
+                <div>
+                  User Email: <code>{user?.email || 'null'}</code>
+                </div>
+                <div>
+                  Profile: <code>null</code>
+                </div>
+                <div>
+                  Auth Loading: <code>{authLoading ? 'true' : 'false'}</code>
+                </div>
               </div>
-              <button 
+              <button
                 className="btn btn-xs btn-outline mt-2"
                 onClick={() => window.location.reload()}
               >

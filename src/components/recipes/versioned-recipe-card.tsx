@@ -32,7 +32,12 @@ interface VersionedRecipeCardProps {
   };
   onView?: (recipe: PublicRecipe) => void;
   onSave?: (recipeId: string) => void;
-  onRateVersion?: (recipeId: string, versionNumber: number, rating: number, comment?: string) => void;
+  onRateVersion?: (
+    recipeId: string,
+    versionNumber: number,
+    rating: number,
+    comment?: string
+  ) => void;
   savingRecipeId?: string | null;
   className?: string;
 }
@@ -69,8 +74,8 @@ export function VersionedRecipeCard({
             <Star
               key={star}
               className={`h-3 w-3 ${
-                star <= stars 
-                  ? 'text-orange-400 fill-orange-400' 
+                star <= stars
+                  ? 'text-orange-400 fill-orange-400'
                   : 'text-gray-300'
               }`}
             />
@@ -137,7 +142,9 @@ export function VersionedRecipeCard({
             {/* Recipe Stats */}
             <div className="flex items-center justify-between text-sm">
               <div className="flex items-center space-x-2">
-                <span className={createDaisyUIBadgeClasses('secondary', 'text-xs')}>
+                <span
+                  className={createDaisyUIBadgeClasses('secondary', 'text-xs')}
+                >
                   {recipe.ingredients.length} ingredients
                 </span>
 
@@ -220,15 +227,11 @@ export function VersionedRecipeCard({
       {/* Action Buttons */}
       <div className="mt-3 flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => onView?.(recipe)}
-          >
+          <Button size="sm" variant="outline" onClick={() => onView?.(recipe)}>
             <Eye className="h-4 w-4 mr-1" />
             View Recipe
           </Button>
-          
+
           {recipe.total_versions && recipe.total_versions > 1 && (
             <Button
               size="sm"
@@ -268,7 +271,7 @@ export function VersionedRecipeCard({
                   ✕
                 </Button>
               </div>
-              
+
               <div className="max-h-[60vh] overflow-y-auto">
                 <VersionSelector
                   originalRecipeId={recipe.parent_recipe_id || recipe.id}

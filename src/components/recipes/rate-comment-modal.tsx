@@ -29,7 +29,9 @@ export function RateCommentModal({
   const [comment, setComment] = useState('');
   const [hoveredRating, setHoveredRating] = useState(0);
   const [submitting, setSubmitting] = useState(false);
-  const [existingRating, setExistingRating] = useState<VersionRating | null>(null);
+  const [existingRating, setExistingRating] = useState<VersionRating | null>(
+    null
+  );
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -39,9 +41,12 @@ export function RateCommentModal({
 
   const loadExistingRating = async () => {
     if (!user) return;
-    
+
     try {
-      const userRating = await recipeApi.getUserVersionRating(recipeId, versionNumber);
+      const userRating = await recipeApi.getUserVersionRating(
+        recipeId,
+        versionNumber
+      );
       if (userRating) {
         setExistingRating(userRating);
         setRating(userRating.rating);
@@ -64,12 +69,17 @@ export function RateCommentModal({
 
     try {
       setSubmitting(true);
-      await recipeApi.rateVersion(recipeId, versionNumber, rating, comment.trim() || undefined);
-      
+      await recipeApi.rateVersion(
+        recipeId,
+        versionNumber,
+        rating,
+        comment.trim() || undefined
+      );
+
       toast({
         title: 'Success',
-        description: existingRating 
-          ? 'Your rating has been updated!' 
+        description: existingRating
+          ? 'Your rating has been updated!'
           : 'Thank you for rating this recipe!',
       });
 
@@ -91,10 +101,10 @@ export function RateCommentModal({
 
   const ratingLabels = {
     1: 'Poor',
-    2: 'Fair', 
+    2: 'Fair',
     3: 'Good',
     4: 'Very Good',
-    5: 'Excellent'
+    5: 'Excellent',
   };
 
   return (
@@ -142,15 +152,15 @@ export function RateCommentModal({
                   >
                     <Star
                       className={`h-8 w-8 ${
-                        star <= displayRating 
-                          ? 'text-orange-400 fill-orange-400' 
+                        star <= displayRating
+                          ? 'text-orange-400 fill-orange-400'
                           : 'text-gray-300 hover:text-orange-200'
                       }`}
                     />
                   </button>
                 ))}
               </div>
-              
+
               {displayRating > 0 && (
                 <div className="text-center">
                   <p className="text-sm font-medium text-gray-900">
@@ -198,11 +208,7 @@ export function RateCommentModal({
 
           {/* Action Buttons */}
           <div className="flex justify-end space-x-3">
-            <Button
-              variant="ghost"
-              onClick={onClose}
-              disabled={submitting}
-            >
+            <Button variant="ghost" onClick={onClose} disabled={submitting}>
               Cancel
             </Button>
             <Button

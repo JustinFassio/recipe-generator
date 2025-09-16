@@ -28,7 +28,7 @@ export class AuthErrorBoundary extends Component<Props, State> {
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     logger.error('AuthErrorBoundary caught an error:', error);
     logger.error('Error info:', errorInfo);
-    
+
     this.setState({
       error,
       errorInfo,
@@ -47,7 +47,7 @@ export class AuthErrorBoundary extends Component<Props, State> {
   private handleRetry = () => {
     logger.debug('AuthErrorBoundary retry triggered');
     this.setState({ hasError: false, error: null, errorInfo: null });
-    
+
     // Force a page reload to reset auth context
     window.location.reload();
   };
@@ -66,31 +66,35 @@ export class AuthErrorBoundary extends Component<Props, State> {
             <div className="card-body">
               <h2 className="card-title">Authentication Error</h2>
               <p>
-                {this.state.error?.message?.includes('useAuth must be used within an AuthProvider')
+                {this.state.error?.message?.includes(
+                  'useAuth must be used within an AuthProvider'
+                )
                   ? 'Authentication context was lost during page update. This can happen during development.'
-                  : this.state.error?.message || 'An authentication error occurred.'}
+                  : this.state.error?.message ||
+                    'An authentication error occurred.'}
               </p>
-              
+
               {import.meta.env.DEV && this.state.error && (
                 <details className="mt-2">
                   <summary className="cursor-pointer text-sm opacity-75">
                     🔧 Debug Info (Development)
                   </summary>
                   <div className="mt-2 text-xs bg-base-100 text-base-content p-2 rounded">
-                    <div><strong>Error:</strong> {this.state.error.message}</div>
-                    <div><strong>Stack:</strong></div>
+                    <div>
+                      <strong>Error:</strong> {this.state.error.message}
+                    </div>
+                    <div>
+                      <strong>Stack:</strong>
+                    </div>
                     <pre className="text-xs overflow-auto max-h-32">
                       {this.state.error.stack}
                     </pre>
                   </div>
                 </details>
               )}
-              
+
               <div className="card-actions justify-end">
-                <button
-                  className="btn btn-outline"
-                  onClick={this.handleRetry}
-                >
+                <button className="btn btn-outline" onClick={this.handleRetry}>
                   Reload Page
                 </button>
               </div>
@@ -117,4 +121,3 @@ export function withAuthErrorBoundary<P extends object>(
     );
   };
 }
-

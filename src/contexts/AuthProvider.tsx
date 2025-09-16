@@ -47,7 +47,8 @@ function createImmediateProfile(user: User): Profile {
   return {
     id: user.id,
     username: null,
-    full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || null,
+    full_name:
+      user.user_metadata?.full_name || user.email?.split('@')[0] || null,
     bio: null,
     avatar_url: user.user_metadata?.avatar_url || null,
     region: null,
@@ -81,7 +82,7 @@ let globalAuthFallback: AuthContextType | null = null;
 
 export function useAuth(): AuthContextType {
   const context = useContext(AuthContext);
-  
+
   // Enhanced error handling with hot reload recovery
   if (context === undefined) {
     // In development, try to use global fallback during hot reloads
@@ -89,7 +90,7 @@ export function useAuth(): AuthContextType {
       console.warn('🔧 [useAuth] Using global fallback during hot reload');
       return globalAuthFallback;
     }
-    
+
     // Create emergency fallback context for development
     if (import.meta.env.DEV) {
       console.error('🔧 [useAuth] Creating emergency fallback context');
@@ -109,41 +110,48 @@ export function useAuth(): AuthContextType {
       };
       return emergencyContext;
     }
-    
+
     throw new Error('useAuth must be used within an AuthProvider');
   }
-  
+
   // Update global fallback for hot reload scenarios
   if (import.meta.env.DEV) {
     globalAuthFallback = context;
   }
-  
+
   return context;
 }
 
 // Enhanced state persistence for hot reload recovery
-const persistAuthState = (user: User | null, profile: Profile | null, loading: boolean, error: string | null) => {
+const persistAuthState = (
+  user: User | null,
+  profile: Profile | null,
+  loading: boolean,
+  error: string | null
+) => {
   if (!import.meta.env.DEV || typeof window === 'undefined') return;
-  
+
   try {
     const state = {
       hasUser: !!user,
       userEmail: user?.email,
       userId: user?.id,
-      profile: profile ? {
-        id: profile.id,
-        username: profile.username,
-        full_name: profile.full_name,
-        country: profile.country,
-        region: profile.region,
-      } : null,
+      profile: profile
+        ? {
+            id: profile.id,
+            username: profile.username,
+            full_name: profile.full_name,
+            country: profile.country,
+            region: profile.region,
+          }
+        : null,
       loading,
       error,
       timestamp: Date.now(),
     };
-    
+
     sessionStorage.setItem('auth-debug-state', JSON.stringify(state));
-    
+
     // Also persist in global fallback
     if (globalAuthFallback && user) {
       globalAuthFallback.user = user;
@@ -158,7 +166,7 @@ const persistAuthState = (user: User | null, profile: Profile | null, loading: b
 
 const getPersistedAuthState = () => {
   if (!import.meta.env.DEV || typeof window === 'undefined') return null;
-  
+
   try {
     const persisted = sessionStorage.getItem('auth-debug-state');
     if (persisted) {
@@ -179,9 +187,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const persistedState = getPersistedAuthState();
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [loading, setLoading] = useState(persistedState?.hasUser ? false : true);
-  const [error, setError] = useState<string | null>(persistedState?.error || null);
-  
+  const [loading, setLoading] = useState(
+    persistedState?.hasUser ? false : true
+  );
+  const [error, setError] = useState<string | null>(
+    persistedState?.error || null
+  );
+
   // Persist auth state changes during development
   useEffect(() => {
     persistAuthState(user, profile, loading, error);
@@ -202,14 +214,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Store current fetchProfile function to avoid dependency issues
   const fetchProfileRef = useRef<typeof fetchProfile>();
-  
+
   // Enhanced initialization state to prevent race conditions during page refresh
   const initializationState = useRef<{
     promise: Promise<void> | null;
     completed: boolean;
     timestamp: number;
   }>({ promise: null, completed: false, timestamp: 0 });
-  
 
   // Backoff delays: 1s, 2s, 4s
   const getBackoffDelay = (attempt: number): number =>
@@ -418,7 +429,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           logger.success('✅ Profile refreshed successfully');
           onComplete?.(detailedProfileData);
         } else {
-          logger.warn('⚠️ Detailed profile refresh returned null - keeping immediate profile');
+          logger.warn(
+            '⚠️ Detailed profile refresh returned null - keeping immediate profile'
+          );
           onComplete?.(immediateProfile);
         }
       } catch (refreshError) {
@@ -464,9 +477,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       // Check if initialization was recently completed to prevent rapid re-initialization
-      const timeSinceLastInit = Date.now() - initializationState.current.timestamp;
+      const timeSinceLastInit =
+        Date.now() - initializationState.current.timestamp;
       if (initializationState.current.completed && timeSinceLastInit < 1000) {
-        logger.auth('Initialization recently completed, skipping duplicate attempt');
+        logger.auth(
+          'Initialization recently completed, skipping duplicate attempt'
+        );
         return;
       }
 
@@ -476,108 +492,114 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         try {
           logger.auth('Initializing AuthProvider...');
 
-        // Increased session timeout to handle network latency and auth delays
-        const SESSION_TIMEOUT_MS = import.meta.env.DEV ? 20000 : 15000; // More generous timeouts for reliability
-        
-        // Add timing for session fetch
-        const sessionStartTime = Date.now();
-        logger.auth(`Starting session fetch with ${SESSION_TIMEOUT_MS}ms timeout`);
-        
-        const sessionPromise = supabase.auth.getSession();
-        const timeoutPromise = new Promise<never>((_, reject) => {
-          setTimeout(
-            () => reject(new Error('Initial session timeout')),
-            SESSION_TIMEOUT_MS
+          // Increased session timeout to handle network latency and auth delays
+          const SESSION_TIMEOUT_MS = import.meta.env.DEV ? 20000 : 15000; // More generous timeouts for reliability
+
+          // Add timing for session fetch
+          const sessionStartTime = Date.now();
+          logger.auth(
+            `Starting session fetch with ${SESSION_TIMEOUT_MS}ms timeout`
           );
-        });
 
-        const {
-          data: { session },
-        } = (await Promise.race([sessionPromise, timeoutPromise])) as {
-          data: { session: Session | null };
-        };
-        
-        const sessionDuration = Date.now() - sessionStartTime;
-        logger.auth(`Session fetch completed in ${sessionDuration}ms`);
-
-        // CRITICAL FIX: Always set loading to false, even if component unmounted
-        // This prevents stuck loading states during hot reloads
-        logger.auth('🔧 CRITICAL: Setting loading to false after session fetch completion');
-        setLoading(false);
-
-        if (!isMounted) {
-          logger.auth('Component unmounted during session fetch - continuing with state update');
-          // Don't return early - still need to process the session result
-        }
-
-        if (session?.user) {
-          logger.auth(`Initial session found: ${session.user.id}`);
-          setUser(session.user);
-
-          // Fetch profile non-blocking with error boundaries
-          try {
-            let profileData = null;
-            if (
-              fetchProfileRef.current &&
-              typeof fetchProfileRef.current === 'function'
-            ) {
-              profileData = await fetchProfileRef.current(session.user.id);
-            } else {
-              logger.error(
-                'fetchProfileRef.current is not set or not a function'
-              );
-            }
-
-            if (isMounted) {
-              logger.db(`Initial profile fetch result: ${!!profileData}`);
-              setProfile(profileData);
-            }
-          } catch (profileError) {
-            logger.error('Initial profile fetch failed:', profileError);
-            // In development, be more lenient with profile fetch failures
-            if (import.meta.env.DEV) {
-              logger.auth(
-                'Development mode: continuing without profile, will retry on demand'
-              );
-            }
-            // Continue without profile - don't block app initialization
-          }
-        } else {
-          logger.auth('No initial session found');
-        }
-
-        // Always set loading to false after initial session check
-        logger.success('🔧 Setting loading to false after initial session check');
-        setLoading(false);
-        
-        // Mark initialization as completed
-        initializationState.current.completed = true;
-        
-      } catch (err) {
-        logger.error('Initial session error:', err);
-        
-        // Always set loading to false on error, regardless of mount state
-        logger.error('🔧 Setting loading to false after session error');
-        setLoading(false);
-        
-        if (isMounted) {
-          // Don't treat session timeouts as critical errors
-          if (err instanceof Error && err.message.includes('timeout')) {
-            logger.error('Session timeout - continuing without session');
-          } else {
-            setError(
-              err instanceof Error ? err.message : 'Authentication error'
+          const sessionPromise = supabase.auth.getSession();
+          const timeoutPromise = new Promise<never>((_, reject) => {
+            setTimeout(
+              () => reject(new Error('Initial session timeout')),
+              SESSION_TIMEOUT_MS
             );
+          });
+
+          const {
+            data: { session },
+          } = (await Promise.race([sessionPromise, timeoutPromise])) as {
+            data: { session: Session | null };
+          };
+
+          const sessionDuration = Date.now() - sessionStartTime;
+          logger.auth(`Session fetch completed in ${sessionDuration}ms`);
+
+          // CRITICAL FIX: Always set loading to false, even if component unmounted
+          // This prevents stuck loading states during hot reloads
+          logger.auth(
+            '🔧 CRITICAL: Setting loading to false after session fetch completion'
+          );
+          setLoading(false);
+
+          if (!isMounted) {
+            logger.auth(
+              'Component unmounted during session fetch - continuing with state update'
+            );
+            // Don't return early - still need to process the session result
           }
+
+          if (session?.user) {
+            logger.auth(`Initial session found: ${session.user.id}`);
+            setUser(session.user);
+
+            // Fetch profile non-blocking with error boundaries
+            try {
+              let profileData = null;
+              if (
+                fetchProfileRef.current &&
+                typeof fetchProfileRef.current === 'function'
+              ) {
+                profileData = await fetchProfileRef.current(session.user.id);
+              } else {
+                logger.error(
+                  'fetchProfileRef.current is not set or not a function'
+                );
+              }
+
+              if (isMounted) {
+                logger.db(`Initial profile fetch result: ${!!profileData}`);
+                setProfile(profileData);
+              }
+            } catch (profileError) {
+              logger.error('Initial profile fetch failed:', profileError);
+              // In development, be more lenient with profile fetch failures
+              if (import.meta.env.DEV) {
+                logger.auth(
+                  'Development mode: continuing without profile, will retry on demand'
+                );
+              }
+              // Continue without profile - don't block app initialization
+            }
+          } else {
+            logger.auth('No initial session found');
+          }
+
+          // Always set loading to false after initial session check
+          logger.success(
+            '🔧 Setting loading to false after initial session check'
+          );
+          setLoading(false);
+
+          // Mark initialization as completed
+          initializationState.current.completed = true;
+        } catch (err) {
+          logger.error('Initial session error:', err);
+
+          // Always set loading to false on error, regardless of mount state
+          logger.error('🔧 Setting loading to false after session error');
+          setLoading(false);
+
+          if (isMounted) {
+            // Don't treat session timeouts as critical errors
+            if (err instanceof Error && err.message.includes('timeout')) {
+              logger.error('Session timeout - continuing without session');
+            } else {
+              setError(
+                err instanceof Error ? err.message : 'Authentication error'
+              );
+            }
+          }
+
+          // Mark initialization as completed even on error
+          initializationState.current.completed = true;
+        } finally {
+          // Clear initialization promise when done but preserve completion state
+          initializationState.current.promise = null;
         }
-        
-        // Mark initialization as completed even on error
-        initializationState.current.completed = true;
-        
-      } finally {
-        // Clear initialization promise when done but preserve completion state
-        initializationState.current.promise = null;
-      }
       })();
 
       // Wait for initialization to complete
@@ -620,18 +642,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               // PHASE 4.4: Progressive profile loading - fetch detailed data in background (non-blocking)
               setTimeout(async () => {
                 if (!isMounted) return;
-                
+
                 try {
                   logger.db(
                     `🔄 Starting background detailed profile fetch for user: ${session.user.id}`
                   );
-                  
+
                   let detailedProfileData = null;
                   if (
                     fetchProfileRef.current &&
                     typeof fetchProfileRef.current === 'function'
                   ) {
-                    detailedProfileData = await fetchProfileRef.current(session.user.id);
+                    detailedProfileData = await fetchProfileRef.current(
+                      session.user.id
+                    );
                   } else {
                     logger.error(
                       'fetchProfileRef.current is not set or not a function'
@@ -641,13 +665,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                   // Only update if we got detailed data and component is still mounted
                   if (detailedProfileData && isMounted) {
                     setProfile(detailedProfileData);
-                    logger.success('✅ Detailed profile loaded from database - replacing immediate profile');
+                    logger.success(
+                      '✅ Detailed profile loaded from database - replacing immediate profile'
+                    );
                   } else if (isMounted) {
-                    logger.warn('⚠️ Detailed profile fetch returned null - keeping immediate profile');
+                    logger.warn(
+                      '⚠️ Detailed profile fetch returned null - keeping immediate profile'
+                    );
                   }
                 } catch (profileError) {
-                  logger.error('Background detailed profile fetch error:', profileError);
-                  logger.auth('Keeping immediate profile - detailed fetch failed');
+                  logger.error(
+                    'Background detailed profile fetch error:',
+                    profileError
+                  );
+                  logger.auth(
+                    'Keeping immediate profile - detailed fetch failed'
+                  );
                   // Keep the immediate profile - don't set to null
                 }
               }, 100); // Small delay to ensure immediate profile is set first

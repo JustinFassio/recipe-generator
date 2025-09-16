@@ -517,10 +517,13 @@ export function RecipeForm({
         <div className="card-body">
           <h3 className={createDaisyUICardTitleClasses()}>Your Rating</h3>
           <p className="text-sm text-gray-600 mb-3">
-            Rate your recipe from 1-5 stars. This helps others discover great recipes when you share them!
+            Rate your recipe from 1-5 stars. This helps others discover great
+            recipes when you share them!
           </p>
           <div className="flex flex-col gap-2">
-            <span className="text-sm font-medium text-gray-700">How would you rate this recipe?</span>
+            <span className="text-sm font-medium text-gray-700">
+              How would you rate this recipe?
+            </span>
             <CreatorRating
               rating={watch('creator_rating') ?? 0}
               onRate={(rating) => setValue('creator_rating', rating)}

@@ -23,7 +23,7 @@ export function CreateVersionModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!versionName.trim() || !changelog.trim()) {
       toast({
         title: 'Missing Information',
@@ -145,7 +145,10 @@ export function CreateVersionModal({
                 <div className="text-sm text-blue-800">
                   <p className="font-medium mb-1">How versioning works:</p>
                   <ul className="text-xs space-y-1 text-blue-700">
-                    <li>• This creates a copy of your current recipe as a new version</li>
+                    <li>
+                      • This creates a copy of your current recipe as a new
+                      version
+                    </li>
                     <li>• You can then edit the new version independently</li>
                     <li>• Both versions will be available to the community</li>
                     <li>• Ratings are tracked separately for each version</li>

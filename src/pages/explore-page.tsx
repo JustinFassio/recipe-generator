@@ -10,16 +10,20 @@ import { useRecipeFilters } from '@/hooks/use-recipe-filters';
 import { useNavigate } from 'react-router-dom';
 
 export default function ExplorePage() {
-  const [recipes, setRecipes] = useState<(PublicRecipe & {
-    aggregate_rating?: number | null;
-    total_ratings?: number;
-    total_views?: number;
-    total_versions?: number;
-    latest_version?: number;
-  })[]>([]);
+  const [recipes, setRecipes] = useState<
+    (PublicRecipe & {
+      aggregate_rating?: number | null;
+      total_ratings?: number;
+      total_views?: number;
+      total_versions?: number;
+      latest_version?: number;
+    })[]
+  >([]);
   const [loading, setLoading] = useState(true);
   const [savingRecipeId, setSavingRecipeId] = useState<string | null>(null);
-  const [sortBy, setSortBy] = useState<'rating' | 'views' | 'recent' | 'versions' | 'trending'>('rating');
+  const [sortBy, setSortBy] = useState<
+    'rating' | 'views' | 'recent' | 'versions' | 'trending'
+  >('rating');
   const { filters, updateFilters } = useRecipeFilters();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -28,13 +32,13 @@ export default function ExplorePage() {
     try {
       setLoading(true);
       let data;
-      
+
       if (sortBy === 'trending') {
         data = await recipeApi.getTrendingRecipes(50); // Get more for filtering
       } else {
         data = await recipeApi.getPublicRecipesWithStats();
       }
-      
+
       setRecipes(data);
     } catch (error) {
       console.error('Error loading public recipes:', error);
@@ -72,7 +76,12 @@ export default function ExplorePage() {
     }
   };
 
-  const handleRateVersion = async (recipeId: string, versionNumber: number, rating: number, comment?: string) => {
+  const handleRateVersion = async (
+    recipeId: string,
+    versionNumber: number,
+    rating: number,
+    comment?: string
+  ) => {
     try {
       await recipeApi.rateVersion(recipeId, versionNumber, rating, comment);
       toast({
@@ -252,7 +261,8 @@ export default function ExplorePage() {
           break;
         case 'recent':
         default:
-          comparison = new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+          comparison =
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
           break;
       }
 

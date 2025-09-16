@@ -156,11 +156,11 @@ export const CATEGORY_METADATA = {
 export function getCategoryStats() {
   const stats: Record<string, number> = {};
   let total = 0;
-  
+
   Object.entries(CHEF_ISABELLA_SYSTEM_CATALOG).forEach(([category, items]) => {
     stats[category] = items.length;
     total += items.length;
   });
-  
+
   return { stats, total };
 }

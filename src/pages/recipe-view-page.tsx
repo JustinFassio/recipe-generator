@@ -70,7 +70,9 @@ export function RecipeViewPage() {
   const [showVersions, setShowVersions] = useState(false);
   const [versions, setVersions] = useState<RecipeVersion[]>([]);
   const [currentVersionNumber, setCurrentVersionNumber] = useState<number>(1);
-  const [aggregateStats, setAggregateStats] = useState<AggregateStats | null>(null);
+  const [aggregateStats, setAggregateStats] = useState<AggregateStats | null>(
+    null
+  );
   const [isOwner, setIsOwner] = useState(false);
   const [showCreateVersion, setShowCreateVersion] = useState(false);
 
@@ -104,9 +106,10 @@ export function RecipeViewPage() {
   useEffect(() => {
     if (recipe && publicRecipe) {
       setRatingLoading(true);
-      recipeApi.getCommunityRating(recipe.id)
+      recipeApi
+        .getCommunityRating(recipe.id)
         .then(setCommunityRating)
-        .catch(error => {
+        .catch((error) => {
           console.error('Failed to fetch community rating:', error);
           setCommunityRating(null);
         })
@@ -116,8 +119,9 @@ export function RecipeViewPage() {
 
   const loadVersionData = async (currentRecipe: any) => {
     try {
-      const originalRecipeId = currentRecipe.parent_recipe_id || currentRecipe.id;
-      
+      const originalRecipeId =
+        currentRecipe.parent_recipe_id || currentRecipe.id;
+
       // Load versions
       const versionsData = await recipeApi.getRecipeVersions(originalRecipeId);
       setVersions(versionsData);
@@ -128,7 +132,10 @@ export function RecipeViewPage() {
 
       // Track view for current version
       if (publicRecipe) {
-        await recipeApi.trackVersionView(currentRecipe.id, currentRecipe.version_number || 1);
+        await recipeApi.trackVersionView(
+          currentRecipe.id,
+          currentRecipe.version_number || 1
+        );
       }
     } catch (error) {
       console.error('Failed to load version data:', error);
@@ -137,7 +144,8 @@ export function RecipeViewPage() {
 
   const checkOwnership = async (currentRecipe: any) => {
     if (user) {
-      const originalRecipeId = currentRecipe.parent_recipe_id || currentRecipe.id;
+      const originalRecipeId =
+        currentRecipe.parent_recipe_id || currentRecipe.id;
       const owns = await recipeApi.checkRecipeOwnership(originalRecipeId);
       setIsOwner(owns);
     }
@@ -146,14 +154,14 @@ export function RecipeViewPage() {
   // Handle community rating submission
   const handleCommunityRating = async (rating: number) => {
     if (!recipe) return;
-    
+
     try {
       await recipeApi.submitCommunityRating(recipe.id, rating);
       toast({
         title: 'Rating submitted',
         description: 'Thank you for rating this recipe!',
       });
-      
+
       // Refresh community rating data
       const updatedRating = await recipeApi.getCommunityRating(recipe.id);
       setCommunityRating(updatedRating);
@@ -171,22 +179,27 @@ export function RecipeViewPage() {
   const handleVersionSelect = (version: RecipeVersion) => {
     if (version.recipe) {
       // Navigate to the selected version
-      navigate(`/recipe/${version.recipe.id}`, { 
+      navigate(`/recipe/${version.recipe.id}`, {
         state: { from: 'version-navigation' },
-        replace: true 
+        replace: true,
       });
     }
   };
 
   // Handle version rating
-  const handleVersionRating = async (recipeId: string, versionNumber: number, rating: number, comment?: string) => {
+  const handleVersionRating = async (
+    recipeId: string,
+    versionNumber: number,
+    rating: number,
+    comment?: string
+  ) => {
     try {
       await recipeApi.rateVersion(recipeId, versionNumber, rating, comment);
       toast({
         title: 'Rating submitted',
         description: 'Thank you for rating this version!',
       });
-      
+
       // Reload version data to update stats
       if (recipe) {
         await loadVersionData(recipe);
@@ -204,9 +217,9 @@ export function RecipeViewPage() {
   // Handle version creation
   const handleVersionCreated = (newVersion: Recipe) => {
     // Navigate to the new version
-    navigate(`/recipe/${newVersion.id}`, { 
+    navigate(`/recipe/${newVersion.id}`, {
       state: { from: 'version-creation' },
-      replace: true 
+      replace: true,
     });
   };
 
@@ -314,15 +327,16 @@ export function RecipeViewPage() {
   }
 
   // Determine where we came from for better navigation
-  const cameFromExplore = location.state?.from === 'explore' || 
-                         document.referrer.includes('/explore');
+  const cameFromExplore =
+    location.state?.from === 'explore' ||
+    document.referrer.includes('/explore');
 
   // Determine if this should show Save or Edit button
-  // Show Save if: 
+  // Show Save if:
   // 1. We found a public recipe (regardless of who owns it), AND
   // 2. We came from the explore page
   // Show Edit if:
-  // 1. We found a user recipe (private recipe), OR 
+  // 1. We found a user recipe (private recipe), OR
   // 2. We didn't come from explore page
   const shouldShowSave = !!publicRecipe && cameFromExplore;
   const shouldShowEdit = !shouldShowSave;
@@ -333,14 +347,14 @@ export function RecipeViewPage() {
 
   const handleSave = async () => {
     if (!recipe) return;
-    
+
     try {
       await recipeApi.savePublicRecipe(recipe.id);
       toast({
         title: 'Success',
         description: 'Recipe saved to your collection!',
       });
-      
+
       // Navigate to user's recipes page to show the saved recipe
       navigate('/recipes', { state: { refresh: Date.now() } });
     } catch (error) {
@@ -365,7 +379,6 @@ export function RecipeViewPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50">
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        
         {/* Version Navigation Header */}
         {versions.length > 0 && (
           <div className="mb-6">
@@ -380,16 +393,18 @@ export function RecipeViewPage() {
                   <ArrowLeft className="h-4 w-4 mr-2" />
                   Back
                 </Button>
-                
+
                 {aggregateStats && (
                   <div className="flex items-center space-x-2">
                     <Badge variant="outline" className="text-xs">
                       <GitBranch className="h-3 w-3 mr-1" />
-                      {aggregateStats.total_versions} version{aggregateStats.total_versions !== 1 ? 's' : ''}
+                      {aggregateStats.total_versions} version
+                      {aggregateStats.total_versions !== 1 ? 's' : ''}
                     </Badge>
                     {aggregateStats.aggregate_avg_rating && (
                       <Badge variant="secondary" className="text-xs">
-                        ⭐ {aggregateStats.aggregate_avg_rating.toFixed(1)} ({aggregateStats.total_ratings} ratings)
+                        ⭐ {aggregateStats.aggregate_avg_rating.toFixed(1)} (
+                        {aggregateStats.total_ratings} ratings)
                       </Badge>
                     )}
                   </div>
@@ -417,7 +432,8 @@ export function RecipeViewPage() {
                   <div className="flex items-center space-x-2">
                     <Badge variant="default">
                       Version {currentVersionNumber}
-                      {currentVersionNumber === aggregateStats?.latest_version && ' (Latest)'}
+                      {currentVersionNumber ===
+                        aggregateStats?.latest_version && ' (Latest)'}
                     </Badge>
                     {recipe && (
                       <span className="text-sm font-medium text-gray-900">
@@ -427,24 +443,30 @@ export function RecipeViewPage() {
                   </div>
                   {recipe?.creator_rating && (
                     <div className="flex items-center space-x-1 mt-1">
-                      <span className="text-xs text-gray-500">Creator rating:</span>
+                      <span className="text-xs text-gray-500">
+                        Creator rating:
+                      </span>
                       <div className="flex items-center">
                         {[1, 2, 3, 4, 5].map((star) => (
                           <span
                             key={star}
                             className={`text-xs ${
-                              star <= recipe.creator_rating! ? 'text-orange-400' : 'text-gray-300'
+                              star <= recipe.creator_rating!
+                                ? 'text-orange-400'
+                                : 'text-gray-300'
                             }`}
                           >
                             ★
                           </span>
                         ))}
                       </div>
-                      <span className="text-xs text-gray-500">({recipe.creator_rating}/5)</span>
+                      <span className="text-xs text-gray-500">
+                        ({recipe.creator_rating}/5)
+                      </span>
                     </div>
                   )}
                 </div>
-                
+
                 {isOwner && (
                   <Button
                     variant="outline"
@@ -459,8 +481,8 @@ export function RecipeViewPage() {
           </div>
         )}
 
-        <RecipeView 
-          recipe={recipe} 
+        <RecipeView
+          recipe={recipe}
           onEdit={shouldShowEdit ? handleEdit : undefined}
           onSave={shouldShowSave ? handleSave : undefined}
           onBack={!versions.length ? handleBack : undefined} // Hide back button if we have version nav
@@ -484,10 +506,12 @@ export function RecipeViewPage() {
                     ✕
                   </Button>
                 </div>
-                
+
                 <div className="max-h-[60vh] overflow-y-auto">
                   <VersionSelector
-                    originalRecipeId={recipe?.parent_recipe_id || recipe?.id || ''}
+                    originalRecipeId={
+                      recipe?.parent_recipe_id || recipe?.id || ''
+                    }
                     currentVersionNumber={currentVersionNumber}
                     onVersionSelect={handleVersionSelect}
                     onRateVersion={handleVersionRating}

@@ -2,14 +2,14 @@ import { useState, useEffect } from 'react';
 import { recipeApi } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Eye, 
-  Star, 
-  MessageSquare, 
-  BarChart3, 
+import {
+  Eye,
+  Star,
+  MessageSquare,
+  BarChart3,
   Calendar,
   Users,
-  GitBranch
+  GitBranch,
 } from 'lucide-react';
 import type { Recipe } from '@/lib/types';
 
@@ -70,17 +70,17 @@ export function RecipeAnalytics({ recipe, onClose }: RecipeAnalyticsProps) {
     }
   };
 
-  const StatCard = ({ 
-    icon: Icon, 
-    title, 
-    value, 
-    subtitle, 
-    color = 'blue' 
-  }: { 
-    icon: any; 
-    title: string; 
-    value: string | number; 
-    subtitle?: string; 
+  const StatCard = ({
+    icon: Icon,
+    title,
+    value,
+    subtitle,
+    color = 'blue',
+  }: {
+    icon: any;
+    title: string;
+    value: string | number;
+    subtitle?: string;
     color?: string;
   }) => (
     <div className="bg-white border border-gray-200 rounded-lg p-4">
@@ -104,7 +104,9 @@ export function RecipeAnalytics({ recipe, onClose }: RecipeAnalyticsProps) {
           <div className="p-6">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-semibold">Recipe Analytics</h3>
-              <Button variant="ghost" size="sm" onClick={onClose}>✕</Button>
+              <Button variant="ghost" size="sm" onClick={onClose}>
+                ✕
+              </Button>
             </div>
             <div className="animate-pulse space-y-4">
               {[1, 2, 3, 4].map((i) => (
@@ -145,7 +147,11 @@ export function RecipeAnalytics({ recipe, onClose }: RecipeAnalyticsProps) {
                     <StatCard
                       icon={Star}
                       title="Average Rating"
-                      value={analytics.aggregate_stats?.aggregate_avg_rating?.toFixed(1) || '0.0'}
+                      value={
+                        analytics.aggregate_stats?.aggregate_avg_rating?.toFixed(
+                          1
+                        ) || '0.0'
+                      }
                       subtitle={`${analytics.aggregate_stats?.total_ratings || 0} total ratings`}
                       color="orange"
                     />
@@ -213,16 +219,23 @@ export function RecipeAnalytics({ recipe, onClose }: RecipeAnalyticsProps) {
                     </h4>
                     <div className="space-y-3">
                       {analytics.top_comments.slice(0, 3).map((comment) => (
-                        <div key={comment.id} className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                        <div
+                          key={comment.id}
+                          className="bg-gray-50 border border-gray-200 rounded-lg p-3"
+                        >
                           <div className="flex items-center justify-between mb-2">
                             <div className="flex items-center space-x-2">
                               <Badge variant="outline" className="text-xs">
                                 {comment.rating}⭐
                               </Badge>
-                              <span className="text-sm font-medium">Community Member</span>
+                              <span className="text-sm font-medium">
+                                Community Member
+                              </span>
                             </div>
                             <span className="text-xs text-gray-500">
-                              {new Date(comment.created_at).toLocaleDateString()}
+                              {new Date(
+                                comment.created_at
+                              ).toLocaleDateString()}
                             </span>
                           </div>
                           <p className="text-sm text-gray-700 italic">
@@ -243,13 +256,24 @@ export function RecipeAnalytics({ recipe, onClose }: RecipeAnalyticsProps) {
                     </h4>
                     <div className="space-y-2">
                       {analytics.version_stats.map((versionStat) => (
-                        <div key={versionStat.recipe_id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div
+                          key={versionStat.recipe_id}
+                          className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                        >
                           <div className="flex items-center space-x-3">
-                            <Badge variant="outline">v{versionStat.version_number}</Badge>
-                            <span className="text-sm font-medium">{versionStat.title}</span>
+                            <Badge variant="outline">
+                              v{versionStat.version_number}
+                            </Badge>
+                            <span className="text-sm font-medium">
+                              {versionStat.title}
+                            </span>
                           </div>
                           <div className="flex items-center space-x-4 text-xs text-gray-600">
-                            <span>⭐ {versionStat.version_avg_rating?.toFixed(1) || '0.0'}</span>
+                            <span>
+                              ⭐{' '}
+                              {versionStat.version_avg_rating?.toFixed(1) ||
+                                '0.0'}
+                            </span>
                             <span>👁️ {versionStat.version_view_count}</span>
                             <span>💬 {versionStat.version_comment_count}</span>
                           </div>

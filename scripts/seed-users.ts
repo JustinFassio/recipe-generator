@@ -265,7 +265,6 @@ async function upsertCooking(userId: string, cooking: SeedUser['cooking']) {
   if (error) throw error;
 }
 
-
 async function seedEvaluationReports() {
   // Sample evaluation reports for each user to test Dr. Luna Clearwater functionality
   const evaluationReports = [

@@ -227,14 +227,18 @@ export function RecipeCard({
                         <span
                           key={i}
                           className={`text-sm ${
-                            i < recipe.creator_rating! ? 'text-orange-400' : 'text-gray-300'
+                            i < recipe.creator_rating!
+                              ? 'text-orange-400'
+                              : 'text-gray-300'
                           }`}
                         >
                           ★
                         </span>
                       ))}
                     </div>
-                    <span className="text-xs text-gray-600">{recipe.creator_rating}/5</span>
+                    <span className="text-xs text-gray-600">
+                      {recipe.creator_rating}/5
+                    </span>
                   </div>
                 )}
 

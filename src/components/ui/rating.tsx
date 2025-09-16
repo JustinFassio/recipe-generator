@@ -21,46 +21,43 @@ export function Rating({
   className = '',
 }: RatingProps) {
   const [hoveredRating, setHoveredRating] = useState(0);
-  
+
   const sizeClasses = {
     sm: 'w-4 h-4',
     md: 'w-5 h-5',
     lg: 'w-6 h-6',
   };
-  
+
   const starSize = sizeClasses[size];
   const isInteractive = !readonly && onRate;
-  
+
   const handleStarClick = (starRating: number) => {
     if (isInteractive) {
       onRate?.(starRating);
     }
   };
-  
+
   const handleStarHover = (starRating: number) => {
     if (isInteractive) {
       setHoveredRating(starRating);
     }
   };
-  
+
   const handleMouseLeave = () => {
     if (isInteractive) {
       setHoveredRating(0);
     }
   };
-  
+
   const displayRating = hoveredRating || rating;
-  
+
   return (
     <div className={`flex items-center gap-2 ${className}`}>
       {label && (
         <span className="text-sm font-medium text-gray-700">{label}:</span>
       )}
-      
-      <div 
-        className="flex items-center gap-1"
-        onMouseLeave={handleMouseLeave}
-      >
+
+      <div className="flex items-center gap-1" onMouseLeave={handleMouseLeave}>
         {[1, 2, 3, 4, 5].map((star) => (
           <button
             key={star}
@@ -79,20 +76,22 @@ export function Rating({
               className={`
                 ${starSize}
                 transition-colors duration-150
-                ${star <= displayRating
-                  ? 'fill-yellow-400 text-yellow-400'
-                  : 'fill-gray-200 text-gray-300'
+                ${
+                  star <= displayRating
+                    ? 'fill-yellow-400 text-yellow-400'
+                    : 'fill-gray-200 text-gray-300'
                 }
-                ${isInteractive && star <= (hoveredRating || rating)
-                  ? 'drop-shadow-sm'
-                  : ''
+                ${
+                  isInteractive && star <= (hoveredRating || rating)
+                    ? 'drop-shadow-sm'
+                    : ''
                 }
               `}
             />
           </button>
         ))}
       </div>
-      
+
       {showValue && (
         <span className="text-sm text-gray-600 ml-1">
           {rating > 0 ? `${rating}/5` : 'Not rated'}
@@ -117,7 +116,9 @@ export function CreatorRating({
   className = '',
 }: CreatorRatingProps) {
   return (
-    <div className={`p-3 bg-orange-50 rounded-lg border border-orange-200 ${className}`}>
+    <div
+      className={`p-3 bg-orange-50 rounded-lg border border-orange-200 ${className}`}
+    >
       <Rating
         rating={rating}
         onRate={disabled ? undefined : onRate}
@@ -128,10 +129,9 @@ export function CreatorRating({
         className="justify-center"
       />
       <p className="text-xs text-orange-700 mt-1 text-center">
-        {disabled 
-          ? "Rating locked after sharing" 
-          : "Rate your recipe before sharing"
-        }
+        {disabled
+          ? 'Rating locked after sharing'
+          : 'Rate your recipe before sharing'}
       </p>
     </div>
   );
@@ -154,14 +154,18 @@ export function CommunityRating({
   className = '',
 }: CommunityRatingProps) {
   return (
-    <div className={`p-3 bg-blue-50 rounded-lg border border-blue-200 ${className}`}>
+    <div
+      className={`p-3 bg-blue-50 rounded-lg border border-blue-200 ${className}`}
+    >
       <div className="flex items-center justify-between mb-2">
-        <span className="text-sm font-medium text-blue-900">Community Rating</span>
+        <span className="text-sm font-medium text-blue-900">
+          Community Rating
+        </span>
         <span className="text-xs text-blue-700">
           {totalRatings} rating{totalRatings !== 1 ? 's' : ''}
         </span>
       </div>
-      
+
       <div className="flex items-center gap-3">
         <Rating
           rating={averageRating}
@@ -173,7 +177,7 @@ export function CommunityRating({
           {averageRating.toFixed(1)}/5
         </span>
       </div>
-      
+
       {onRate && (
         <div className="mt-3 pt-2 border-t border-blue-200">
           <Rating
@@ -213,7 +217,7 @@ export function RatingDisplay({
         disabled={true}
         className="bg-orange-50/50"
       />
-      
+
       {communityRating && communityRating.count > 0 && (
         <CommunityRating
           averageRating={communityRating.average}
@@ -226,5 +230,3 @@ export function RatingDisplay({
     </div>
   );
 }
-
-

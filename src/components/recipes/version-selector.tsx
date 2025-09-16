@@ -11,7 +11,12 @@ interface VersionSelectorProps {
   originalRecipeId: string;
   currentVersionNumber?: number;
   onVersionSelect: (version: RecipeVersion) => void;
-  onRateVersion?: (recipeId: string, versionNumber: number, rating: number, comment?: string) => void;
+  onRateVersion?: (
+    recipeId: string,
+    versionNumber: number,
+    rating: number,
+    comment?: string
+  ) => void;
   className?: string;
 }
 
@@ -23,13 +28,17 @@ export function VersionSelector({
   className = '',
 }: VersionSelectorProps) {
   const [versions, setVersions] = useState<RecipeVersion[]>([]);
-  const [versionStats, setVersionStats] = useState<Map<number, VersionStats>>(new Map());
-  const [aggregateStats, setAggregateStats] = useState<AggregateStats | null>(null);
+  const [versionStats, setVersionStats] = useState<Map<number, VersionStats>>(
+    new Map()
+  );
+  const [aggregateStats, setAggregateStats] = useState<AggregateStats | null>(
+    null
+  );
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState(false);
-  const [showRatingModal, setShowRatingModal] = useState<{ 
-    version: number; 
-    recipe_id: string; 
+  const [showRatingModal, setShowRatingModal] = useState<{
+    version: number;
+    recipe_id: string;
     recipe_title: string;
     version_name?: string;
   } | null>(null);
@@ -42,7 +51,7 @@ export function VersionSelector({
   const loadVersionData = async () => {
     try {
       setLoading(true);
-      
+
       // Load all versions
       const versionsData = await recipeApi.getRecipeVersions(originalRecipeId);
       setVersions(versionsData);
@@ -55,7 +64,10 @@ export function VersionSelector({
       const statsMap = new Map<number, VersionStats>();
       for (const version of versionsData) {
         if (version.recipe) {
-          const stats = await recipeApi.getVersionStats(version.recipe.id, version.version_number);
+          const stats = await recipeApi.getVersionStats(
+            version.recipe.id,
+            version.version_number
+          );
           if (stats) {
             statsMap.set(version.version_number, stats);
           }
@@ -83,15 +95,15 @@ export function VersionSelector({
   const renderStars = (rating: number | null, size: 'sm' | 'md' = 'sm') => {
     const stars = rating || 0;
     const sizeClass = size === 'sm' ? 'h-3 w-3' : 'h-4 w-4';
-    
+
     return (
       <div className="flex items-center space-x-0.5">
         {[1, 2, 3, 4, 5].map((star) => (
           <Star
             key={star}
             className={`${sizeClass} ${
-              star <= stars 
-                ? 'text-orange-400 fill-orange-400' 
+              star <= stars
+                ? 'text-orange-400 fill-orange-400'
                 : 'text-gray-300'
             }`}
           />
@@ -100,15 +112,19 @@ export function VersionSelector({
     );
   };
 
-  const renderVersionCard = (version: RecipeVersion, stats: VersionStats | undefined, isLatest: boolean) => {
+  const renderVersionCard = (
+    version: RecipeVersion,
+    stats: VersionStats | undefined,
+    isLatest: boolean
+  ) => {
     const isSelected = version.version_number === currentVersionNumber;
-    
+
     return (
       <div
         key={version.id}
         className={`p-4 border rounded-lg transition-all ${
-          isSelected 
-            ? 'border-blue-500 bg-blue-50' 
+          isSelected
+            ? 'border-blue-500 bg-blue-50'
             : 'border-gray-200 hover:border-gray-300'
         }`}
       >
@@ -142,17 +158,22 @@ export function VersionSelector({
                 <div className="flex items-center space-x-1">
                   {renderStars(stats.version_avg_rating)}
                   <span className="text-xs text-gray-500">
-                    {stats.version_avg_rating?.toFixed(1) || '0.0'} ({stats.version_rating_count})
+                    {stats.version_avg_rating?.toFixed(1) || '0.0'} (
+                    {stats.version_rating_count})
                   </span>
                 </div>
                 <div className="flex items-center space-x-1">
                   <Eye className="h-3 w-3 text-gray-400" />
-                  <span className="text-xs text-gray-500">{stats.version_view_count}</span>
+                  <span className="text-xs text-gray-500">
+                    {stats.version_view_count}
+                  </span>
                 </div>
                 {stats.version_comment_count > 0 && (
                   <div className="flex items-center space-x-1">
                     <MessageSquare className="h-3 w-3 text-gray-400" />
-                    <span className="text-xs text-gray-500">{stats.version_comment_count}</span>
+                    <span className="text-xs text-gray-500">
+                      {stats.version_comment_count}
+                    </span>
                   </div>
                 )}
               </>
@@ -172,12 +193,14 @@ export function VersionSelector({
               <Button
                 size="sm"
                 variant="ghost"
-                onClick={() => setShowRatingModal({ 
-                  version: version.version_number, 
-                  recipe_id: version.recipe!.id,
-                  recipe_title: version.recipe!.title,
-                  version_name: version.version_name || undefined
-                })}
+                onClick={() =>
+                  setShowRatingModal({
+                    version: version.version_number,
+                    recipe_id: version.recipe!.id,
+                    recipe_title: version.recipe!.title,
+                    version_name: version.version_name || undefined,
+                  })
+                }
               >
                 Rate & Comment
               </Button>
@@ -215,18 +238,21 @@ export function VersionSelector({
                 <div className="flex items-center space-x-1">
                   {renderStars(aggregateStats.aggregate_avg_rating, 'md')}
                   <span className="text-sm text-gray-600">
-                    {aggregateStats.aggregate_avg_rating?.toFixed(1) || '0.0'} 
-                    ({aggregateStats.total_ratings} total ratings)
+                    {aggregateStats.aggregate_avg_rating?.toFixed(1) || '0.0'}(
+                    {aggregateStats.total_ratings} total ratings)
                   </span>
                 </div>
                 <div className="flex items-center space-x-1">
                   <Eye className="h-4 w-4 text-gray-400" />
-                  <span className="text-sm text-gray-600">{aggregateStats.total_views} total views</span>
+                  <span className="text-sm text-gray-600">
+                    {aggregateStats.total_views} total views
+                  </span>
                 </div>
               </div>
             </div>
             <Badge variant="outline">
-              {aggregateStats.total_versions} version{aggregateStats.total_versions !== 1 ? 's' : ''}
+              {aggregateStats.total_versions} version
+              {aggregateStats.total_versions !== 1 ? 's' : ''}
             </Badge>
           </div>
         </div>
@@ -235,18 +261,22 @@ export function VersionSelector({
       {/* Version List */}
       <div className="space-y-3">
         {versions.length === 0 ? (
-          <p className="text-center text-gray-500 py-8">No versions available</p>
+          <p className="text-center text-gray-500 py-8">
+            No versions available
+          </p>
         ) : (
           <>
             {/* Show latest version by default */}
-            {versions.slice(0, 1).map((version) => 
-              renderVersionCard(
-                version, 
-                versionStats.get(version.version_number), 
-                true
-              )
-            )}
-            
+            {versions
+              .slice(0, 1)
+              .map((version) =>
+                renderVersionCard(
+                  version,
+                  versionStats.get(version.version_number),
+                  true
+                )
+              )}
+
             {/* Show/hide older versions */}
             {versions.length > 1 && (
               <>
@@ -264,18 +294,22 @@ export function VersionSelector({
                   ) : (
                     <>
                       <ChevronDown className="h-4 w-4 mr-2" />
-                      Show {versions.length - 1} older version{versions.length > 2 ? 's' : ''}
+                      Show {versions.length - 1} older version
+                      {versions.length > 2 ? 's' : ''}
                     </>
                   )}
                 </Button>
-                
-                {expanded && versions.slice(1).map((version) => 
-                  renderVersionCard(
-                    version, 
-                    versionStats.get(version.version_number), 
-                    false
-                  )
-                )}
+
+                {expanded &&
+                  versions
+                    .slice(1)
+                    .map((version) =>
+                      renderVersionCard(
+                        version,
+                        versionStats.get(version.version_number),
+                        false
+                      )
+                    )}
               </>
             )}
           </>

@@ -43,14 +43,14 @@ interface RecipeViewProps {
   ratingLoading?: boolean;
 }
 
-export function RecipeView({ 
-  recipe, 
-  onEdit, 
-  onSave, 
-  onBack, 
-  communityRating, 
-  onCommunityRate, 
-  ratingLoading 
+export function RecipeView({
+  recipe,
+  onEdit,
+  onSave,
+  onBack,
+  communityRating,
+  onCommunityRate,
+  ratingLoading,
 }: RecipeViewProps) {
   const { groceries } = useGroceries();
   const {
@@ -239,7 +239,9 @@ export function RecipeView({
                   <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
                     <div className="flex items-center justify-center">
                       <div className="loading loading-spinner loading-sm text-blue-600"></div>
-                      <span className="ml-2 text-sm text-blue-700">Loading ratings...</span>
+                      <span className="ml-2 text-sm text-blue-700">
+                        Loading ratings...
+                      </span>
                     </div>
                   </div>
                 </div>

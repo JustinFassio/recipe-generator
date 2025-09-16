@@ -3,7 +3,7 @@
 **Date:** January 15, 2025  
 **Issue:** MCP servers showing "No tools or prompts" after restart  
 **Root Cause:** Supabase MCP server now requires Personal Access Token (PAT)  
-**Status:** ⚠️ **REQUIRES ACTION** - Need to generate PAT  
+**Status:** ⚠️ **REQUIRES ACTION** - Need to generate PAT
 
 ---
 
@@ -12,8 +12,9 @@
 The Supabase MCP server has changed its authentication requirements. It now requires a **Personal Access Token (PAT)** instead of just service role keys.
 
 ### **Error Message:**
+
 ```
-Please provide a personal access token (PAT) with the --access-token flag 
+Please provide a personal access token (PAT) with the --access-token flag
 or set the SUPABASE_ACCESS_TOKEN environment variable
 ```
 
@@ -62,7 +63,7 @@ I've already updated your `.cursor/mcp.json` with the correct format:
     "supabase": {
       "command": "npx",
       "args": [
-        "-y", 
+        "-y",
         "@supabase/mcp-server-supabase@latest",
         "--access-token",
         "${SUPABASE_ACCESS_TOKEN}"
@@ -71,7 +72,7 @@ I've already updated your `.cursor/mcp.json` with the correct format:
     "supabase-local": {
       "command": "npx",
       "args": [
-        "-y", 
+        "-y",
         "@supabase/mcp-server-supabase@latest",
         "--access-token",
         "${SUPABASE_ACCESS_TOKEN}"
@@ -86,22 +87,26 @@ I've already updated your `.cursor/mcp.json` with the correct format:
 ## 🔄 **Complete Setup Process**
 
 ### **1. Generate Personal Access Token**
+
 - Visit: https://supabase.com/dashboard/account/tokens
 - Create token with project access
 - Copy and save securely
 
 ### **2. Set Environment Variable**
+
 ```bash
 export SUPABASE_ACCESS_TOKEN="your-token-here"
 source ~/.zshrc
 ```
 
 ### **3. Test MCP Server**
+
 ```bash
 npx -y @supabase/mcp-server-supabase@latest --access-token "$SUPABASE_ACCESS_TOKEN"
 ```
 
 ### **4. Restart Cursor**
+
 - Close Cursor completely
 - Reopen Cursor
 - Check MCP servers show green status with tools/prompts
@@ -111,6 +116,7 @@ npx -y @supabase/mcp-server-supabase@latest --access-token "$SUPABASE_ACCESS_TOK
 ## 🔍 **Verification Commands**
 
 ### **Test Token Access**
+
 ```bash
 # Verify token is set
 echo $SUPABASE_ACCESS_TOKEN | cut -c1-20
@@ -120,6 +126,7 @@ npx -y @supabase/mcp-server-supabase@latest --access-token "$SUPABASE_ACCESS_TOK
 ```
 
 ### **Check Project Access**
+
 ```bash
 # Verify you can access your project with the token
 curl -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
@@ -131,11 +138,13 @@ curl -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
 ## 📋 **What Changed in Supabase MCP**
 
 ### **Old Authentication (Deprecated)**
+
 - Used service role keys directly
 - Environment variables: `SUPABASE_SERVICE_ROLE_KEY`
 - Direct database access
 
 ### **New Authentication (Current)**
+
 - Requires Personal Access Token (PAT)
 - Environment variable: `SUPABASE_ACCESS_TOKEN`
 - Project-level access control
@@ -148,12 +157,14 @@ curl -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
 Once you complete the setup:
 
 ### **MCP Server Status**
+
 - ✅ **supabase**: Should show green with available tools
 - ✅ **supabase-local**: Should show green with available tools
 - ✅ **Tools Available**: Schema inspection, query assistance, etc.
 - ✅ **Prompts Available**: Database-specific prompts and suggestions
 
 ### **AI Integration**
+
 - Real-time database schema access
 - Context-aware query suggestions
 - Migration assistance
@@ -164,12 +175,14 @@ Once you complete the setup:
 ## 🔒 **Security Best Practices**
 
 ### **Token Security**
+
 - **Never commit** PAT to version control
 - **Store securely** in environment variables only
 - **Rotate regularly** for security
 - **Use minimal permissions** required
 
 ### **Environment Setup**
+
 - Keep PAT in shell environment (`.zshrc`)
 - Don't hardcode in configuration files
 - Use same token for both production and local MCP servers
@@ -180,14 +193,17 @@ Once you complete the setup:
 ## 🆘 **Troubleshooting**
 
 ### **Issue: "Invalid token"**
+
 - **Solution**: Regenerate token in Supabase Dashboard
 - **Check**: Token has correct project permissions
 
 ### **Issue: "Token not found"**
+
 - **Solution**: Verify environment variable is set
 - **Check**: `echo $SUPABASE_ACCESS_TOKEN`
 
 ### **Issue: "Connection refused"**
+
 - **Solution**: Ensure Supabase project is accessible
 - **Check**: Project URL and permissions
 
@@ -204,4 +220,3 @@ Once you complete the setup:
 ---
 
 **Once you complete these steps, your Supabase MCP integration will be fully operational with the latest authentication requirements.**
-

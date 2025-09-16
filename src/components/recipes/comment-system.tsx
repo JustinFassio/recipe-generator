@@ -18,14 +18,19 @@ interface CommentWithProfile extends VersionRating {
   author_avatar?: string;
 }
 
-export function CommentSystem({ recipeId, versionNumber, className = '' }: CommentSystemProps) {
+export function CommentSystem({
+  recipeId,
+  versionNumber,
+  className = '',
+}: CommentSystemProps) {
   const [comments, setComments] = useState<CommentWithProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [showCommentForm, setShowCommentForm] = useState(false);
   const [newComment, setNewComment] = useState('');
   const [newRating, setNewRating] = useState(0);
-  const [userExistingRating, setUserExistingRating] = useState<VersionRating | null>(null);
+  const [userExistingRating, setUserExistingRating] =
+    useState<VersionRating | null>(null);
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -37,27 +42,40 @@ export function CommentSystem({ recipeId, versionNumber, className = '' }: Comme
   const loadComments = async () => {
     try {
       setLoading(true);
-      const ratingsData = await recipeApi.getVersionRatings(recipeId, versionNumber);
-      
+      const ratingsData = await recipeApi.getVersionRatings(
+        recipeId,
+        versionNumber
+      );
+
       // Filter only ratings with comments and get profile data
-      const commentsWithRatings = ratingsData.filter(rating => rating.comment && rating.comment.trim() !== '');
-      
+      const commentsWithRatings = ratingsData.filter(
+        (rating) => rating.comment && rating.comment.trim() !== ''
+      );
+
       // Get profile data for comment authors
-      const userIds = [...new Set(commentsWithRatings.map(comment => comment.user_id))];
+      const userIds = [
+        ...new Set(commentsWithRatings.map((comment) => comment.user_id)),
+      ];
       const profiles = await Promise.all(
         userIds.map(async (userId) => {
           try {
             const profile = await recipeApi.getUserProfile(userId);
-            return profile || { id: userId, full_name: 'Anonymous', avatar_url: null };
+            return (
+              profile || {
+                id: userId,
+                full_name: 'Anonymous',
+                avatar_url: null,
+              }
+            );
           } catch {
             return { id: userId, full_name: 'Anonymous', avatar_url: null };
           }
         })
       );
 
-      const profileMap = new Map(profiles.map(p => [p.id, p]));
-      
-      const commentsWithProfiles = commentsWithRatings.map(comment => ({
+      const profileMap = new Map(profiles.map((p) => [p.id, p]));
+
+      const commentsWithProfiles = commentsWithRatings.map((comment) => ({
         ...comment,
         author_name: profileMap.get(comment.user_id)?.full_name || 'Anonymous',
         author_avatar: profileMap.get(comment.user_id)?.avatar_url,
@@ -78,9 +96,12 @@ export function CommentSystem({ recipeId, versionNumber, className = '' }: Comme
 
   const loadUserRating = async () => {
     if (!user) return;
-    
+
     try {
-      const userRating = await recipeApi.getUserVersionRating(recipeId, versionNumber);
+      const userRating = await recipeApi.getUserVersionRating(
+        recipeId,
+        versionNumber
+      );
       setUserExistingRating(userRating);
       if (userRating) {
         setNewRating(userRating.rating);
@@ -103,11 +124,18 @@ export function CommentSystem({ recipeId, versionNumber, className = '' }: Comme
 
     try {
       setSubmitting(true);
-      await recipeApi.rateVersion(recipeId, versionNumber, newRating, newComment.trim() || undefined);
-      
+      await recipeApi.rateVersion(
+        recipeId,
+        versionNumber,
+        newRating,
+        newComment.trim() || undefined
+      );
+
       toast({
         title: 'Success',
-        description: userExistingRating ? 'Rating updated!' : 'Rating and comment submitted!',
+        description: userExistingRating
+          ? 'Rating updated!'
+          : 'Rating and comment submitted!',
       });
 
       // Reload comments and user rating
@@ -126,7 +154,11 @@ export function CommentSystem({ recipeId, versionNumber, className = '' }: Comme
     }
   };
 
-  const renderStars = (rating: number, interactive: boolean = false, onRate?: (rating: number) => void) => {
+  const renderStars = (
+    rating: number,
+    interactive: boolean = false,
+    onRate?: (rating: number) => void
+  ) => {
     return (
       <div className="flex items-center space-x-1">
         {[1, 2, 3, 4, 5].map((star) => (
@@ -138,9 +170,9 @@ export function CommentSystem({ recipeId, versionNumber, className = '' }: Comme
           >
             <Star
               className={`h-4 w-4 ${
-                star <= rating 
-                  ? 'text-orange-400 fill-orange-400' 
-                  : interactive 
+                star <= rating
+                  ? 'text-orange-400 fill-orange-400'
+                  : interactive
                     ? 'text-gray-300 hover:text-orange-200'
                     : 'text-gray-300'
               }`}
@@ -155,11 +187,13 @@ export function CommentSystem({ recipeId, versionNumber, className = '' }: Comme
     const date = new Date(dateString);
     const now = new Date();
     const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-    
+
     if (diffInSeconds < 60) return 'Just now';
     if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
-    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
-    if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)}d ago`;
+    if (diffInSeconds < 86400)
+      return `${Math.floor(diffInSeconds / 3600)}h ago`;
+    if (diffInSeconds < 2592000)
+      return `${Math.floor(diffInSeconds / 86400)}d ago`;
     return date.toLocaleDateString();
   };
 
@@ -173,7 +207,7 @@ export function CommentSystem({ recipeId, versionNumber, className = '' }: Comme
             Comments ({comments.length})
           </h3>
         </div>
-        
+
         {user && (
           <Button
             variant="outline"
@@ -195,7 +229,7 @@ export function CommentSystem({ recipeId, versionNumber, className = '' }: Comme
               </label>
               {renderStars(newRating, true, setNewRating)}
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Comment (optional)
@@ -270,7 +304,10 @@ export function CommentSystem({ recipeId, versionNumber, className = '' }: Comme
           </div>
         ) : (
           comments.map((comment) => (
-            <div key={comment.id} className="bg-white border border-gray-200 rounded-lg p-4">
+            <div
+              key={comment.id}
+              className="bg-white border border-gray-200 rounded-lg p-4"
+            >
               <div className="flex items-start space-x-3">
                 <div className="flex-shrink-0">
                   <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center">
@@ -279,7 +316,7 @@ export function CommentSystem({ recipeId, versionNumber, className = '' }: Comme
                     </span>
                   </div>
                 </div>
-                
+
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center space-x-3">
@@ -297,13 +334,13 @@ export function CommentSystem({ recipeId, versionNumber, className = '' }: Comme
                       {formatTimeAgo(comment.created_at)}
                     </span>
                   </div>
-                  
+
                   {comment.comment && (
                     <p className="text-gray-700 text-sm leading-relaxed mb-3">
                       {comment.comment}
                     </p>
                   )}
-                  
+
                   <div className="flex items-center space-x-4">
                     <button className="flex items-center space-x-1 text-xs text-gray-500 hover:text-gray-700 transition-colors">
                       <ThumbsUp className="h-3 w-3" />
@@ -335,7 +372,7 @@ export function CommentSystem({ recipeId, versionNumber, className = '' }: Comme
           <Button
             variant="outline"
             size="sm"
-            onClick={() => window.location.href = '/auth/signin'}
+            onClick={() => (window.location.href = '/auth/signin')}
             className="border-blue-300 text-blue-700 hover:bg-blue-100"
           >
             Sign In
