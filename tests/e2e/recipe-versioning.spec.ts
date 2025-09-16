@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test } from '@playwright/test';
 
 // Test data
 const testRecipe = {
@@ -488,7 +488,3 @@ test.describe('Recipe Versioning System', () => {
   });
 });
 
-// Helper function to wait for network idle
-async function waitForNetworkIdle(page: any, timeout = 5000) {
-  return page.waitForLoadState('networkidle', { timeout });
-}

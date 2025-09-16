@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   createDaisyUICardClasses,
   createDaisyUICardTitleClasses,
@@ -7,7 +7,6 @@ import { createDaisyUIBadgeClasses } from '@/lib/badge-migration';
 import {
   Eye,
   Star,
-  MessageSquare,
   MoreHorizontal,
   Save,
   GitBranch,

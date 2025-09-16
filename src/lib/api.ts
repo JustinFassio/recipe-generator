@@ -1216,7 +1216,7 @@ export const recipeApi = {
   // Get recipe engagement analytics for creators
   async getRecipeAnalytics(recipeId: string): Promise<{
     version_stats: VersionStats[];
-    aggregate_stats: any;
+    aggregate_stats: AggregateStats;
     recent_activity: {
       ratings_this_week: number;
       views_this_week: number;
@@ -1275,7 +1275,7 @@ export const recipeApi = {
         version_stats: versionStats.filter(
           (stat) => stat !== null
         ) as VersionStats[],
-        aggregate_stats: aggregateStats,
+        aggregate_stats: aggregateStats!,
         recent_activity: {
           ratings_this_week: recentRatings?.length || 0,
           views_this_week: recentViews?.length || 0,

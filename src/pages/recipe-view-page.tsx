@@ -13,7 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthProvider';
 import { recipeApi } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
-import type { RecipeVersion, VersionStats, AggregateStats } from '@/lib/types';
+import type { Recipe, RecipeVersion, AggregateStats } from '@/lib/types';
 
 export function RecipeViewPage() {
   const { id } = useParams<{ id: string }>();
@@ -117,7 +117,7 @@ export function RecipeViewPage() {
     }
   }, [recipe, publicRecipe]);
 
-  const loadVersionData = async (currentRecipe: any) => {
+  const loadVersionData = async (currentRecipe: Recipe) => {
     try {
       const originalRecipeId =
         currentRecipe.parent_recipe_id || currentRecipe.id;
@@ -142,7 +142,7 @@ export function RecipeViewPage() {
     }
   };
 
-  const checkOwnership = async (currentRecipe: any) => {
+  const checkOwnership = async (currentRecipe: Recipe) => {
     if (user) {
       const originalRecipeId =
         currentRecipe.parent_recipe_id || currentRecipe.id;

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { recipeApi } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -77,7 +77,7 @@ export function RecipeAnalytics({ recipe, onClose }: RecipeAnalyticsProps) {
     subtitle,
     color = 'blue',
   }: {
-    icon: any;
+    icon: React.ComponentType<{ className?: string }>;
     title: string;
     value: string | number;
     subtitle?: string;

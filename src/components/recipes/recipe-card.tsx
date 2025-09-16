@@ -15,7 +15,6 @@ import {
 } from 'lucide-react';
 import CategoryChip from '@/components/ui/CategoryChip';
 import { Badge } from '@/components/ui/badge';
-import { CreatorRating } from '@/components/ui/rating';
 import { useIngredientMatching } from '@/hooks/useIngredientMatching';
 import type { Recipe, PublicRecipe } from '@/lib/types';
 import { useDeleteRecipe } from '@/hooks/use-recipes';

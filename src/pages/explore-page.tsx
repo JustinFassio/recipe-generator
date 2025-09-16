@@ -155,13 +155,6 @@ export default function ExplorePage() {
 
   // Remove handleEditRecipe - community recipes should not be editable
 
-  const handleShareToggle = () => {
-    // For public recipes, sharing is already enabled
-    toast({
-      title: 'Info',
-      description: 'This recipe is already public',
-    });
-  };
 
   // Comprehensive filtering logic for public recipes
   const filteredRecipes = useMemo(() => {
@@ -237,33 +230,41 @@ export default function ExplorePage() {
     const sorted = [...filtered].sort((a, b) => {
       let comparison = 0;
 
+      // Declare variables outside switch to avoid lexical declaration errors
+      let ratingA: number, ratingB: number, trendA: number, trendB: number;
+      
       switch (sortBy) {
-        case 'rating':
+        case 'rating': {
           // Sort by aggregate rating, then by total ratings
-          const ratingA = a.aggregate_rating || a.creator_rating || 0;
-          const ratingB = b.aggregate_rating || b.creator_rating || 0;
+          ratingA = a.aggregate_rating || a.creator_rating || 0;
+          ratingB = b.aggregate_rating || b.creator_rating || 0;
           comparison = ratingB - ratingA;
           if (comparison === 0) {
             comparison = (b.total_ratings || 0) - (a.total_ratings || 0);
           }
           break;
-        case 'views':
+        }
+        case 'views': {
           comparison = (b.total_views || 0) - (a.total_views || 0);
           break;
-        case 'versions':
+        }
+        case 'versions': {
           comparison = (b.total_versions || 1) - (a.total_versions || 1);
           break;
-        case 'trending':
+        }
+        case 'trending': {
           // Sort by trend score if available, otherwise by recent activity
-          const trendA = (a as any).trend_score || 0;
-          const trendB = (b as any).trend_score || 0;
+          trendA = (a as { trend_score?: number }).trend_score || 0;
+          trendB = (b as { trend_score?: number }).trend_score || 0;
           comparison = trendB - trendA;
           break;
+        }
         case 'recent':
-        default:
+        default: {
           comparison =
             new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
           break;
+        }
       }
 
       // Fallback sorting by title if primary sort is equal
@@ -277,13 +278,6 @@ export default function ExplorePage() {
     return sorted;
   }, [recipes, filters, sortBy]);
 
-  const getAuthorName = (recipe: PublicRecipe) => {
-    if (recipe.author_name && recipe.author_name.trim() !== '') {
-      const firstName = recipe.author_name.trim().split(' ')[0];
-      return firstName || 'Anonymous';
-    }
-    return 'Anonymous';
-  };
 
   if (loading) {
     return (
