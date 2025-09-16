@@ -155,7 +155,6 @@ export default function ExplorePage() {
 
   // Remove handleEditRecipe - community recipes should not be editable
 
-
   // Comprehensive filtering logic for public recipes
   const filteredRecipes = useMemo(() => {
     let filtered = [...recipes];
@@ -232,7 +231,7 @@ export default function ExplorePage() {
 
       // Declare variables outside switch to avoid lexical declaration errors
       let ratingA: number, ratingB: number, trendA: number, trendB: number;
-      
+
       switch (sortBy) {
         case 'rating': {
           // Sort by aggregate rating, then by total ratings
@@ -277,7 +276,6 @@ export default function ExplorePage() {
 
     return sorted;
   }, [recipes, filters, sortBy]);
-
 
   if (loading) {
     return (

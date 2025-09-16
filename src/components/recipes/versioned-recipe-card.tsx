@@ -4,13 +4,7 @@ import {
   createDaisyUICardTitleClasses,
 } from '@/lib/card-migration';
 import { createDaisyUIBadgeClasses } from '@/lib/badge-migration';
-import {
-  Eye,
-  Star,
-  MoreHorizontal,
-  Save,
-  GitBranch,
-} from 'lucide-react';
+import { Eye, Star, MoreHorizontal, Save, GitBranch } from 'lucide-react';
 import CategoryChip from '@/components/ui/CategoryChip';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';

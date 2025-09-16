@@ -1172,7 +1172,8 @@ async function seedEvaluationReports() {
   for (const reportData of evaluationReports) {
     // Find user ID by email
     const userMatch = userList.users.find(
-      (x: { email?: string }) => x.email?.toLowerCase() === reportData.user_email.toLowerCase()
+      (x: { email?: string }) =>
+        x.email?.toLowerCase() === reportData.user_email.toLowerCase()
     );
 
     if (!userMatch) {
@@ -2805,7 +2806,8 @@ async function seedRecipes() {
   for (const recipe of recipes) {
     // Get user ID for the recipe from cached user list
     const userMatch = userList.users.find(
-      (x: { email?: string }) => x.email?.toLowerCase() === recipe.user_email.toLowerCase()
+      (x: { email?: string }) =>
+        x.email?.toLowerCase() === recipe.user_email.toLowerCase()
     );
 
     if (!userMatch) {
@@ -2975,7 +2977,8 @@ async function main() {
         });
       if (listError) throw listError;
       const match = existing.users.find(
-        (x: { email?: string }) => x.email?.toLowerCase() === u.email.toLowerCase()
+        (x: { email?: string }) =>
+          x.email?.toLowerCase() === u.email.toLowerCase()
       );
       if (!match) {
         throw new Error(`Could not find or create user ${u.email}`);
