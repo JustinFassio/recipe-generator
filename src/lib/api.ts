@@ -1045,9 +1045,10 @@ export const recipeApi = {
         version_number: versionNumber,
         user_id: user.id,
         viewed_at: new Date().toISOString(),
+        viewed_date: new Date().toISOString().split('T')[0], // YYYY-MM-DD format
       },
       {
-        onConflict: 'recipe_id,version_number,user_id,viewed_at',
+        onConflict: 'recipe_id,version_number,user_id,viewed_date',
         ignoreDuplicates: true,
       }
     );
