@@ -55,6 +55,9 @@ test-results/
 test-failed-*.png
 error-context.md
 
+# Playwright reports
+playwright-report/
+
 # Temporary documentation files
 *ACTION_PLAN*.md
 *HANDOFF_MEMO*.md
