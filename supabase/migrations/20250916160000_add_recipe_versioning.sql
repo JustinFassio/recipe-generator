@@ -91,7 +91,7 @@ SELECT
   COUNT(DISTINCT rr.id) as version_rating_count,
   AVG(rr.rating)::NUMERIC(3,2) as version_avg_rating,
   COUNT(DISTINCT rv.id) as version_view_count,
-  COUNT(DISTINCT CASE WHEN rr.comment IS NOT NULL AND rr.comment != '' THEN rr.id END) as version_comment_count,
+  0 as version_comment_count, -- Comments not yet implemented in recipe_ratings
   r.is_public,
   r.created_at,
   r.updated_at,
@@ -114,7 +114,7 @@ SELECT
   COUNT(DISTINCT rr.id) as total_ratings,
   AVG(rr.rating)::NUMERIC(3,2) as aggregate_avg_rating,
   COUNT(DISTINCT rvw.id) as total_views,
-  COUNT(DISTINCT CASE WHEN rr.comment IS NOT NULL AND rr.comment != '' THEN rr.id END) as total_comments,
+  0 as total_comments, -- Comments not yet implemented in recipe_ratings
   MAX(COALESCE(r2.updated_at, r.updated_at)) as last_updated,
   -- Latest version details
   (SELECT r3.title FROM recipes r3 WHERE r3.parent_recipe_id = COALESCE(r.parent_recipe_id, r.id) 

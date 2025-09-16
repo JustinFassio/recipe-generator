@@ -17,6 +17,7 @@ import CategoryChip from '@/components/ui/CategoryChip';
 import { Badge } from '@/components/ui/badge';
 import { useIngredientMatching } from '@/hooks/useIngredientMatching';
 import type { Recipe, PublicRecipe } from '@/lib/types';
+import { getOptimizedImageUrl } from '@/lib/image-cache-utils';
 import { useDeleteRecipe } from '@/hooks/use-recipes';
 import { useState } from 'react';
 import { recipeApi } from '@/lib/api';
@@ -130,9 +131,11 @@ export function RecipeCard({
             {recipe.image_url && (
               <div className="aspect-video overflow-hidden">
                 <img
-                  src={`${recipe.image_url}?v=${new Date(
-                    recipe.updated_at || recipe.created_at
-                  ).getTime()}`}
+                  src={getOptimizedImageUrl(
+                    recipe.image_url,
+                    recipe.updated_at,
+                    recipe.created_at
+                  )}
                   alt={recipe.title}
                   className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-105"
                 />
