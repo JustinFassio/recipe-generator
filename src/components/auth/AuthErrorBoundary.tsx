@@ -1,5 +1,6 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { createLogger } from '@/lib/logger';
+import { supabase } from '@/lib/supabase';
 
 interface Props {
   children: ReactNode;
@@ -10,6 +11,7 @@ interface State {
   hasError: boolean;
   error: Error | null;
   errorInfo: ErrorInfo | null;
+  isRetrying: boolean;
 }
 
 const logger = createLogger('AuthErrorBoundary');
@@ -17,12 +19,17 @@ const logger = createLogger('AuthErrorBoundary');
 export class AuthErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    this.state = { hasError: false, error: null, errorInfo: null };
+    this.state = {
+      hasError: false,
+      error: null,
+      errorInfo: null,
+      isRetrying: false,
+    };
   }
 
   static getDerivedStateFromError(error: Error): State {
     // Update state so the next render will show the fallback UI
-    return { hasError: true, error, errorInfo: null };
+    return { hasError: true, error, errorInfo: null, isRetrying: false };
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
@@ -44,12 +51,62 @@ export class AuthErrorBoundary extends Component<Props, State> {
     }
   }
 
-  private handleRetry = () => {
-    logger.debug('AuthErrorBoundary retry triggered');
-    this.setState({ hasError: false, error: null, errorInfo: null });
+  private handleRetry = async () => {
+    logger.debug('AuthErrorBoundary graceful retry triggered');
+    this.setState({ isRetrying: true });
 
-    // Force a page reload to reset auth context
-    window.location.reload();
+    try {
+      // Attempt graceful auth recovery without page reload
+      logger.debug('Attempting to refresh auth session...');
+
+      // Refresh the auth session to restore context
+      const {
+        data: { session },
+        error: sessionError,
+      } = await supabase.auth.getSession();
+
+      if (sessionError) {
+        logger.warn(
+          'Session refresh failed, attempting sign out and redirect:',
+          sessionError
+        );
+        // If session refresh fails, sign out gracefully and redirect to auth
+        await supabase.auth.signOut();
+        window.location.href = '/auth/signin';
+        return;
+      }
+
+      if (session) {
+        logger.debug('Auth session restored successfully');
+        // Session is valid, reset error state and let app continue
+        this.setState({
+          hasError: false,
+          error: null,
+          errorInfo: null,
+          isRetrying: false,
+        });
+      } else {
+        logger.debug('No valid session found, redirecting to auth');
+        // No session, redirect to sign in without reload
+        window.location.href = '/auth/signin';
+      }
+    } catch (recoveryError) {
+      logger.error('Graceful recovery failed:', recoveryError);
+      // Only fallback to reload if graceful recovery completely fails
+      this.setState({ isRetrying: false });
+
+      // Give user choice between reload and sign out
+      const userChoice = confirm(
+        'Authentication recovery failed. Would you like to reload the page (OK) or sign out (Cancel)?'
+      );
+
+      if (userChoice) {
+        window.location.reload();
+      } else {
+        await supabase.auth.signOut();
+        window.location.href = '/auth/signin';
+      }
+    }
   };
 
   render() {
@@ -69,9 +126,11 @@ export class AuthErrorBoundary extends Component<Props, State> {
                 {this.state.error?.message?.includes(
                   'useAuth must be used within an AuthProvider'
                 )
-                  ? 'Authentication context was lost during page update. This can happen during development.'
-                  : this.state.error?.message ||
-                    'An authentication error occurred.'}
+                  ? "Authentication context was lost. We'll try to restore your session without losing your current work."
+                  : this.state.error?.message?.includes('auth')
+                    ? 'Your authentication session encountered an issue. We can try to recover it gracefully.'
+                    : this.state.error?.message ||
+                      "An authentication error occurred. We'll attempt to recover your session."}
               </p>
 
               {import.meta.env.DEV && this.state.error && (
@@ -94,8 +153,19 @@ export class AuthErrorBoundary extends Component<Props, State> {
               )}
 
               <div className="card-actions justify-end">
-                <button className="btn btn-outline" onClick={this.handleRetry}>
-                  Reload Page
+                <button
+                  className="btn btn-outline"
+                  onClick={this.handleRetry}
+                  disabled={this.state.isRetrying}
+                >
+                  {this.state.isRetrying ? (
+                    <>
+                      <span className="loading loading-spinner loading-xs"></span>
+                      Recovering...
+                    </>
+                  ) : (
+                    'Try Again'
+                  )}
                 </button>
               </div>
             </div>
