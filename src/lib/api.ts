@@ -426,14 +426,7 @@ export const recipeApi = {
     const { data: latestRecipes, error: recipesError } = await supabase
       .from('recipes')
       .select('*')
-      .in(
-        'id',
-        originalIds.map(
-          (id) =>
-            aggregateData.find((item) => item.original_recipe_id === id)
-              ?.original_recipe_id
-        )
-      )
+      .in('id', originalIds)
       .eq('is_public', true);
 
     if (recipesError) handleError(recipesError, 'Get latest recipes');
