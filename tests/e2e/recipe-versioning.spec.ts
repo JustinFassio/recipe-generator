@@ -26,7 +26,7 @@ const versionUpdate = {
 test.describe('Recipe Versioning System', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to the app
-    await page.goto('http://localhost:5174');
+    await page.goto('/');
 
     // Wait for the app to load
     await page.waitForSelector(
@@ -231,7 +231,7 @@ test.describe('Recipe Versioning System', () => {
     console.log('🧪 Testing recipe view page version navigation...');
 
     // Navigate to recipes page
-    await page.goto('http://localhost:5174/recipes');
+    await page.goto('/recipes');
     await page.waitForSelector('text=My Recipes', { timeout: 10000 });
 
     // Find any recipe and click view
@@ -273,7 +273,7 @@ test.describe('Recipe Versioning System', () => {
   test('Explore page versioning features', async ({ page }) => {
     console.log('🧪 Testing Explore page versioning features...');
 
-    await page.goto('http://localhost:5174/explore');
+    await page.goto('/explore');
     await page.waitForSelector('text=Explore Recipes', { timeout: 10000 });
 
     // Test sorting controls
@@ -335,7 +335,7 @@ test.describe('Recipe Versioning System', () => {
   test('Version rating system', async ({ page }) => {
     console.log('🧪 Testing version rating system...');
 
-    await page.goto('http://localhost:5174/explore');
+    await page.goto('/explore');
     await page.waitForSelector('text=Explore Recipes', { timeout: 10000 });
 
     // Find a recipe with versions
@@ -396,7 +396,7 @@ test.describe('Recipe Versioning System', () => {
     // This test validates that the versioning system is working by checking for UI elements
     // that would only appear if the database migration was successful
 
-    await page.goto('http://localhost:5174/explore');
+    await page.goto('/explore');
     await page.waitForSelector('text=Explore Recipes', { timeout: 10000 });
 
     // Check for version-aware sorting (only available with migration)
@@ -433,7 +433,7 @@ test.describe('Recipe Versioning System', () => {
     console.log('🧪 Testing error handling and edge cases...');
 
     // Test navigation to non-existent recipe
-    await page.goto('http://localhost:5174/recipe/non-existent-id');
+    await page.goto('/recipe/non-existent-id');
 
     // Should show error page or redirect
     await page.waitForTimeout(3000);
@@ -460,7 +460,7 @@ test.describe('Recipe Versioning System', () => {
     }
 
     // Test empty states in Explore
-    await page.goto('http://localhost:5174/explore');
+    await page.goto('/explore');
     await page.waitForSelector('text=Explore Recipes', { timeout: 10000 });
 
     // Apply filters that might return no results
