@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import CategoryChip from '@/components/ui/CategoryChip';
 import { Badge } from '@/components/ui/badge';
+import { CreatorRating } from '@/components/ui/rating';
 import { useIngredientMatching } from '@/hooks/useIngredientMatching';
 import type { Recipe, PublicRecipe } from '@/lib/types';
 import { useDeleteRecipe } from '@/hooks/use-recipes';
@@ -217,6 +218,25 @@ export function RecipeCard({
                       </div>
                     </div>
                   )}
+
+                {/* Creator Rating */}
+                {recipe.creator_rating && (
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-1">
+                      {[...Array(5)].map((_, i) => (
+                        <span
+                          key={i}
+                          className={`text-sm ${
+                            i < recipe.creator_rating! ? 'text-orange-400' : 'text-gray-300'
+                          }`}
+                        >
+                          ★
+                        </span>
+                      ))}
+                    </div>
+                    <span className="text-xs text-gray-600">{recipe.creator_rating}/5</span>
+                  </div>
+                )}
 
                 {recipe.categories && recipe.categories.length > 0 && (
                   <div className="flex flex-wrap gap-1">

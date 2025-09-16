@@ -30,6 +30,7 @@ export function AddRecipePage() {
         image_url: existingRecipe.image_url || null,
         categories: existingRecipe.categories || [],
         setup: existingRecipe.setup || [],
+        creator_rating: existingRecipe.creator_rating || null,
       });
     }
 

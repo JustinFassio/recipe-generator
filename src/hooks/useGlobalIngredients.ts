@@ -59,11 +59,11 @@ export function useGlobalIngredients(): UseGlobalIngredientsReturn {
     null
   );
 
-  // Initialize matcher when groceries change
+  // Initialize matcher when groceries change or immediately with empty groceries for new users
   useEffect(() => {
-    if (Object.keys(groceries).length > 0) {
-      setMatcher(new EnhancedIngredientMatcher(groceries));
-    }
+    // Always initialize matcher, even with empty groceries for new users
+    // This allows global ingredients to load for users who haven't set up groceries yet
+    setMatcher(new EnhancedIngredientMatcher(groceries));
   }, [groceries]);
 
   // Load global ingredients when matcher is ready

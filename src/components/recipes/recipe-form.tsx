@@ -19,6 +19,7 @@ import { X, Upload, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import CategoryInput from '@/components/ui/CategoryInput';
+import { CreatorRating } from '@/components/ui/rating';
 import { MAX_CATEGORIES_PER_RECIPE } from '@/lib/constants';
 import { processImageFile } from '@/lib/image-utils';
 import { toast } from '@/hooks/use-toast';
@@ -97,6 +98,7 @@ export function RecipeForm({
           image_url: editRecipe.image_url || null,
           categories: editRecipe.categories || [],
           setup: editRecipe.setup || [],
+          creator_rating: editRecipe.creator_rating || null,
         }
       : {
           title: '',
@@ -106,6 +108,7 @@ export function RecipeForm({
           image_url: null,
           categories: [],
           setup: [],
+          creator_rating: null,
         },
   });
 
@@ -139,6 +142,7 @@ export function RecipeForm({
         image_url: initialData.image_url || null,
         categories: initialData.categories || [],
         setup: initialData.setup || [],
+        creator_rating: initialData.creator_rating || null,
       });
     }
   }, [initialData, reset]);
@@ -217,6 +221,10 @@ export function RecipeForm({
         await createRecipe.mutateAsync({
           ...recipeData,
           is_public: false,
+          creator_rating: recipeData.creator_rating || null,
+          version_number: 1,
+          parent_recipe_id: null,
+          is_version: false,
         });
       }
 
@@ -502,6 +510,33 @@ export function RecipeForm({
             size="md"
             className="w-full resize-none"
           />
+        </div>
+      </div>
+
+      <div className={createDaisyUICardClasses('bordered')}>
+        <div className="card-body">
+          <h3 className={createDaisyUICardTitleClasses()}>Your Rating</h3>
+          <p className="text-sm text-gray-600 mb-3">
+            Rate your recipe from 1-5 stars. This helps others discover great recipes when you share them!
+          </p>
+          <div className="flex flex-col gap-2">
+            <span className="text-sm font-medium text-gray-700">How would you rate this recipe?</span>
+            <CreatorRating
+              rating={watch('creator_rating') ?? 0}
+              onRate={(rating) => setValue('creator_rating', rating)}
+              className="max-w-xs"
+            />
+            {watch('creator_rating') && (
+              <p className="text-xs text-gray-500">
+                You can update your rating anytime before sharing
+              </p>
+            )}
+          </div>
+          {errors.creator_rating && (
+            <p className="mt-1 text-sm text-red-500">
+              {errors.creator_rating.message}
+            </p>
+          )}
         </div>
       </div>
 

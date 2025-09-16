@@ -12,12 +12,82 @@ export type Recipe = {
   setup: string[];
   user_id: string;
   is_public: boolean;
+  creator_rating: number | null;
   created_at: string;
   updated_at: string;
+  // Versioning fields
+  version_number: number;
+  parent_recipe_id: string | null;
+  is_version: boolean;
 };
 
 export type PublicRecipe = Recipe & {
   author_name: string;
+};
+
+// Recipe Versioning types
+export type RecipeVersion = {
+  id: string;
+  original_recipe_id: string;
+  version_recipe_id: string;
+  version_number: number;
+  version_name: string | null;
+  changelog: string | null;
+  created_at: string;
+  is_active: boolean;
+  recipe?: Recipe; // Full recipe data when populated
+};
+
+export type VersionStats = {
+  recipe_id: string;
+  title: string;
+  version_number: number;
+  creator_rating: number | null;
+  owner_id: string;
+  version_rating_count: number;
+  version_avg_rating: number | null;
+  version_view_count: number;
+  version_comment_count: number;
+  is_public: boolean;
+  created_at: string;
+  updated_at: string;
+  parent_recipe_id: string | null;
+  is_version: boolean;
+};
+
+export type AggregateStats = {
+  original_recipe_id: string;
+  original_title: string;
+  owner_id: string;
+  total_versions: number;
+  latest_version: number;
+  total_ratings: number;
+  aggregate_avg_rating: number | null;
+  total_views: number;
+  total_comments: number;
+  last_updated: string;
+  latest_version_title: string | null;
+  latest_creator_rating: number | null;
+};
+
+export type VersionRating = {
+  id: string;
+  recipe_id: string;
+  version_number: number;
+  user_id: string;
+  rating: number;
+  comment: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type RecipeView = {
+  id: string;
+  recipe_id: string;
+  version_number: number;
+  user_id: string;
+  viewed_at: string;
+  session_id: string | null;
 };
 
 // Recipe filtering types - only include what exists in the database

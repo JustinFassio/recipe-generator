@@ -35,7 +35,7 @@ import {
 import { EmailCard, PasswordCard } from '@/components/profile/account';
 
 export default function ProfilePage() {
-  const { user, profile } = useAuth();
+  const { user, profile, loading: authLoading, error: authError } = useAuth();
 
   // All profile functionality via hooks
   const userSafety = useUserSafety();
@@ -157,10 +157,95 @@ export default function ProfilePage() {
     await accountManagement.updateUserPassword();
   };
 
+  // Enhanced loading and error states with debugging
+  if (authLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-center">
+          <div className="loading loading-spinner loading-lg text-primary mb-4"></div>
+          <p className="text-base-content/60">Loading profile...</p>
+          {import.meta.env.DEV && (
+            <div className="mt-4 p-4 bg-base-200 rounded-lg text-left max-w-md mx-auto">
+              <h3 className="font-bold text-sm mb-2">🔧 Profile Debug Info</h3>
+              <div className="text-xs space-y-1 text-base-content/80">
+                <div>Auth Loading: <code>{authLoading ? 'true' : 'false'}</code></div>
+                <div>User: <code>{user ? user.email : 'null'}</code></div>
+                <div>Profile: <code>{profile ? 'loaded' : 'null'}</code></div>
+                <div>Auth Error: <code>{authError || 'null'}</code></div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  if (authError) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="card bg-error text-error-content w-96 shadow-xl">
+          <div className="card-body">
+            <h2 className="card-title">Profile Error</h2>
+            <p>{authError}</p>
+            <div className="card-actions justify-end">
+              <button
+                className="btn btn-outline"
+                onClick={() => window.location.reload()}
+              >
+                Reload
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="card bg-warning text-warning-content w-96 shadow-xl">
+          <div className="card-body">
+            <h2 className="card-title">No User Found</h2>
+            <p>Please sign in to access your profile.</p>
+            <div className="card-actions justify-end">
+              <button
+                className="btn btn-outline"
+                onClick={() => window.location.href = '/auth/signin'}
+              >
+                Sign In
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (!profile) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <div className="loading loading-spinner loading-lg"></div>
+        <div className="text-center">
+          <div className="loading loading-spinner loading-lg text-primary mb-4"></div>
+          <p className="text-base-content/60">Loading profile data...</p>
+          {import.meta.env.DEV && (
+            <div className="mt-4 p-4 bg-base-200 rounded-lg text-left max-w-md mx-auto">
+              <h3 className="font-bold text-sm mb-2">🔧 Profile Loading Debug</h3>
+              <div className="text-xs space-y-1 text-base-content/80">
+                <div>User ID: <code>{user?.id || 'null'}</code></div>
+                <div>User Email: <code>{user?.email || 'null'}</code></div>
+                <div>Profile: <code>null</code></div>
+                <div>Auth Loading: <code>{authLoading ? 'true' : 'false'}</code></div>
+              </div>
+              <button 
+                className="btn btn-xs btn-outline mt-2"
+                onClick={() => window.location.reload()}
+              >
+                Force Reload
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     );
   }
