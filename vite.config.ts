@@ -36,26 +36,10 @@ export default defineConfig({
     sourcemap: 'hidden',
     rollupOptions: {
       output: {
-        // Optimize chunk splitting for better caching
+        // Simple chunk splitting for better caching
         manualChunks: {
           vendor: ['react', 'react-dom', 'react-router-dom'],
-          ui: [
-            '@radix-ui/react-dialog',
-            '@radix-ui/react-dropdown-menu',
-            '@radix-ui/react-select',
-            '@radix-ui/react-tabs',
-          ],
-          supabase: ['@supabase/supabase-js'],
-          query: ['@tanstack/react-query'],
-          utils: ['date-fns', 'zod', 'clsx'],
         },
-        preserveModules: false,
-      },
-      // Re-enable tree shaking with careful configuration
-      treeshake: {
-        moduleSideEffects: false,
-        propertyReadSideEffects: false,
-        unknownGlobalSideEffects: false,
       },
     },
     // Use esbuild which is available everywhere
@@ -66,10 +50,5 @@ export default defineConfig({
   // Feature flag preserved
   define: {
     __TOUCH_EVENTS__: true,
-  },
-  // Configure esbuild to preserve clarity while allowing treeshaking
-  esbuild: {
-    treeShaking: true,
-    keepNames: false,
   },
 });
