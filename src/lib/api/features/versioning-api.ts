@@ -9,20 +9,33 @@ import type {
 import { handleError } from '../shared/error-handling';
 
 export const versioningApi = {
-  // Get all versions of a recipe
-  async getRecipeVersions(originalRecipeId: string): Promise<RecipeVersion[]> {
-    // Get all recipe versions including the original recipe
-    // First get all recipes that are part of this version family
+  // Get all versions of a recipe family (works with any recipe ID in the family)
+  async getRecipeVersions(
+    anyRecipeIdInFamily: string
+  ): Promise<RecipeVersion[]> {
+    // STEP 1: Find the true original recipe ID (the one with parent_recipe_id = NULL)
+    const originalRecipeId =
+      await this.findOriginalRecipeId(anyRecipeIdInFamily);
+
+    // STEP 2: Get current user for ownership-based filtering
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    // STEP 3: Get all recipes in the version family
     const { data: recipes, error: recipesError } = await supabase
       .from('recipes')
       .select('*')
       .or(`id.eq.${originalRecipeId},parent_recipe_id.eq.${originalRecipeId}`)
-      .eq('is_public', true)
+      // Allow viewing versions if: user owns them OR they're public
+      .or(
+        user ? `user_id.eq.${user.id},is_public.eq.true` : `is_public.eq.true`
+      )
       .order('version_number', { ascending: false });
 
     if (recipesError) handleError(recipesError, 'Get recipe versions');
 
-    // Get version metadata from recipe_versions table
+    // STEP 4: Get version metadata from recipe_versions table
     // Note: Original recipe (v1) won't have an entry here, only child versions (v2+)
     const { data: versionMeta, error: versionError } = await supabase
       .from('recipe_versions')
@@ -82,8 +95,12 @@ export const versioningApi = {
 
   // Get aggregate stats for all versions of a recipe
   async getAggregateStats(
-    originalRecipeId: string
+    anyRecipeIdInFamily: string
   ): Promise<AggregateStats | null> {
+    // Find the true original recipe ID first
+    const originalRecipeId =
+      await this.findOriginalRecipeId(anyRecipeIdInFamily);
+
     const { data, error } = await supabase
       .from('recipe_aggregate_stats')
       .select('*')
@@ -150,7 +167,11 @@ export const versioningApi = {
   },
 
   // Get next version number for a recipe
-  async getNextVersionNumber(originalRecipeId: string): Promise<number> {
+  async getNextVersionNumber(anyRecipeIdInFamily: string): Promise<number> {
+    // Find the true original recipe ID first
+    const originalRecipeId =
+      await this.findOriginalRecipeId(anyRecipeIdInFamily);
+
     const { data, error } = await supabase.rpc('get_next_version_number', {
       original_id: originalRecipeId,
     });

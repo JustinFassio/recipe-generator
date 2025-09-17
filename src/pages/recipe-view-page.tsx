@@ -119,9 +119,9 @@ export function RecipeViewPage() {
     }
   }, [recipe, publicRecipe]);
 
-  // Calculate next version number for version creation
+  // Calculate next version number for version creation (for ALL owned recipes)
   useEffect(() => {
-    if (recipe?.is_public && isOwner) {
+    if (recipe && isOwner) {
       const fetchNextVersion = async () => {
         try {
           const originalId = recipe.parent_recipe_id || recipe.id;
@@ -398,8 +398,8 @@ export function RecipeViewPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50">
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        {/* Version Navigation Header */}
-        {versions.length > 0 && (
+        {/* Version Navigation Header - Show for owned recipes OR when versions exist */}
+        {(isOwner || versions.length > 0) && (
           <div className="mb-6">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center space-x-4">
