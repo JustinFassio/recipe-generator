@@ -887,6 +887,7 @@ export const recipeApi = {
     if (recipesError) handleError(recipesError, 'Get recipe versions');
 
     // Get version metadata from recipe_versions table
+    // Note: Original recipe (v1) won't have an entry here, only child versions (v2+)
     const { data: versionMeta, error: versionError } = await supabase
       .from('recipe_versions')
       .select('version_recipe_id, version_name, changelog')
@@ -908,13 +909,10 @@ export const recipeApi = {
     // Convert recipes to RecipeVersion format with metadata
     const recipeVersions: RecipeVersion[] = (recipes || []).map((recipe) => {
       const meta = metaMap.get(recipe.id) || {};
-      // The original recipe has no parent, so its original_recipe_id is its own id
-      // Child versions have parent_recipe_id pointing to the original
-      const actualOriginalId = recipe.parent_recipe_id || recipe.id;
 
       return {
         id: recipe.id,
-        original_recipe_id: actualOriginalId,
+        original_recipe_id: originalRecipeId, // All versions share the same original_recipe_id
         version_recipe_id: recipe.id,
         version_number: recipe.version_number || 1,
         version_name: meta.version_name || null,
