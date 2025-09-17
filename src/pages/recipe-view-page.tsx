@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { RecipeView } from '@/components/recipes/recipe-view';
 import { VersionSelector } from '@/components/recipes/version-selector';
 import { CreateVersionModal } from '@/components/recipes/create-version-modal';
+import { DualRatingDisplay } from '@/components/recipes/dual-rating-display';
 import { createDaisyUICardClasses } from '@/lib/card-migration';
 import { createDaisyUISkeletonClasses } from '@/lib/skeleton-migration';
 import { ChefHat, GitBranch, ArrowLeft } from 'lucide-react';
@@ -75,6 +76,7 @@ export function RecipeViewPage() {
   );
   const [isOwner, setIsOwner] = useState(false);
   const [showCreateVersion, setShowCreateVersion] = useState(false);
+  const [nextVersionNumber, setNextVersionNumber] = useState(2);
 
   // Enhanced debugging
   console.log('📊 [RecipeViewPage] State summary:', {
@@ -116,6 +118,23 @@ export function RecipeViewPage() {
         .finally(() => setRatingLoading(false));
     }
   }, [recipe, publicRecipe]);
+
+  // Calculate next version number for version creation
+  useEffect(() => {
+    if (recipe?.is_public && isOwner) {
+      const fetchNextVersion = async () => {
+        try {
+          const originalId = recipe.parent_recipe_id || recipe.id;
+          const nextVersion = await recipeApi.getNextVersionNumber(originalId);
+          setNextVersionNumber(nextVersion);
+        } catch (error) {
+          console.error('Failed to get next version number:', error);
+          setNextVersionNumber(2); // fallback
+        }
+      };
+      fetchNextVersion();
+    }
+  }, [recipe, isOwner]);
 
   const loadVersionData = async (currentRecipe: Recipe) => {
     try {
@@ -491,6 +510,15 @@ export function RecipeViewPage() {
           ratingLoading={ratingLoading}
         />
 
+        {/* Dual Rating Display - Version vs Aggregate Analytics */}
+        {recipe && versions.length > 0 && (
+          <DualRatingDisplay
+            originalRecipeId={recipe.parent_recipe_id || recipe.id}
+            currentRecipe={recipe}
+            className="mt-8"
+          />
+        )}
+
         {/* Version Selection Modal */}
         {showVersions && versions.length > 0 && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -525,7 +553,9 @@ export function RecipeViewPage() {
         {/* Create Version Modal */}
         {showCreateVersion && recipe && (
           <CreateVersionModal
-            originalRecipe={recipe}
+            isOpen={showCreateVersion}
+            recipe={recipe}
+            nextVersionNumber={nextVersionNumber}
             onVersionCreated={handleVersionCreated}
             onClose={() => setShowCreateVersion(false)}
           />

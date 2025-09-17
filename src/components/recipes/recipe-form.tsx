@@ -25,8 +25,8 @@ import { processImageFile } from '@/lib/image-utils';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
 import { recipeApi } from '@/lib/api';
-
-import type { Recipe } from '@/lib/types';
+import { Recipe } from '@/lib/types';
+import { RecipeVersions } from './recipe-versions';
 
 interface RecipeFormProps {
   recipe?: Recipe;
@@ -596,6 +596,17 @@ export function RecipeForm({
       )}
 
       <div className="flex justify-end space-x-2">
+        {/* Recipe Versioning Component */}
+        <RecipeVersions
+          existingRecipe={existingRecipe}
+          disabled={
+            createRecipe.isPending ||
+            updateRecipe.isPending ||
+            uploadImage.isPending ||
+            !isOnline
+          }
+        />
+
         <Button
           type="submit"
           className="min-w-32"

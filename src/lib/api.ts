@@ -982,6 +982,20 @@ export const recipeApi = {
     return newRecipe;
   },
 
+  // Get next version number for a recipe
+  async getNextVersionNumber(originalRecipeId: string): Promise<number> {
+    const { data, error } = await supabase.rpc('get_next_version_number', {
+      original_id: originalRecipeId,
+    });
+
+    if (error) {
+      console.error('Error getting next version number:', error);
+      return 2; // fallback
+    }
+
+    return data || 2;
+  },
+
   // Rate specific version
   async rateVersion(
     recipeId: string,
