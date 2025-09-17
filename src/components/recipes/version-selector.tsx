@@ -3,7 +3,7 @@ import { recipeApi } from '@/lib/api';
 import type { RecipeVersion, VersionStats, AggregateStats } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Star, Eye, MessageSquare, ChevronDown, ChevronUp } from 'lucide-react';
+import { Star, Eye, MessageSquare } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { RateCommentModal } from './rate-comment-modal';
 
@@ -35,7 +35,6 @@ export function VersionSelector({
     null
   );
   const [loading, setLoading] = useState(true);
-  const [expanded, setExpanded] = useState(false);
   const [showRatingModal, setShowRatingModal] = useState<{
     version: number;
     recipe_id: string;
@@ -269,51 +268,13 @@ export function VersionSelector({
           </p>
         ) : (
           <>
-            {/* Show latest version by default */}
-            {versions
-              .slice(0, 1)
-              .map((version) =>
-                renderVersionCard(
-                  version,
-                  versionStats.get(version.version_number),
-                  true
-                )
-              )}
-
-            {/* Show/hide older versions */}
-            {versions.length > 1 && (
-              <>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setExpanded(!expanded)}
-                  className="w-full"
-                >
-                  {expanded ? (
-                    <>
-                      <ChevronUp className="h-4 w-4 mr-2" />
-                      Hide older versions
-                    </>
-                  ) : (
-                    <>
-                      <ChevronDown className="h-4 w-4 mr-2" />
-                      Show {versions.length - 1} older version
-                      {versions.length > 2 ? 's' : ''}
-                    </>
-                  )}
-                </Button>
-
-                {expanded &&
-                  versions
-                    .slice(1)
-                    .map((version) =>
-                      renderVersionCard(
-                        version,
-                        versionStats.get(version.version_number),
-                        false
-                      )
-                    )}
-              </>
+            {/* Show all versions in descending order (newest first) */}
+            {versions.map((version, index) =>
+              renderVersionCard(
+                version,
+                versionStats.get(version.version_number),
+                index === 0 // Mark first (newest) version as latest
+              )
             )}
           </>
         )}

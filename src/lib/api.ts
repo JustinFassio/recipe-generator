@@ -875,24 +875,53 @@ export const recipeApi = {
 
   // Get all versions of a recipe
   async getRecipeVersions(originalRecipeId: string): Promise<RecipeVersion[]> {
-    const { data, error } = await supabase
-      .from('recipe_versions')
-      .select(
-        `
-        *,
-        recipe:version_recipe_id (
-          id, title, ingredients, instructions, notes, image_url, 
-          categories, setup, user_id, is_public, creator_rating, 
-          created_at, updated_at, version_number, parent_recipe_id, is_version
-        )
-      `
-      )
-      .eq('original_recipe_id', originalRecipeId)
-      .eq('is_active', true)
+    // Get all recipe versions including the original recipe
+    // First get all recipes that are part of this version family
+    const { data: recipes, error: recipesError } = await supabase
+      .from('recipes')
+      .select('*')
+      .or(`id.eq.${originalRecipeId},parent_recipe_id.eq.${originalRecipeId}`)
+      .eq('is_public', true)
       .order('version_number', { ascending: false });
 
-    if (error) handleError(error, 'Get recipe versions');
-    return data || [];
+    if (recipesError) handleError(recipesError, 'Get recipe versions');
+
+    // Get version metadata from recipe_versions table
+    const { data: versionMeta, error: versionError } = await supabase
+      .from('recipe_versions')
+      .select('version_recipe_id, version_name, changelog')
+      .eq('original_recipe_id', originalRecipeId)
+      .eq('is_active', true);
+
+    if (versionError)
+      console.warn('Could not load version metadata:', versionError);
+
+    // Create a map of version metadata
+    const metaMap = new Map();
+    (versionMeta || []).forEach((meta) => {
+      metaMap.set(meta.version_recipe_id, {
+        version_name: meta.version_name,
+        changelog: meta.changelog,
+      });
+    });
+
+    // Convert recipes to RecipeVersion format with metadata
+    const recipeVersions: RecipeVersion[] = (recipes || []).map((recipe) => {
+      const meta = metaMap.get(recipe.id) || {};
+      return {
+        id: recipe.id,
+        original_recipe_id: originalRecipeId,
+        version_recipe_id: recipe.id,
+        version_number: recipe.version_number || 1,
+        version_name: meta.version_name || null,
+        changelog: meta.changelog || null,
+        created_at: recipe.created_at,
+        is_active: true,
+        recipe: recipe,
+      };
+    });
+
+    return recipeVersions;
   },
 
   // Get version-specific stats
