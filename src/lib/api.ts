@@ -908,9 +908,13 @@ export const recipeApi = {
     // Convert recipes to RecipeVersion format with metadata
     const recipeVersions: RecipeVersion[] = (recipes || []).map((recipe) => {
       const meta = metaMap.get(recipe.id) || {};
+      // The original recipe has no parent, so its original_recipe_id is its own id
+      // Child versions have parent_recipe_id pointing to the original
+      const actualOriginalId = recipe.parent_recipe_id || recipe.id;
+
       return {
         id: recipe.id,
-        original_recipe_id: originalRecipeId,
+        original_recipe_id: actualOriginalId,
         version_recipe_id: recipe.id,
         version_number: recipe.version_number || 1,
         version_name: meta.version_name || null,
