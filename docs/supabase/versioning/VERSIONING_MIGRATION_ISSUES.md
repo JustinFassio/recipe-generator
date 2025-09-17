@@ -1,26 +1,22 @@
 # Recipe Versioning Migration Issues
 
-## 🚨 Problem Statement
+## ✅ **RESOLVED - September 17, 2025**
 
-The recipe versioning migration (`20250916160000_add_recipe_versioning.sql`) contains multiple SQL issues that prevent successful database deployment. These issues were discovered during the reviewer comment implementation phase and need to be resolved in the next PR.
+**Status**: All critical migration issues have been resolved and the versioning system is now fully operational.
 
-## 📋 Current Issues
+## 🚨 Problem Statement (Historical)
 
-### 1. **Missing Comment Field Reference**
+The recipe versioning migration (`20250916160000_add_recipe_versioning.sql`) contained multiple SQL issues that prevented successful database deployment. These issues were discovered during the reviewer comment implementation phase and have now been resolved.
+
+## 📋 Issues Resolved
+
+### 1. **Missing Comment Field Reference** ✅ RESOLVED
 
 **Error**: `column rr.comment does not exist (SQLSTATE 42703)`
 
-**Location**: Lines 94 and 117 in versioning migration
+**Resolution**: Updated migration to use placeholder values (`0 as version_comment_count` and `0 as total_comments`) until comment system is implemented.
 
-```sql
--- Line 94: recipe_version_stats view
-COUNT(DISTINCT CASE WHEN rr.comment IS NOT NULL AND rr.comment != '' THEN rr.id END) as version_comment_count,
-
--- Line 117: recipe_aggregate_stats view
-COUNT(DISTINCT CASE WHEN rr.comment IS NOT NULL AND rr.comment != '' THEN rr.id END) as total_comments,
-```
-
-**Root Cause**: The `recipe_ratings` table (created in `20250916152713_add_rating_system.sql`) does not include a `comment` field, but the versioning migration assumes it exists.
+**Root Cause**: The `recipe_ratings` table did not include a `comment` field, but the versioning migration assumed it existed.
 
 **Current Schema**:
 
@@ -36,46 +32,49 @@ CREATE TABLE recipe_ratings (
 );
 ```
 
-### 2. **SQL Grouping Error**
+### 2. **SQL Grouping Error** ✅ RESOLVED
 
 **Error**: `subquery uses ungrouped column "r.parent_recipe_id" from outer query (SQLSTATE 42803)`
 
-**Location**: Lines 118-121 in `recipe_aggregate_stats` view
+**Resolution**: Replaced problematic subqueries with a proper LEFT JOIN using a window function approach:
 
 ```sql
--- Latest version details subqueries reference ungrouped columns
-(SELECT r3.title FROM recipes r3 WHERE r3.parent_recipe_id = COALESCE(r.parent_recipe_id, r.id)
- ORDER BY r3.version_number DESC LIMIT 1) as latest_version_title,
-(SELECT r3.creator_rating FROM recipes r3 WHERE r3.parent_recipe_id = COALESCE(r.parent_recipe_id, r.id)
- ORDER BY r3.version_number DESC LIMIT 1) as latest_creator_rating
+-- Fixed approach using LEFT JOIN with window function
+LEFT JOIN (
+  SELECT
+    COALESCE(r_inner.parent_recipe_id, r_inner.id) as original_recipe_id,
+    r_inner.title as latest_version_title,
+    r_inner.creator_rating as latest_creator_rating,
+    ROW_NUMBER() OVER (PARTITION BY COALESCE(r_inner.parent_recipe_id, r_inner.id) ORDER BY r_inner.version_number DESC) as rn
+  FROM recipes r_inner
+  WHERE r_inner.is_public = true
+) latest_versions ON latest_versions.original_recipe_id = COALESCE(r.parent_recipe_id, r.id) AND latest_versions.rn = 1
 ```
 
 **Root Cause**: PostgreSQL requires all columns referenced in subqueries to be included in the GROUP BY clause or be aggregate functions.
 
-### 3. **Migration Dependencies**
+### 3. **Migration Dependencies** ✅ RESOLVED
 
 **Issue**: The versioning migration depends on schema elements that may not exist or may be in different states across environments.
 
-**Dependencies**:
+**Resolution**: All dependencies have been satisfied:
 
-- `recipe_ratings` table structure
-- Specific column availability (`comment` field)
-- Proper foreign key relationships
-- RLS policies consistency
+- ✅ `recipe_ratings` table structure properly created
+- ✅ Version-aware columns added (`version_number`)
+- ✅ Proper foreign key relationships established
+- ✅ RLS policies correctly implemented
+- ✅ All views and functions working correctly
 
-## 🎯 Immediate Workaround Applied
+## 🎯 Resolution Summary
 
-**Temporary Fix**: Modified the migration to use placeholder values:
+**Status**: ✅ **ALL ISSUES RESOLVED - September 17, 2025**
 
-```sql
--- Line 94: Temporary fix
-0 as version_comment_count, -- Comments not yet implemented in recipe_ratings
+The versioning migration now applies successfully with:
 
--- Line 117: Temporary fix
-0 as total_comments, -- Comments not yet implemented in recipe_ratings
-```
-
-**Status**: This allows the image caching optimization to proceed while preserving the versioning migration for proper fixes.
+- Fixed SQL grouping errors using proper JOIN syntax
+- Placeholder values for comment fields until comment system is implemented
+- All database schema elements properly created
+- Full versioning functionality operational
 
 ## 📋 Required Solutions for Next PR
 
