@@ -49,13 +49,16 @@ export function DualRatingDisplay({
     try {
       setLoading(true);
 
-      // Load all versions of this recipe
+      // Load all versions of this recipe and sort by version number descending (newest first)
       const recipeVersions =
         await recipeApi.getRecipeVersions(originalRecipeId);
+      const sortedVersions = recipeVersions.sort(
+        (a, b) => b.version_number - a.version_number
+      );
 
       // Load stats for each version
       const versionsWithStats = await Promise.all(
-        recipeVersions.map(async (version) => {
+        sortedVersions.map(async (version) => {
           const stats = await recipeApi.getVersionStats(
             version.version_recipe_id,
             version.version_number

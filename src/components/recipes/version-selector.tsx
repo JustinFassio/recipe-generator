@@ -52,9 +52,12 @@ export function VersionSelector({
     try {
       setLoading(true);
 
-      // Load all versions
+      // Load all versions and sort by version number descending (newest first)
       const versionsData = await recipeApi.getRecipeVersions(originalRecipeId);
-      setVersions(versionsData);
+      const sortedVersions = versionsData.sort(
+        (a, b) => b.version_number - a.version_number
+      );
+      setVersions(sortedVersions);
 
       // Load aggregate stats
       const aggregateData = await recipeApi.getAggregateStats(originalRecipeId);
