@@ -1,24 +1,44 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { RecipeCard } from '../components/recipes/recipe-card';
+import { VersionedRecipeCard } from '../components/recipes/versioned-recipe-card';
 import { recipeApi } from '../lib/api';
 import type { PublicRecipe, Recipe } from '@/lib/types';
 import { Button } from '../components/ui/button';
-import { Save } from 'lucide-react';
+import { TrendingUp, Star, Eye, GitBranch } from 'lucide-react';
 import { useToast } from '../hooks/use-toast';
 import { FilterBar } from '@/components/recipes/FilterBar';
 import { useRecipeFilters } from '@/hooks/use-recipe-filters';
+import { useNavigate } from 'react-router-dom';
 
 export default function ExplorePage() {
-  const [recipes, setRecipes] = useState<PublicRecipe[]>([]);
+  const [recipes, setRecipes] = useState<
+    (PublicRecipe & {
+      aggregate_rating?: number | null;
+      total_ratings?: number;
+      total_views?: number;
+      total_versions?: number;
+      latest_version?: number;
+    })[]
+  >([]);
   const [loading, setLoading] = useState(true);
   const [savingRecipeId, setSavingRecipeId] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<
+    'rating' | 'views' | 'recent' | 'versions' | 'trending'
+  >('rating');
   const { filters, updateFilters } = useRecipeFilters();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const loadPublicRecipes = useCallback(async () => {
     try {
       setLoading(true);
-      const data = await recipeApi.getPublicRecipes();
+      let data;
+
+      if (sortBy === 'trending') {
+        data = await recipeApi.getTrendingRecipes(50); // Get more for filtering
+      } else {
+        data = await recipeApi.getPublicRecipesWithStats();
+      }
+
       setRecipes(data);
     } catch (error) {
       console.error('Error loading public recipes:', error);
@@ -30,7 +50,7 @@ export default function ExplorePage() {
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, [toast, sortBy]);
 
   useEffect(() => {
     loadPublicRecipes();
@@ -53,6 +73,30 @@ export default function ExplorePage() {
       });
     } finally {
       setSavingRecipeId(null);
+    }
+  };
+
+  const handleRateVersion = async (
+    recipeId: string,
+    versionNumber: number,
+    rating: number,
+    comment?: string
+  ) => {
+    try {
+      await recipeApi.rateVersion(recipeId, versionNumber, rating, comment);
+      toast({
+        title: 'Rating submitted',
+        description: 'Thank you for rating this version!',
+      });
+      // Reload recipes to update stats
+      await loadPublicRecipes();
+    } catch (error) {
+      console.error('Error rating version:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to submit rating',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -90,9 +134,9 @@ export default function ExplorePage() {
           author: result?.author_name,
         });
 
-        // Navigate to recipe view page
-        console.log('🚀 [Explore] Opening recipe page...');
-        window.open(`/recipe/${recipe.id}`, '_blank');
+        // Navigate to recipe view page in same tab with state
+        console.log('🚀 [Explore] Navigating to recipe page...');
+        navigate(`/recipe/${recipe.id}`, { state: { from: 'explore' } });
       })
       .catch((error) => {
         console.error('❌ [Explore] API test failed:', {
@@ -110,14 +154,6 @@ export default function ExplorePage() {
   };
 
   // Remove handleEditRecipe - community recipes should not be editable
-
-  const handleShareToggle = () => {
-    // For public recipes, sharing is already enabled
-    toast({
-      title: 'Info',
-      description: 'This recipe is already public',
-    });
-  };
 
   // Comprehensive filtering logic for public recipes
   const filteredRecipes = useMemo(() => {
@@ -189,39 +225,57 @@ export default function ExplorePage() {
       );
     }
 
-    // Sorting
+    // Enhanced sorting with version-aware metrics
     const sorted = [...filtered].sort((a, b) => {
       let comparison = 0;
 
-      switch (filters.sortBy) {
-        case 'title':
-          comparison = a.title.localeCompare(b.title);
+      // Declare variables outside switch to avoid lexical declaration errors
+      let ratingA: number, ratingB: number, trendA: number, trendB: number;
+
+      switch (sortBy) {
+        case 'rating': {
+          // Sort by aggregate rating, then by total ratings
+          ratingA = a.aggregate_rating || a.creator_rating || 0;
+          ratingB = b.aggregate_rating || b.creator_rating || 0;
+          comparison = ratingB - ratingA;
+          if (comparison === 0) {
+            comparison = (b.total_ratings || 0) - (a.total_ratings || 0);
+          }
           break;
-        case 'popularity':
-          // Use updated_at as a proxy for popularity
+        }
+        case 'views': {
+          comparison = (b.total_views || 0) - (a.total_views || 0);
+          break;
+        }
+        case 'versions': {
+          comparison = (b.total_versions || 1) - (a.total_versions || 1);
+          break;
+        }
+        case 'trending': {
+          // Sort by trend score if available, otherwise by recent activity
+          trendA = (a as { trend_score?: number }).trend_score || 0;
+          trendB = (b as { trend_score?: number }).trend_score || 0;
+          comparison = trendB - trendA;
+          break;
+        }
+        case 'recent':
+        default: {
           comparison =
-            new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime();
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
           break;
-        case 'date':
-        default:
-          comparison =
-            new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
-          break;
+        }
       }
 
-      return filters.sortOrder === 'asc' ? comparison : -comparison;
+      // Fallback sorting by title if primary sort is equal
+      if (comparison === 0) {
+        comparison = a.title.localeCompare(b.title);
+      }
+
+      return comparison;
     });
 
     return sorted;
-  }, [recipes, filters]);
-
-  const getAuthorName = (recipe: PublicRecipe) => {
-    if (recipe.author_name && recipe.author_name.trim() !== '') {
-      const firstName = recipe.author_name.trim().split(' ')[0];
-      return firstName || 'Anonymous';
-    }
-    return 'Anonymous';
-  };
+  }, [recipes, filters, sortBy]);
 
   if (loading) {
     return (
@@ -252,6 +306,59 @@ export default function ExplorePage() {
           filteredCount={filteredRecipes.length}
           className="mb-6"
         />
+
+        {/* Sorting Controls */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center space-x-2">
+            <span className="text-sm font-medium text-gray-700">Sort by:</span>
+            <div className="flex items-center space-x-1">
+              <Button
+                size="sm"
+                variant={sortBy === 'rating' ? 'default' : 'outline'}
+                onClick={() => setSortBy('rating')}
+                className="text-xs"
+              >
+                <Star className="h-3 w-3 mr-1" />
+                Top Rated
+              </Button>
+              <Button
+                size="sm"
+                variant={sortBy === 'views' ? 'default' : 'outline'}
+                onClick={() => setSortBy('views')}
+                className="text-xs"
+              >
+                <Eye className="h-3 w-3 mr-1" />
+                Most Viewed
+              </Button>
+              <Button
+                size="sm"
+                variant={sortBy === 'versions' ? 'default' : 'outline'}
+                onClick={() => setSortBy('versions')}
+                className="text-xs"
+              >
+                <GitBranch className="h-3 w-3 mr-1" />
+                Most Versions
+              </Button>
+              <Button
+                size="sm"
+                variant={sortBy === 'trending' ? 'default' : 'outline'}
+                onClick={() => setSortBy('trending')}
+                className="text-xs"
+              >
+                <TrendingUp className="h-3 w-3 mr-1" />
+                Trending
+              </Button>
+              <Button
+                size="sm"
+                variant={sortBy === 'recent' ? 'default' : 'outline'}
+                onClick={() => setSortBy('recent')}
+                className="text-xs"
+              >
+                Recent
+              </Button>
+            </div>
+          </div>
+        </div>
 
         {/* Results Count */}
         <div className="mb-4 text-sm text-muted-foreground">
@@ -284,32 +391,14 @@ export default function ExplorePage() {
       ) : (
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {filteredRecipes.map((recipe) => (
-            <div key={recipe.id} className="relative">
-              <RecipeCard
-                recipe={recipe}
-                onView={handleViewRecipe}
-                showShareButton={false}
-                onShareToggle={handleShareToggle}
-                showEditDelete={false} // Hide Edit/Delete for community recipes
-              />
-
-              {/* Author info and save button */}
-              <div className="mt-3 flex items-center justify-between">
-                <div className="text-muted-foreground text-sm">
-                  by {getAuthorName(recipe)}
-                </div>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => handleSaveRecipe(recipe.id)}
-                  disabled={savingRecipeId === recipe.id}
-                  className="flex items-center gap-2"
-                >
-                  <Save className="h-4 w-4" />
-                  {savingRecipeId === recipe.id ? 'Saving...' : 'Save'}
-                </Button>
-              </div>
-            </div>
+            <VersionedRecipeCard
+              key={recipe.id}
+              recipe={recipe}
+              onView={handleViewRecipe}
+              onSave={handleSaveRecipe}
+              onRateVersion={handleRateVersion}
+              savingRecipeId={savingRecipeId}
+            />
           ))}
         </div>
       )}

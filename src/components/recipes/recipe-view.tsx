@@ -14,6 +14,7 @@ import {
   ShoppingCart,
   AlertCircle,
   Globe,
+  Save,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -25,14 +26,32 @@ import { parseIngredientText } from '@/lib/groceries/ingredient-parser';
 import { EnhancedIngredientMatcher } from '@/lib/groceries/enhanced-ingredient-matcher';
 import { useGroceries } from '@/hooks/useGroceries';
 import type { Recipe } from '@/lib/types';
+import { CreatorRating, CommunityRating } from '@/components/ui/rating';
+import { CommentSystem } from './comment-system';
 
 interface RecipeViewProps {
   recipe: Recipe;
   onEdit?: () => void;
+  onSave?: () => void;
   onBack?: () => void;
+  communityRating?: {
+    average: number;
+    count: number;
+    userRating?: number;
+  } | null;
+  onCommunityRate?: (rating: number) => void;
+  ratingLoading?: boolean;
 }
 
-export function RecipeView({ recipe, onEdit, onBack }: RecipeViewProps) {
+export function RecipeView({
+  recipe,
+  onEdit,
+  onSave,
+  onBack,
+  communityRating,
+  onCommunityRate,
+  ratingLoading,
+}: RecipeViewProps) {
   const { groceries } = useGroceries();
   const {
     /* saveIngredientToGlobal, */ refreshGlobalIngredients,
@@ -124,6 +143,12 @@ export function RecipeView({ recipe, onEdit, onBack }: RecipeViewProps) {
             Edit Recipe
           </Button>
         )}
+        {onSave && (
+          <Button onClick={onSave}>
+            <Save className="mr-2 h-4 w-4" />
+            Save Recipe
+          </Button>
+        )}
       </div>
 
       {/* Recipe Header */}
@@ -180,6 +205,44 @@ export function RecipeView({ recipe, onEdit, onBack }: RecipeViewProps) {
                         size="sm"
                       />
                     ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Creator Rating */}
+              {recipe.creator_rating && (
+                <div className="mt-4">
+                  <CreatorRating
+                    rating={recipe.creator_rating}
+                    disabled={true}
+                    className="max-w-xs"
+                  />
+                </div>
+              )}
+
+              {/* Community Rating */}
+              {communityRating && communityRating.count > 0 && (
+                <div className="mt-4">
+                  <CommunityRating
+                    averageRating={communityRating.average}
+                    totalRatings={communityRating.count}
+                    userRating={communityRating.userRating}
+                    onRate={onCommunityRate}
+                    className="max-w-xs"
+                  />
+                </div>
+              )}
+
+              {/* Community Rating Loading */}
+              {ratingLoading && (
+                <div className="mt-4 max-w-xs">
+                  <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                    <div className="flex items-center justify-center">
+                      <div className="loading loading-spinner loading-sm text-blue-600"></div>
+                      <span className="ml-2 text-sm text-blue-700">
+                        Loading ratings...
+                      </span>
+                    </div>
                   </div>
                 </div>
               )}
@@ -505,6 +568,19 @@ export function RecipeView({ recipe, onEdit, onBack }: RecipeViewProps) {
                 );
               })}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Comments Section for Public Recipes */}
+      {recipe.is_public && (
+        <div className={createDaisyUICardClasses('bordered')}>
+          <div className="card-body">
+            <CommentSystem
+              recipeId={recipe.id}
+              versionNumber={recipe.version_number || 1}
+              className="mt-6"
+            />
           </div>
         </div>
       )}

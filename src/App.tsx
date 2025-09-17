@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from '@/contexts/AuthProvider';
 import { ProtectedRoute, PublicRoute } from '@/components/auth/ProtectedRoute';
 import { Header } from '@/components/layout/header';
+import { AuthErrorBoundary } from '@/components/auth/AuthErrorBoundary';
 import { RecipesPage } from '@/pages/recipes-page';
 import { AddRecipePage } from '@/pages/add-recipe-page';
 import { RecipeViewPage } from '@/pages/recipe-view-page';
@@ -59,7 +60,9 @@ function AppContent() {
         element={
           <ProtectedRoute>
             <div className="bg-base-100 min-h-screen">
-              <Header />
+              <AuthErrorBoundary>
+                <Header />
+              </AuthErrorBoundary>
               <main>
                 <RecipesPage />
               </main>
@@ -135,9 +138,13 @@ function AppContent() {
         element={
           <ProtectedRoute>
             <div className="bg-base-100 min-h-screen">
-              <Header />
+              <AuthErrorBoundary>
+                <Header />
+              </AuthErrorBoundary>
               <main>
-                <ProfilePage />
+                <AuthErrorBoundary>
+                  <ProfilePage />
+                </AuthErrorBoundary>
               </main>
             </div>
           </ProtectedRoute>

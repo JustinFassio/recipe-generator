@@ -46,6 +46,41 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
       Accept: 'application/json',
       'X-Client-Info': 'recipe-generator-web',
     },
+    // Add fetch configuration for better timeout handling
+    fetch: (url, options = {}) => {
+      const timeoutMs = import.meta.env.DEV ? 20000 : 15000;
+
+      // Create timeout signal with fallback for older browsers
+      let timeoutSignal: AbortSignal;
+      if (typeof AbortSignal.timeout === 'function') {
+        timeoutSignal = AbortSignal.timeout(timeoutMs);
+      } else {
+        // Fallback for browsers that don't support AbortSignal.timeout
+        const controller = new AbortController();
+        setTimeout(() => controller.abort(), timeoutMs);
+        timeoutSignal = controller.signal;
+      }
+
+      // Combine with existing signal if provided
+      const existingSignal = options.signal;
+      let finalSignal = timeoutSignal;
+
+      if (existingSignal) {
+        // If there's already a signal, we need to combine them
+        const combinedController = new AbortController();
+        const abortHandler = () => combinedController.abort();
+
+        existingSignal.addEventListener('abort', abortHandler);
+        timeoutSignal.addEventListener('abort', abortHandler);
+
+        finalSignal = combinedController.signal;
+      }
+
+      return fetch(url, {
+        ...options,
+        signal: finalSignal,
+      });
+    },
   },
   // Optimize database queries
   db: {

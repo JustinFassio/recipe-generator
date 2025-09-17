@@ -155,8 +155,12 @@ export const CATEGORY_METADATA = {
 // Helper function to get stats for sync script
 export function getCategoryStats() {
   const stats: Record<string, number> = {};
+  let total = 0;
+
   Object.entries(CHEF_ISABELLA_SYSTEM_CATALOG).forEach(([category, items]) => {
     stats[category] = items.length;
+    total += items.length;
   });
-  return stats;
+
+  return { stats, total };
 }

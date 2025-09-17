@@ -9,6 +9,7 @@ import { toast } from '@/hooks/use-toast';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Divider } from '@/components/ui/divider';
 import { AppTitle } from '@/components/ui/app-title';
+import { StackedImages } from '@/components/auth/StackedImages';
 
 export function AuthForm() {
   const { user } = useAuth();
@@ -505,31 +506,10 @@ export function AuthForm() {
           <Divider className="divider-horizontal text-gray-500">AND</Divider>
         </div>
 
-        {/* Right Side - App Info */}
-        <div className="card rounded-box flex min-h-[400px] flex-1 flex-col border border-gray-200 bg-white p-8 shadow-xl lg:min-h-[600px]">
-          <div className="flex flex-1 flex-col justify-center text-center">
-            <h3 className="mb-4 text-2xl font-bold text-gray-900">
-              Discover Amazing Recipes
-            </h3>
-            <p className="mb-6 text-sm text-gray-600">
-              Add or recreate your favorite family and healthy recipes with
-              family and friends
-            </p>
-
-            <div className="text-center">
-              <p className="mb-4 text-gray-500">
-                Join our community of home chefs
-              </p>
-              <p className="text-sm text-gray-600">
-                Share your favorite recipes with the community
-              </p>
-            </div>
-
-            <div className="mt-6">
-              <p className="text-xs text-gray-500">
-                Be the first to share your favorite recipes with the community
-              </p>
-            </div>
+        {/* Right Side - Featured Recipes Showcase */}
+        <div className="card rounded-box flex min-h-[400px] flex-1 flex-col border border-gray-200 bg-white shadow-xl lg:min-h-[600px]">
+          <div className="flex flex-1 flex-col justify-center">
+            <StackedImages maxImages={6} />
           </div>
         </div>
       </div>

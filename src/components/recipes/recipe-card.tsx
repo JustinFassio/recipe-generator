@@ -17,6 +17,7 @@ import CategoryChip from '@/components/ui/CategoryChip';
 import { Badge } from '@/components/ui/badge';
 import { useIngredientMatching } from '@/hooks/useIngredientMatching';
 import type { Recipe, PublicRecipe } from '@/lib/types';
+import { getOptimizedImageUrl } from '@/lib/image-cache-utils';
 import { useDeleteRecipe } from '@/hooks/use-recipes';
 import { useState } from 'react';
 import { recipeApi } from '@/lib/api';
@@ -130,9 +131,11 @@ export function RecipeCard({
             {recipe.image_url && (
               <div className="aspect-video overflow-hidden">
                 <img
-                  src={`${recipe.image_url}?v=${new Date(
-                    recipe.updated_at || recipe.created_at
-                  ).getTime()}`}
+                  src={getOptimizedImageUrl(
+                    recipe.image_url,
+                    recipe.updated_at,
+                    recipe.created_at
+                  )}
                   alt={recipe.title}
                   className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-105"
                 />
@@ -217,6 +220,29 @@ export function RecipeCard({
                       </div>
                     </div>
                   )}
+
+                {/* Creator Rating */}
+                {recipe.creator_rating && (
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-1">
+                      {[...Array(5)].map((_, i) => (
+                        <span
+                          key={i}
+                          className={`text-sm ${
+                            i < recipe.creator_rating!
+                              ? 'text-orange-400'
+                              : 'text-gray-300'
+                          }`}
+                        >
+                          ★
+                        </span>
+                      ))}
+                    </div>
+                    <span className="text-xs text-gray-600">
+                      {recipe.creator_rating}/5
+                    </span>
+                  </div>
+                )}
 
                 {recipe.categories && recipe.categories.length > 0 && (
                   <div className="flex flex-wrap gap-1">

@@ -45,3 +45,23 @@ backups/
 # Development/debug components
 src/components/ui/theme-debug.tsx
 src/components/ui/theme-test.tsx
+
+# Vercel
+.vercel
+
+# Test artifacts and videos
+test-results/
+*.webm
+test-failed-*.png
+error-context.md
+
+# Playwright reports
+playwright-report/
+
+# Temporary documentation files
+*ACTION_PLAN*.md
+*HANDOFF_MEMO*.md
+*PROTECTED_ROUTE*.md
+
+# Environment files
+.env*.local

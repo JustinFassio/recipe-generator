@@ -51,6 +51,7 @@ export const recipeFormSchema = z.object({
       MAX_CATEGORIES_PER_RECIPE,
       `Maximum ${MAX_CATEGORIES_PER_RECIPE} categories allowed`
     ),
+  creator_rating: z.number().min(1).max(5).nullable().optional(),
 });
 
 export type RecipeFormData = z.infer<typeof recipeFormSchema>;
