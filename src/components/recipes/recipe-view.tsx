@@ -457,6 +457,33 @@ export function RecipeView({
         </div>
       </div>
 
+      {/* Setup */}
+      {recipe.setup && recipe.setup.length > 0 && (
+        <div className={createDaisyUICardClasses('bordered')}>
+          <div className="card-body">
+            <h3
+              className={`${createDaisyUICardTitleClasses()} text-xl font-semibold`}
+            >
+              Setup & Preparation
+            </h3>
+            <div className="space-y-3">
+              {recipe.setup.map((step, index) => (
+                <div key={index} className="flex items-start">
+                  <div className="mt-0.5 mr-4 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-blue-100">
+                    <span className="text-sm font-semibold text-blue-700">
+                      {index + 1}
+                    </span>
+                  </div>
+                  <div className="flex-1 pt-1">
+                    <p className="text-gray-800 leading-relaxed">{step}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Instructions */}
       <div className={createDaisyUICardClasses('bordered')}>
         <div className="card-body">

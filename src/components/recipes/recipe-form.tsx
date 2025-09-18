@@ -222,9 +222,9 @@ export function RecipeForm({
           ...recipeData,
           is_public: false,
           creator_rating: recipeData.creator_rating || null,
-          version_number: 1,
-          parent_recipe_id: null,
-          is_version: false,
+          cooking_time: null,
+          difficulty: null,
+          current_version_id: null,
         });
       }
 
@@ -599,6 +599,20 @@ export function RecipeForm({
         {/* Recipe Versioning Component */}
         <RecipeVersions
           existingRecipe={existingRecipe}
+          currentFormData={(() => {
+            // Convert RecipeFormData to format expected by versioning API
+            const formData = watch();
+            return {
+              title: formData.title,
+              ingredients: formData.ingredients,
+              instructions: formData.instructions,
+              notes: formData.notes,
+              setup: formData.setup,
+              categories: formData.categories,
+              creator_rating: formData.creator_rating,
+              image_url: formData.image_url
+            };
+          })()} // Pass converted form data for version creation
           disabled={
             createRecipe.isPending ||
             updateRecipe.isPending ||

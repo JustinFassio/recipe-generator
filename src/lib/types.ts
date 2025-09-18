@@ -10,15 +10,15 @@ export type Recipe = {
   image_url: string | null;
   categories: string[];
   setup: string[];
+  cooking_time: string | null;
+  difficulty: string | null;
   user_id: string;
   is_public: boolean;
   creator_rating: number | null;
   created_at: string;
   updated_at: string;
-  // Versioning fields
-  version_number: number;
-  parent_recipe_id: string | null;
-  is_version: boolean;
+  // Clean versioning field
+  current_version_id: string | null;
 };
 
 export type PublicRecipe = Recipe & {
@@ -28,14 +28,25 @@ export type PublicRecipe = Recipe & {
 // Recipe Versioning types
 export type RecipeVersion = {
   id: string;
-  original_recipe_id: string;
-  version_recipe_id: string;
+  recipe_id: string;
   version_number: number;
   version_name: string | null;
   changelog: string | null;
+  // Full content snapshot
+  title: string;
+  ingredients: string[];
+  instructions: string;
+  notes: string | null;
+  setup: string[];
+  categories: string[];
+  cooking_time: string | null;
+  difficulty: string | null;
+  creator_rating: number | null;
+  image_url: string | null;
+  // Metadata
   created_at: string;
-  is_active: boolean;
-  recipe?: Recipe; // Full recipe data when populated
+  created_by: string;
+  is_published: boolean;
 };
 
 export type VersionStats = {

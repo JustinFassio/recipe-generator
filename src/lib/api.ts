@@ -3,9 +3,6 @@ import type {
   Recipe,
   PublicRecipe,
   RecipeFilters,
-  VersionStats,
-  AggregateStats,
-  VersionRating,
 } from './types';
 import { parseRecipeFromText } from './recipe-parser';
 import { trackAPIError } from './error-tracking';
@@ -571,6 +568,7 @@ export const recipeApi = {
     if (!user) throw new Error('User not authenticated');
 
     try {
+      // Create the recipe first
       const { data, error } = await supabase
         .from('recipes')
         .insert({ ...recipe, user_id: user.id, is_public: false })
@@ -580,6 +578,38 @@ export const recipeApi = {
       if (error) {
         console.error('Supabase create recipe error:', error);
         throw new Error(`Database error: ${error.message}`);
+      }
+
+      // 🎯 CRITICAL: Automatically create Version 0 (Original Recipe) for new recipes
+      console.log('🔄 [createRecipe] Creating Version 0 for new recipe:', data.title);
+      
+      const { error: versionError } = await supabase
+        .from('recipe_content_versions')
+        .insert({
+          recipe_id: data.id,
+          version_number: 0,
+          version_name: 'Original Recipe',
+          changelog: 'Initial recipe version',
+          title: data.title,
+          ingredients: data.ingredients,
+          instructions: data.instructions,
+          notes: data.notes,
+          setup: data.setup,
+          categories: data.categories,
+          cooking_time: data.cooking_time,
+          difficulty: data.difficulty,
+          creator_rating: data.creator_rating,
+          image_url: data.image_url,
+          created_by: user.id,
+          is_published: true // Original is always published
+        });
+
+      if (versionError) {
+        console.error('❌ Failed to create Version 0 for new recipe:', versionError);
+        // Don't fail the recipe creation, but log the error
+        console.warn('Recipe created but Version 0 creation failed. This may cause versioning issues.');
+      } else {
+        console.log('✅ Version 0 created successfully for new recipe');
       }
 
       return data;
@@ -966,35 +996,19 @@ export const recipeApi = {
   },
 
   // Get recipe engagement analytics for creators
+  // Simple recipe analytics using clean API
   async getRecipeAnalytics(recipeId: string): Promise<{
-    version_stats: VersionStats[];
-    aggregate_stats: AggregateStats;
+    version_count: number;
     recent_activity: {
       ratings_this_week: number;
       views_this_week: number;
       comments_this_week: number;
     };
-    top_comments: VersionRating[];
+    top_comments: any[];
   } | null> {
     try {
-      const originalRecipeId = recipeId; // Assume this is the original recipe ID
-
-      // Get all version stats
-      const versions = await this.getRecipeVersions(originalRecipeId);
-      const versionStats = await Promise.all(
-        versions.map(async (version) => {
-          if (version.recipe) {
-            return this.getVersionStats(
-              version.recipe.id,
-              version.version_number
-            );
-          }
-          return null;
-        })
-      );
-
-      // Get aggregate stats
-      const aggregateStats = await this.getAggregateStats(originalRecipeId);
+      // Get version count using clean API
+      const versionCount = await this.getVersionCount(recipeId);
 
       // Calculate recent activity (last 7 days)
       const sevenDaysAgo = new Date();
@@ -1024,10 +1038,7 @@ export const recipeApi = {
         .limit(5);
 
       return {
-        version_stats: versionStats.filter(
-          (stat) => stat !== null
-        ) as VersionStats[],
-        aggregate_stats: aggregateStats!,
+        version_count: versionCount,
         recent_activity: {
           ratings_this_week: recentRatings?.length || 0,
           views_this_week: recentViews?.length || 0,
@@ -1061,7 +1072,7 @@ export const recipeApi = {
     return data;
   },
 
-  // VERSIONING API - imported from dedicated module
+  // VERSIONING API - using clean implementation
   ...versioningApi,
 };
 // Formatting fix
