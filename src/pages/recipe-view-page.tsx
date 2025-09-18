@@ -48,16 +48,26 @@ export function RecipeViewPage() {
     authLoading,
   });
 
-  // Optimize: Try public recipe first for better performance on public recipe pages
+  // Optimize: Use single query strategy to eliminate redundant API calls
+  // - Authenticated users: Use user query (can see both public + private recipes)
+  // - Unauthenticated users: Use public query (public recipes only)
+  const shouldFetchUser = !!user && !authLoading;
+  const shouldFetchPublic = !shouldFetchUser; // Only fetch public if not authenticated
+
+  console.log('🚀 [RecipeViewPage] Query optimization strategy:', {
+    shouldFetchUser,
+    shouldFetchPublic,
+    hasUser: !!user,
+    authLoading,
+    strategy: shouldFetchUser ? 'user-query-only' : 'public-query-only'
+  });
+
   const {
     data: publicRecipe,
     isLoading: publicLoading,
     error: publicError,
-  } = usePublicRecipe(id!);
+  } = usePublicRecipe(id!, { enabled: shouldFetchPublic });
 
-  // Always try to fetch user recipe if we have an authenticated user
-  // This ensures we can find both public and private recipes owned by the user
-  const shouldFetchUser = !!user && !authLoading;
   const {
     data: userRecipe,
     isLoading: userLoading,
