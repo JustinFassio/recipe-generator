@@ -70,10 +70,6 @@ export function VersionSelector({
       );
       setVersions(sortedVersions);
 
-      // Load aggregate stats (if this function still exists, otherwise remove)
-      // const aggregateData = await recipeApi.getAggregateStats(recipeId);
-      // setAggregateStats(aggregateData);
-
       // Load individual version stats (simplified - versions now contain full content)
       const statsMap = new Map<number, VersionStats>();
       for (const version of versionsData) {
