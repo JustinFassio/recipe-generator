@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS recipe_content_versions (
 );
 
 -- Create essential indexes for performance
-CREATE INDEX IF NOT EXISTS idx_recipe_content_versions_recipe_id ON recipe_content_versions(recipe_id);
+-- Note: Composite (recipe_id, version_number) index handles recipe_id-only queries efficiently
 CREATE INDEX IF NOT EXISTS idx_recipe_content_versions_recipe_version ON recipe_content_versions(recipe_id, version_number);
 CREATE INDEX IF NOT EXISTS idx_recipe_content_versions_created_at ON recipe_content_versions(created_at);
 
