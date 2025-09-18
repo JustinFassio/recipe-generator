@@ -1,4 +1,5 @@
 import { test } from '@playwright/test';
+import { TEST_USER } from './fixtures/auth';
 
 test.describe('Recipe Version Investigation with Test Data', () => {
   test('create recipe versions and investigate viewing issue', async ({
@@ -17,8 +18,8 @@ test.describe('Recipe Version Investigation with Test Data', () => {
       await signInButton.click();
 
       // Fill in credentials
-      await page.fill('input[type="email"]', 'test@example.com');
-      await page.fill('input[type="password"]', 'password123');
+      await page.fill('input[type="email"]', TEST_USER.email);
+      await page.fill('input[type="password"]', TEST_USER.password);
       await page.click('button[type="submit"]');
       await page.waitForLoadState('networkidle');
 
@@ -33,8 +34,8 @@ test.describe('Recipe Version Investigation with Test Data', () => {
         });
         if ((await createAccountButton.count()) > 0) {
           await createAccountButton.click();
-          await page.fill('input[type="email"]', 'test@example.com');
-          await page.fill('input[type="password"]', 'password123');
+          await page.fill('input[type="email"]', TEST_USER.email);
+          await page.fill('input[type="password"]', TEST_USER.password);
           await page.click('button[type="submit"]');
           await page.waitForLoadState('networkidle');
         }

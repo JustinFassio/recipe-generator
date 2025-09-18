@@ -1,4 +1,5 @@
 import { test } from '@playwright/test';
+import { TEST_USER } from './fixtures/auth';
 
 // Test data
 const testRecipe = {
@@ -41,8 +42,8 @@ test.describe('Recipe Versioning System', () => {
 
     if (!isSignedIn) {
       // Sign in process
-      await page.fill('input[type="email"]', 'test@example.com');
-      await page.fill('input[type="password"]', 'testpassword123');
+      await page.fill('input[type="email"]', TEST_USER.email);
+      await page.fill('input[type="password"]', TEST_USER.password);
       await page.click('button[type="submit"]');
 
       // Wait for successful sign in

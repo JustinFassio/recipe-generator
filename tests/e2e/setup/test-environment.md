@@ -79,11 +79,13 @@ test('should sign in user', async ({ authPage }) => {
 
 ## Test Users
 
-The following test users are available:
+The following test users are available (from seed data):
 
-- **Primary**: `test@example.com` / `testpassword123`
-- **Secondary**: `test2@example.com` / `testpassword123`
-- **Admin**: `admin@example.com` / `adminpassword123`
+- **Primary (Alice)**: `alice@example.com` / `Password123!`
+- **Secondary (Bob)**: `bob@example.com` / `Password123!`
+- **Admin (Charlie)**: `charlie@example.com` / `Password123!`
+
+**Note**: Use the centralized `TEST_USER` from `fixtures/auth.ts` in your tests for consistency.
 
 ## Environment Variables
 

@@ -1,4 +1,5 @@
 import { test } from '@playwright/test';
+import { TEST_USER } from './fixtures/auth';
 
 test.describe('Comprehensive Versioning Investigation', () => {
   test('create test data and investigate versioning issues', async ({
@@ -16,8 +17,8 @@ test.describe('Comprehensive Versioning Investigation', () => {
       console.log('🔐 Attempting to sign in...');
       await signInButton.click();
 
-      await page.fill('input[type="email"]', 'test@example.com');
-      await page.fill('input[type="password"]', 'password123');
+      await page.fill('input[type="email"]', TEST_USER.email);
+      await page.fill('input[type="password"]', TEST_USER.password);
       await page.click('button[type="submit"]');
       await page.waitForLoadState('networkidle');
 
@@ -32,8 +33,8 @@ test.describe('Comprehensive Versioning Investigation', () => {
         });
         if ((await createAccountButton.count()) > 0) {
           await createAccountButton.click();
-          await page.fill('input[type="email"]', 'test@example.com');
-          await page.fill('input[type="password"]', 'password123');
+          await page.fill('input[type="email"]', TEST_USER.email);
+          await page.fill('input[type="password"]', TEST_USER.password);
           await page.click('button[type="submit"]');
           await page.waitForLoadState('networkidle');
         }

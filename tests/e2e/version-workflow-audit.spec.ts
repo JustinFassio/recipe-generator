@@ -1,4 +1,5 @@
 import { test } from '@playwright/test';
+import { TEST_USER } from './fixtures/auth';
 
 test.describe('Version Workflow Systematic Audit', () => {
   test('comprehensive workflow validation from database to UI', async ({
@@ -18,8 +19,8 @@ test.describe('Version Workflow Systematic Audit', () => {
     if ((await signInButton.count()) > 0) {
       console.log('🔐 Authenticating user...');
       await signInButton.click();
-      await page.fill('input[type="email"]', 'test@example.com');
-      await page.fill('input[type="password"]', 'password123');
+      await page.fill('input[type="email"]', TEST_USER.email);
+      await page.fill('input[type="password"]', TEST_USER.password);
       await page.click('button[type="submit"]');
       await page.waitForLoadState('networkidle');
     }
