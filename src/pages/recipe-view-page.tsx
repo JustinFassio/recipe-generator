@@ -59,7 +59,7 @@ export function RecipeViewPage() {
     shouldFetchPublic,
     hasUser: !!user,
     authLoading,
-    strategy: shouldFetchUser ? 'user-query-only' : 'public-query-only'
+    strategy: shouldFetchUser ? 'user-query-only' : 'public-query-only',
   });
 
   const {
