@@ -85,9 +85,27 @@ export function VersionedRecipeCard({
   };
 
   const handleVersionSelect = (version: RecipeVersion) => {
-    if (version.recipe) {
-      onView?.(version.recipe as PublicRecipe);
-    }
+    // Create a PublicRecipe-compatible object from the version data
+    const versionAsRecipe: PublicRecipe = {
+      id: version.recipe_id,
+      title: version.title,
+      ingredients: version.ingredients,
+      instructions: version.instructions,
+      notes: version.notes || null,
+      setup: version.setup || null,
+      categories: version.categories,
+      cooking_time: version.cooking_time || null,
+      difficulty: version.difficulty || null,
+      creator_rating: version.creator_rating || null,
+      image_url: version.image_url || null,
+      user_id: version.created_by,
+      is_public: version.is_published,
+      created_at: version.created_at,
+      updated_at: version.created_at,
+      current_version_id: version.id,
+      author_name: 'Recipe Author', // Placeholder until we can fetch actual author name
+    };
+    onView?.(versionAsRecipe);
   };
 
   return (
@@ -99,7 +117,7 @@ export function VersionedRecipeCard({
           <div className="aspect-video overflow-hidden">
             <img
               src={getOptimizedImageUrl(
-                recipe.image_url,
+                recipe.image_url!, // Safe due to conditional rendering guard
                 recipe.updated_at,
                 recipe.created_at
               )}
@@ -270,8 +288,8 @@ export function VersionedRecipeCard({
 
               <div className="max-h-[60vh] overflow-y-auto">
                 <VersionSelector
-                  originalRecipeId={recipe.parent_recipe_id || recipe.id}
-                  currentVersionNumber={recipe.version_number}
+                  recipeId={recipe.id}
+                  currentVersionNumber={1}
                   onVersionSelect={handleVersionSelect}
                   onRateVersion={onRateVersion}
                 />

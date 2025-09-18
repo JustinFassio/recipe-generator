@@ -58,6 +58,15 @@ error-context.md
 # Playwright reports
 playwright-report/
 
+# Debug screenshots and HTML files
+debug-*.png
+debug-*.html
+*-not-found.png
+setup-*.png
+version-*.png
+test-*.png
+*-debug.png
+
 # Temporary documentation files
 *ACTION_PLAN*.md
 *HANDOFF_MEMO*.md

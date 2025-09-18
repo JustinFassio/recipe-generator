@@ -1,17 +1,11 @@
 import { supabase } from './supabase';
-import type {
-  Recipe,
-  PublicRecipe,
-  RecipeFilters,
-  RecipeVersion,
-  VersionStats,
-  AggregateStats,
-  VersionRating,
-} from './types';
+import type { Recipe, PublicRecipe, RecipeFilters } from './types';
 import { parseRecipeFromText } from './recipe-parser';
-import { trackDatabaseError, trackAPIError } from './error-tracking';
+import { trackAPIError } from './error-tracking';
 import { IngredientMatcher } from './groceries/ingredient-matcher';
 import { getUserGroceries } from './user-preferences';
+import { handleError } from './api/shared/error-handling';
+import { versioningApi } from './api/features/versioning-api';
 
 // Configuration constants for ingredient filtering
 const INGREDIENT_MATCH_CONFIDENCE_THRESHOLD = 50; // Minimum confidence score for ingredient matching (0-100)
@@ -35,27 +29,6 @@ function applySimpleIngredientFilter(
 interface ProfileSummary {
   id: string;
   full_name: string | null;
-}
-
-// Enhanced error handler with error tracking
-function handleError(error: unknown, operation: string): never {
-  const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-
-  // Determine error category and track appropriately
-  if (
-    error &&
-    typeof error === 'object' &&
-    ('code' in error || 'hint' in error || 'details' in error)
-  ) {
-    // Supabase database error
-    trackDatabaseError(`${operation}: ${errorMessage}`, error, { operation });
-  } else {
-    // General API error
-    trackAPIError(`${operation}: ${errorMessage}`, error, { operation });
-  }
-
-  console.error(`${operation} error:`, error);
-  throw new Error(`${operation} failed: ${errorMessage}`);
 }
 
 export const recipeApi = {
@@ -591,6 +564,7 @@ export const recipeApi = {
     if (!user) throw new Error('User not authenticated');
 
     try {
+      // Create the recipe first
       const { data, error } = await supabase
         .from('recipes')
         .insert({ ...recipe, user_id: user.id, is_public: false })
@@ -600,6 +574,46 @@ export const recipeApi = {
       if (error) {
         console.error('Supabase create recipe error:', error);
         throw new Error(`Database error: ${error.message}`);
+      }
+
+      // 🎯 CRITICAL: Automatically create Version 0 (Original Recipe) for new recipes
+      console.log(
+        '🔄 [createRecipe] Creating Version 0 for new recipe:',
+        data.title
+      );
+
+      const { error: versionError } = await supabase
+        .from('recipe_content_versions')
+        .insert({
+          recipe_id: data.id,
+          version_number: 0,
+          version_name: 'Original Recipe',
+          changelog: 'Initial recipe version',
+          title: data.title,
+          ingredients: data.ingredients,
+          instructions: data.instructions,
+          notes: data.notes,
+          setup: data.setup,
+          categories: data.categories,
+          cooking_time: data.cooking_time,
+          difficulty: data.difficulty,
+          creator_rating: data.creator_rating,
+          image_url: data.image_url,
+          created_by: user.id,
+          is_published: true, // Original is always published
+        });
+
+      if (versionError) {
+        console.error(
+          '❌ Failed to create Version 0 for new recipe:',
+          versionError
+        );
+        // Don't fail the recipe creation, but log the error
+        console.warn(
+          'Recipe created but Version 0 creation failed. This may cause versioning issues.'
+        );
+      } else {
+        console.log('✅ Version 0 created successfully for new recipe');
       }
 
       return data;
@@ -871,228 +885,6 @@ export const recipeApi = {
     if (error) handleError(error, 'Submit community rating');
   },
 
-  // RECIPE VERSIONING API
-
-  // Get all versions of a recipe
-  async getRecipeVersions(originalRecipeId: string): Promise<RecipeVersion[]> {
-    const { data, error } = await supabase
-      .from('recipe_versions')
-      .select(
-        `
-        *,
-        recipe:version_recipe_id (
-          id, title, ingredients, instructions, notes, image_url, 
-          categories, setup, user_id, is_public, creator_rating, 
-          created_at, updated_at, version_number, parent_recipe_id, is_version
-        )
-      `
-      )
-      .eq('original_recipe_id', originalRecipeId)
-      .eq('is_active', true)
-      .order('version_number', { ascending: false });
-
-    if (error) handleError(error, 'Get recipe versions');
-    return data || [];
-  },
-
-  // Get version-specific stats
-  async getVersionStats(
-    recipeId: string,
-    versionNumber: number
-  ): Promise<VersionStats | null> {
-    const { data, error } = await supabase
-      .from('recipe_version_stats')
-      .select('*')
-      .eq('recipe_id', recipeId)
-      .eq('version_number', versionNumber)
-      .single();
-
-    if (error && error.code !== 'PGRST116') {
-      handleError(error, 'Get version stats');
-    }
-    return data;
-  },
-
-  // Get aggregate stats for all versions of a recipe
-  async getAggregateStats(
-    originalRecipeId: string
-  ): Promise<AggregateStats | null> {
-    const { data, error } = await supabase
-      .from('recipe_aggregate_stats')
-      .select('*')
-      .eq('original_recipe_id', originalRecipeId)
-      .single();
-
-    if (error && error.code !== 'PGRST116') {
-      handleError(error, 'Get aggregate stats');
-    }
-    return data;
-  },
-
-  // Create new version (owner only)
-  async createNewVersion(
-    originalRecipeId: string,
-    recipeData: Omit<Recipe, 'id' | 'user_id' | 'created_at' | 'updated_at'>,
-    versionName?: string,
-    changelog?: string
-  ): Promise<Recipe> {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) throw new Error('User not authenticated');
-
-    // Get next version number
-    const { data: nextVersionData, error: versionError } = await supabase.rpc(
-      'get_next_version_number',
-      { original_id: originalRecipeId }
-    );
-
-    if (versionError) handleError(versionError, 'Get next version number');
-    const nextVersion = nextVersionData || 2;
-
-    // Create the new recipe version
-    const { data: newRecipe, error: recipeError } = await supabase
-      .from('recipes')
-      .insert({
-        ...recipeData,
-        user_id: user.id,
-        version_number: nextVersion,
-        parent_recipe_id: originalRecipeId,
-        is_version: true,
-      })
-      .select()
-      .single();
-
-    if (recipeError) handleError(recipeError, 'Create new recipe version');
-
-    // Add to recipe_versions tracking table
-    const { error: versionTrackingError } = await supabase
-      .from('recipe_versions')
-      .insert({
-        original_recipe_id: originalRecipeId,
-        version_recipe_id: newRecipe.id,
-        version_number: nextVersion,
-        version_name: versionName,
-        changelog: changelog,
-      });
-
-    if (versionTrackingError)
-      handleError(versionTrackingError, 'Track recipe version');
-
-    return newRecipe;
-  },
-
-  // Rate specific version
-  async rateVersion(
-    recipeId: string,
-    versionNumber: number,
-    rating: number,
-    comment?: string
-  ): Promise<void> {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) throw new Error('User not authenticated');
-
-    const { error } = await supabase.from('recipe_ratings').upsert({
-      recipe_id: recipeId,
-      user_id: user.id,
-      version_number: versionNumber,
-      rating,
-      comment: comment || null,
-      updated_at: new Date().toISOString(),
-    });
-
-    if (error) handleError(error, 'Rate recipe version');
-  },
-
-  // Get version-specific ratings
-  async getVersionRatings(
-    recipeId: string,
-    versionNumber: number
-  ): Promise<VersionRating[]> {
-    const { data, error } = await supabase
-      .from('recipe_ratings')
-      .select('*')
-      .eq('recipe_id', recipeId)
-      .eq('version_number', versionNumber)
-      .order('created_at', { ascending: false });
-
-    if (error) handleError(error, 'Get version ratings');
-    return data || [];
-  },
-
-  // Track view for specific version
-  async trackVersionView(
-    recipeId: string,
-    versionNumber: number
-  ): Promise<void> {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) return; // Only track views for logged-in users
-
-    const { error } = await supabase.from('recipe_views').upsert(
-      {
-        recipe_id: recipeId,
-        version_number: versionNumber,
-        user_id: user.id,
-        viewed_at: new Date().toISOString(),
-        viewed_date: new Date().toISOString().split('T')[0], // YYYY-MM-DD format
-      },
-      {
-        onConflict: 'recipe_id,version_number,user_id,viewed_date',
-        ignoreDuplicates: true,
-      }
-    );
-
-    // Don't throw errors for view tracking failures
-    if (error) {
-      console.warn('Failed to track recipe view:', error);
-    }
-  },
-
-  // Get user's rating for a specific version
-  async getUserVersionRating(
-    recipeId: string,
-    versionNumber: number
-  ): Promise<VersionRating | null> {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) return null;
-
-    const { data, error } = await supabase
-      .from('recipe_ratings')
-      .select('*')
-      .eq('recipe_id', recipeId)
-      .eq('version_number', versionNumber)
-      .eq('user_id', user.id)
-      .single();
-
-    if (error && error.code !== 'PGRST116') {
-      handleError(error, 'Get user version rating');
-    }
-    return data;
-  },
-
-  // Check if user owns a recipe (for version creation permissions)
-  async checkRecipeOwnership(recipeId: string): Promise<boolean> {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) return false;
-
-    const { data, error } = await supabase
-      .from('recipes')
-      .select('user_id')
-      .eq('id', recipeId)
-      .single();
-
-    if (error) return false;
-    return data?.user_id === user.id;
-  },
-
   // PHASE 2: ENHANCED DISCOVERY & ANALYTICS
 
   // Get trending recipes based on recent engagement
@@ -1208,35 +1000,19 @@ export const recipeApi = {
   },
 
   // Get recipe engagement analytics for creators
+  // Simple recipe analytics using clean API
   async getRecipeAnalytics(recipeId: string): Promise<{
-    version_stats: VersionStats[];
-    aggregate_stats: AggregateStats;
+    version_count: number;
     recent_activity: {
       ratings_this_week: number;
       views_this_week: number;
       comments_this_week: number;
     };
-    top_comments: VersionRating[];
+    top_comments: Array<{ id: string; comment: string; created_at: string }>;
   } | null> {
     try {
-      const originalRecipeId = recipeId; // Assume this is the original recipe ID
-
-      // Get all version stats
-      const versions = await this.getRecipeVersions(originalRecipeId);
-      const versionStats = await Promise.all(
-        versions.map(async (version) => {
-          if (version.recipe) {
-            return this.getVersionStats(
-              version.recipe.id,
-              version.version_number
-            );
-          }
-          return null;
-        })
-      );
-
-      // Get aggregate stats
-      const aggregateStats = await this.getAggregateStats(originalRecipeId);
+      // Get version count using clean API
+      const versionCount = await this.getVersionCount(recipeId);
 
       // Calculate recent activity (last 7 days)
       const sevenDaysAgo = new Date();
@@ -1266,10 +1042,7 @@ export const recipeApi = {
         .limit(5);
 
       return {
-        version_stats: versionStats.filter(
-          (stat) => stat !== null
-        ) as VersionStats[],
-        aggregate_stats: aggregateStats!,
+        version_count: versionCount,
         recent_activity: {
           ratings_this_week: recentRatings?.length || 0,
           views_this_week: recentViews?.length || 0,
@@ -1302,5 +1075,8 @@ export const recipeApi = {
 
     return data;
   },
+
+  // VERSIONING API - using clean implementation
+  ...versioningApi,
 };
 // Formatting fix

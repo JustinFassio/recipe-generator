@@ -116,17 +116,24 @@ SELECT
   COUNT(DISTINCT rvw.id) as total_views,
   0 as total_comments, -- Comments not yet implemented in recipe_ratings
   MAX(COALESCE(r2.updated_at, r.updated_at)) as last_updated,
-  -- Latest version details
-  (SELECT r3.title FROM recipes r3 WHERE r3.parent_recipe_id = COALESCE(r.parent_recipe_id, r.id) 
-   ORDER BY r3.version_number DESC LIMIT 1) as latest_version_title,
-  (SELECT r3.creator_rating FROM recipes r3 WHERE r3.parent_recipe_id = COALESCE(r.parent_recipe_id, r.id) 
-   ORDER BY r3.version_number DESC LIMIT 1) as latest_creator_rating
+  -- Latest version details (fixed subquery grouping)
+  latest_versions.latest_version_title,
+  latest_versions.latest_creator_rating
 FROM recipes r
 LEFT JOIN recipes r2 ON r2.parent_recipe_id = COALESCE(r.parent_recipe_id, r.id) AND r2.is_version = true
 LEFT JOIN recipe_ratings rr ON (COALESCE(r2.id, r.id) = rr.recipe_id)
 LEFT JOIN recipe_views rvw ON (COALESCE(r2.id, r.id) = rvw.recipe_id)
+LEFT JOIN (
+  SELECT 
+    COALESCE(r_inner.parent_recipe_id, r_inner.id) as original_recipe_id,
+    r_inner.title as latest_version_title,
+    r_inner.creator_rating as latest_creator_rating,
+    ROW_NUMBER() OVER (PARTITION BY COALESCE(r_inner.parent_recipe_id, r_inner.id) ORDER BY r_inner.version_number DESC) as rn
+  FROM recipes r_inner
+  WHERE r_inner.is_public = true
+) latest_versions ON latest_versions.original_recipe_id = COALESCE(r.parent_recipe_id, r.id) AND latest_versions.rn = 1
 WHERE r.is_public = true AND (r.parent_recipe_id IS NULL OR r.parent_recipe_id = r.id)
-GROUP BY COALESCE(r.parent_recipe_id, r.id), r.title, r.user_id;
+GROUP BY COALESCE(r.parent_recipe_id, r.id), r.title, r.user_id, latest_versions.latest_version_title, latest_versions.latest_creator_rating;
 
 -- Update existing recipes to have version_number = 1 if NULL
 UPDATE recipes SET version_number = 1 WHERE version_number IS NULL;

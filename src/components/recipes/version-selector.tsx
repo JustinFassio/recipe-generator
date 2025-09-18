@@ -3,12 +3,12 @@ import { recipeApi } from '@/lib/api';
 import type { RecipeVersion, VersionStats, AggregateStats } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Star, Eye, MessageSquare, ChevronDown, ChevronUp } from 'lucide-react';
+import { Star, Eye, MessageSquare } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { RateCommentModal } from './rate-comment-modal';
 
 interface VersionSelectorProps {
-  originalRecipeId: string;
+  recipeId: string;
   currentVersionNumber?: number;
   onVersionSelect: (version: RecipeVersion) => void;
   onRateVersion?: (
@@ -21,7 +21,7 @@ interface VersionSelectorProps {
 }
 
 export function VersionSelector({
-  originalRecipeId,
+  recipeId,
   currentVersionNumber = 1,
   onVersionSelect,
   onRateVersion,
@@ -31,11 +31,8 @@ export function VersionSelector({
   const [versionStats, setVersionStats] = useState<Map<number, VersionStats>>(
     new Map()
   );
-  const [aggregateStats, setAggregateStats] = useState<AggregateStats | null>(
-    null
-  );
+  const [aggregateStats] = useState<AggregateStats | null>(null);
   const [loading, setLoading] = useState(true);
-  const [expanded, setExpanded] = useState(false);
   const [showRatingModal, setShowRatingModal] = useState<{
     version: number;
     recipe_id: string;
@@ -46,32 +43,54 @@ export function VersionSelector({
 
   useEffect(() => {
     loadVersionData();
-  }, [originalRecipeId]);
+  }, [recipeId]);
 
   const loadVersionData = async () => {
     try {
       setLoading(true);
 
-      // Load all versions
-      const versionsData = await recipeApi.getRecipeVersions(originalRecipeId);
-      setVersions(versionsData);
+      console.log(
+        `🔍 [VersionSelector] Loading versions for recipe: ${recipeId}`
+      );
 
-      // Load aggregate stats
-      const aggregateData = await recipeApi.getAggregateStats(originalRecipeId);
-      setAggregateStats(aggregateData);
+      // Load all versions using new clean API (already sorted newest first)
+      const versionsData = await recipeApi.getRecipeVersions(recipeId);
 
-      // Load individual version stats
+      console.log(
+        `📊 [VersionSelector] API returned ${versionsData?.length || 0} versions:`,
+        versionsData
+      );
+
+      const sortedVersions = versionsData.sort(
+        (a, b) => b.version_number - a.version_number
+      );
+
+      console.log(
+        `📋 [VersionSelector] Setting ${sortedVersions.length} sorted versions`
+      );
+      setVersions(sortedVersions);
+
+      // Load individual version stats (simplified - versions now contain full content)
       const statsMap = new Map<number, VersionStats>();
       for (const version of versionsData) {
-        if (version.recipe) {
-          const stats = await recipeApi.getVersionStats(
-            version.recipe.id,
-            version.version_number
-          );
-          if (stats) {
-            statsMap.set(version.version_number, stats);
-          }
-        }
+        // Create stats from version data (no separate API call needed)
+        const stats: VersionStats = {
+          recipe_id: version.recipe_id,
+          title: version.title,
+          version_number: version.version_number,
+          creator_rating: version.creator_rating,
+          owner_id: version.created_by,
+          version_rating_count: 0, // TODO: Implement rating system for new schema
+          version_avg_rating: null,
+          version_view_count: 0, // TODO: Implement view tracking for new schema
+          version_comment_count: 0,
+          is_public: version.is_published,
+          created_at: version.created_at,
+          updated_at: version.created_at,
+          parent_recipe_id: null, // Not applicable in new schema
+          is_version: version.version_number > 0,
+        };
+        statsMap.set(version.version_number, stats);
       }
       setVersionStats(statsMap);
     } catch (error) {
@@ -184,20 +203,31 @@ export function VersionSelector({
             <Button
               size="sm"
               variant="outline"
-              onClick={() => version.recipe && onVersionSelect(version)}
+              onClick={() => {
+                console.log(
+                  '🔍 [VersionSelector] View button clicked for version:',
+                  {
+                    versionNumber: version.version_number,
+                    recipeId: version.recipe_id,
+                    versionId: version.id,
+                    hasRecipeId: !!version.recipe_id,
+                  }
+                );
+                onVersionSelect(version);
+              }}
               disabled={isSelected}
             >
               {isSelected ? 'Current' : 'View'}
             </Button>
-            {onRateVersion && version.recipe && (
+            {onRateVersion && (
               <Button
                 size="sm"
                 variant="ghost"
                 onClick={() =>
                   setShowRatingModal({
                     version: version.version_number,
-                    recipe_id: version.recipe!.id,
-                    recipe_title: version.recipe!.title,
+                    recipe_id: version.recipe_id,
+                    recipe_title: version.title,
                     version_name: version.version_name || undefined,
                   })
                 }
@@ -266,51 +296,13 @@ export function VersionSelector({
           </p>
         ) : (
           <>
-            {/* Show latest version by default */}
-            {versions
-              .slice(0, 1)
-              .map((version) =>
-                renderVersionCard(
-                  version,
-                  versionStats.get(version.version_number),
-                  true
-                )
-              )}
-
-            {/* Show/hide older versions */}
-            {versions.length > 1 && (
-              <>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setExpanded(!expanded)}
-                  className="w-full"
-                >
-                  {expanded ? (
-                    <>
-                      <ChevronUp className="h-4 w-4 mr-2" />
-                      Hide older versions
-                    </>
-                  ) : (
-                    <>
-                      <ChevronDown className="h-4 w-4 mr-2" />
-                      Show {versions.length - 1} older version
-                      {versions.length > 2 ? 's' : ''}
-                    </>
-                  )}
-                </Button>
-
-                {expanded &&
-                  versions
-                    .slice(1)
-                    .map((version) =>
-                      renderVersionCard(
-                        version,
-                        versionStats.get(version.version_number),
-                        false
-                      )
-                    )}
-              </>
+            {/* Show all versions in descending order (newest first) */}
+            {versions.map((version, index) =>
+              renderVersionCard(
+                version,
+                versionStats.get(version.version_number),
+                index === 0 // Mark first (newest) version as latest
+              )
             )}
           </>
         )}

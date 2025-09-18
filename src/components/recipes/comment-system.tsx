@@ -49,7 +49,8 @@ export function CommentSystem({
 
       // Filter only ratings with comments and get profile data
       const commentsWithRatings = ratingsData.filter(
-        (rating) => rating.comment && rating.comment.trim() !== ''
+        (rating: { comment?: string }) =>
+          rating.comment && rating.comment.trim() !== ''
       );
 
       // Get profile data for comment authors
@@ -75,11 +76,15 @@ export function CommentSystem({
 
       const profileMap = new Map(profiles.map((p) => [p.id, p]));
 
-      const commentsWithProfiles = commentsWithRatings.map((comment) => ({
-        ...comment,
-        author_name: profileMap.get(comment.user_id)?.full_name || 'Anonymous',
-        author_avatar: profileMap.get(comment.user_id)?.avatar_url || undefined,
-      }));
+      const commentsWithProfiles = commentsWithRatings.map(
+        (comment: { user_id: string; [key: string]: unknown }) => ({
+          ...comment,
+          author_name:
+            profileMap.get(comment.user_id)?.full_name || 'Anonymous',
+          author_avatar:
+            profileMap.get(comment.user_id)?.avatar_url || undefined,
+        })
+      ) as CommentWithProfile[];
 
       setComments(commentsWithProfiles);
     } catch (error) {
@@ -102,7 +107,7 @@ export function CommentSystem({
         recipeId,
         versionNumber
       );
-      setUserExistingRating(userRating);
+      setUserExistingRating(userRating as VersionRating | null);
       if (userRating) {
         setNewRating(userRating.rating);
         setNewComment(userRating.comment || '');

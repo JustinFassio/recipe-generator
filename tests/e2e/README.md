@@ -5,7 +5,7 @@
 ### 1. **Authentication Flow**
 
 - ✅ Sign-in page loads correctly
-- ✅ User can enter credentials (`test@example.com` / `Password123!`)
+- ✅ User can enter credentials (use `TEST_USER` from fixtures for consistency)
 - ✅ Authentication succeeds
 - ✅ User is redirected to protected routes (`/recipes`)
 - ✅ Profile page is accessible (`/profile`)

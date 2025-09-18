@@ -25,8 +25,8 @@ import { processImageFile } from '@/lib/image-utils';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
 import { recipeApi } from '@/lib/api';
-
-import type { Recipe } from '@/lib/types';
+import { Recipe } from '@/lib/types';
+import { RecipeVersions } from './recipe-versions';
 
 interface RecipeFormProps {
   recipe?: Recipe;
@@ -222,9 +222,9 @@ export function RecipeForm({
           ...recipeData,
           is_public: false,
           creator_rating: recipeData.creator_rating || null,
-          version_number: 1,
-          parent_recipe_id: null,
-          is_version: false,
+          cooking_time: null,
+          difficulty: null,
+          current_version_id: null,
         });
       }
 
@@ -596,6 +596,31 @@ export function RecipeForm({
       )}
 
       <div className="flex justify-end space-x-2">
+        {/* Recipe Versioning Component */}
+        <RecipeVersions
+          existingRecipe={existingRecipe}
+          currentFormData={(() => {
+            // Convert RecipeFormData to format expected by versioning API
+            const formData = watch();
+            return {
+              title: formData.title,
+              ingredients: formData.ingredients,
+              instructions: formData.instructions,
+              notes: formData.notes,
+              setup: formData.setup,
+              categories: formData.categories,
+              creator_rating: formData.creator_rating,
+              image_url: formData.image_url,
+            };
+          })()} // Pass converted form data for version creation
+          disabled={
+            createRecipe.isPending ||
+            updateRecipe.isPending ||
+            uploadImage.isPending ||
+            !isOnline
+          }
+        />
+
         <Button
           type="submit"
           className="min-w-32"
