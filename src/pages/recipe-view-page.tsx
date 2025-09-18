@@ -203,17 +203,26 @@ export function RecipeViewPage() {
     }
   }, [recipe, isOwner]);
 
-  // CRITICAL: Handle undefined route parameter AFTER all hooks are declared
+  // CRITICAL: Handle invalid route parameter AFTER all hooks are declared
   // This prevents React Hooks violation
-  if (!id || id === 'undefined') {
-    console.error('❌ Recipe ID is undefined in route');
+  const isValidUUID = (str: string): boolean => {
+    const uuidRegex =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    return uuidRegex.test(str);
+  };
+
+  if (!id || id === 'undefined' || !isValidUUID(id)) {
+    console.error('❌ Recipe ID is invalid in route:', {
+      id,
+      isValid: id ? isValidUUID(id) : false,
+    });
     return (
       <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50 p-4">
         <div className="mx-auto max-w-2xl pt-20">
           <div className="border border-gray-200 p-8 text-center rounded-lg">
             <h2 className="mb-2 text-xl font-semibold">Invalid Recipe URL</h2>
             <p className="mb-4 text-gray-600">
-              The recipe URL is malformed or missing the recipe ID.
+              The recipe URL is malformed or contains an invalid recipe ID.
             </p>
             <Button onClick={() => navigate('/')}>Back to Home</Button>
           </div>
