@@ -45,6 +45,7 @@ ALTER TABLE recipe_content_versions ENABLE ROW LEVEL SECURITY;
 -- Create RLS policies that match production
 DROP POLICY IF EXISTS "recipe_content_versions_select_policy" ON recipe_content_versions;
 DROP POLICY IF EXISTS "recipe_content_versions_insert_policy" ON recipe_content_versions;
+DROP POLICY IF EXISTS "recipe_content_versions_update_policy" ON recipe_content_versions;
 
 CREATE POLICY "recipe_content_versions_select_policy" 
 ON recipe_content_versions FOR SELECT USING (true);
