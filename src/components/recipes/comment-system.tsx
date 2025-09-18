@@ -84,7 +84,7 @@ export function CommentSystem({
           author_avatar:
             profileMap.get(comment.user_id)?.avatar_url || undefined,
         })
-      );
+      ) as CommentWithProfile[];
 
       setComments(commentsWithProfiles);
     } catch (error) {
@@ -107,7 +107,7 @@ export function CommentSystem({
         recipeId,
         versionNumber
       );
-      setUserExistingRating(userRating);
+      setUserExistingRating(userRating as VersionRating | null);
       if (userRating) {
         setNewRating(userRating.rating);
         setNewComment(userRating.comment || '');

@@ -48,7 +48,7 @@ export function RateCommentModal({
         versionNumber
       );
       if (userRating) {
-        setExistingRating(userRating);
+        setExistingRating(userRating as VersionRating);
         setRating(userRating.rating);
         setComment(userRating.comment || '');
       }
