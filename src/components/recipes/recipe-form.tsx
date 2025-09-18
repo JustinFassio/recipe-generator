@@ -610,7 +610,7 @@ export function RecipeForm({
               setup: formData.setup,
               categories: formData.categories,
               creator_rating: formData.creator_rating,
-              image_url: formData.image_url
+              image_url: formData.image_url,
             };
           })()} // Pass converted form data for version creation
           disabled={

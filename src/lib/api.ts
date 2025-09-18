@@ -1,9 +1,5 @@
 import { supabase } from './supabase';
-import type {
-  Recipe,
-  PublicRecipe,
-  RecipeFilters,
-} from './types';
+import type { Recipe, PublicRecipe, RecipeFilters } from './types';
 import { parseRecipeFromText } from './recipe-parser';
 import { trackAPIError } from './error-tracking';
 import { IngredientMatcher } from './groceries/ingredient-matcher';
@@ -581,8 +577,11 @@ export const recipeApi = {
       }
 
       // 🎯 CRITICAL: Automatically create Version 0 (Original Recipe) for new recipes
-      console.log('🔄 [createRecipe] Creating Version 0 for new recipe:', data.title);
-      
+      console.log(
+        '🔄 [createRecipe] Creating Version 0 for new recipe:',
+        data.title
+      );
+
       const { error: versionError } = await supabase
         .from('recipe_content_versions')
         .insert({
@@ -601,13 +600,18 @@ export const recipeApi = {
           creator_rating: data.creator_rating,
           image_url: data.image_url,
           created_by: user.id,
-          is_published: true // Original is always published
+          is_published: true, // Original is always published
         });
 
       if (versionError) {
-        console.error('❌ Failed to create Version 0 for new recipe:', versionError);
+        console.error(
+          '❌ Failed to create Version 0 for new recipe:',
+          versionError
+        );
         // Don't fail the recipe creation, but log the error
-        console.warn('Recipe created but Version 0 creation failed. This may cause versioning issues.');
+        console.warn(
+          'Recipe created but Version 0 creation failed. This may cause versioning issues.'
+        );
       } else {
         console.log('✅ Version 0 created successfully for new recipe');
       }
@@ -1004,7 +1008,7 @@ export const recipeApi = {
       views_this_week: number;
       comments_this_week: number;
     };
-    top_comments: any[];
+    top_comments: Array<{ id: string; comment: string; created_at: string }>;
   } | null> {
     try {
       // Get version count using clean API

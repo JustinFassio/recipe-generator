@@ -14,7 +14,7 @@ import { useAuth } from '@/contexts/AuthProvider';
 import { recipeApi } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
-import type { Recipe, RecipeVersion, AggregateStats } from '@/lib/types';
+import type { Recipe, RecipeVersion } from '@/lib/types';
 
 export function RecipeViewPage() {
   const { id } = useParams<{ id: string }>();
@@ -22,18 +22,20 @@ export function RecipeViewPage() {
   const location = useLocation();
   const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
-  
+
   // Extract version parameter from URL
   const searchParams = new URLSearchParams(location.search);
-  const requestedVersion = searchParams.get('version') ? parseInt(searchParams.get('version')!) : null;
-  
+  const requestedVersion = searchParams.get('version')
+    ? parseInt(searchParams.get('version')!)
+    : null;
+
   // Debug route parameters
   console.log('🔍 [RecipeViewPage] Route debug:', {
     id,
     requestedVersion,
     fullUrl: window.location.href,
     pathname: location.pathname,
-    search: location.search
+    search: location.search,
   });
 
   // Debug logging
@@ -64,13 +66,30 @@ export function RecipeViewPage() {
 
   // Use whichever one succeeds (base recipe from database)
   const baseRecipe = userRecipe || publicRecipe;
-  
+
   // Local state for version content when viewing specific versions
-  const [versionContent, setVersionContent] = useState<RecipeVersion | null>(null);
-  
+  const [versionContent, setVersionContent] = useState<RecipeVersion | null>(
+    null
+  );
+
+  // All state hooks must be declared before any conditional returns
+  // Community rating state
+  const [communityRating, setCommunityRating] = useState<{
+    average: number;
+    count: number;
+    userRating?: number;
+  } | null>(null);
+  const [ratingLoading, setRatingLoading] = useState(false);
+
+  // Version navigation state
+  const [showVersions, setShowVersions] = useState(false);
+  const [versions, setVersions] = useState<RecipeVersion[]>([]);
+  const [currentVersionNumber, setCurrentVersionNumber] = useState<number>(1);
+  const [isOwner, setIsOwner] = useState(false);
+
   // Determine which content to display
   const recipe = baseRecipe;
-  const displayContent = versionContent 
+  const displayContent = versionContent
     ? {
         ...baseRecipe!,
         title: versionContent.title,
@@ -93,70 +112,24 @@ export function RecipeViewPage() {
       ? userError || publicError || new Error('Recipe not found')
       : null;
 
-  // CRITICAL: Handle undefined route parameter AFTER all hooks are declared
-  // This prevents React Hooks violation
-  if (!id || id === 'undefined') {
-    console.error('❌ Recipe ID is undefined in route');
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50 p-4">
-        <div className="mx-auto max-w-2xl pt-20">
-          <div className="border border-gray-200 p-8 text-center rounded-lg">
-            <h2 className="mb-2 text-xl font-semibold">Invalid Recipe URL</h2>
-            <p className="mb-4 text-gray-600">The recipe URL is malformed or missing the recipe ID.</p>
-            <Button onClick={() => navigate('/')}>Back to Home</Button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Community rating state
-  const [communityRating, setCommunityRating] = useState<{
-    average: number;
-    count: number;
-    userRating?: number;
-  } | null>(null);
-  const [ratingLoading, setRatingLoading] = useState(false);
-
-  // Version navigation state
-  const [showVersions, setShowVersions] = useState(false);
-  const [versions, setVersions] = useState<RecipeVersion[]>([]);
-  const [currentVersionNumber, setCurrentVersionNumber] = useState<number>(1);
-  const [aggregateStats, setAggregateStats] = useState<AggregateStats | null>(
-    null
-  );
-  const [isOwner, setIsOwner] = useState(false);
-  const [nextVersionNumber, setNextVersionNumber] = useState(2);
-
-  // Enhanced debugging
-  console.log('📊 [RecipeViewPage] State summary:', {
-    recipeId: id,
-    userRecipe: userRecipe ? 'Found' : 'Not found',
-    publicRecipe: publicRecipe ? 'Found' : 'Not found',
-    finalRecipe: recipe ? 'Found' : 'Not found',
-    userLoading,
-    publicLoading,
-    isLoading,
-    userError: userError?.message,
-    publicError: publicError?.message,
-    finalError: error?.message,
-    shouldFetchUser,
-    hasUser: !!user,
-    authLoading,
-  });
-
+  // All useEffect hooks must be declared before any conditional returns
   // Load version data when recipe is loaded AND user is authenticated
   useEffect(() => {
     if (recipe && user && !authLoading) {
-      console.log('🔄 [RecipeViewPage] Loading version data with authenticated user');
+      console.log(
+        '🔄 [RecipeViewPage] Loading version data with authenticated user'
+      );
       loadVersionData(recipe);
       checkOwnership(recipe);
     } else {
-      console.log('⏳ [RecipeViewPage] Waiting for authentication before loading versions', {
-        hasRecipe: !!recipe,
-        hasUser: !!user,
-        authLoading
-      });
+      console.log(
+        '⏳ [RecipeViewPage] Waiting for authentication before loading versions',
+        {
+          hasRecipe: !!recipe,
+          hasUser: !!user,
+          authLoading,
+        }
+      );
     }
   }, [recipe, user, authLoading]);
 
@@ -165,18 +138,20 @@ export function RecipeViewPage() {
     if (recipe && versions.length > 0) {
       // Determine which version to show
       let versionToShow: number;
-      
+
       if (requestedVersion) {
         // Specific version requested via URL
         versionToShow = requestedVersion;
       } else {
         // No version specified - show the LATEST version (highest version number)
-        const latestVersion = Math.max(...versions.map(v => v.version_number));
+        const latestVersion = Math.max(
+          ...versions.map((v) => v.version_number)
+        );
         versionToShow = latestVersion;
       }
-      
+
       setCurrentVersionNumber(versionToShow);
-      
+
       // Load the specific version content for ANY version number
       loadSpecificVersion(recipe.id, versionToShow);
     } else if (recipe) {
@@ -206,46 +181,93 @@ export function RecipeViewPage() {
     if (recipe && isOwner) {
       const fetchNextVersion = async () => {
         try {
-          const originalId = recipe.parent_recipe_id || recipe.id;
-          const nextVersion = await recipeApi.getNextVersionNumber(originalId);
-          setNextVersionNumber(nextVersion);
+          const originalId = recipe.id;
+          // Get next version number (for future use if needed)
+          await recipeApi.getNextVersionNumber(originalId);
         } catch (error) {
           console.error('Failed to get next version number:', error);
-          setNextVersionNumber(2); // fallback
+          // setNextVersionNumber(2); // fallback - removed unused variable
         }
       };
       fetchNextVersion();
     }
   }, [recipe, isOwner]);
 
+  // CRITICAL: Handle undefined route parameter AFTER all hooks are declared
+  // This prevents React Hooks violation
+  if (!id || id === 'undefined') {
+    console.error('❌ Recipe ID is undefined in route');
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50 p-4">
+        <div className="mx-auto max-w-2xl pt-20">
+          <div className="border border-gray-200 p-8 text-center rounded-lg">
+            <h2 className="mb-2 text-xl font-semibold">Invalid Recipe URL</h2>
+            <p className="mb-4 text-gray-600">
+              The recipe URL is malformed or missing the recipe ID.
+            </p>
+            <Button onClick={() => navigate('/')}>Back to Home</Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Enhanced debugging
+  console.log('📊 [RecipeViewPage] State summary:', {
+    recipeId: id,
+    userRecipe: userRecipe ? 'Found' : 'Not found',
+    publicRecipe: publicRecipe ? 'Found' : 'Not found',
+    finalRecipe: recipe ? 'Found' : 'Not found',
+    userLoading,
+    publicLoading,
+    isLoading,
+    userError: userError?.message,
+    publicError: publicError?.message,
+    finalError: error?.message,
+    shouldFetchUser,
+    hasUser: !!user,
+    authLoading,
+  });
+
   const loadVersionData = async (currentRecipe: Recipe) => {
     try {
-      console.log(`🔍 [loadVersionData] Loading versions for recipe: ${currentRecipe.id}`);
-      
+      console.log(
+        `🔍 [loadVersionData] Loading versions for recipe: ${currentRecipe.id}`
+      );
+
       // Load versions using new clean API (no more parent traversal!)
       const versionsData = await recipeApi.getRecipeVersions(currentRecipe.id);
-      
-      console.log(`📊 [loadVersionData] Received ${versionsData?.length || 0} versions:`, versionsData);
-      
+
+      console.log(
+        `📊 [loadVersionData] Received ${versionsData?.length || 0} versions:`,
+        versionsData
+      );
+
       setVersions(versionsData);
 
       // 🎯 FIXED: Load latest version by default, specific version when requested
       if (versionsData && versionsData.length > 0) {
         if (requestedVersion !== null) {
           // Specific version requested
-          const requestedVersionData = versionsData.find(v => v.version_number === requestedVersion);
+          const requestedVersionData = versionsData.find(
+            (v) => v.version_number === requestedVersion
+          );
           if (requestedVersionData) {
             console.log(`🔄 Loading requested version: ${requestedVersion}`);
             setVersionContent(requestedVersionData);
           } else {
-            console.warn(`⚠️ Requested version ${requestedVersion} not found, falling back to latest`);
+            console.warn(
+              `⚠️ Requested version ${requestedVersion} not found, falling back to latest`
+            );
             const latestVersion = versionsData[0]; // First is latest (descending order)
             setVersionContent(latestVersion);
           }
         } else {
           // No version parameter - load latest version by default
           const latestVersion = versionsData[0]; // Versions are ordered newest first (descending)
-          console.log(`🔄 No version specified - loading latest version: ${latestVersion.version_number}`);
+          console.log(
+            `🔄 No version specified - loading latest version: ${latestVersion.version_number}`
+          );
           setVersionContent(latestVersion);
         }
       } else {
@@ -258,20 +280,27 @@ export function RecipeViewPage() {
       // const aggregateData = await recipeApi.getAggregateStats(currentRecipe.id);
       // setAggregateStats(aggregateData);
 
-      // Track view for current version
+      // Track view for current version (temporarily disabled until API is implemented)
       if (publicRecipe) {
-        const versionToTrack = requestedVersion || (versionsData?.[0]?.version_number || 1);
-        await recipeApi.trackVersionView(currentRecipe.id, versionToTrack);
+        const versionToTrack =
+          requestedVersion || versionsData?.[0]?.version_number || 1;
+        console.log(
+          `📊 Would track view for version ${versionToTrack} of recipe ${currentRecipe.id}`
+        );
+        // await recipeApi.trackVersionView(currentRecipe.id, versionToTrack);
       }
     } catch (error) {
       console.error('Failed to load version data:', error);
     }
   };
 
-  const loadSpecificVersion = async (recipeId: string, versionNumber: number) => {
+  const loadSpecificVersion = async (
+    recipeId: string,
+    versionNumber: number
+  ) => {
     try {
       console.log(`🔄 Loading version ${versionNumber} for recipe ${recipeId}`);
-      
+
       // Get the specific version from the versions table
       const { data: version, error } = await supabase
         .from('recipe_content_versions')
@@ -279,19 +308,19 @@ export function RecipeViewPage() {
         .eq('recipe_id', recipeId)
         .eq('version_number', versionNumber)
         .single();
-      
+
       if (error) {
         console.error('Failed to load version:', error);
         throw error;
       }
-      
+
       // Set the version content for display
       setVersionContent(version);
-      
+
       console.log(`✅ Loaded version ${versionNumber} content:`, {
         title: version.title,
         setupItems: version.setup?.length || 0,
-        hasContent: !!version
+        hasContent: !!version,
       });
     } catch (error) {
       console.error('Failed to load specific version:', error);
@@ -342,33 +371,35 @@ export function RecipeViewPage() {
       versionName: version.version_name,
       recipeId: version.recipe_id,
       baseRecipeId: baseRecipe?.id,
-      currentUrl: window.location.href
+      currentUrl: window.location.href,
     });
-    
+
     // Set the current version number
     setCurrentVersionNumber(version.version_number);
-    
+
     // Use the recipe_id from the version (most reliable source)
     const targetRecipeId = version.recipe_id;
-    
+
     if (targetRecipeId) {
-      console.log(`🌐 Navigating to: /recipe/${targetRecipeId}?version=${version.version_number}`);
-      
+      console.log(
+        `🌐 Navigating to: /recipe/${targetRecipeId}?version=${version.version_number}`
+      );
+
       // Update the URL to reflect the version being viewed
       navigate(`/recipe/${targetRecipeId}?version=${version.version_number}`, {
         replace: true,
       });
-      
+
       // Set the version content directly (no async loading needed)
       setVersionContent(version);
-      
+
       console.log(`✅ Switched to version ${version.version_number}`);
     } else {
       console.error('❌ No recipe ID available for navigation');
     }
   };
 
-  // Handle version rating
+  // Handle version rating (temporarily disabled until API is implemented)
   const handleVersionRating = async (
     recipeId: string,
     versionNumber: number,
@@ -376,7 +407,12 @@ export function RecipeViewPage() {
     comment?: string
   ) => {
     try {
-      await recipeApi.rateVersion(recipeId, versionNumber, rating, comment);
+      console.log(
+        `⭐ Would rate version ${versionNumber} of recipe ${recipeId} with ${rating} stars`
+      );
+      if (comment) console.log(`💬 Comment: ${comment}`);
+
+      // await recipeApi.rateVersion(recipeId, versionNumber, rating, comment);
       toast({
         title: 'Rating submitted',
         description: 'Thank you for rating this version!',
@@ -395,7 +431,6 @@ export function RecipeViewPage() {
       });
     }
   };
-
 
   if (isLoading) {
     return (
@@ -568,19 +603,13 @@ export function RecipeViewPage() {
                   Back
                 </Button>
 
-                {aggregateStats && (
+                {versions.length > 0 && (
                   <div className="flex items-center space-x-2">
                     <Badge variant="outline" className="text-xs">
                       <GitBranch className="h-3 w-3 mr-1" />
-                      {aggregateStats.total_versions} version
-                      {aggregateStats.total_versions !== 1 ? 's' : ''}
+                      {versions.length} version
+                      {versions.length !== 1 ? 's' : ''}
                     </Badge>
-                    {aggregateStats.aggregate_avg_rating && (
-                      <Badge variant="secondary" className="text-xs">
-                        ⭐ {aggregateStats.aggregate_avg_rating.toFixed(1)} (
-                        {aggregateStats.total_ratings} ratings)
-                      </Badge>
-                    )}
                   </div>
                 )}
               </div>
@@ -593,7 +622,8 @@ export function RecipeViewPage() {
                     onClick={() => setShowVersions(!showVersions)}
                   >
                     <GitBranch className="h-4 w-4 mr-2" />
-                    {showVersions ? 'Hide' : 'View'} Versions ({versions.length})
+                    {showVersions ? 'Hide' : 'View'} Versions ({versions.length}
+                    )
                   </Button>
                 )}
               </div>
@@ -604,23 +634,38 @@ export function RecipeViewPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <div className="flex items-center space-x-2">
-                    <Badge 
+                    <Badge
                       variant={
-                        versionContent?.version_number === 0 || 
-                        (versionContent && versions.length > 0 && versionContent.version_number === Math.max(...versions.map(v => v.version_number)))
-                          ? "default"
-                          : "neutral"
+                        versionContent?.version_number === 0 ||
+                        (versionContent &&
+                          versions.length > 0 &&
+                          versionContent.version_number ===
+                            Math.max(...versions.map((v) => v.version_number)))
+                          ? 'default'
+                          : 'secondary'
                       }
                       className={
-                        versionContent?.version_number === 0 
+                        versionContent?.version_number === 0
                           ? 'bg-amber-100 text-amber-800 border-amber-300'
-                          : versionContent && versions.length > 0 && versionContent.version_number === Math.max(...versions.map(v => v.version_number))
-                          ? 'bg-green-100 text-green-800 border-green-300'
-                          : ''
+                          : versionContent &&
+                              versions.length > 0 &&
+                              versionContent.version_number ===
+                                Math.max(
+                                  ...versions.map((v) => v.version_number)
+                                )
+                            ? 'bg-green-100 text-green-800 border-green-300'
+                            : ''
                       }
                     >
-                      {versionContent?.version_number === 0 ? 'Original' : `v${versionContent?.version_number || currentVersionNumber}`}
-                      {versionContent && versions.length > 0 && versionContent.version_number === Math.max(...versions.map(v => v.version_number)) && versionContent.version_number > 0 && ' (Latest)'}
+                      {versionContent?.version_number === 0
+                        ? 'Original'
+                        : `v${versionContent?.version_number || currentVersionNumber}`}
+                      {versionContent &&
+                        versions.length > 0 &&
+                        versionContent.version_number ===
+                          Math.max(...versions.map((v) => v.version_number)) &&
+                        versionContent.version_number > 0 &&
+                        ' (Latest)'}
                     </Badge>
                     {versionContent?.version_name && (
                       <span className="text-sm font-medium text-gray-700">
@@ -635,12 +680,19 @@ export function RecipeViewPage() {
                   </div>
                   {versionContent?.changelog && (
                     <div className="text-sm text-gray-600 mt-1">
-                      <strong>{versionContent.version_number === 0 ? 'Description:' : 'Changes:'}</strong> {versionContent.changelog}
+                      <strong>
+                        {versionContent.version_number === 0
+                          ? 'Description:'
+                          : 'Changes:'}
+                      </strong>{' '}
+                      {versionContent.changelog}
                     </div>
                   )}
                   {versionContent && (
                     <div className="text-xs text-gray-500 mt-1">
-                      {versionContent.version_number === 0 ? 'Original recipe' : `Created ${new Date(versionContent.created_at).toLocaleDateString()}`}
+                      {versionContent.version_number === 0
+                        ? 'Original recipe'
+                        : `Created ${new Date(versionContent.created_at).toLocaleDateString()}`}
                     </div>
                   )}
                   {recipe?.creator_rating && (
@@ -668,29 +720,34 @@ export function RecipeViewPage() {
                     </div>
                   )}
                 </div>
-
               </div>
             </div>
           </div>
         )}
 
-        <RecipeView
-          recipe={displayContent}
-          onEdit={shouldShowEdit ? handleEdit : undefined}
-          onSave={shouldShowSave ? handleSave : undefined}
-          onBack={!versions.length ? handleBack : undefined} // Hide back button if we have version nav
-          communityRating={communityRating}
-          onCommunityRate={handleCommunityRating}
-          ratingLoading={ratingLoading}
-        />
+        {displayContent && (
+          <RecipeView
+            recipe={displayContent}
+            onEdit={shouldShowEdit ? handleEdit : undefined}
+            onSave={shouldShowSave ? handleSave : undefined}
+            onBack={!versions.length ? handleBack : undefined} // Hide back button if we have version nav
+            communityRating={communityRating}
+            onCommunityRate={handleCommunityRating}
+            ratingLoading={ratingLoading}
+          />
+        )}
 
         {/* Clean Separated Analytics Dashboard - Replaces problematic DualRatingDisplay */}
         {recipe && (
           <RecipeAnalyticsDashboard
             recipeId={id!}
-            currentVersion={versionContent?.version_number || requestedVersion || undefined}
+            currentVersion={
+              versionContent?.version_number || requestedVersion || undefined
+            }
             onVersionChange={(versionNumber) => {
-              console.log(`🔄 [RecipeViewPage] Version change requested: ${versionNumber}`);
+              console.log(
+                `🔄 [RecipeViewPage] Version change requested: ${versionNumber}`
+              );
               navigate(`/recipe/${id}?version=${versionNumber}`);
             }}
             className="mt-8"
@@ -725,7 +782,6 @@ export function RecipeViewPage() {
             </div>
           </div>
         )}
-
       </div>
     </div>
   );

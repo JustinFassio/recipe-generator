@@ -29,7 +29,9 @@ export function RecipeVersions({
       const fetchNextVersion = async () => {
         try {
           // Use the current recipe ID (no more parent_recipe_id logic!)
-          const nextVersion = await recipeApi.getNextVersionNumber(existingRecipe.id);
+          const nextVersion = await recipeApi.getNextVersionNumber(
+            existingRecipe.id
+          );
           setNextVersionNumber(nextVersion);
         } catch (error) {
           console.error('Failed to get next version number:', error);
@@ -45,15 +47,20 @@ export function RecipeVersions({
       versionId: newVersion.id,
       recipeId: newVersion.recipe_id,
       versionNumber: newVersion.version_number,
-      versionName: newVersion.version_name
+      versionName: newVersion.version_name,
     });
-    
+
     // Navigate to the newly created version (latest version)
-    navigate(`/recipe/${newVersion.recipe_id}?version=${newVersion.version_number}`, {
-      state: { refresh: Date.now() },
-    });
-    
-    console.log(`🌐 Redirecting to latest version: /recipe/${newVersion.recipe_id}?version=${newVersion.version_number}`);
+    navigate(
+      `/recipe/${newVersion.recipe_id}?version=${newVersion.version_number}`,
+      {
+        state: { refresh: Date.now() },
+      }
+    );
+
+    console.log(
+      `🌐 Redirecting to latest version: /recipe/${newVersion.recipe_id}?version=${newVersion.version_number}`
+    );
   };
 
   // Don't render anything if recipe doesn't exist

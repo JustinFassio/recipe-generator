@@ -55,7 +55,7 @@ export function logSuccess(message: string) {
   console.log(`✅ ${message}`);
 }
 
-export function logError(message: string, error?: any) {
+export function logError(message: string, error?: unknown) {
   console.error(`❌ ${message}`, error || '');
 }
 
@@ -70,9 +70,12 @@ export function logWarning(message: string) {
 /**
  * Find user by email from admin user list
  */
-export function findUserByEmail(users: SupabaseAdminUser[], email: string): SupabaseAdminUser | undefined {
-  return users.find((x: SupabaseAdminUser) => 
-    x.email?.toLowerCase() === email.toLowerCase()
+export function findUserByEmail(
+  users: SupabaseAdminUser[],
+  email: string
+): SupabaseAdminUser | undefined {
+  return users.find(
+    (x: SupabaseAdminUser) => x.email?.toLowerCase() === email.toLowerCase()
   );
 }
 
@@ -80,7 +83,7 @@ export function findUserByEmail(users: SupabaseAdminUser[], email: string): Supa
  * Validate required environment variables
  */
 export function validateEnvironment(requiredVars: string[]) {
-  const missing = requiredVars.filter(varName => !process.env[varName]);
+  const missing = requiredVars.filter((varName) => !process.env[varName]);
   if (missing.length > 0) {
     logError(`Missing required environment variables: ${missing.join(', ')}`);
     process.exit(1);

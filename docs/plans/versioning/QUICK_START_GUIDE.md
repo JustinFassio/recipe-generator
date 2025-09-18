@@ -1,4 +1,5 @@
 # Recipe Versioning Quick Start Guide
+
 ## Immediate Implementation Steps
 
 ### 🚀 **TL;DR - Fix the Problem Now**
@@ -6,14 +7,16 @@
 The current versioning system shows duplicate recipes because it treats versions as separate recipe entities. This guide provides the fastest path to fix the core issue while maintaining data integrity.
 
 **Current Problem:**
+
 ```
 My Recipes:
 ❌ Zucchini Noodles with Pesto (v1)
-❌ Zucchini Noodles with Pesto (v2) 
+❌ Zucchini Noodles with Pesto (v2)
 ❌ Zucchini Noodles with Pesto (v3)
 ```
 
 **Target Result:**
+
 ```
 My Recipes:
 ✅ Zucchini Noodles with Pesto
@@ -23,9 +26,11 @@ My Recipes:
 ---
 
 ## ⚡ **Option A: Quick Frontend Fix (2 hours)**
-*Recommended for immediate deployment*
+
+_Recommended for immediate deployment_
 
 ### **Problem Analysis**
+
 The issue is in `src/pages/recipe-view-page.tsx` around line 235. The system automatically loads version content even when no version is requested, causing URLs like `/recipe/ID` to show version content instead of original recipe content.
 
 ```typescript
@@ -41,20 +46,26 @@ if (!requestedVersion && versionsData && versionsData.length > 0) {
 **Edit `src/pages/recipe-view-page.tsx`:**
 
 Find this code around line 235:
+
 ```typescript
 // If no specific version requested, automatically load the latest version content
 if (!requestedVersion && versionsData && versionsData.length > 0) {
   const latestVersion = versionsData[0]; // Versions are ordered newest first
-  console.log(`🔄 Auto-loading latest version: ${latestVersion.version_number}`);
+  console.log(
+    `🔄 Auto-loading latest version: ${latestVersion.version_number}`
+  );
   setVersionContent(latestVersion);
 }
 ```
 
 Replace it with:
+
 ```typescript
 // FIXED: Only load version content when explicitly requested via URL parameter
 if (requestedVersion && versionsData && versionsData.length > 0) {
-  const requestedVersionData = versionsData.find(v => v.version_number === requestedVersion);
+  const requestedVersionData = versionsData.find(
+    (v) => v.version_number === requestedVersion
+  );
   if (requestedVersionData) {
     console.log(`🔄 Loading requested version: ${requestedVersion}`);
     setVersionContent(requestedVersionData);
@@ -86,6 +97,7 @@ vercel deploy --prod
 ```
 
 **Expected Result:**
+
 - ✅ `/recipe/ID` shows original recipe content
 - ✅ `/recipe/ID?version=X` shows version X content
 - ✅ No duplicate recipes in recipe list
@@ -94,9 +106,11 @@ vercel deploy --prod
 ---
 
 ## 🔧 **Option B: Complete Database Refactor (2-3 weeks)**
-*Recommended for long-term production stability*
+
+_Recommended for long-term production stability_
 
 ### **Why This Is Better**
+
 - Eliminates duplicate recipes at the database level
 - Uses proper temporal versioning pattern
 - Leverages Supabase built-in tools
@@ -105,6 +119,7 @@ vercel deploy --prod
 ### **Quick Implementation Steps**
 
 #### **Phase 1: Create New Schema (Day 1)**
+
 ```sql
 -- Create the new versioning table
 CREATE TABLE recipe_content_versions (
@@ -113,7 +128,7 @@ CREATE TABLE recipe_content_versions (
   version_number INTEGER NOT NULL,
   version_name TEXT,
   changelog TEXT,
-  
+
   -- Full recipe content snapshot
   title TEXT NOT NULL,
   ingredients TEXT[] NOT NULL,
@@ -125,17 +140,18 @@ CREATE TABLE recipe_content_versions (
   difficulty TEXT,
   creator_rating INTEGER,
   image_url TEXT,
-  
+
   -- Metadata
   created_at TIMESTAMPTZ DEFAULT NOW(),
   created_by UUID REFERENCES auth.users(id),
   is_published BOOLEAN DEFAULT false,
-  
+
   UNIQUE(recipe_id, version_number)
 );
 ```
 
 #### **Phase 2: Migrate Data (Day 2)**
+
 ```sql
 -- Migrate existing version data to new table
 WITH recipe_families AS (
@@ -150,7 +166,7 @@ version_data AS (
          r.title, r.ingredients, r.instructions, r.notes, r.setup, r.categories,
          r.cooking_time, r.difficulty, r.creator_rating, r.image_url,
          r.user_id as created_by, r.created_at,
-         (r.version_number = (SELECT MAX(r2.version_number) FROM recipes r2 
+         (r.version_number = (SELECT MAX(r2.version_number) FROM recipes r2
                               WHERE COALESCE(r2.parent_recipe_id, r2.id) = rf.original_id)) as is_latest
   FROM recipe_families rf
   LEFT JOIN recipes r ON (r.id = rf.original_id OR find_original_recipe_id(r.id) = rf.original_id)
@@ -170,6 +186,7 @@ FROM version_data;
 ```
 
 #### **Phase 3: Clean Up (Day 3)**
+
 ```sql
 -- Remove duplicate recipes (keep only originals)
 DELETE FROM recipes WHERE parent_recipe_id IS NOT NULL;
@@ -184,7 +201,9 @@ WHERE v.recipe_id = r.id AND v.is_published = true;
 ```
 
 #### **Phase 4: Update API (Day 4-7)**
+
 Create new clean API methods:
+
 ```typescript
 // src/lib/api/features/clean-versioning-api.ts
 export const cleanVersioningApi = {
@@ -194,23 +213,28 @@ export const cleanVersioningApi = {
       .select('*')
       .eq('recipe_id', recipeId)
       .order('version_number', { ascending: false });
-    
+
     if (error) throw error;
     return data || [];
   },
-  
-  async createVersion(recipeId: string, versionData: CreateVersionData): Promise<RecipeVersion> {
+
+  async createVersion(
+    recipeId: string,
+    versionData: CreateVersionData
+  ): Promise<RecipeVersion> {
     // Implementation here
-  }
+  },
 };
 ```
 
 #### **Phase 5: Update Frontend (Day 8-10)**
+
 - Update components to use new API
 - Remove duplicate recipe logic
 - Add version publishing UI
 
 **For detailed implementation, see:**
+
 - `docs/plans/versioning/PRODUCTION_READY_VERSIONING_PLAN.md`
 - `docs/plans/versioning/IMPLEMENTATION_ROADMAP.md`
 
@@ -221,6 +245,7 @@ export const cleanVersioningApi = {
 ### **Manual Testing Checklist**
 
 #### **Option A Testing (Frontend Fix)**
+
 - [ ] Navigate to `/recipe/ID` - shows original content
 - [ ] Navigate to `/recipe/ID?version=1` - shows version 1 content
 - [ ] Recipe list shows only one entry per recipe
@@ -229,6 +254,7 @@ export const cleanVersioningApi = {
 - [ ] No JavaScript errors in console
 
 #### **Option B Testing (Database Refactor)**
+
 - [ ] All Option A tests pass
 - [ ] Database has no duplicate recipes
 - [ ] Version creation uses new schema
@@ -237,6 +263,7 @@ export const cleanVersioningApi = {
 - [ ] RLS policies work correctly
 
 ### **Automated Testing**
+
 ```bash
 # Run existing tests
 npm test
@@ -253,18 +280,22 @@ npm run type-check
 ## 🚨 **Emergency Rollback**
 
 ### **Option A Rollback (Frontend Fix)**
+
 If the frontend fix causes issues, simply revert the change:
 
 ```typescript
 // Restore original code in recipe-view-page.tsx
 if (!requestedVersion && versionsData && versionsData.length > 0) {
   const latestVersion = versionsData[0];
-  console.log(`🔄 Auto-loading latest version: ${latestVersion.version_number}`);
+  console.log(
+    `🔄 Auto-loading latest version: ${latestVersion.version_number}`
+  );
   setVersionContent(latestVersion);
 }
 ```
 
 ### **Option B Rollback (Database Refactor)**
+
 ```bash
 # Restore from backup
 npx supabase db reset --project-ref YOUR_PROJECT_REF
@@ -276,6 +307,7 @@ psql -h YOUR_HOST -p 5432 -U postgres -d postgres < backup_pre_migration.sql
 ## 🎯 **Success Criteria**
 
 ### **Immediate Success (Option A)**
+
 - [ ] Recipe list shows one entry per recipe (no duplicates)
 - [ ] Original recipe content displays by default
 - [ ] Version content displays only when requested via URL
@@ -283,6 +315,7 @@ psql -h YOUR_HOST -p 5432 -U postgres -d postgres < backup_pre_migration.sql
 - [ ] No performance degradation
 
 ### **Long-term Success (Option B)**
+
 - [ ] All Option A criteria met
 - [ ] Database schema is clean and maintainable
 - [ ] Audit trail tracks all changes
@@ -305,6 +338,7 @@ psql -h YOUR_HOST -p 5432 -U postgres -d postgres < backup_pre_migration.sql
 **Solution**: Update type definitions in `src/lib/types.ts`
 
 ### **Debug Commands**
+
 ```bash
 # Check current recipe data
 curl "http://localhost:54321/rest/v1/recipes?id=eq.RECIPE_ID" \
@@ -319,6 +353,7 @@ curl "http://localhost:54321/rest/v1/recipe_content_versions?recipe_id=eq.RECIPE
 ```
 
 ### **Contact**
+
 - **Slack**: #versioning-help
 - **Email**: dev-team@company.com
 - **Documentation**: `docs/plans/versioning/`
@@ -326,6 +361,7 @@ curl "http://localhost:54321/rest/v1/recipe_content_versions?recipe_id=eq.RECIPE
 ---
 
 **Choose your path:**
+
 - **Need it fixed NOW?** → Go with Option A (2 hours)
 - **Want it done RIGHT?** → Go with Option B (2-3 weeks)
 - **Not sure?** → Start with Option A, plan Option B for later

@@ -4,7 +4,12 @@
  */
 
 import { admin } from '../utils/client';
-import { logSuccess, logError, logInfo, findUserByEmail } from '../utils/shared';
+import {
+  logSuccess,
+  logError,
+  logInfo,
+  findUserByEmail,
+} from '../utils/shared';
 
 // Creator ratings for recipes (1-5 stars)
 const creatorRatings = [
@@ -18,31 +23,99 @@ const creatorRatings = [
 // Community ratings (users rating other users' recipes)
 const communityRatings = [
   // Alice's Avocado Toast ratings
-  { recipeId: '11111111-1111-1111-1111-111111111111', userEmail: 'bob@example.com', rating: 4 },
-  { recipeId: '11111111-1111-1111-1111-111111111111', userEmail: 'cora@example.com', rating: 5 },
-  { recipeId: '11111111-1111-1111-1111-111111111111', userEmail: 'david@example.com', rating: 4 },
-  { recipeId: '11111111-1111-1111-1111-111111111111', userEmail: 'emma@example.com', rating: 5 },
+  {
+    recipeId: '11111111-1111-1111-1111-111111111111',
+    userEmail: 'bob@example.com',
+    rating: 4,
+  },
+  {
+    recipeId: '11111111-1111-1111-1111-111111111111',
+    userEmail: 'cora@example.com',
+    rating: 5,
+  },
+  {
+    recipeId: '11111111-1111-1111-1111-111111111111',
+    userEmail: 'david@example.com',
+    rating: 4,
+  },
+  {
+    recipeId: '11111111-1111-1111-1111-111111111111',
+    userEmail: 'emma@example.com',
+    rating: 5,
+  },
 
   // Alice's Caprese Salad ratings (private recipe, fewer ratings)
-  { recipeId: '11111111-1111-1111-1111-111111111112', userEmail: 'cora@example.com', rating: 5 },
-  { recipeId: '11111111-1111-1111-1111-111111111112', userEmail: 'emma@example.com', rating: 4 },
+  {
+    recipeId: '11111111-1111-1111-1111-111111111112',
+    userEmail: 'cora@example.com',
+    rating: 5,
+  },
+  {
+    recipeId: '11111111-1111-1111-1111-111111111112',
+    userEmail: 'emma@example.com',
+    rating: 4,
+  },
 
   // Alice's Quick Pasta ratings
-  { recipeId: '11111111-1111-1111-1111-111111111113', userEmail: 'bob@example.com', rating: 3 },
-  { recipeId: '11111111-1111-1111-1111-111111111113', userEmail: 'david@example.com', rating: 4 },
-  { recipeId: '11111111-1111-1111-1111-111111111113', userEmail: 'frank@example.com', rating: 4 },
+  {
+    recipeId: '11111111-1111-1111-1111-111111111113',
+    userEmail: 'bob@example.com',
+    rating: 3,
+  },
+  {
+    recipeId: '11111111-1111-1111-1111-111111111113',
+    userEmail: 'david@example.com',
+    rating: 4,
+  },
+  {
+    recipeId: '11111111-1111-1111-1111-111111111113',
+    userEmail: 'frank@example.com',
+    rating: 4,
+  },
 
   // Alice's Veggie Stir Fry ratings
-  { recipeId: '11111111-1111-1111-1111-111111111114', userEmail: 'david@example.com', rating: 5 },
-  { recipeId: '11111111-1111-1111-1111-111111111114', userEmail: 'emma@example.com', rating: 5 },
-  { recipeId: '11111111-1111-1111-1111-111111111114', userEmail: 'frank@example.com', rating: 4 },
+  {
+    recipeId: '11111111-1111-1111-1111-111111111114',
+    userEmail: 'david@example.com',
+    rating: 5,
+  },
+  {
+    recipeId: '11111111-1111-1111-1111-111111111114',
+    userEmail: 'emma@example.com',
+    rating: 5,
+  },
+  {
+    recipeId: '11111111-1111-1111-1111-111111111114',
+    userEmail: 'frank@example.com',
+    rating: 4,
+  },
 
   // Bob's Caesar Salad ratings (public recipe, more ratings)
-  { recipeId: '22222222-2222-2222-2222-222222222221', userEmail: 'alice@example.com', rating: 4 },
-  { recipeId: '22222222-2222-2222-2222-222222222221', userEmail: 'cora@example.com', rating: 5 },
-  { recipeId: '22222222-2222-2222-2222-222222222221', userEmail: 'david@example.com', rating: 4 },
-  { recipeId: '22222222-2222-2222-2222-222222222221', userEmail: 'emma@example.com', rating: 3 },
-  { recipeId: '22222222-2222-2222-2222-222222222221', userEmail: 'frank@example.com', rating: 4 },
+  {
+    recipeId: '22222222-2222-2222-2222-222222222221',
+    userEmail: 'alice@example.com',
+    rating: 4,
+  },
+  {
+    recipeId: '22222222-2222-2222-2222-222222222221',
+    userEmail: 'cora@example.com',
+    rating: 5,
+  },
+  {
+    recipeId: '22222222-2222-2222-2222-222222222221',
+    userEmail: 'david@example.com',
+    rating: 4,
+  },
+  {
+    recipeId: '22222222-2222-2222-2222-222222222221',
+    userEmail: 'emma@example.com',
+    rating: 3,
+  },
+  {
+    recipeId: '22222222-2222-2222-2222-222222222221',
+    userEmail: 'frank@example.com',
+    rating: 4,
+  },
 ];
 
 /**
@@ -59,7 +132,10 @@ async function updateCreatorRatings() {
       .eq('id', rating.recipeId);
 
     if (error) {
-      logError(`Error updating creator rating for recipe ${rating.recipeId}:`, error);
+      logError(
+        `Error updating creator rating for recipe ${rating.recipeId}:`,
+        error
+      );
     } else {
       updatedCount++;
     }
@@ -75,7 +151,8 @@ async function addCommunityRatings() {
   logInfo('Adding community ratings...');
 
   // Get all users for email lookup
-  const { data: userList, error: userError } = await admin.auth.admin.listUsers();
+  const { data: userList, error: userError } =
+    await admin.auth.admin.listUsers();
   if (userError) {
     logError('Error fetching user list for ratings:', userError);
     return;
@@ -102,7 +179,10 @@ async function addCommunityRatings() {
     );
 
     if (error) {
-      logError(`Error inserting rating for recipe ${rating.recipeId} by ${rating.userEmail}:`, error);
+      logError(
+        `Error inserting rating for recipe ${rating.recipeId} by ${rating.userEmail}:`,
+        error
+      );
     } else {
       insertedCount++;
     }
@@ -124,13 +204,13 @@ export async function seedRecipeRatings() {
   const { data: ratingsStats } = await admin
     .from('recipe_ratings')
     .select('recipe_id')
-    .then(result => ({ data: result.data?.length || 0 }));
+    .then((result) => ({ data: result.data?.length || 0 }));
 
   const { data: recipesWithRatings } = await admin
     .from('recipes')
     .select('id')
     .not('creator_rating', 'is', null)
-    .then(result => ({ data: result.data?.length || 0 }));
+    .then((result) => ({ data: result.data?.length || 0 }));
 
   logSuccess('Recipe ratings seed completed!');
   logInfo(`  • Creator ratings: ${recipesWithRatings} recipes`);

@@ -62,7 +62,36 @@ export function RecipeAnalytics({ recipe, onClose }: RecipeAnalyticsProps) {
     try {
       setLoading(true);
       const data = await recipeApi.getRecipeAnalytics(recipe.id);
-      setAnalytics(data);
+      if (data) {
+        // Transform the API response to match AnalyticsData interface
+        const analyticsData: AnalyticsData = {
+          version_stats: [], // Will be populated when version stats are implemented
+          aggregate_stats: {
+            total_versions: data.version_count,
+            total_ratings: data.recent_activity.ratings_this_week,
+            aggregate_avg_rating: null,
+            total_views: data.recent_activity.views_this_week,
+            total_comments: data.recent_activity.comments_this_week,
+          },
+          recent_activity: data.recent_activity,
+          top_comments: data.top_comments.map(
+            (comment: {
+              id: string;
+              comment: string;
+              created_at: string;
+              rating?: number;
+              user_id?: string;
+            }) => ({
+              id: comment.id,
+              comment: comment.comment,
+              rating: comment.rating || 0,
+              created_at: comment.created_at,
+              user_id: comment.user_id || 'unknown',
+            })
+          ),
+        };
+        setAnalytics(analyticsData);
+      }
     } catch (error) {
       console.error('Failed to load analytics:', error);
     } finally {

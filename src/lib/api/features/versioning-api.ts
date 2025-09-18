@@ -4,13 +4,12 @@ import { handleError } from '../shared/error-handling';
 
 /**
  * CLEAN VERSIONING API - NO MORE PARENT-CHILD TRAVERSAL HELL!
- * 
+ *
  * Simple, straightforward functions that work with the new clean schema:
  * - recipes table: Contains only current/published content (one entry per recipe)
  * - recipe_content_versions table: Contains historical version snapshots
  */
 export const versioningApi = {
-  
   /**
    * Get all versions of a recipe (SIMPLE!)
    * No more complex family traversal - just direct lookup by recipe_id
@@ -47,7 +46,7 @@ export const versioningApi = {
    * Takes current recipe content + changes, creates new version snapshot
    */
   async createVersion(
-    recipeId: string, 
+    recipeId: string,
     versionData: {
       name: string;
       changelog: string;
@@ -70,7 +69,8 @@ export const versioningApi = {
       .eq('id', recipeId)
       .single();
 
-    if (recipeError) handleError(recipeError, 'Get current recipe for versioning');
+    if (recipeError)
+      handleError(recipeError, 'Get current recipe for versioning');
 
     // Get next version number
     const { data: maxVersionData } = await supabase
@@ -85,13 +85,18 @@ export const versioningApi = {
     const nextVersionNumber = (maxVersionData?.version_number || 0) + 1;
 
     // Get current user
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
     if (userError || !user) throw new Error('User not authenticated');
 
     // 🎯 CRITICAL FIX: If this is the first version, create "Version 0" (original) first
     if (isFirstVersion) {
-      console.log('🔄 [createVersion] First version detected - creating Version 0 (original recipe)');
-      
+      console.log(
+        '🔄 [createVersion] First version detected - creating Version 0 (original recipe)'
+      );
+
       // Create Version 0 with the original recipe content
       const { error: originalVersionError } = await supabase
         .from('recipe_content_versions')
@@ -111,12 +116,15 @@ export const versioningApi = {
           creator_rating: currentRecipe.creator_rating,
           image_url: currentRecipe.image_url,
           created_by: user.id,
-          is_published: true // Original is always published
+          is_published: true, // Original is always published
         });
 
       if (originalVersionError) {
         console.error('❌ Failed to create Version 0:', originalVersionError);
-        handleError(originalVersionError, 'Create original version (Version 0)');
+        handleError(
+          originalVersionError,
+          'Create original version (Version 0)'
+        );
       } else {
         console.log('✅ Version 0 (original recipe) created successfully');
       }
@@ -131,25 +139,57 @@ export const versioningApi = {
         version_name: versionData.name,
         changelog: versionData.changelog,
         // Use provided changes or fall back to current recipe content
-        title: versionData.title !== undefined ? versionData.title : currentRecipe.title,
-        ingredients: versionData.ingredients !== undefined ? versionData.ingredients : currentRecipe.ingredients,
-        instructions: versionData.instructions !== undefined ? versionData.instructions : currentRecipe.instructions,
-        notes: versionData.notes !== undefined ? versionData.notes : currentRecipe.notes,
-        setup: versionData.setup !== undefined ? versionData.setup : currentRecipe.setup,
-        categories: versionData.categories !== undefined ? versionData.categories : currentRecipe.categories,
-        cooking_time: versionData.cooking_time !== undefined ? versionData.cooking_time : currentRecipe.cooking_time,
-        difficulty: versionData.difficulty !== undefined ? versionData.difficulty : currentRecipe.difficulty,
-        creator_rating: versionData.creator_rating !== undefined ? versionData.creator_rating : currentRecipe.creator_rating,
-        image_url: versionData.image_url !== undefined ? versionData.image_url : currentRecipe.image_url,
+        title:
+          versionData.title !== undefined
+            ? versionData.title
+            : currentRecipe.title,
+        ingredients:
+          versionData.ingredients !== undefined
+            ? versionData.ingredients
+            : currentRecipe.ingredients,
+        instructions:
+          versionData.instructions !== undefined
+            ? versionData.instructions
+            : currentRecipe.instructions,
+        notes:
+          versionData.notes !== undefined
+            ? versionData.notes
+            : currentRecipe.notes,
+        setup:
+          versionData.setup !== undefined
+            ? versionData.setup
+            : currentRecipe.setup,
+        categories:
+          versionData.categories !== undefined
+            ? versionData.categories
+            : currentRecipe.categories,
+        cooking_time:
+          versionData.cooking_time !== undefined
+            ? versionData.cooking_time
+            : currentRecipe.cooking_time,
+        difficulty:
+          versionData.difficulty !== undefined
+            ? versionData.difficulty
+            : currentRecipe.difficulty,
+        creator_rating:
+          versionData.creator_rating !== undefined
+            ? versionData.creator_rating
+            : currentRecipe.creator_rating,
+        image_url:
+          versionData.image_url !== undefined
+            ? versionData.image_url
+            : currentRecipe.image_url,
         created_by: user.id,
-        is_published: false // New versions start as drafts
+        is_published: false, // New versions start as drafts
       })
       .select()
       .single();
 
     if (error) handleError(error, 'Create version');
-    
-    console.log(`✅ [createVersion] Created Version ${nextVersionNumber}: ${versionData.name}`);
+
+    console.log(
+      `✅ [createVersion] Created Version ${nextVersionNumber}: ${versionData.name}`
+    );
     return data;
   },
 
@@ -176,7 +216,7 @@ export const versioningApi = {
         creator_rating: version.creator_rating,
         image_url: version.image_url,
         current_version_id: versionId,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       })
       .eq('id', recipeId);
 
@@ -199,7 +239,10 @@ export const versioningApi = {
   /**
    * Switch to a specific version (load version content into main recipe) (SIMPLE!)
    */
-  async switchToVersion(recipeId: string, versionNumber: number): Promise<Recipe> {
+  async switchToVersion(
+    recipeId: string,
+    versionNumber: number
+  ): Promise<Recipe> {
     // Get the version content
     const { data: version, error: versionError } = await supabase
       .from('recipe_content_versions')
@@ -227,7 +270,7 @@ export const versioningApi = {
       is_public: false, // Will be fetched from main recipe if needed
       created_at: version.created_at,
       updated_at: version.created_at,
-      current_version_id: version.id
+      current_version_id: version.id,
     };
   },
 
@@ -260,7 +303,10 @@ export const versioningApi = {
    * Check if user owns a recipe (SIMPLE!)
    */
   async checkRecipeOwnership(recipeId: string): Promise<boolean> {
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
     if (userError || !user) return false;
 
     const { data, error } = await supabase
@@ -296,10 +342,10 @@ export const versioningApi = {
         cooking_time: recipeData.cooking_time || undefined,
         difficulty: recipeData.difficulty || undefined,
         creator_rating: recipeData.creator_rating || undefined,
-        image_url: recipeData.image_url || undefined
-      })
+        image_url: recipeData.image_url || undefined,
+      }),
     };
-    
+
     return this.createVersion(recipeId, versionData);
   },
 
@@ -321,5 +367,62 @@ export const versioningApi = {
     }
 
     return (data?.version_number || 0) + 1;
-  }
+  },
+
+  // Additional placeholder methods for missing API functions
+  async getVersionRatings(
+    recipeId: string,
+    versionNumber: number
+  ): Promise<
+    Array<{
+      id: string;
+      comment?: string;
+      user_id: string;
+      rating: number;
+      created_at: string;
+    }>
+  > {
+    console.log(
+      `📊 Getting version ratings for recipe ${recipeId}, version ${versionNumber}`
+    );
+    return []; // Placeholder until rating system is implemented
+  },
+
+  async getUserVersionRating(
+    recipeId: string,
+    versionNumber: number
+  ): Promise<{
+    id: string;
+    rating: number;
+    comment?: string;
+    created_at: string;
+  } | null> {
+    console.log(
+      `⭐ Getting user version rating for recipe ${recipeId}, version ${versionNumber}`
+    );
+    return null; // Placeholder until rating system is implemented
+  },
+
+  async rateVersion(
+    recipeId: string,
+    versionNumber: number,
+    rating: number,
+    comment?: string
+  ): Promise<void> {
+    console.log(
+      `⭐ Rating version ${versionNumber} of recipe ${recipeId} with ${rating} stars`
+    );
+    if (comment) console.log(`💬 Comment: ${comment}`);
+    // Placeholder until rating system is implemented
+  },
+
+  async trackVersionView(
+    recipeId: string,
+    versionNumber: number
+  ): Promise<void> {
+    console.log(
+      `👁️ Tracking view for version ${versionNumber} of recipe ${recipeId}`
+    );
+    // Placeholder until analytics system is implemented
+  },
 };

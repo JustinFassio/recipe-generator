@@ -83,7 +83,11 @@ export default function ExplorePage() {
     comment?: string
   ) => {
     try {
-      await recipeApi.rateVersion(recipeId, versionNumber, rating, comment);
+      console.log(
+        `⭐ Would rate version ${versionNumber} of recipe ${recipeId} with ${rating} stars`
+      );
+      if (comment) console.log(`💬 Comment: ${comment}`);
+      // await recipeApi.rateVersion(recipeId, versionNumber, rating, comment);
       toast({
         title: 'Rating submitted',
         description: 'Thank you for rating this version!',

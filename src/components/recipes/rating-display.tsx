@@ -22,7 +22,7 @@ export function RatingDisplay({
   versionNumber,
   showAggregateRating = false,
   allowRating = true,
-  className = ''
+  className = '',
 }: RatingDisplayProps) {
   const [ratingData, setRatingData] = useState<RatingData | null>(null);
   const [userRating, setUserRating] = useState<number | null>(null);
@@ -36,9 +36,11 @@ export function RatingDisplay({
   const loadRatingData = async () => {
     try {
       setLoading(true);
-      
-      console.log(`📊 [RatingDisplay] Loading ${showAggregateRating ? 'aggregate' : 'specific'} rating data for recipe: ${recipeId}${versionNumber ? `, version: ${versionNumber}` : ''}`);
-      
+
+      console.log(
+        `📊 [RatingDisplay] Loading ${showAggregateRating ? 'aggregate' : 'specific'} rating data for recipe: ${recipeId}${versionNumber ? `, version: ${versionNumber}` : ''}`
+      );
+
       // For now, create mock rating data since we don't have rating tables yet
       // TODO: Replace with real ratingApi calls when rating tables are created
       const mockRatingData: RatingData = {
@@ -49,17 +51,21 @@ export function RatingDisplay({
           Math.floor(Math.random() * 5),
           Math.floor(Math.random() * 8),
           Math.floor(Math.random() * 15),
-          Math.floor(Math.random() * 20)
-        ]
+          Math.floor(Math.random() * 20),
+        ],
       };
-      
+
       setRatingData(mockRatingData);
-      
+
       // Load user's rating if authenticated
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (user) {
         // TODO: Replace with real getUserRating call when rating tables exist
-        setUserRating(Math.random() > 0.5 ? Math.floor(Math.random() * 5) + 1 : null);
+        setUserRating(
+          Math.random() > 0.5 ? Math.floor(Math.random() * 5) + 1 : null
+        );
       }
     } catch (error) {
       console.error('❌ [RatingDisplay] Failed to load rating data:', error);
@@ -72,15 +78,17 @@ export function RatingDisplay({
   const handleRating = async (rating: number) => {
     try {
       setSubmitting(true);
-      
-      console.log(`⭐ [RatingDisplay] Submitting rating: ${rating} for recipe: ${recipeId}${versionNumber ? `, version: ${versionNumber}` : ''}`);
-      
+
+      console.log(
+        `⭐ [RatingDisplay] Submitting rating: ${rating} for recipe: ${recipeId}${versionNumber ? `, version: ${versionNumber}` : ''}`
+      );
+
       // TODO: Replace with real ratingApi.submitRating call when rating tables exist
       // await ratingApi.submitRating(recipeId, versionNumber, rating);
-      
+
       setUserRating(rating);
       await loadRatingData(); // Refresh data
-      
+
       console.log('✅ [RatingDisplay] Rating submitted successfully');
     } catch (error) {
       console.error('❌ [RatingDisplay] Failed to submit rating:', error);
@@ -94,7 +102,7 @@ export function RatingDisplay({
       <div className={`animate-pulse ${className}`}>
         <div className="h-6 bg-gray-200 rounded mb-2 w-32"></div>
         <div className="flex gap-1 mb-2">
-          {[1, 2, 3, 4, 5].map(i => (
+          {[1, 2, 3, 4, 5].map((i) => (
             <div key={i} className="w-5 h-5 bg-gray-200 rounded"></div>
           ))}
         </div>
@@ -103,30 +111,26 @@ export function RatingDisplay({
     );
   }
 
-  const ratingTitle = showAggregateRating 
-    ? 'Overall Rating (All Versions)' 
-    : versionNumber 
-      ? `Version ${versionNumber} Rating` 
+  const ratingTitle = showAggregateRating
+    ? 'Overall Rating (All Versions)'
+    : versionNumber
+      ? `Version ${versionNumber} Rating`
       : 'Current Recipe Rating';
 
   return (
     <div className={`space-y-4 ${className}`}>
       <div>
-        <h4 className="font-semibold mb-2 text-gray-800">
-          {ratingTitle}
-        </h4>
-        
+        <h4 className="font-semibold mb-2 text-gray-800">{ratingTitle}</h4>
+
         <div className="flex items-center gap-3">
-          <StarRating
-            rating={ratingData?.average || 0}
-            size="md"
-          />
+          <StarRating rating={ratingData?.average || 0} size="md" />
           <span className="text-sm text-gray-600">
-            {ratingData?.average?.toFixed(1) || '0.0'} ({ratingData?.count || 0} {ratingData?.count === 1 ? 'rating' : 'ratings'})
+            {ratingData?.average?.toFixed(1) || '0.0'} ({ratingData?.count || 0}{' '}
+            {ratingData?.count === 1 ? 'rating' : 'ratings'})
           </span>
         </div>
       </div>
-      
+
       {allowRating && (
         <div>
           <h5 className="font-medium mb-2 text-gray-700">Your Rating</h5>
@@ -142,10 +146,12 @@ export function RatingDisplay({
           </div>
         </div>
       )}
-      
+
       {ratingData?.distribution && ratingData.count > 0 && (
         <div>
-          <h5 className="font-medium mb-2 text-gray-700">Rating Distribution</h5>
+          <h5 className="font-medium mb-2 text-gray-700">
+            Rating Distribution
+          </h5>
           <RatingDistribution distribution={ratingData.distribution} />
         </div>
       )}
@@ -154,21 +160,27 @@ export function RatingDisplay({
 }
 
 // Supporting components - keep them focused on display only
-function StarRating({ rating, size = 'sm' }: { rating: number; size?: 'sm' | 'md' | 'lg' }) {
+function StarRating({
+  rating,
+  size = 'sm',
+}: {
+  rating: number;
+  size?: 'sm' | 'md' | 'lg';
+}) {
   const sizeClasses = {
     sm: 'w-4 h-4',
     md: 'w-5 h-5',
-    lg: 'w-6 h-6'
+    lg: 'w-6 h-6',
   };
 
   const starSize = sizeClasses[size];
-  
+
   return (
     <div className="flex items-center gap-0.5">
       {[1, 2, 3, 4, 5].map((star) => {
         const filled = rating >= star;
         const halfFilled = rating >= star - 0.5 && rating < star;
-        
+
         return (
           <div key={star} className={`${starSize} text-yellow-400`}>
             {filled ? (
@@ -185,13 +197,13 @@ function StarRating({ rating, size = 'sm' }: { rating: number; size?: 'sm' | 'md
   );
 }
 
-function InteractiveStarRating({ 
-  rating, 
-  onRate, 
-  disabled = false 
-}: { 
-  rating: number; 
-  onRate: (rating: number) => void; 
+function InteractiveStarRating({
+  rating,
+  onRate,
+  disabled = false,
+}: {
+  rating: number;
+  onRate: (rating: number) => void;
   disabled?: boolean;
 }) {
   const [hoverRating, setHoverRating] = useState(0);
@@ -200,12 +212,14 @@ function InteractiveStarRating({
     <div className="flex items-center gap-0.5">
       {[1, 2, 3, 4, 5].map((star) => {
         const isActive = (hoverRating || rating) >= star;
-        
+
         return (
           <button
             key={star}
             className={`w-5 h-5 transition-colors ${
-              disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:scale-110'
+              disabled
+                ? 'cursor-not-allowed opacity-50'
+                : 'cursor-pointer hover:scale-110'
             } ${isActive ? 'text-yellow-400' : 'text-gray-300'}`}
             onClick={() => !disabled && onRate(star)}
             onMouseEnter={() => !disabled && setHoverRating(star)}
@@ -222,15 +236,15 @@ function InteractiveStarRating({
 
 function RatingDistribution({ distribution }: { distribution: number[] }) {
   const total = distribution.reduce((sum, count) => sum + count, 0);
-  
+
   if (total === 0) return null;
-  
+
   return (
     <div className="space-y-1">
       {[5, 4, 3, 2, 1].map((stars) => {
         const count = distribution[stars - 1] || 0;
         const percentage = total > 0 ? (count / total) * 100 : 0;
-        
+
         return (
           <div key={stars} className="flex items-center gap-2 text-sm">
             <span className="w-8 text-gray-600">{stars}★</span>

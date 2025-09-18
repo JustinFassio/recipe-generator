@@ -605,7 +605,7 @@ export function RecipeView({
           <div className="card-body">
             <CommentSystem
               recipeId={recipe.id}
-              versionNumber={recipe.version_number || 1}
+              versionNumber={1}
               className="mt-6"
             />
           </div>

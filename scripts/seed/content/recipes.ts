@@ -4,7 +4,13 @@
  */
 
 import { admin } from '../utils/client';
-import { SeedRecipe, SupabaseAdminUser, logSuccess, logError, findUserByEmail, DEFAULT_MOOD, MAX_CATEGORIES_PER_RECIPE } from '../utils/shared';
+import {
+  SeedRecipe,
+  logSuccess,
+  logError,
+  findUserByEmail,
+  MAX_CATEGORIES_PER_RECIPE,
+} from '../utils/shared';
 
 // Test recipes data - extracted from monolithic seed script
 export const seedRecipesData: SeedRecipe[] = [
@@ -148,10 +154,11 @@ export async function seedAllRecipes() {
   console.log('🚀 Starting recipes seed...\n');
 
   // Fetch all users once for better performance
-  const { data: userList, error: userListError } = await admin.auth.admin.listUsers({
-    page: 1,
-    perPage: 100,
-  });
+  const { data: userList, error: userListError } =
+    await admin.auth.admin.listUsers({
+      page: 1,
+      perPage: 100,
+    });
 
   if (userListError) {
     logError('Error fetching user list:', userListError);
@@ -162,7 +169,9 @@ export async function seedAllRecipes() {
     // Find the user for this recipe
     const userMatch = findUserByEmail(userList.users, recipe.user_email);
     if (!userMatch) {
-      logError(`User not found for recipe ${recipe.title}: ${recipe.user_email}`);
+      logError(
+        `User not found for recipe ${recipe.title}: ${recipe.user_email}`
+      );
       continue;
     }
 
@@ -176,7 +185,13 @@ export async function seedAllRecipes() {
         const moodGuesses: string[] = [];
         // Add mood guessing logic here if needed
         moodAugmented = Array.from(
-          new Set([...existing, ...moodGuesses.slice(0, MAX_CATEGORIES_PER_RECIPE - existing.length)])
+          new Set([
+            ...existing,
+            ...moodGuesses.slice(
+              0,
+              MAX_CATEGORIES_PER_RECIPE - existing.length
+            ),
+          ])
         );
       }
     }
@@ -203,27 +218,29 @@ export async function seedAllRecipes() {
     }
 
     // 🎯 CRITICAL: Create Version 0 (Original Recipe) for each seeded recipe
-    const { error: versionError } = await admin.from('recipe_content_versions').upsert(
-      {
-        recipe_id: recipe.id,
-        version_number: 0,
-        version_name: 'Original Recipe',
-        changelog: 'Initial recipe version',
-        title: recipe.title,
-        ingredients: recipe.ingredients,
-        instructions: recipe.instructions,
-        notes: recipe.notes,
-        setup: recipe.setup || null,
-        categories: moodAugmented,
-        cooking_time: null,
-        difficulty: null,
-        creator_rating: null,
-        image_url: recipe.image_url,
-        created_by: userMatch.id,
-        is_published: true // Original is always published
-      },
-      { onConflict: 'recipe_id,version_number' }
-    );
+    const { error: versionError } = await admin
+      .from('recipe_content_versions')
+      .upsert(
+        {
+          recipe_id: recipe.id,
+          version_number: 0,
+          version_name: 'Original Recipe',
+          changelog: 'Initial recipe version',
+          title: recipe.title,
+          ingredients: recipe.ingredients,
+          instructions: recipe.instructions,
+          notes: recipe.notes,
+          setup: recipe.setup || null,
+          categories: moodAugmented,
+          cooking_time: null,
+          difficulty: null,
+          creator_rating: null,
+          image_url: recipe.image_url,
+          created_by: userMatch.id,
+          is_published: true, // Original is always published
+        },
+        { onConflict: 'recipe_id,version_number' }
+      );
 
     if (versionError) {
       logError(`Error creating Version 0 for ${recipe.title}:`, versionError);

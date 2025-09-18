@@ -4,7 +4,12 @@
  */
 
 import { admin } from '../utils/client';
-import { SeedUser, SupabaseAdminUser, logSuccess, logError, findUserByEmail } from '../utils/shared';
+import {
+  SeedUser,
+  logSuccess,
+  logError,
+  findUserByEmail,
+} from '../utils/shared';
 
 // Test users data
 export const seedUsers: SeedUser[] = [
@@ -149,10 +154,9 @@ export const seedUsers: SeedUser[] = [
 ];
 
 async function ensureUsername(userId: string, username: string) {
-  const { error } = await admin.from('usernames').upsert(
-    { user_id: userId, username },
-    { onConflict: 'user_id' }
-  );
+  const { error } = await admin
+    .from('usernames')
+    .upsert({ user_id: userId, username }, { onConflict: 'user_id' });
 
   if (error) {
     logError(`Failed to set username '${username}' for user ${userId}:`, error);
@@ -183,10 +187,9 @@ async function createProfile(
 async function upsertSafety(userId: string, safety: SeedUser['safety']) {
   if (!safety) return;
 
-  const { error } = await admin.from('user_safety').upsert(
-    { user_id: userId, ...safety },
-    { onConflict: 'user_id' }
-  );
+  const { error } = await admin
+    .from('user_safety')
+    .upsert({ user_id: userId, ...safety }, { onConflict: 'user_id' });
 
   if (error) {
     logError(`Failed to create safety data for user ${userId}:`, error);
@@ -196,10 +199,9 @@ async function upsertSafety(userId: string, safety: SeedUser['safety']) {
 async function upsertCooking(userId: string, cooking: SeedUser['cooking']) {
   if (!cooking) return;
 
-  const { error } = await admin.from('cooking_preferences').upsert(
-    { user_id: userId, ...cooking },
-    { onConflict: 'user_id' }
-  );
+  const { error } = await admin
+    .from('cooking_preferences')
+    .upsert({ user_id: userId, ...cooking }, { onConflict: 'user_id' });
 
   if (error) {
     logError(`Failed to create cooking preferences for user ${userId}:`, error);
@@ -214,14 +216,18 @@ export async function seedAllUsers() {
 
   for (const u of seedUsers) {
     // Create or fetch existing user
-    const { data: created, error: createError } = await admin.auth.admin.createUser({
-      email: u.email,
-      password: u.password,
-      email_confirm: true,
-      user_metadata: { full_name: u.fullName },
-    });
+    const { data: created, error: createError } =
+      await admin.auth.admin.createUser({
+        email: u.email,
+        password: u.password,
+        email_confirm: true,
+        user_metadata: { full_name: u.fullName },
+      });
 
-    if (createError && !String(createError.message).includes('already registered')) {
+    if (
+      createError &&
+      !String(createError.message).includes('already registered')
+    ) {
       logError(`Failed creating user ${u.email}:`, createError.message);
       process.exitCode = 1;
       continue;
@@ -229,18 +235,25 @@ export async function seedAllUsers() {
 
     // If user already exists, fetch it
     const userId = created?.user?.id;
-    let effectiveUserId = userId;
+    let effectiveUserId: string = userId || '';
     if (!effectiveUserId) {
-      const { data: existing, error: listError } = await admin.auth.admin.listUsers({
-        page: 1,
-        perPage: 100,
-      });
+      const { data: existing, error: listError } =
+        await admin.auth.admin.listUsers({
+          page: 1,
+          perPage: 100,
+        });
       if (listError) throw listError;
       const match = findUserByEmail(existing.users, u.email);
-      if (!match) {
+      if (!match || !match.id) {
         throw new Error(`Could not find or create user ${u.email}`);
       }
       effectiveUserId = match.id;
+    }
+
+    // Ensure we have a valid user ID before proceeding
+    if (!effectiveUserId) {
+      logError(`Failed to get user ID for ${u.email}`);
+      continue;
     }
 
     // Create related data

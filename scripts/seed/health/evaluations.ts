@@ -13,7 +13,8 @@ export async function seedEvaluationReports() {
   console.log('🚀 Starting evaluation reports seed...\n');
 
   // Get all users
-  const { data: userList, error: userError } = await admin.auth.admin.listUsers();
+  const { data: userList, error: userError } =
+    await admin.auth.admin.listUsers();
   if (userError) {
     logError('Error fetching user list for evaluation reports:', userError);
     return;
@@ -28,15 +29,20 @@ export async function seedEvaluationReports() {
       dietitian: 'Dr. Luna Clearwater',
       reportVersion: 'v2.1',
       reportData: {
-        summary: 'Comprehensive nutritional assessment for vegetarian diet optimization',
+        summary:
+          'Comprehensive nutritional assessment for vegetarian diet optimization',
         recommendations: [
           'Increase protein variety with legumes and quinoa',
           'Add vitamin B12 supplementation',
-          'Include more iron-rich foods like spinach and lentils'
+          'Include more iron-rich foods like spinach and lentils',
         ],
         restrictions: ['Avoid peanuts due to allergy'],
-        goals: ['Maintain vegetarian diet', 'Optimize protein intake', 'Ensure micronutrient balance']
-      }
+        goals: [
+          'Maintain vegetarian diet',
+          'Optimize protein intake',
+          'Ensure micronutrient balance',
+        ],
+      },
     },
     {
       userEmail: 'bob@example.com',
@@ -49,11 +55,15 @@ export async function seedEvaluationReports() {
         recommendations: [
           'Balance red meat with lean proteins',
           'Increase vegetable intake',
-          'Consider heart-healthy cooking methods'
+          'Consider heart-healthy cooking methods',
         ],
         restrictions: [],
-        goals: ['Maintain muscle mass', 'Support active lifestyle', 'Improve heart health']
-      }
+        goals: [
+          'Maintain muscle mass',
+          'Support active lifestyle',
+          'Improve heart health',
+        ],
+      },
     },
     {
       userEmail: 'david@example.com',
@@ -66,12 +76,16 @@ export async function seedEvaluationReports() {
         recommendations: [
           'Maintain traditional Korean fermented foods for gut health',
           'Balance sodium intake from traditional sauces',
-          'Include more variety in vegetable preparations'
+          'Include more variety in vegetable preparations',
         ],
         restrictions: [],
-        goals: ['Preserve cultural food traditions', 'Optimize digestive health', 'Balance modern nutrition']
-      }
-    }
+        goals: [
+          'Preserve cultural food traditions',
+          'Optimize digestive health',
+          'Balance modern nutrition',
+        ],
+      },
+    },
   ];
 
   for (const report of evaluationReports) {
@@ -96,9 +110,14 @@ export async function seedEvaluationReports() {
     );
 
     if (error) {
-      logError(`Error seeding evaluation report for ${report.userEmail}:`, error);
+      logError(
+        `Error seeding evaluation report for ${report.userEmail}:`,
+        error
+      );
     } else {
-      logSuccess(`Evaluation report seeded for ${report.userEmail}: ${report.reportId}`);
+      logSuccess(
+        `Evaluation report seeded for ${report.userEmail}: ${report.reportId}`
+      );
     }
   }
 

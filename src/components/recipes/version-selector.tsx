@@ -31,9 +31,7 @@ export function VersionSelector({
   const [versionStats, setVersionStats] = useState<Map<number, VersionStats>>(
     new Map()
   );
-  const [aggregateStats, setAggregateStats] = useState<AggregateStats | null>(
-    null
-  );
+  const [aggregateStats] = useState<AggregateStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [showRatingModal, setShowRatingModal] = useState<{
     version: number;
@@ -51,18 +49,25 @@ export function VersionSelector({
     try {
       setLoading(true);
 
-      console.log(`🔍 [VersionSelector] Loading versions for recipe: ${recipeId}`);
+      console.log(
+        `🔍 [VersionSelector] Loading versions for recipe: ${recipeId}`
+      );
 
       // Load all versions using new clean API (already sorted newest first)
       const versionsData = await recipeApi.getRecipeVersions(recipeId);
-      
-      console.log(`📊 [VersionSelector] API returned ${versionsData?.length || 0} versions:`, versionsData);
-      
+
+      console.log(
+        `📊 [VersionSelector] API returned ${versionsData?.length || 0} versions:`,
+        versionsData
+      );
+
       const sortedVersions = versionsData.sort(
         (a, b) => b.version_number - a.version_number
       );
-      
-      console.log(`📋 [VersionSelector] Setting ${sortedVersions.length} sorted versions`);
+
+      console.log(
+        `📋 [VersionSelector] Setting ${sortedVersions.length} sorted versions`
+      );
       setVersions(sortedVersions);
 
       // Load aggregate stats (if this function still exists, otherwise remove)
@@ -82,7 +87,12 @@ export function VersionSelector({
           version_rating_count: 0, // TODO: Implement rating system for new schema
           version_avg_rating: null,
           version_view_count: 0, // TODO: Implement view tracking for new schema
-          version_comment_count: 0
+          version_comment_count: 0,
+          is_public: version.is_published,
+          created_at: version.created_at,
+          updated_at: version.created_at,
+          parent_recipe_id: null, // Not applicable in new schema
+          is_version: version.version_number > 0,
         };
         statsMap.set(version.version_number, stats);
       }
@@ -143,7 +153,7 @@ export function VersionSelector({
       >
         <div className="flex items-start justify-between mb-2">
           <div className="flex items-center space-x-2">
-            <Badge variant={isLatest ? 'default' : 'neutral'}>
+            <Badge variant={isLatest ? 'default' : 'secondary'}>
               v{version.version_number} {isLatest && '(Latest)'}
             </Badge>
             {version.version_name && (
@@ -198,12 +208,15 @@ export function VersionSelector({
               size="sm"
               variant="outline"
               onClick={() => {
-                console.log('🔍 [VersionSelector] View button clicked for version:', {
-                  versionNumber: version.version_number,
-                  recipeId: version.recipe_id,
-                  versionId: version.id,
-                  hasRecipeId: !!version.recipe_id
-                });
+                console.log(
+                  '🔍 [VersionSelector] View button clicked for version:',
+                  {
+                    versionNumber: version.version_number,
+                    recipeId: version.recipe_id,
+                    versionId: version.id,
+                    hasRecipeId: !!version.recipe_id,
+                  }
+                );
                 onVersionSelect(version);
               }}
               disabled={isSelected}

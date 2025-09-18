@@ -1,4 +1,5 @@
 # DualRatingDisplay Component Audit
+
 ## Root Cause Analysis & System Separation Strategy
 
 ### 🚨 **Critical Issues Identified**
@@ -12,6 +13,7 @@ The `DualRatingDisplay` component is a **monolithic component** that tightly cou
 ### **1. Architectural Violations**
 
 #### **Multiple Responsibilities (Violation of SRP)**
+
 ```typescript
 // The component does TOO MUCH:
 export function DualRatingDisplay({
@@ -22,22 +24,25 @@ export function DualRatingDisplay({
   // 1. VERSION MANAGEMENT
   const [versions, setVersions] = useState<VersionWithStats[]>([]);
   const [selectedVersion, setSelectedVersion] = useState<number>();
-  
-  // 2. RATINGS & ANALYTICS  
+
+  // 2. RATINGS & ANALYTICS
   const [aggregateStats, setAggregateStats] = useState<AggregateStats | null>();
-  
+
   // 3. NAVIGATION
   const navigate = useNavigate();
   const handleVersionSelect = (versionNumber: number, recipeId: string) => {
     navigate(`/recipe/${recipeId}?version=${versionNumber}`);
   };
-  
+
   // 4. DATA FETCHING
-  const loadVersionData = async () => { /* complex API orchestration */ };
+  const loadVersionData = async () => {
+    /* complex API orchestration */
+  };
 }
 ```
 
 #### **Tight Coupling Between Systems**
+
 ```typescript
 // PROBLEM: Ratings data is artificially created from version data
 const versionsWithStats = sortedVersions.map((version) => {
@@ -57,12 +62,14 @@ const versionsWithStats = sortedVersions.map((version) => {
 ```
 
 **This is fundamentally broken because:**
+
 - Version data and rating data are different domains
 - Forcing them together creates fake/empty data
 - Makes it impossible to have ratings without versions
 - Creates circular dependencies
 
 #### **Navigation Logic Inconsistency**
+
 ```typescript
 // LINE 284: Uses version.version_recipe_id (WRONG!)
 onClick={() =>
@@ -85,7 +92,9 @@ onClick={(e) => {
 ### **2. Data Flow Problems**
 
 #### **Artificial Data Creation**
+
 The component creates fake `VersionStats` from `RecipeVersion` data:
+
 ```typescript
 // Lines 61-77: Creating fake stats
 const stats: VersionStats = {
@@ -102,13 +111,17 @@ const stats: VersionStats = {
 ```
 
 #### **Mixed Data Sources**
+
 ```typescript
 // Lines 79-89: Mixing version count with rating data
 const aggregate: AggregateStats = {
   original_recipe_id: recipeId,
   original_title: currentRecipe.title,
   total_versions: versionsWithStats.length, // ← VERSION DATA
-  latest_version: Math.max(...versionsWithStats.map(v => v.version.version_number), 1),
+  latest_version: Math.max(
+    ...versionsWithStats.map((v) => v.version.version_number),
+    1
+  ),
   total_ratings: 0, // ← RATING DATA (fake)
   aggregate_avg_rating: null, // ← RATING DATA (fake)
   total_views: 0, // ← ANALYTICS DATA (fake)
@@ -119,6 +132,7 @@ const aggregate: AggregateStats = {
 ### **3. Performance Issues**
 
 #### **Unnecessary Re-renders**
+
 ```typescript
 // Line 44-46: Loads version data on every recipeId change
 useEffect(() => {
@@ -129,27 +143,31 @@ useEffect(() => {
 But the component also handles navigation, causing it to reload data when it navigates to a new version of the same recipe.
 
 #### **Complex State Management**
+
 The component manages 4 different state concerns:
+
 - `versions` - Version data
-- `aggregateStats` - Analytics data  
+- `aggregateStats` - Analytics data
 - `selectedVersion` - UI state
 - `loading` - Loading state
 
 ### **4. Type System Confusion**
 
 #### **Conflicting Interfaces**
+
 ```typescript
 // The component expects currentRecipe.version_number
 const [selectedVersion, setSelectedVersion] = useState<number>(
-  currentRecipe.version_number || 1  // ← But Recipe doesn't have version_number in clean schema
+  currentRecipe.version_number || 1 // ← But Recipe doesn't have version_number in clean schema
 );
 ```
 
 #### **Artificial Interface Coupling**
+
 ```typescript
 interface VersionWithStats {
   version: RecipeVersion;
-  stats: VersionStats;  // ← Forces rating stats to be coupled with versions
+  stats: VersionStats; // ← Forces rating stats to be coupled with versions
 }
 ```
 
@@ -163,7 +181,7 @@ interface VersionWithStats {
 ❌ CURRENT: Monolithic Component
 DualRatingDisplay
 ├── Version Management
-├── Rating System  
+├── Rating System
 ├── Analytics System
 └── Navigation Logic
 
@@ -196,13 +214,13 @@ export function VersionNavigator({
   className
 }: VersionNavigatorProps) {
   const [versions, setVersions] = useState<RecipeVersion[]>([]);
-  
+
   // ONLY handles version data - no ratings, no analytics
   const loadVersions = async () => {
     const versionData = await versioningApi.getRecipeVersions(recipeId);
     setVersions(versionData);
   };
-  
+
   return (
     <div className={className}>
       <h3>Recipe Versions</h3>
@@ -241,7 +259,7 @@ export function RatingDisplay({
   className
 }: RatingDisplayProps) {
   const [ratingData, setRatingData] = useState<RatingData | null>(null);
-  
+
   // ONLY handles rating data - no versions, no navigation
   const loadRatingData = async () => {
     if (versionNumber) {
@@ -258,10 +276,10 @@ export function RatingDisplay({
       setRatingData(data);
     }
   };
-  
+
   return (
     <div className={className}>
-      <StarRating 
+      <StarRating
         rating={ratingData?.average || 0}
         count={ratingData?.count || 0}
         onRate={(rating) => ratingApi.submitRating(recipeId, versionNumber, rating)}
@@ -293,13 +311,13 @@ export function AnalyticsPanel({
   className
 }: AnalyticsPanelProps) {
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
-  
+
   // ONLY handles analytics data
   const loadAnalytics = async () => {
     const data = await analyticsApi.getRecipeAnalytics(recipeId, versionNumber);
     setAnalytics(data);
   };
-  
+
   return (
     <div className={className}>
       <div className="analytics-summary">
@@ -341,7 +359,7 @@ export function RecipeAnalyticsDashboard({
         currentVersion={currentVersion}
         onVersionSelect={onVersionChange}
       />
-      
+
       {/* Rating Display - Independent */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <RatingDisplay
@@ -355,7 +373,7 @@ export function RecipeAnalyticsDashboard({
           className="border-green-200 bg-green-50/50"
         />
       </div>
-      
+
       {/* Analytics Panel - Independent */}
       <AnalyticsPanel
         recipeId={recipeId}
@@ -372,6 +390,7 @@ export function RecipeAnalyticsDashboard({
 ## 📋 **Database Schema Separation**
 
 ### **Current Problem: Mixed Concerns in Schema**
+
 ```sql
 -- BROKEN: recipe_content_versions table has rating data mixed in
 CREATE TABLE recipe_content_versions (
@@ -393,6 +412,7 @@ CREATE TABLE recipe_content_versions (
 ```
 
 ### **Target: Clean Domain Separation**
+
 ```sql
 -- VERSIONING DOMAIN: Pure content versioning
 CREATE TABLE recipe_content_versions (
@@ -401,7 +421,7 @@ CREATE TABLE recipe_content_versions (
   version_number INTEGER NOT NULL,
   version_name TEXT,
   changelog TEXT,
-  
+
   -- PURE CONTENT SNAPSHOT (no ratings!)
   title TEXT NOT NULL,
   ingredients TEXT[] NOT NULL,
@@ -412,12 +432,12 @@ CREATE TABLE recipe_content_versions (
   cooking_time TEXT,
   difficulty TEXT,
   image_url TEXT,
-  
+
   -- VERSION METADATA ONLY
   created_at TIMESTAMPTZ DEFAULT NOW(),
   created_by UUID REFERENCES auth.users(id),
   is_published BOOLEAN DEFAULT false,
-  
+
   UNIQUE(recipe_id, version_number)
 );
 
@@ -431,7 +451,7 @@ CREATE TABLE recipe_ratings (
   comment TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
-  
+
   -- A user can rate each version once
   UNIQUE(recipe_id, version_number, user_id)
 );
@@ -455,7 +475,7 @@ CREATE TABLE recipe_creator_ratings (
   creator_notes TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
-  
+
   UNIQUE(recipe_id, version_number)
 );
 ```
@@ -465,6 +485,7 @@ CREATE TABLE recipe_creator_ratings (
 ## 📋 **API Separation Strategy**
 
 ### **Current Problem: Monolithic API**
+
 ```typescript
 // BROKEN: Single API mixes all concerns
 export const recipeApi = {
@@ -479,6 +500,7 @@ export const recipeApi = {
 ### **Target: Separated Domain APIs**
 
 #### **1. Versioning API (Pure)**
+
 ```typescript
 // src/lib/api/features/versioning-api.ts
 export const versioningApi = {
@@ -489,22 +511,26 @@ export const versioningApi = {
       .select('*') // Only content and metadata
       .eq('recipe_id', recipeId)
       .order('version_number', { ascending: false });
-    
+
     if (error) throw error;
     return data || [];
   },
-  
-  async createVersion(recipeId: string, versionData: CreateVersionData): Promise<RecipeVersion> {
+
+  async createVersion(
+    recipeId: string,
+    versionData: CreateVersionData
+  ): Promise<RecipeVersion> {
     // Pure version creation - no rating logic
   },
-  
+
   async publishVersion(recipeId: string, versionId: string): Promise<void> {
     // Pure version publishing - no rating updates
-  }
+  },
 };
 ```
 
 #### **2. Rating API (Pure)**
+
 ```typescript
 // src/lib/api/features/rating-api.ts
 export const ratingApi = {
@@ -515,101 +541,121 @@ export const ratingApi = {
       .select('*')
       .eq('recipe_id', recipeId)
       .is('version_number', null); // Current recipe rating
-    
+
     if (error) throw error;
     return this.aggregateRatings(data);
   },
-  
-  async getVersionRating(recipeId: string, versionNumber: number): Promise<RatingData> {
+
+  async getVersionRating(
+    recipeId: string,
+    versionNumber: number
+  ): Promise<RatingData> {
     const { data, error } = await supabase
       .from('recipe_ratings')
       .select('*')
       .eq('recipe_id', recipeId)
       .eq('version_number', versionNumber);
-    
+
     if (error) throw error;
     return this.aggregateRatings(data);
   },
-  
-  async submitRating(recipeId: string, versionNumber: number | null, rating: number, comment?: string): Promise<void> {
+
+  async submitRating(
+    recipeId: string,
+    versionNumber: number | null,
+    rating: number,
+    comment?: string
+  ): Promise<void> {
     // Pure rating submission - no version logic
   },
-  
+
   async getAggregateRating(recipeId: string): Promise<RatingData> {
     // Aggregate ratings across all versions
   },
-  
-  private aggregateRatings(ratings: any[]): RatingData {
+
+  aggregateRatings(ratings: any[]): RatingData {
     // Pure rating calculation logic
-  }
+  },
 };
 ```
 
 #### **3. Analytics API (Pure)**
+
 ```typescript
 // src/lib/api/features/analytics-api.ts
 export const analyticsApi = {
   // ONLY analytics - no content, no ratings
-  async trackRecipeView(recipeId: string, versionNumber?: number): Promise<void> {
-    const { error } = await supabase
-      .from('recipe_analytics')
-      .insert({
-        recipe_id: recipeId,
-        version_number: versionNumber,
-        event_type: 'view',
-        user_id: (await supabase.auth.getUser()).data.user?.id,
-        created_at: new Date().toISOString()
-      });
-    
+  async trackRecipeView(
+    recipeId: string,
+    versionNumber?: number
+  ): Promise<void> {
+    const { error } = await supabase.from('recipe_analytics').insert({
+      recipe_id: recipeId,
+      version_number: versionNumber,
+      event_type: 'view',
+      user_id: (await supabase.auth.getUser()).data.user?.id,
+      created_at: new Date().toISOString(),
+    });
+
     if (error) throw error;
   },
-  
-  async getRecipeAnalytics(recipeId: string, versionNumber?: number): Promise<AnalyticsData> {
+
+  async getRecipeAnalytics(
+    recipeId: string,
+    versionNumber?: number
+  ): Promise<AnalyticsData> {
     const { data, error } = await supabase
       .from('recipe_analytics')
       .select('*')
       .eq('recipe_id', recipeId)
       .eq('version_number', versionNumber || null);
-    
+
     if (error) throw error;
     return this.aggregateAnalytics(data);
   },
-  
-  private aggregateAnalytics(events: any[]): AnalyticsData {
+
+  aggregateAnalytics(events: any[]): AnalyticsData {
     // Pure analytics calculation
-  }
+  },
 };
 ```
 
 #### **4. Creator Rating API (Separate)**
+
 ```typescript
 // src/lib/api/features/creator-rating-api.ts
 export const creatorRatingApi = {
-  async getCreatorRating(recipeId: string, versionNumber?: number): Promise<CreatorRating | null> {
+  async getCreatorRating(
+    recipeId: string,
+    versionNumber?: number
+  ): Promise<CreatorRating | null> {
     const { data, error } = await supabase
       .from('recipe_creator_ratings')
       .select('*')
       .eq('recipe_id', recipeId)
       .eq('version_number', versionNumber || null)
       .maybeSingle();
-    
+
     if (error) throw error;
     return data;
   },
-  
-  async setCreatorRating(recipeId: string, versionNumber: number | null, rating: number, notes?: string): Promise<void> {
-    const { error } = await supabase
-      .from('recipe_creator_ratings')
-      .upsert({
-        recipe_id: recipeId,
-        version_number: versionNumber,
-        creator_rating: rating,
-        creator_notes: notes,
-        updated_at: new Date().toISOString()
-      });
-    
+
+  async setCreatorRating(
+    recipeId: string,
+    versionNumber: number | null,
+    rating: number,
+    notes?: string
+  ): Promise<void> {
+    const { error } = await supabase.from('recipe_creator_ratings').upsert({
+      recipe_id: recipeId,
+      version_number: versionNumber,
+      creator_rating: rating,
+      creator_notes: notes,
+      updated_at: new Date().toISOString(),
+    });
+
     if (error) throw error;
-  }
+  },
 };
 ```
 
@@ -618,24 +664,28 @@ export const creatorRatingApi = {
 ## 🔄 **Migration Strategy**
 
 ### **Phase 1: Component Separation (Week 1)**
+
 1. Create separate components (`VersionNavigator`, `RatingDisplay`, `AnalyticsPanel`)
 2. Update `RecipeViewPage` to use new components
 3. Deprecate `DualRatingDisplay` (keep for rollback)
 4. Test component separation
 
 ### **Phase 2: Database Schema Separation (Week 2)**
+
 1. Create new rating and analytics tables
 2. Migrate existing rating data from `recipe_content_versions`
 3. Remove `creator_rating` from version table
 4. Update RLS policies for new tables
 
 ### **Phase 3: API Separation (Week 2-3)**
+
 1. Create separate API modules
 2. Update components to use new APIs
 3. Remove mixed-concern API methods
 4. Test API separation
 
 ### **Phase 4: Cleanup (Week 3)**
+
 1. Remove deprecated `DualRatingDisplay`
 2. Clean up unused API methods
 3. Update type definitions
@@ -646,6 +696,7 @@ export const creatorRatingApi = {
 ## 📊 **Benefits of Separation**
 
 ### **Technical Benefits**
+
 - **Single Responsibility**: Each component has one clear purpose
 - **Loose Coupling**: Systems can evolve independently
 - **Better Testing**: Each system can be tested in isolation
@@ -653,12 +704,14 @@ export const creatorRatingApi = {
 - **Maintainability**: Easier to debug and modify individual systems
 
 ### **Business Benefits**
+
 - **Feature Independence**: Can add ratings without versions, or versions without ratings
 - **Scalability**: Each system can be optimized independently
 - **Team Productivity**: Different teams can work on different systems
 - **User Experience**: Faster loading, more responsive UI
 
 ### **Data Integrity Benefits**
+
 - **No Fake Data**: Each system only handles its own domain data
 - **Consistent State**: No artificial coupling between unrelated data
 - **Clear Ownership**: Each table has a single responsibility
@@ -668,18 +721,21 @@ export const creatorRatingApi = {
 ## 🎯 **Success Metrics**
 
 ### **Component Metrics**
+
 - [ ] Each component has < 100 lines of code
 - [ ] Each component manages < 3 state variables
 - [ ] Zero cross-domain data dependencies
 - [ ] 100% test coverage for each component
 
 ### **Performance Metrics**
+
 - [ ] 50% reduction in unnecessary API calls
 - [ ] 30% faster initial page load
 - [ ] Zero fake/empty data in UI
 - [ ] Improved component re-render performance
 
 ### **Maintainability Metrics**
+
 - [ ] Each domain can be modified independently
 - [ ] Zero breaking changes when updating one system
 - [ ] Clear separation of concerns in codebase

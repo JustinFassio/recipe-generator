@@ -4,7 +4,12 @@
  */
 
 import { admin } from '../utils/client';
-import { logSuccess, logError, logInfo, findUserByEmail } from '../utils/shared';
+import {
+  logSuccess,
+  logError,
+  logInfo,
+  findUserByEmail,
+} from '../utils/shared';
 
 // Avatar analytics data for users
 const avatarAnalyticsData = [
@@ -21,8 +26,8 @@ const avatarAnalyticsData = [
       upload_frequency_days: 3.2,
       last_upload_date: '2025-01-15T10:30:00Z',
       preferred_format: 'jpeg',
-      usage_pattern: 'regular'
-    }
+      usage_pattern: 'regular',
+    },
   },
   {
     userEmail: 'bob@example.com',
@@ -37,8 +42,8 @@ const avatarAnalyticsData = [
       upload_frequency_days: 5.1,
       last_upload_date: '2025-01-14T16:20:00Z',
       preferred_format: 'jpeg',
-      usage_pattern: 'moderate'
-    }
+      usage_pattern: 'moderate',
+    },
   },
   {
     userEmail: 'cora@example.com',
@@ -53,8 +58,8 @@ const avatarAnalyticsData = [
       upload_frequency_days: 2.8,
       last_upload_date: '2025-01-16T09:15:00Z',
       preferred_format: 'jpeg',
-      usage_pattern: 'frequent'
-    }
+      usage_pattern: 'frequent',
+    },
   },
   {
     userEmail: 'david@example.com',
@@ -69,9 +74,9 @@ const avatarAnalyticsData = [
       upload_frequency_days: 7.2,
       last_upload_date: '2025-01-13T14:45:00Z',
       preferred_format: 'png',
-      usage_pattern: 'occasional'
-    }
-  }
+      usage_pattern: 'occasional',
+    },
+  },
 ];
 
 // Recipe views data (simulating user engagement)
@@ -79,7 +84,7 @@ const recipeViewsData = [
   // Popular public recipes get more views
   { recipeId: '11111111-1111-1111-1111-111111111111', views: 45 }, // Avocado Toast (public)
   { recipeId: '22222222-2222-2222-2222-222222222221', views: 38 }, // Caesar Salad (public)
-  
+
   // Private recipes get fewer views (only from friends/shared)
   { recipeId: '11111111-1111-1111-1111-111111111112', views: 12 }, // Caprese Salad (private)
   { recipeId: '11111111-1111-1111-1111-111111111113', views: 18 }, // Quick Pasta (private)
@@ -93,7 +98,8 @@ async function seedAvatarAnalytics() {
   logInfo('Seeding avatar analytics...');
 
   // Get all users for email lookup
-  const { data: userList, error: userError } = await admin.auth.admin.listUsers();
+  const { data: userList, error: userError } =
+    await admin.auth.admin.listUsers();
   if (userError) {
     logError('Error fetching user list for analytics:', userError);
     return;
@@ -124,9 +130,19 @@ async function seedAvatarAnalytics() {
   }
 
   // Create summary analytics using the correct JSONB structure
-  const totalUploads = avatarAnalyticsData.reduce((sum, a) => sum + a.analytics.total_uploads, 0);
-  const totalSize = avatarAnalyticsData.reduce((sum, a) => sum + a.analytics.total_size_bytes, 0);
-  const avgCompression = avatarAnalyticsData.reduce((sum, a) => sum + a.analytics.compression_ratio, 0) / avatarAnalyticsData.length;
+  const totalUploads = avatarAnalyticsData.reduce(
+    (sum, a) => sum + a.analytics.total_uploads,
+    0
+  );
+  const totalSize = avatarAnalyticsData.reduce(
+    (sum, a) => sum + a.analytics.total_size_bytes,
+    0
+  );
+  const avgCompression =
+    avatarAnalyticsData.reduce(
+      (sum, a) => sum + a.analytics.compression_ratio,
+      0
+    ) / avatarAnalyticsData.length;
 
   const summaryData = {
     total_users_with_uploads: insertedCount,
@@ -136,11 +152,15 @@ async function seedAvatarAnalytics() {
     last_calculated: new Date().toISOString(),
   };
 
-  const { error: summaryError } = await admin.from('avatar_analytics_summary').insert({
-    analytics_data: summaryData,
-    period_start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days ago
-    period_end: new Date().toISOString(),
-  });
+  const { error: summaryError } = await admin
+    .from('avatar_analytics_summary')
+    .insert({
+      analytics_data: summaryData,
+      period_start: new Date(
+        Date.now() - 30 * 24 * 60 * 60 * 1000
+      ).toISOString(), // 30 days ago
+      period_end: new Date().toISOString(),
+    });
 
   if (summaryError) {
     logError('Error creating analytics summary:', summaryError);
@@ -156,7 +176,8 @@ async function seedRecipeViews() {
   logInfo('Seeding recipe views...');
 
   // Get all users for realistic view distribution
-  const { data: userList, error: userError } = await admin.auth.admin.listUsers();
+  const { data: userList, error: userError } =
+    await admin.auth.admin.listUsers();
   if (userError) {
     logError('Error fetching user list for recipe views:', userError);
     return;
@@ -167,11 +188,12 @@ async function seedRecipeViews() {
   for (const view of recipeViewsData) {
     // Create multiple view records to simulate realistic viewing patterns
     const viewsToCreate = Math.min(view.views, 20); // Cap at 20 for performance
-    
+
     for (let i = 0; i < viewsToCreate; i++) {
       // Pick a random user for this view
-      const randomUser = userList.users[Math.floor(Math.random() * userList.users.length)];
-      
+      const randomUser =
+        userList.users[Math.floor(Math.random() * userList.users.length)];
+
       // Create view with random timestamp in the last 30 days
       const daysAgo = Math.floor(Math.random() * 30);
       const hoursAgo = Math.floor(Math.random() * 24);
@@ -213,7 +235,9 @@ export async function seedAnalyticsData() {
 
   logSuccess('Analytics data seed completed!');
   logInfo(`  • Avatar analytics: ${totalAnalytics} users`);
-  logInfo(`  • Recipe views: ${totalViews} total views across ${recipeViewsData.length} recipes`);
+  logInfo(
+    `  • Recipe views: ${totalViews} total views across ${recipeViewsData.length} recipes`
+  );
   logInfo(`  • Analytics summary: Generated aggregate statistics`);
 }
 

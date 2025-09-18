@@ -10,7 +10,9 @@ const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!SERVICE_ROLE_KEY) {
   console.error('❌ Missing SUPABASE_SERVICE_ROLE_KEY in environment.');
-  console.error('   Set it for local via your shell or an .env file before running seeding.');
+  console.error(
+    '   Set it for local via your shell or an .env file before running seeding.'
+  );
   process.exit(1);
 }
 
