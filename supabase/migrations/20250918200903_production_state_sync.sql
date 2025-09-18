@@ -73,7 +73,7 @@ BEGIN
     1
   );
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, public;
 
 -- Populate Version 0 for existing recipes (idempotent)
 -- This matches what was done in the production emergency fix
