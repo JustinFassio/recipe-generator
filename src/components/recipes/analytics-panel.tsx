@@ -42,16 +42,26 @@ export function AnalyticsPanel({
 
       // For now, create mock analytics data since we don't have analytics tables yet
       // TODO: Replace with real analyticsApi calls when analytics tables are created
+
+      // Create deterministic mock data based on recipe ID for consistent testing
+      const seedValue = recipeId
+        .split('')
+        .reduce((acc, char, idx) => acc + char.charCodeAt(0) * (idx + 1), 0);
+      const seededRandom = (min: number, max: number) => {
+        const seed = (seedValue * 9301 + 49297) % 233280;
+        return Math.floor((seed / 233280) * (max - min) + min);
+      };
+
       const mockAnalyticsData: AnalyticsData = {
-        views: Math.floor(Math.random() * 500) + 10,
-        uniqueUsers: Math.floor(Math.random() * 100) + 5,
-        engagementRate: Math.random() * 100,
+        views: seededRandom(10, 510),
+        uniqueUsers: seededRandom(5, 105),
+        engagementRate: seededRandom(10, 95),
         lastViewed: new Date(
-          Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000
+          Date.now() - seededRandom(0, 7 * 24 * 60 * 60 * 1000)
         ).toISOString(),
-        commentsCount: Math.floor(Math.random() * 20),
-        sharesCount: Math.floor(Math.random() * 15),
-        savesCount: Math.floor(Math.random() * 30),
+        commentsCount: seededRandom(0, 20),
+        sharesCount: seededRandom(0, 15),
+        savesCount: seededRandom(0, 30),
       };
 
       setAnalytics(mockAnalyticsData);
