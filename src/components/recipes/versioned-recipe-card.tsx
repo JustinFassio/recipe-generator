@@ -117,7 +117,7 @@ export function VersionedRecipeCard({
           <div className="aspect-video overflow-hidden">
             <img
               src={getOptimizedImageUrl(
-                recipe.image_url,
+                recipe.image_url!, // Safe due to conditional rendering guard
                 recipe.updated_at,
                 recipe.created_at
               )}
