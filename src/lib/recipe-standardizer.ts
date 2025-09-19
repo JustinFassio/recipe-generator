@@ -27,6 +27,13 @@ export async function standardizeRecipeWithAI(
       body: JSON.stringify({ recipeText }),
     });
 
+    // Check if response exists and has ok property
+    if (!response || typeof response.ok === 'undefined') {
+      throw new Error(
+        'AI API standardization failed: No response or malformed response object'
+      );
+    }
+
     if (!response.ok) {
       const errorData = await response.json();
       console.error('AI standardization API error:', errorData);

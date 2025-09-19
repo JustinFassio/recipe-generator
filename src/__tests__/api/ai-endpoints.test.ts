@@ -17,15 +17,27 @@ describe('AI API Endpoints Configuration', () => {
   });
 
   describe('Environment Configuration', () => {
-    it('should have OpenAI API key configured', () => {
+    it('should have required environment variables configured', () => {
       // Check if environment variables are available
       const hasViteSupabaseUrl = !!import.meta.env.VITE_SUPABASE_URL;
       const hasViteSupabaseKey = !!import.meta.env.VITE_SUPABASE_ANON_KEY;
       const hasViteOpenAIModel = !!import.meta.env.VITE_OPENAI_MODEL;
 
+      // Check for OpenAI API key (used server-side, may not be available in client tests)
+      const hasOpenAIKey = !!(
+        import.meta.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY
+      );
+
       expect(hasViteSupabaseUrl).toBe(true);
       expect(hasViteSupabaseKey).toBe(true);
       expect(hasViteOpenAIModel).toBe(true);
+
+      // OpenAI API key is optional in test environment (server-side only)
+      if (!hasOpenAIKey) {
+        console.warn(
+          '⚠️ OpenAI API key not available - AI parsing tests will use fallbacks'
+        );
+      }
     });
 
     it('should have proper model configuration', () => {
