@@ -179,7 +179,7 @@ export function FilterBar({
                 className="w-full sm:w-40"
                 isOpen={openFilterSection === 'categories'}
                 onToggle={(isOpen) =>
-                  handleFilterSectionToggle('categories', !isOpen)
+                  handleFilterSectionToggle('categories', isOpen)
                 }
               />
 
@@ -192,7 +192,7 @@ export function FilterBar({
                 className="w-full sm:w-40"
                 isOpen={openFilterSection === 'cuisines'}
                 onToggle={(isOpen) =>
-                  handleFilterSectionToggle('cuisines', !isOpen)
+                  handleFilterSectionToggle('cuisines', isOpen)
                 }
               />
 
@@ -203,7 +203,7 @@ export function FilterBar({
                 className="w-full sm:w-40"
                 isOpen={openFilterSection === 'moods'}
                 onToggle={(isOpen) =>
-                  handleFilterSectionToggle('moods', !isOpen)
+                  handleFilterSectionToggle('moods', isOpen)
                 }
               />
 
@@ -216,7 +216,7 @@ export function FilterBar({
                 className="w-full sm:w-40"
                 isOpen={openFilterSection === 'ingredients'}
                 onToggle={(isOpen) =>
-                  handleFilterSectionToggle('ingredients', !isOpen)
+                  handleFilterSectionToggle('ingredients', isOpen)
                 }
               />
             </div>
