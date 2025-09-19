@@ -10,6 +10,8 @@ interface CategoryFilterSectionProps {
   onCategoriesChange: (categories: string[]) => void;
   variant: 'dropdown' | 'accordion' | 'drawer';
   className?: string;
+  isOpen?: boolean;
+  onToggle?: (isOpen: boolean) => void;
 }
 
 export function CategoryFilterSection({
@@ -17,10 +19,22 @@ export function CategoryFilterSection({
   onCategoriesChange,
   variant,
   className = '',
+  isOpen: externalIsOpen,
+  onToggle,
 }: CategoryFilterSectionProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
-  const [isOpen, setIsOpen] = useState(false);
+  const [internalIsOpen, setInternalIsOpen] = useState(false);
+
+  // Use external isOpen state if provided (for accordion behavior), otherwise use internal state
+  const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
+  const toggleOpen = () => {
+    if (onToggle) {
+      onToggle(isOpen);
+    } else {
+      setInternalIsOpen(!internalIsOpen);
+    }
+  };
 
   // Group categories by namespace for better organization
   const groupedCategories = useMemo(() => {
@@ -86,7 +100,7 @@ export function CategoryFilterSection({
       <div className={`relative ${className}`}>
         <Button
           variant="outline"
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={toggleOpen}
           className="w-full justify-between"
         >
           <span>

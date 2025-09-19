@@ -13,6 +13,8 @@ interface IngredientFilterSectionProps {
   onIngredientsChange: (ingredients: string[]) => void;
   variant: 'dropdown' | 'accordion' | 'drawer';
   className?: string;
+  isOpen?: boolean;
+  onToggle?: (isOpen: boolean) => void;
 }
 
 export function IngredientFilterSection({
@@ -20,10 +22,22 @@ export function IngredientFilterSection({
   onIngredientsChange,
   variant,
   className = '',
+  isOpen: externalIsOpen,
+  onToggle,
 }: IngredientFilterSectionProps) {
   const [searchTerm, setSearchTerm] = useState('');
-  const [isOpen, setIsOpen] = useState(false);
+  const [internalIsOpen, setInternalIsOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'global' | 'available'>('global');
+
+  // Use external isOpen state if provided (for accordion behavior), otherwise use internal state
+  const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
+  const toggleOpen = () => {
+    if (onToggle) {
+      onToggle(isOpen);
+    } else {
+      setInternalIsOpen(!internalIsOpen);
+    }
+  };
   const groceries = useGroceries();
 
   // Get available ingredients organized by category (like groceries page structure)
@@ -202,7 +216,7 @@ export function IngredientFilterSection({
       <div className={`relative ${className}`}>
         <Button
           variant="outline"
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={toggleOpen}
           className="w-full justify-between"
         >
           <span>
