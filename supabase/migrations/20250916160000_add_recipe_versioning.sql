@@ -36,25 +36,27 @@ CREATE TABLE IF NOT EXISTS recipe_views (
   version_number INTEGER DEFAULT 1,
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE, -- Only logged in users
   viewed_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  viewed_date DATE DEFAULT CURRENT_DATE,
+  -- viewed_date column removed to avoid production conflicts
   session_id TEXT,
-  UNIQUE(recipe_id, version_number, user_id, viewed_date)
+  UNIQUE(recipe_id, version_number, user_id, viewed_at)
 );
 
 -- Create indexes for recipe views
 CREATE INDEX IF NOT EXISTS idx_recipe_views_recipe_version ON recipe_views(recipe_id, version_number);
 CREATE INDEX IF NOT EXISTS idx_recipe_views_user ON recipe_views(user_id);
 CREATE INDEX IF NOT EXISTS idx_recipe_views_date ON recipe_views(viewed_at);
-CREATE INDEX IF NOT EXISTS idx_recipe_views_viewed_date ON recipe_views(viewed_date);
+-- Note: viewed_date column and index will be added in a future migration if needed
 
 -- Enable RLS on new tables
 ALTER TABLE recipe_versions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE recipe_views ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies for recipe_versions
+DROP POLICY IF EXISTS "Users can read all recipe versions" ON recipe_versions;
 CREATE POLICY "Users can read all recipe versions" ON recipe_versions
 FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Users can insert versions of their own recipes" ON recipe_versions;
 CREATE POLICY "Users can insert versions of their own recipes" ON recipe_versions
 FOR INSERT WITH CHECK (
   EXISTS (
@@ -64,6 +66,7 @@ FOR INSERT WITH CHECK (
   )
 );
 
+DROP POLICY IF EXISTS "Users can update versions of their own recipes" ON recipe_versions;
 CREATE POLICY "Users can update versions of their own recipes" ON recipe_versions
 FOR UPDATE USING (
   EXISTS (
@@ -74,14 +77,17 @@ FOR UPDATE USING (
 );
 
 -- RLS Policies for recipe_views
+DROP POLICY IF EXISTS "Users can read all recipe views" ON recipe_views;
 CREATE POLICY "Users can read all recipe views" ON recipe_views
 FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Users can insert their own views" ON recipe_views;
 CREATE POLICY "Users can insert their own views" ON recipe_views
 FOR INSERT WITH CHECK (auth.uid() = user_id);
 
 -- Enhanced stats view with version awareness
-CREATE OR REPLACE VIEW recipe_version_stats AS
+DROP VIEW IF EXISTS recipe_version_stats CASCADE;
+CREATE VIEW recipe_version_stats AS
 SELECT 
   r.id as recipe_id,
   r.title,
@@ -104,7 +110,8 @@ WHERE r.is_public = true
 GROUP BY r.id, r.title, r.version_number, r.creator_rating, r.user_id, r.is_public, r.created_at, r.updated_at, r.parent_recipe_id, r.is_version;
 
 -- Aggregate stats across all versions of a recipe
-CREATE OR REPLACE VIEW recipe_aggregate_stats AS
+DROP VIEW IF EXISTS recipe_aggregate_stats CASCADE;
+CREATE VIEW recipe_aggregate_stats AS
 SELECT 
   COALESCE(r.parent_recipe_id, r.id) as original_recipe_id,
   r.title as original_title,

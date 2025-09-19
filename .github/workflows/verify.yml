@@ -26,6 +26,30 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Create environment file for tests
+        run: |
+          echo "🔍 Creating environment file for tests..."
+
+          # Create .env.local with secrets for test environment
+          echo "VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL }}" >> .env.local
+          echo "VITE_SUPABASE_ANON_KEY=${{ secrets.VITE_SUPABASE_ANON_KEY }}" >> .env.local
+          echo "VITE_OPENAI_MODEL=${{ secrets.VITE_OPENAI_MODEL || 'gpt-4o-mini' }}" >> .env.local
+
+          # Validate critical secrets for database tests
+          if [ -z "${{ secrets.VITE_SUPABASE_URL }}" ]; then
+            echo "❌ VITE_SUPABASE_URL secret missing - database tests will fail"
+            echo "💡 Add this secret to GitHub repository settings"
+            exit 1
+          fi
+
+          if [ -z "${{ secrets.VITE_SUPABASE_ANON_KEY }}" ]; then
+            echo "❌ VITE_SUPABASE_ANON_KEY secret missing - database tests will fail"
+            echo "💡 Add this secret to GitHub repository settings"
+            exit 1
+          fi
+
+          echo "✅ Environment configured for tests"
+
       - name: Run linting
         run: npm run lint
 
@@ -37,12 +61,24 @@ jobs:
 
       - name: Run tests
         run: npm run test:run
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_OPENAI_MODEL: ${{ secrets.VITE_OPENAI_MODEL || 'gpt-4o-mini' }}
 
       - name: Check coverage
         run: npm run test:coverage
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_OPENAI_MODEL: ${{ secrets.VITE_OPENAI_MODEL || 'gpt-4o-mini' }}
 
       - name: Build
         run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_OPENAI_MODEL: ${{ secrets.VITE_OPENAI_MODEL || 'gpt-4o-mini' }}
 
       - name: Security audit
         run: npm audit --production --audit-level=critical
