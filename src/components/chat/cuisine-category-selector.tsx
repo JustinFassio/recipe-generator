@@ -43,6 +43,7 @@ export function CuisineCategorySelector({
       categories,
       cuisines: selectedCuisines,
       moods: selectedMoods,
+      availableIngredients: selectedIngredients,
     });
   };
 
@@ -52,6 +53,7 @@ export function CuisineCategorySelector({
       categories: selectedCategories,
       cuisines,
       moods: selectedMoods,
+      availableIngredients: selectedIngredients,
     });
   };
 
@@ -61,6 +63,7 @@ export function CuisineCategorySelector({
       categories: selectedCategories,
       cuisines: selectedCuisines,
       moods,
+      availableIngredients: selectedIngredients,
     });
   };
 
@@ -80,6 +83,7 @@ export function CuisineCategorySelector({
       categories: selectedCategories.filter((c) => c !== category),
       cuisines: selectedCuisines,
       moods: selectedMoods,
+      availableIngredients: selectedIngredients,
     });
   };
 
@@ -89,6 +93,7 @@ export function CuisineCategorySelector({
       categories: selectedCategories,
       cuisines: selectedCuisines.filter((c) => c !== cuisine),
       moods: selectedMoods,
+      availableIngredients: selectedIngredients,
     });
   };
 
@@ -98,6 +103,7 @@ export function CuisineCategorySelector({
       categories: selectedCategories,
       cuisines: selectedCuisines,
       moods: selectedMoods.filter((m) => m !== mood),
+      availableIngredients: selectedIngredients,
     });
   };
 
@@ -107,6 +113,7 @@ export function CuisineCategorySelector({
       categories: [],
       cuisines: [],
       moods: [],
+      availableIngredients: [],
     });
   };
 

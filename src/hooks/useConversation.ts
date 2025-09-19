@@ -256,6 +256,7 @@ I'll ensure all recommendations are safe for your dietary needs and tailored to 
         categories: string[];
         cuisines: string[];
         moods: string[];
+        availableIngredients?: string[];
       }
     ) => {
       if (!content.trim() || isLoading || !persona) return;
@@ -266,7 +267,9 @@ I'll ensure all recommendations are safe for your dietary needs and tailored to 
         preferences &&
         (preferences.categories.length > 0 ||
           preferences.cuisines.length > 0 ||
-          preferences.moods.length > 0)
+          preferences.moods.length > 0 ||
+          (preferences.availableIngredients &&
+            preferences.availableIngredients.length > 0))
       ) {
         let preferenceText = '\n\n**Recipe Preferences:**\n';
         if (preferences.cuisines.length > 0) {
@@ -277,6 +280,12 @@ I'll ensure all recommendations are safe for your dietary needs and tailored to 
         }
         if (preferences.moods.length > 0) {
           preferenceText += `• **Moods:** ${preferences.moods.join(', ')}\n`;
+        }
+        if (
+          preferences.availableIngredients &&
+          preferences.availableIngredients.length > 0
+        ) {
+          preferenceText += `• **Available Ingredients:** ${preferences.availableIngredients.join(', ')}\n`;
         }
         enhancedContent += preferenceText;
       }

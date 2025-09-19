@@ -90,6 +90,7 @@ export function ChatInterface({ onRecipeGenerated }: ChatInterfaceProps) {
     categories: string[];
     cuisines: string[];
     moods: string[];
+    availableIngredients?: string[];
   }) => {
     updateSelections(selection);
   };
