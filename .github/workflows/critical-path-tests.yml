@@ -1,0 +1,119 @@
+name: Critical Path Tests
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  critical-path-tests:
+    name: Critical Path Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Clear npm cache
+        run: npm cache clean --force
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Create environment file
+        run: |
+          echo "VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL }}" >> .env.local
+          echo "VITE_SUPABASE_ANON_KEY=${{ secrets.VITE_SUPABASE_ANON_KEY }}" >> .env.local
+          echo "VITE_OPENAI_MODEL=${{ secrets.VITE_OPENAI_MODEL || 'gpt-4o-mini' }}" >> .env.local
+          echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> .env.local
+
+      - name: Run TypeScript check
+        run: npx tsc --noEmit --skipLibCheck
+
+      - name: Run AI endpoints unit tests
+        run: npm run test -- src/__tests__/api/ai-endpoints.test.ts --run --reporter=verbose
+
+      - name: Run critical path integration tests
+        run: npm run test -- src/__tests__/integration/recipe-critical-path.test.ts --run --reporter=verbose
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+
+      - name: Test production build
+        run: npm run build
+
+      - name: Run core functionality tests
+        run: npm run test:core
+
+      - name: Validate database schema
+        run: |
+          node -e "
+          const { createClient } = require('@supabase/supabase-js');
+          const url = process.env.VITE_SUPABASE_URL;
+          const key = process.env.VITE_SUPABASE_ANON_KEY;
+
+          if (!url || !key) {
+            console.log('⚠️  Supabase credentials not found, skipping schema validation');
+            process.exit(0);
+          }
+
+          const supabase = createClient(url, key);
+
+          (async () => {
+            try {
+              console.log('🔍 Testing database connectivity...');
+              
+              const { data, error } = await supabase
+                .from('recipes')
+                .select('id, title, current_version_id')
+                .limit(1);
+              
+              if (error) {
+                console.error('❌ Database connection failed:', error.message);
+                process.exit(1);
+              }
+              
+              console.log('✅ Database connectivity verified');
+              
+              const { data: versionData, error: versionError } = await supabase
+                .from('recipe_content_versions')
+                .select('id, recipe_id, version_number')
+                .limit(1);
+                
+              if (versionError) {
+                console.error('❌ Recipe versioning table check failed:', versionError.message);
+                process.exit(1);
+              }
+              
+              console.log('✅ Recipe versioning schema verified');
+              console.log('🎉 All database checks passed!');
+              
+            } catch (err) {
+              console.error('❌ Database validation failed:', err.message);
+              process.exit(1);
+            }
+          })();
+          "
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+
+      - name: Critical path validation summary
+        run: |
+          echo "🎉 Critical Path Validation Complete!"
+          echo "======================================"
+          echo "✅ TypeScript compilation"
+          echo "✅ AI endpoints structure"
+          echo "✅ Recipe CRUD operations"
+          echo "✅ Database schema integrity"
+          echo "✅ Production build process"
+          echo "✅ Core application functionality"
+          echo ""
+          echo "🚀 Ready for deployment!"

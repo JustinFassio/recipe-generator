@@ -9,19 +9,21 @@ export default defineConfig({
   server: {
     port: 5174,
     host: true,
-    // Proxy API requests to Vercel local server (vercel dev) during development
-    proxy: {
-      '/api': {
-        target: 'http://localhost:3000',
-        changeOrigin: true,
-        configure: (proxy) => {
-          // Avoid proxy errors breaking HMR
-          proxy.on('error', (err) => {
-            console.warn('[vite proxy] /api error:', err?.message || err);
-          });
-        },
-      },
-    },
+    // Note: API routes are handled by Vercel serverless functions in production
+    // For local development, either run `vercel dev` on port 3000 or use production endpoints
+    // Commenting out proxy to avoid connection errors when vercel dev is not running
+    // proxy: {
+    //   '/api': {
+    //     target: 'http://localhost:3000',
+    //     changeOrigin: true,
+    //     configure: (proxy) => {
+    //       // Avoid proxy errors breaking HMR
+    //       proxy.on('error', (err) => {
+    //         console.warn('[vite proxy] /api error:', err?.message || err);
+    //       });
+    //     },
+    //   },
+    // },
   },
   resolve: {
     alias: {
