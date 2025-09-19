@@ -117,11 +117,18 @@ export function RecipeView({
       );
     }
 
-    const variant = match.matchType === 'exact' ? 'default' : 'secondary';
+    const variant = match.matchType === 'exact' ? 'default' : 'outline';
     const text = match.matchType === 'exact' ? 'You have this' : 'Similar item';
 
     return (
-      <Badge variant={variant} className="ml-2 text-xs">
+      <Badge
+        variant={variant}
+        className={`ml-2 text-xs ${
+          match.matchType === 'exact'
+            ? 'bg-green-100 text-green-800 border-green-300'
+            : 'bg-amber-50 text-amber-700 border-amber-300'
+        }`}
+      >
         {text}
       </Badge>
     );
