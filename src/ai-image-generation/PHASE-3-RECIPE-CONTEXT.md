@@ -62,14 +62,14 @@ export function analyzeRecipeContext(recipe: RecipeFormData): RecipeContext {
     complexity: 'simple',
     dietaryTags: [],
     flavorProfile: [],
-    visualStyle: 'natural'
+    visualStyle: 'natural',
   };
 
   // Extract categories
   if (recipe.categories) {
-    recipe.categories.forEach(category => {
-      const [namespace, value] = category.split(':').map(s => s.trim());
-      
+    recipe.categories.forEach((category) => {
+      const [namespace, value] = category.split(':').map((s) => s.trim());
+
       switch (namespace.toLowerCase()) {
         case 'cuisine':
           context.cuisine = value;
@@ -89,12 +89,15 @@ export function analyzeRecipeContext(recipe: RecipeFormData): RecipeContext {
 
   // Analyze ingredients for main components
   if (recipe.ingredients) {
-    const ingredients = Array.isArray(recipe.ingredients) 
-      ? recipe.ingredients 
+    const ingredients = Array.isArray(recipe.ingredients)
+      ? recipe.ingredients
       : recipe.ingredients.map((ing: any) => ing.item || ing);
 
     context.mainIngredients = extractMainIngredients(ingredients);
-    context.cookingMethod = inferCookingMethod(recipe.instructions, ingredients);
+    context.cookingMethod = inferCookingMethod(
+      recipe.instructions,
+      ingredients
+    );
     context.flavorProfile = inferFlavorProfile(ingredients);
   }
 
@@ -115,10 +118,10 @@ export function generateIntelligentPrompt(
   userPrompt?: string
 ): ImagePromptContext {
   const context = analyzeRecipeContext(recipe);
-  
+
   // Start with user prompt or generate from title
   let basePrompt = userPrompt || generateBasePromptFromTitle(recipe.title);
-  
+
   // Enhance with context
   const styleModifiers = buildStyleModifiers(context);
   const qualityEnhancers = buildQualityEnhancers(context);
@@ -138,7 +141,7 @@ export function generateIntelligentPrompt(
     styleModifiers,
     qualityEnhancers,
     contextTags,
-    negativePrompts
+    negativePrompts,
   };
 }
 
@@ -147,15 +150,31 @@ export function generateIntelligentPrompt(
  */
 function extractMainIngredients(ingredients: string[]): string[] {
   const mainIngredientKeywords = [
-    'chicken', 'beef', 'pork', 'fish', 'salmon', 'shrimp', 'tofu',
-    'pasta', 'rice', 'quinoa', 'bread', 'potato', 'tomato',
-    'cheese', 'milk', 'cream', 'butter', 'egg', 'flour'
+    'chicken',
+    'beef',
+    'pork',
+    'fish',
+    'salmon',
+    'shrimp',
+    'tofu',
+    'pasta',
+    'rice',
+    'quinoa',
+    'bread',
+    'potato',
+    'tomato',
+    'cheese',
+    'milk',
+    'cream',
+    'butter',
+    'egg',
+    'flour',
   ];
 
   return ingredients
-    .map(ing => ing.toLowerCase())
-    .filter(ing => 
-      mainIngredientKeywords.some(keyword => ing.includes(keyword))
+    .map((ing) => ing.toLowerCase())
+    .filter((ing) =>
+      mainIngredientKeywords.some((keyword) => ing.includes(keyword))
     )
     .slice(0, 3); // Limit to top 3 main ingredients
 }
@@ -163,23 +182,30 @@ function extractMainIngredients(ingredients: string[]): string[] {
 /**
  * Infer cooking method from instructions and ingredients
  */
-function inferCookingMethod(instructions: string, ingredients: string[]): string | null {
+function inferCookingMethod(
+  instructions: string,
+  ingredients: string[]
+): string | null {
   const instructionsLower = instructions.toLowerCase();
   const ingredientsLower = ingredients.join(' ').toLowerCase();
 
   const methods = {
-    'baked': ['bake', 'oven', 'baking', 'roast', 'roasting'],
-    'grilled': ['grill', 'grilling', 'bbq', 'barbecue'],
-    'fried': ['fry', 'frying', 'deep fry', 'pan fry'],
-    'boiled': ['boil', 'boiling', 'simmer', 'simmering'],
-    'raw': ['raw', 'fresh', 'uncooked', 'salad'],
-    'steamed': ['steam', 'steaming']
+    baked: ['bake', 'oven', 'baking', 'roast', 'roasting'],
+    grilled: ['grill', 'grilling', 'bbq', 'barbecue'],
+    fried: ['fry', 'frying', 'deep fry', 'pan fry'],
+    boiled: ['boil', 'boiling', 'simmer', 'simmering'],
+    raw: ['raw', 'fresh', 'uncooked', 'salad'],
+    steamed: ['steam', 'steaming'],
   };
 
   for (const [method, keywords] of Object.entries(methods)) {
-    if (keywords.some(keyword => 
-      instructionsLower.includes(keyword) || ingredientsLower.includes(keyword)
-    )) {
+    if (
+      keywords.some(
+        (keyword) =>
+          instructionsLower.includes(keyword) ||
+          ingredientsLower.includes(keyword)
+      )
+    ) {
       return method;
     }
   }
@@ -216,22 +242,37 @@ function inferFlavorProfile(ingredients: string[]): string[] {
 /**
  * Assess recipe complexity
  */
-function assessComplexity(recipe: RecipeFormData): 'simple' | 'moderate' | 'complex' {
+function assessComplexity(
+  recipe: RecipeFormData
+): 'simple' | 'moderate' | 'complex' {
   let complexityScore = 0;
 
   // Ingredient count
-  if (recipe.ingredients && recipe.ingredients.length > 10) complexityScore += 1;
-  if (recipe.ingredients && recipe.ingredients.length > 15) complexityScore += 1;
+  if (recipe.ingredients && recipe.ingredients.length > 10)
+    complexityScore += 1;
+  if (recipe.ingredients && recipe.ingredients.length > 15)
+    complexityScore += 1;
 
   // Instruction length
-  if (recipe.instructions && recipe.instructions.length > 500) complexityScore += 1;
-  if (recipe.instructions && recipe.instructions.length > 1000) complexityScore += 1;
+  if (recipe.instructions && recipe.instructions.length > 500)
+    complexityScore += 1;
+  if (recipe.instructions && recipe.instructions.length > 1000)
+    complexityScore += 1;
 
   // Technique complexity
-  const complexTechniques = ['braise', 'confit', 'sous vide', 'ferment', 'cure'];
-  if (recipe.instructions && complexTechniques.some(tech => 
-    recipe.instructions.toLowerCase().includes(tech)
-  )) {
+  const complexTechniques = [
+    'braise',
+    'confit',
+    'sous vide',
+    'ferment',
+    'cure',
+  ];
+  if (
+    recipe.instructions &&
+    complexTechniques.some((tech) =>
+      recipe.instructions.toLowerCase().includes(tech)
+    )
+  ) {
     complexityScore += 2;
   }
 
@@ -261,27 +302,27 @@ function buildStyleModifiers(context: RecipeContext): string[] {
   // Cuisine-specific styles
   if (context.cuisine) {
     const cuisineStyles: Record<string, string[]> = {
-      'Italian': ['rustic', 'traditional', 'Mediterranean'],
-      'Japanese': ['minimalist', 'clean', 'elegant'],
-      'French': ['sophisticated', 'refined', 'classic'],
-      'Mexican': ['vibrant', 'colorful', 'authentic'],
-      'Indian': ['spiced', 'aromatic', 'traditional'],
-      'Thai': ['fresh', 'herbal', 'balanced']
+      Italian: ['rustic', 'traditional', 'Mediterranean'],
+      Japanese: ['minimalist', 'clean', 'elegant'],
+      French: ['sophisticated', 'refined', 'classic'],
+      Mexican: ['vibrant', 'colorful', 'authentic'],
+      Indian: ['spiced', 'aromatic', 'traditional'],
+      Thai: ['fresh', 'herbal', 'balanced'],
     };
-    
+
     modifiers.push(...(cuisineStyles[context.cuisine] || ['authentic']));
   }
 
   // Cooking method styles
   if (context.cookingMethod) {
     const methodStyles: Record<string, string[]> = {
-      'baked': ['golden', 'caramelized'],
-      'grilled': ['charred', 'smoky'],
-      'fried': ['crispy', 'golden'],
-      'raw': ['fresh', 'vibrant'],
-      'steamed': ['tender', 'delicate']
+      baked: ['golden', 'caramelized'],
+      grilled: ['charred', 'smoky'],
+      fried: ['crispy', 'golden'],
+      raw: ['fresh', 'vibrant'],
+      steamed: ['tender', 'delicate'],
     };
-    
+
     modifiers.push(...(methodStyles[context.cookingMethod] || []));
   }
 
@@ -300,7 +341,7 @@ function buildQualityEnhancers(context: RecipeContext): string[] {
     'high quality',
     'well-lit',
     'appetizing',
-    'mouth-watering'
+    'mouth-watering',
   ];
 
   // Add complexity-based enhancers
@@ -343,7 +384,7 @@ function buildNegativePrompts(context: RecipeContext): string[] {
     'low quality',
     'artificial',
     'plastic',
-    'overcooked'
+    'overcooked',
   ];
 
   // Dietary-specific negatives
@@ -378,7 +419,7 @@ function combinePromptElements(
     basePrompt,
     ...styleModifiers,
     ...qualityEnhancers,
-    ...contextTags
+    ...contextTags,
   ];
 
   return elements.join(', ');
@@ -430,7 +471,7 @@ export function optimizePrompt(
     prompt: optimizedPrompt,
     confidence,
     estimatedCost,
-    alternatives
+    alternatives,
   };
 }
 
@@ -444,11 +485,11 @@ function removeRedundantWords(prompt: string): string {
     'super fresh',
     'extremely appetizing',
     'high quality professional',
-    'beautiful and delicious'
+    'beautiful and delicious',
   ];
 
   let cleaned = prompt;
-  redundantPhrases.forEach(phrase => {
+  redundantPhrases.forEach((phrase) => {
     cleaned = cleaned.replace(new RegExp(phrase, 'gi'), '');
   });
 
@@ -471,12 +512,12 @@ function truncatePrompt(prompt: string, maxLength: number): string {
     /professional food photography/i,
     /high quality/i,
     /appetizing/i,
-    /well-lit/i
+    /well-lit/i,
   ];
 
   // Add essential elements first
-  priorities.forEach(pattern => {
-    const match = parts.find(part => pattern.test(part));
+  priorities.forEach((pattern) => {
+    const match = parts.find((part) => pattern.test(part));
     if (match && currentLength + match.length < maxLength) {
       essentialParts.push(match);
       currentLength += match.length + 2; // +2 for comma and space
@@ -484,9 +525,11 @@ function truncatePrompt(prompt: string, maxLength: number): string {
   });
 
   // Add other parts until limit reached
-  parts.forEach(part => {
-    if (!essentialParts.includes(part) && 
-        currentLength + part.length < maxLength) {
+  parts.forEach((part) => {
+    if (
+      !essentialParts.includes(part) &&
+      currentLength + part.length < maxLength
+    ) {
       essentialParts.push(part);
       currentLength += part.length + 2;
     }
@@ -507,14 +550,14 @@ function generateAlternativePrompt(
     return [
       context.basePrompt.split(',')[0], // Main description
       'professional food photography',
-      'high quality'
+      'high quality',
     ].join(', ');
   } else {
     // Detailed version includes more context
     return [
       ...context.basePrompt.split(',').slice(0, 3),
       ...context.styleModifiers.slice(0, 2),
-      ...context.qualityEnhancers.slice(0, 3)
+      ...context.qualityEnhancers.slice(0, 3),
     ].join(', ');
   }
 }
@@ -559,7 +602,7 @@ export function generateFallbackStrategies(
     name: 'Simplified Prompt',
     prompt: generateSimplifiedPrompt(recipe.title, context),
     confidence: 0.7,
-    reason: 'Reduced complexity to avoid generation errors'
+    reason: 'Reduced complexity to avoid generation errors',
   });
 
   // Strategy 2: Generic food photography
@@ -568,7 +611,7 @@ export function generateFallbackStrategies(
       name: 'Generic Cuisine Style',
       prompt: generateGenericCuisinePrompt(context.cuisine),
       confidence: 0.6,
-      reason: `Generic ${context.cuisine} food photography`
+      reason: `Generic ${context.cuisine} food photography`,
     });
   }
 
@@ -578,7 +621,7 @@ export function generateFallbackStrategies(
       name: 'Ingredient Focused',
       prompt: generateIngredientPrompt(context.mainIngredients[0]),
       confidence: 0.5,
-      reason: 'Focus on main ingredient only'
+      reason: 'Focus on main ingredient only',
     });
   }
 
@@ -588,7 +631,7 @@ export function generateFallbackStrategies(
       name: 'Course Based',
       prompt: generateCoursePrompt(context.course),
       confidence: 0.4,
-      reason: `Generic ${context.course} dish photography`
+      reason: `Generic ${context.course} dish photography`,
     });
   }
 
@@ -598,7 +641,10 @@ export function generateFallbackStrategies(
 /**
  * Generate simplified prompt
  */
-function generateSimplifiedPrompt(title: string, context: RecipeContext): string {
+function generateSimplifiedPrompt(
+  title: string,
+  context: RecipeContext
+): string {
   const base = `A delicious ${title.toLowerCase()}`;
   const style = context.cuisine ? `, ${context.cuisine} style` : '';
   return `${base}${style}, professional food photography, appetizing`;
@@ -609,15 +655,21 @@ function generateSimplifiedPrompt(title: string, context: RecipeContext): string
  */
 function generateGenericCuisinePrompt(cuisine: string): string {
   const cuisinePrompts: Record<string, string> = {
-    'Italian': 'Traditional Italian cuisine, rustic style, professional food photography',
-    'Japanese': 'Authentic Japanese food, minimalist presentation, high quality',
-    'French': 'Classic French cuisine, elegant presentation, professional photography',
-    'Mexican': 'Authentic Mexican food, vibrant colors, traditional style',
-    'Indian': 'Traditional Indian cuisine, aromatic spices, authentic presentation',
-    'Thai': 'Authentic Thai food, fresh ingredients, balanced flavors'
+    Italian:
+      'Traditional Italian cuisine, rustic style, professional food photography',
+    Japanese: 'Authentic Japanese food, minimalist presentation, high quality',
+    French:
+      'Classic French cuisine, elegant presentation, professional photography',
+    Mexican: 'Authentic Mexican food, vibrant colors, traditional style',
+    Indian:
+      'Traditional Indian cuisine, aromatic spices, authentic presentation',
+    Thai: 'Authentic Thai food, fresh ingredients, balanced flavors',
   };
 
-  return cuisinePrompts[cuisine] || `${cuisine} cuisine, professional food photography`;
+  return (
+    cuisinePrompts[cuisine] ||
+    `${cuisine} cuisine, professional food photography`
+  );
 }
 
 /**
@@ -632,14 +684,19 @@ function generateIngredientPrompt(ingredient: string): string {
  */
 function generateCoursePrompt(course: string): string {
   const coursePrompts: Record<string, string> = {
-    'Appetizer': 'Beautiful appetizer, elegant presentation, professional food photography',
-    'Main': 'Hearty main course, satisfying presentation, professional photography',
-    'Dessert': 'Delicious dessert, indulgent presentation, professional food photography',
-    'Side': 'Perfect side dish, complementary presentation, professional photography',
-    'Breakfast': 'Inviting breakfast, morning presentation, professional food photography'
+    Appetizer:
+      'Beautiful appetizer, elegant presentation, professional food photography',
+    Main: 'Hearty main course, satisfying presentation, professional photography',
+    Dessert:
+      'Delicious dessert, indulgent presentation, professional food photography',
+    Side: 'Perfect side dish, complementary presentation, professional photography',
+    Breakfast:
+      'Inviting breakfast, morning presentation, professional food photography',
   };
 
-  return coursePrompts[course] || `${course} dish, professional food photography`;
+  return (
+    coursePrompts[course] || `${course} dish, professional food photography`
+  );
 }
 ```
 
@@ -649,7 +706,10 @@ function generateCoursePrompt(course: string): string {
 
 ```typescript
 // Add to existing handler
-import { analyzeRecipeContext, generateIntelligentPrompt } from '@/lib/ai-image-generation/recipe-context-analyzer';
+import {
+  analyzeRecipeContext,
+  generateIntelligentPrompt,
+} from '@/lib/ai-image-generation/recipe-context-analyzer';
 import { optimizePrompt } from '@/lib/ai-image-generation/prompt-optimizer';
 import { generateFallbackStrategies } from '@/lib/ai-image-generation/fallback-strategies';
 
@@ -679,19 +739,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       size = '1024x1024',
       quality = 'standard',
       useIntelligentPrompting = true,
-      fallbackOnError = true
+      fallbackOnError = true,
     }: EnhancedGenerateImageRequest = req.body;
 
     let finalPrompt = prompt || '';
     let promptContext = null;
 
     // Use intelligent prompting if enabled and recipe data available
-    if (useIntelligentPrompting && (recipeTitle || ingredients || instructions)) {
+    if (
+      useIntelligentPrompting &&
+      (recipeTitle || ingredients || instructions)
+    ) {
       const recipeData = {
         title: recipeTitle || '',
         categories: categories || [],
         ingredients: ingredients || [],
-        instructions: instructions || ''
+        instructions: instructions || '',
       };
 
       promptContext = generateIntelligentPrompt(recipeData, prompt);
@@ -700,56 +763,68 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // Call DALL-E 3 API with enhanced prompt
-    const imageResponse = await fetch('https://api.openai.com/v1/images/generations', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'dall-e-3',
-        prompt: finalPrompt,
-        n: 1,
-        size,
-        quality,
-        response_format: 'url'
-      })
-    });
+    const imageResponse = await fetch(
+      'https://api.openai.com/v1/images/generations',
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'dall-e-3',
+          prompt: finalPrompt,
+          n: 1,
+          size,
+          quality,
+          response_format: 'url',
+        }),
+      }
+    );
 
     if (!imageResponse.ok) {
       const errorData = await imageResponse.json();
-      
+
       // Try fallback strategies if enabled
       if (fallbackOnError && promptContext) {
         const recipeData = {
           title: recipeTitle || '',
           categories: categories || [],
           ingredients: ingredients || [],
-          instructions: instructions || ''
+          instructions: instructions || '',
         };
-        
+
         const context = analyzeRecipeContext(recipeData);
-        const fallbacks = generateFallbackStrategies(recipeData, context, errorData.error?.message || '');
-        
+        const fallbacks = generateFallbackStrategies(
+          recipeData,
+          context,
+          errorData.error?.message || ''
+        );
+
         // Try first fallback strategy
         if (fallbacks.length > 0) {
-          console.log(`[AI Image Generation] Trying fallback: ${fallbacks[0].name}`);
-          
-          const fallbackResponse = await fetch('https://api.openai.com/v1/images/generations', {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${apiKey}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              model: 'dall-e-3',
-              prompt: fallbacks[0].prompt,
-              n: 1,
-              size,
-              quality,
-              response_format: 'url'
-            })
-          });
+          console.log(
+            `[AI Image Generation] Trying fallback: ${fallbacks[0].name}`
+          );
+
+          const fallbackResponse = await fetch(
+            'https://api.openai.com/v1/images/generations',
+            {
+              method: 'POST',
+              headers: {
+                Authorization: `Bearer ${apiKey}`,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                model: 'dall-e-3',
+                prompt: fallbacks[0].prompt,
+                n: 1,
+                size,
+                quality,
+                response_format: 'url',
+              }),
+            }
+          );
 
           if (fallbackResponse.ok) {
             const fallbackData = await fallbackResponse.json();
@@ -760,8 +835,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
               fallbackStrategy: fallbacks[0].name,
               usage: {
                 promptTokens: fallbacks[0].prompt.length,
-                totalCost: calculateImageCost(size, quality)
-              }
+                totalCost: calculateImageCost(size, quality),
+              },
             });
           }
         }
@@ -770,11 +845,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(400).json({
         success: false,
         error: `Image generation failed: ${errorData.error?.message || 'Unknown error'}`,
-        fallbackStrategies: fallbackOnError ? generateFallbackStrategies(
-          { title: recipeTitle, categories, ingredients, instructions },
-          promptContext ? analyzeRecipeContext({ title: recipeTitle || '', categories: categories || [], ingredients: ingredients || [], instructions: instructions || '' }) : null,
-          errorData.error?.message || ''
-        ) : []
+        fallbackStrategies: fallbackOnError
+          ? generateFallbackStrategies(
+              { title: recipeTitle, categories, ingredients, instructions },
+              promptContext
+                ? analyzeRecipeContext({
+                    title: recipeTitle || '',
+                    categories: categories || [],
+                    ingredients: ingredients || [],
+                    instructions: instructions || '',
+                  })
+                : null,
+              errorData.error?.message || ''
+            )
+          : [],
       });
     }
 
@@ -792,7 +876,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 **File**: `src/__tests__/lib/ai-image-generation/recipe-context-analyzer.test.ts`
 
 ```typescript
-import { analyzeRecipeContext, generateIntelligentPrompt } from '@/lib/ai-image-generation/recipe-context-analyzer';
+import {
+  analyzeRecipeContext,
+  generateIntelligentPrompt,
+} from '@/lib/ai-image-generation/recipe-context-analyzer';
 
 describe('Recipe Context Analyzer', () => {
   it('should analyze Italian recipe context correctly', () => {
@@ -800,7 +887,8 @@ describe('Recipe Context Analyzer', () => {
       title: 'Classic Italian Lasagna',
       categories: ['Cuisine: Italian', 'Course: Main', 'Technique: Bake'],
       ingredients: ['pasta', 'tomato sauce', 'cheese', 'ground beef'],
-      instructions: 'Layer pasta with sauce and cheese, then bake in oven for 45 minutes'
+      instructions:
+        'Layer pasta with sauce and cheese, then bake in oven for 45 minutes',
     };
 
     const context = analyzeRecipeContext(recipe);
@@ -818,14 +906,16 @@ describe('Recipe Context Analyzer', () => {
       title: 'Spicy Thai Curry',
       categories: ['Cuisine: Thai', 'Course: Main'],
       ingredients: ['coconut milk', 'curry paste', 'chili', 'vegetables'],
-      instructions: 'Simmer curry with coconut milk and spices'
+      instructions: 'Simmer curry with coconut milk and spices',
     };
 
     const promptContext = generateIntelligentPrompt(recipe);
 
     expect(promptContext.basePrompt).toContain('spicy thai curry');
     expect(promptContext.styleModifiers).toContain('fresh');
-    expect(promptContext.qualityEnhancers).toContain('professional food photography');
+    expect(promptContext.qualityEnhancers).toContain(
+      'professional food photography'
+    );
     expect(promptContext.contextTags).toContain('featuring coconut milk');
   });
 });
@@ -841,11 +931,12 @@ import { optimizePrompt } from '@/lib/ai-image-generation/prompt-optimizer';
 describe('Prompt Optimizer', () => {
   it('should optimize long prompts', () => {
     const context = {
-      basePrompt: 'A delicious, very tasty, really appetizing pasta dish, super fresh ingredients, extremely high quality professional food photography, beautiful and delicious presentation',
+      basePrompt:
+        'A delicious, very tasty, really appetizing pasta dish, super fresh ingredients, extremely high quality professional food photography, beautiful and delicious presentation',
       styleModifiers: ['rustic', 'traditional'],
       qualityEnhancers: ['professional food photography', 'high quality'],
       contextTags: ['Italian style'],
-      negativePrompts: []
+      negativePrompts: [],
     };
 
     const optimized = optimizePrompt(context);
@@ -862,12 +953,14 @@ describe('Prompt Optimizer', () => {
       styleModifiers: ['rustic'],
       qualityEnhancers: ['professional food photography'],
       contextTags: ['Italian style'],
-      negativePrompts: []
+      negativePrompts: [],
     };
 
     const optimized = optimizePrompt(context);
 
-    expect(optimized.alternatives[0]).toContain('professional food photography');
+    expect(optimized.alternatives[0]).toContain(
+      'professional food photography'
+    );
     expect(optimized.alternatives[1]).toContain('rustic');
   });
 });
@@ -894,7 +987,7 @@ const metrics: GenerationMetrics = {
   contextElements: promptContext ? Object.keys(promptContext).length : 0,
   fallbackUsed: false,
   generationTime: Date.now() - startTime,
-  cost: calculateImageCost(size, quality)
+  cost: calculateImageCost(size, quality),
 };
 ```
 

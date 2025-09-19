@@ -74,7 +74,7 @@ describe('Recipe Schemas', () => {
       }
     });
 
-    it('should default description to empty string when not provided in form', () => {
+    it('should allow description to be undefined when not provided in form', () => {
       const formWithoutDescription = {
         title: 'Test Recipe',
         ingredients: ['pasta', 'cream'],
@@ -88,7 +88,7 @@ describe('Recipe Schemas', () => {
       const result = recipeFormSchema.safeParse(formWithoutDescription);
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.data.description).toBe('');
+        expect(result.data.description).toBeUndefined();
       }
     });
 

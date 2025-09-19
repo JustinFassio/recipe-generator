@@ -38,7 +38,7 @@ describe('AI Image Generation API', () => {
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.json).toHaveBeenCalledWith({
       success: false,
-      error: 'Prompt is required and must be a string'
+      error: 'Prompt is required and must be a string',
     });
   });
 
@@ -46,14 +46,15 @@ describe('AI Image Generation API', () => {
     // Mock successful DALL-E response
     global.fetch = jest.fn().mockResolvedValue({
       ok: true,
-      json: () => Promise.resolve({
-        data: [{ url: 'https://example.com/generated-image.jpg' }]
-      })
+      json: () =>
+        Promise.resolve({
+          data: [{ url: 'https://example.com/generated-image.jpg' }],
+        }),
     });
 
     const req = {
       method: 'POST',
-      body: { prompt: 'test prompt', size: '1024x1024', quality: 'standard' }
+      body: { prompt: 'test prompt', size: '1024x1024', quality: 'standard' },
     } as any;
     const res = { status: jest.fn().mockReturnThis(), json: jest.fn() } as any;
 
@@ -63,7 +64,7 @@ describe('AI Image Generation API', () => {
     expect(res.json).toHaveBeenCalledWith({
       success: true,
       imageUrl: 'https://example.com/generated-image.jpg',
-      usage: expect.any(Object)
+      usage: expect.any(Object),
     });
   });
 });
@@ -129,39 +130,46 @@ test.describe('AI Image Generation E2E', () => {
   test('should generate recipe image end-to-end', async ({ page }) => {
     // Navigate to recipe form
     await page.goto('/add-recipe');
-    
+
     // Fill recipe details
     await page.fill('[data-testid="recipe-title"]', 'Test Recipe');
-    await page.fill('[data-testid="recipe-ingredients"]', 'pasta, tomato sauce');
-    
+    await page.fill(
+      '[data-testid="recipe-ingredients"]',
+      'pasta, tomato sauce'
+    );
+
     // Click generate with AI
     await page.click('[data-testid="generate-with-ai"]');
-    
+
     // Verify generation panel opens
-    await expect(page.locator('[data-testid="image-generation-panel"]')).toBeVisible();
-    
+    await expect(
+      page.locator('[data-testid="image-generation-panel"]')
+    ).toBeVisible();
+
     // Verify auto-generated prompt
     const promptTextarea = page.locator('[data-testid="prompt-textarea"]');
     await expect(promptTextarea).toContainText('test recipe');
-    
+
     // Mock successful generation
-    await page.route('/api/ai/generate-image', async route => {
+    await page.route('/api/ai/generate-image', async (route) => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({
           success: true,
-          imageUrl: 'https://example.com/generated-image.jpg'
-        })
+          imageUrl: 'https://example.com/generated-image.jpg',
+        }),
       });
     });
-    
+
     // Generate image
     await page.click('[data-testid="generate-button"]');
-    
+
     // Verify success
     await expect(page.locator('[data-testid="generated-image"]')).toBeVisible();
-    await expect(page.locator('[data-testid="cost-display"]')).toContainText('$0.04');
+    await expect(page.locator('[data-testid="cost-display"]')).toContainText(
+      '$0.04'
+    );
   });
 });
 ```
@@ -226,27 +234,29 @@ export async function validateImageQuality(
       relevance: relevanceScore,
       technicalQuality: technicalScore,
       aestheticAppeal: 0.8, // Would be calculated from actual image analysis
-      overallScore
+      overallScore,
     },
     issues,
-    suggestions
+    suggestions,
   };
 }
 
 /**
  * Check if image is accessible and loads correctly
  */
-async function checkImageAccessibility(imageUrl: string): Promise<{ accessible: boolean; error?: string }> {
+async function checkImageAccessibility(
+  imageUrl: string
+): Promise<{ accessible: boolean; error?: string }> {
   try {
     const response = await fetch(imageUrl, { method: 'HEAD' });
     return {
       accessible: response.ok,
-      error: response.ok ? undefined : `HTTP ${response.status}`
+      error: response.ok ? undefined : `HTTP ${response.status}`,
     };
   } catch (error) {
     return {
       accessible: false,
-      error: error.message
+      error: error.message,
     };
   }
 }
@@ -271,10 +281,11 @@ async function assessRelevance(
 
   // Check for ingredient mentions
   if (context.mainIngredients.length > 0) {
-    const ingredientMatches = context.mainIngredients.filter(ingredient =>
+    const ingredientMatches = context.mainIngredients.filter((ingredient) =>
       promptLower.includes(ingredient.toLowerCase())
     );
-    relevanceScore += (ingredientMatches.length / context.mainIngredients.length) * 0.2;
+    relevanceScore +=
+      (ingredientMatches.length / context.mainIngredients.length) * 0.2;
   }
 
   // Check for cooking method alignment
@@ -339,7 +350,7 @@ export function ImageQualityFeedback({
       comments,
       improvements
     };
-    
+
     onFeedbackSubmitted(feedback);
   };
 
@@ -464,27 +475,30 @@ export interface PerformanceAlert {
 export async function collectPerformanceMetrics(): Promise<PerformanceMetrics> {
   // Collect metrics from usage data
   const metrics = await calculateMetrics();
-  
+
   // Check for performance issues
   await checkPerformanceAlerts(metrics);
-  
+
   return metrics;
 }
 
 /**
  * Check for performance alerts
  */
-async function checkPerformanceAlerts(metrics: PerformanceMetrics): Promise<PerformanceAlert[]> {
+async function checkPerformanceAlerts(
+  metrics: PerformanceMetrics
+): Promise<PerformanceAlert[]> {
   const alerts: PerformanceAlert[] = [];
 
   // Generation time alert
-  if (metrics.averageGenerationTime > 30000) { // 30 seconds
+  if (metrics.averageGenerationTime > 30000) {
+    // 30 seconds
     alerts.push({
       type: 'performance',
       severity: 'high',
       message: 'Image generation is slower than expected',
       timestamp: new Date().toISOString(),
-      metrics: { averageGenerationTime: metrics.averageGenerationTime }
+      metrics: { averageGenerationTime: metrics.averageGenerationTime },
     });
   }
 
@@ -495,18 +509,18 @@ async function checkPerformanceAlerts(metrics: PerformanceMetrics): Promise<Perf
       severity: 'high',
       message: 'Image generation success rate is below 90%',
       timestamp: new Date().toISOString(),
-      metrics: { successRate: metrics.successRate }
+      metrics: { successRate: metrics.successRate },
     });
   }
 
   // Cost alert
-  if (metrics.costPerGeneration > 0.10) {
+  if (metrics.costPerGeneration > 0.1) {
     alerts.push({
       type: 'cost',
       severity: 'medium',
       message: 'Average cost per generation is high',
       timestamp: new Date().toISOString(),
-      metrics: { costPerGeneration: metrics.costPerGeneration }
+      metrics: { costPerGeneration: metrics.costPerGeneration },
     });
   }
 
@@ -539,17 +553,20 @@ AI image generation allows you to create custom images for your recipes using ar
 ## Tips for Better Images
 
 ### Writing Effective Prompts
+
 - Be specific about the dish and style
 - Mention key ingredients
 - Include cooking method (baked, grilled, etc.)
 - Add visual style preferences
 
 ### Example Prompts
+
 - "A delicious homemade lasagna, Italian style, golden cheese topping, rustic presentation"
 - "Fresh Thai curry with coconut milk, vibrant green color, aromatic spices, traditional bowl"
 - "Chocolate chip cookies, warm and gooey, golden brown, home-baked style"
 
 ### Cost Optimization
+
 - Use standard quality for most images
 - Choose 1024x1024 size unless you need specific dimensions
 - Check for similar recipes to reuse cached images
@@ -557,11 +574,13 @@ AI image generation allows you to create custom images for your recipes using ar
 ## Troubleshooting
 
 ### Common Issues
+
 - **Generation Fails**: Try a simpler, shorter prompt
 - **Poor Quality**: Use HD quality setting or refine prompt
 - **High Costs**: Check your usage limits and optimize settings
 
 ### Getting Help
+
 - Contact support for technical issues
 - Check the FAQ for common questions
 - Review your usage dashboard for cost management
@@ -583,6 +602,7 @@ AI image generation allows you to create custom images for your recipes using ar
 ## 🚀 Production Deployment
 
 ### Pre-Deployment Checklist
+
 - [ ] All phases completed and tested
 - [ ] Performance benchmarks met
 - [ ] Cost management validated
@@ -592,6 +612,7 @@ AI image generation allows you to create custom images for your recipes using ar
 - [ ] Rollback plan prepared
 
 ### Deployment Steps
+
 1. Deploy backend API endpoints
 2. Deploy frontend components
 3. Run database migrations

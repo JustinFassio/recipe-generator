@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useForm, useFieldArray } from 'react-hook-form';
-import type { FieldArrayPath } from 'react-hook-form';
+import { useForm, useFieldArray, type FieldArrayPath } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { createDaisyUIInputClasses } from '@/lib/input-migration';
 import {
@@ -204,6 +203,7 @@ export function RecipeForm({
 
       const recipeData = {
         ...data,
+        description: data.description || null,
         image_url: imageUrl && imageUrl.trim() !== '' ? imageUrl : null,
       };
 
@@ -317,7 +317,10 @@ export function RecipeForm({
             </div>
 
             <div>
-              <label htmlFor="description" className={createDaisyUILabelClasses()}>
+              <label
+                htmlFor="description"
+                className={createDaisyUILabelClasses()}
+              >
                 Recipe Description
               </label>
               <Textarea
@@ -330,7 +333,8 @@ export function RecipeForm({
                 className="w-full resize-none mt-1"
               />
               <p className="mt-1 text-sm text-gray-500">
-                A rich description helps others discover your recipe and improves AI image generation.
+                A rich description helps others discover your recipe and
+                improves AI image generation.
               </p>
               {errors.description && (
                 <p className="mt-1 text-sm text-red-500">

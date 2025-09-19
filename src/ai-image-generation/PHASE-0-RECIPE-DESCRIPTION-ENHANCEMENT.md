@@ -30,7 +30,9 @@
 export const recipeFormSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   description: z.string().optional().default(''), // NEW FIELD
-  ingredients: z.array(z.string().min(1)).min(1, 'At least one ingredient is required'),
+  ingredients: z
+    .array(z.string().min(1))
+    .min(1, 'At least one ingredient is required'),
   instructions: z.string().min(1, 'Instructions are required'),
   notes: z.string().optional().default(''),
   image_url: z.string().nullable().optional(),
@@ -232,7 +234,7 @@ ${ENHANCED_SAVE_RECIPE_PROMPT}`,
               <Upload className="mr-2 h-4 w-4" />
               Upload Image
             </Button>
-            
+
             {/* NEW: Generate with AI button */}
             <Button
               type="button"
@@ -245,7 +247,7 @@ ${ENHANCED_SAVE_RECIPE_PROMPT}`,
               Generate with AI
             </Button>
           </div>
-          
+
           <p className="text-sm text-gray-500">
             Upload a photo or generate one with AI. A good recipe description improves AI image quality.
           </p>
@@ -269,7 +271,7 @@ ${ENHANCED_SAVE_RECIPE_PROMPT}`,
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
           {recipe.title}
         </h1>
-        
+
         {/* NEW: Description Display */}
         {recipe.description && (
           <div className="mb-4">
@@ -278,7 +280,7 @@ ${ENHANCED_SAVE_RECIPE_PROMPT}`,
             </p>
           </div>
         )}
-        
+
         {/* Rest of existing content */}
         <div className="flex flex-wrap gap-2 mb-4">
           {recipe.categories?.map((category, index) => (
@@ -299,15 +301,15 @@ ${ENHANCED_SAVE_RECIPE_PROMPT}`,
 
 ```sql
 -- Add description column to recipes table
-ALTER TABLE recipes 
+ALTER TABLE recipes
 ADD COLUMN IF NOT EXISTS description TEXT;
 
 -- Add description to recipe_content_versions table
-ALTER TABLE recipe_content_versions 
+ALTER TABLE recipe_content_versions
 ADD COLUMN IF NOT EXISTS description TEXT;
 
 -- Add index for description search
-CREATE INDEX IF NOT EXISTS idx_recipes_description 
+CREATE INDEX IF NOT EXISTS idx_recipes_description
 ON recipes USING GIN (to_tsvector('english', description));
 
 -- Update RLS policies if needed
@@ -328,10 +330,10 @@ export function generateIntelligentPrompt(
   userPrompt?: string
 ): ImagePromptContext {
   const context = analyzeRecipeContext(recipe);
-  
+
   // PRIORITY: Use description if available, fallback to title + context
   let basePrompt = '';
-  
+
   if (recipe.description && recipe.description.trim()) {
     // Use the rich description as the primary prompt
     basePrompt = recipe.description;
@@ -339,7 +341,7 @@ export function generateIntelligentPrompt(
     // Fallback to title + context analysis
     basePrompt = userPrompt || generateBasePromptFromTitle(recipe.title);
   }
-  
+
   // Enhance with context (cuisine, ingredients, etc.)
   const styleModifiers = buildStyleModifiers(context);
   const qualityEnhancers = buildQualityEnhancers(context);
@@ -359,7 +361,7 @@ export function generateIntelligentPrompt(
     styleModifiers,
     qualityEnhancers,
     contextTags,
-    negativePrompts
+    negativePrompts,
   };
 }
 
@@ -378,7 +380,7 @@ function combinePromptElements(
     const elements = [
       basePrompt,
       ...styleModifiers.slice(0, 2), // Limit modifiers for rich descriptions
-      ...qualityEnhancers.slice(0, 2) // Limit enhancers
+      ...qualityEnhancers.slice(0, 2), // Limit enhancers
     ];
     return elements.join(', ');
   } else {
@@ -387,7 +389,7 @@ function combinePromptElements(
       basePrompt,
       ...styleModifiers,
       ...qualityEnhancers,
-      ...contextTags
+      ...contextTags,
     ];
     return elements.join(', ');
   }
@@ -397,21 +399,25 @@ function combinePromptElements(
 ## 🎯 Benefits of This Enhancement
 
 ### 1. **Improved User Experience**
+
 - Rich descriptions help users understand what they're cooking
 - Better recipe discovery through descriptive content
 - More engaging recipe browsing experience
 
 ### 2. **Enhanced AI Image Generation**
+
 - Descriptions provide rich context for image generation
 - Better visual prompts lead to more accurate images
 - Reduces need for manual prompt editing
 
 ### 3. **SEO and Discoverability**
+
 - Rich descriptions improve search engine optimization
 - Better social media sharing with descriptive content
 - Enhanced recipe metadata
 
 ### 4. **Future-Proofing**
+
 - Foundation for advanced features like recipe recommendations
 - Better integration with external recipe platforms
 - Enhanced analytics and user engagement tracking
@@ -419,6 +425,7 @@ function combinePromptElements(
 ## 🧪 Testing Strategy
 
 ### 1. Schema Validation Tests
+
 ```typescript
 // Test that description field is optional and handled correctly
 describe('Recipe Schema with Description', () => {
@@ -427,20 +434,22 @@ describe('Recipe Schema with Description', () => {
       title: 'Test Recipe',
       description: 'A delicious test recipe with rich flavors',
       ingredients: ['test ingredient'],
-      instructions: 'Test instructions'
+      instructions: 'Test instructions',
     };
-    
+
     const result = recipeFormSchema.parse(recipe);
-    expect(result.description).toBe('A delicious test recipe with rich flavors');
+    expect(result.description).toBe(
+      'A delicious test recipe with rich flavors'
+    );
   });
-  
+
   it('should handle recipes without description', () => {
     const recipe = {
       title: 'Test Recipe',
       ingredients: ['test ingredient'],
-      instructions: 'Test instructions'
+      instructions: 'Test instructions',
     };
-    
+
     const result = recipeFormSchema.parse(recipe);
     expect(result.description).toBe('');
   });
@@ -448,17 +457,19 @@ describe('Recipe Schema with Description', () => {
 ```
 
 ### 2. AI Generation Tests
+
 ```typescript
 // Test that descriptions are used for image generation
 describe('AI Image Generation with Description', () => {
   it('should use description for image prompts', () => {
     const recipe = {
       title: 'Simple Pasta',
-      description: 'A rich, creamy carbonara with crispy pancetta and velvety egg sauce',
+      description:
+        'A rich, creamy carbonara with crispy pancetta and velvety egg sauce',
       ingredients: ['pasta', 'eggs', 'pancetta'],
-      instructions: 'Cook pasta...'
+      instructions: 'Cook pasta...',
     };
-    
+
     const prompt = generateIntelligentPrompt(recipe);
     expect(prompt.basePrompt).toContain('creamy carbonara');
     expect(prompt.basePrompt).toContain('crispy pancetta');

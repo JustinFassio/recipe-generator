@@ -1,5 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import { generateImagePrompt, canGenerateImage, extractVisualElements } from '@/lib/ai-image-utils';
+import {
+  generateImagePrompt,
+  canGenerateImage,
+  extractVisualElements,
+} from '@/lib/ai-image-utils';
 import type { Recipe } from '@/lib/types';
 
 describe('AI Image Utils', () => {
@@ -26,7 +30,9 @@ describe('AI Image Utils', () => {
       };
 
       const prompt = generateImagePrompt(recipe);
-      expect(prompt).toContain('A delicious, creamy pasta dish with fresh herbs');
+      expect(prompt).toContain(
+        'A delicious, creamy pasta dish with fresh herbs'
+      );
       expect(prompt).toContain('Italian style');
       expect(prompt).toContain('appetizing');
     });
@@ -66,7 +72,11 @@ describe('AI Image Utils', () => {
         instructions: 'Grill salmon',
         notes: '',
         image_url: null,
-        categories: ['Course: Main', 'Cuisine: Mediterranean', 'Technique: Grilled'],
+        categories: [
+          'Course: Main',
+          'Cuisine: Mediterranean',
+          'Technique: Grilled',
+        ],
         setup: ['Cook time: 15 minutes'],
         cooking_time: null,
         difficulty: null,
@@ -217,7 +227,14 @@ describe('AI Image Utils', () => {
         id: '1',
         title: 'Test Recipe',
         description: null,
-        ingredients: ['ingredient1', 'ingredient2', 'ingredient3', 'ingredient4', 'ingredient5', 'ingredient6'],
+        ingredients: [
+          'ingredient1',
+          'ingredient2',
+          'ingredient3',
+          'ingredient4',
+          'ingredient5',
+          'ingredient6',
+        ],
         instructions: 'Cook it',
         notes: '',
         image_url: null,

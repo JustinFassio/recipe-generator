@@ -56,12 +56,18 @@ export default async function handler(
 
   try {
     // Validate request body
-    const { prompt, recipeTitle, categories, size = '1024x1024', quality = 'standard' }: GenerateImageRequest = req.body;
+    const {
+      prompt,
+      recipeTitle,
+      categories,
+      size = '1024x1024',
+      quality = 'standard',
+    }: GenerateImageRequest = req.body;
 
     if (!prompt || typeof prompt !== 'string') {
-      return res.status(400).json({ 
-        success: false, 
-        error: 'Prompt is required and must be a string' 
+      return res.status(400).json({
+        success: false,
+        error: 'Prompt is required and must be a string',
       });
     }
 
@@ -69,39 +75,46 @@ export default async function handler(
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
       console.error('OpenAI API key not configured');
-      return res.status(500).json({ 
-        success: false, 
-        error: 'Image generation service not configured' 
+      return res.status(500).json({
+        success: false,
+        error: 'Image generation service not configured',
       });
     }
 
     // Generate enhanced prompt for recipe context
-    const enhancedPrompt = buildRecipeImagePrompt(prompt, recipeTitle, categories);
+    const enhancedPrompt = buildRecipeImagePrompt(
+      prompt,
+      recipeTitle,
+      categories
+    );
 
     // Call DALL-E 3 API
-    const imageResponse = await fetch('https://api.openai.com/v1/images/generations', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'dall-e-3',
-        prompt: enhancedPrompt,
-        n: 1,
-        size,
-        quality,
-        response_format: 'url'
-      })
-    });
+    const imageResponse = await fetch(
+      'https://api.openai.com/v1/images/generations',
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'dall-e-3',
+          prompt: enhancedPrompt,
+          n: 1,
+          size,
+          quality,
+          response_format: 'url',
+        }),
+      }
+    );
 
     if (!imageResponse.ok) {
       const errorData = await imageResponse.json();
       console.error('DALL-E API error:', errorData);
-      
+
       return res.status(400).json({
         success: false,
-        error: `Image generation failed: ${errorData.error?.message || 'Unknown error'}`
+        error: `Image generation failed: ${errorData.error?.message || 'Unknown error'}`,
       });
     }
 
@@ -111,7 +124,7 @@ export default async function handler(
     if (!generatedImageUrl) {
       return res.status(500).json({
         success: false,
-        error: 'No image URL returned from generation service'
+        error: 'No image URL returned from generation service',
       });
     }
 
@@ -122,17 +135,16 @@ export default async function handler(
       imageUrl: generatedImageUrl,
       usage: {
         promptTokens: enhancedPrompt.length,
-        totalCost: calculateImageCost(size, quality)
-      }
+        totalCost: calculateImageCost(size, quality),
+      },
     };
 
     res.status(200).json(response);
-
   } catch (error) {
     console.error('Image generation error:', error);
     res.status(500).json({
       success: false,
-      error: 'Internal server error during image generation'
+      error: 'Internal server error during image generation',
     });
   }
 }
@@ -141,8 +153,8 @@ export default async function handler(
  * Build enhanced prompt for recipe images
  */
 function buildRecipeImagePrompt(
-  basePrompt: string, 
-  recipeTitle?: string, 
+  basePrompt: string,
+  recipeTitle?: string,
   categories?: string[]
 ): string {
   let enhancedPrompt = basePrompt;
@@ -155,18 +167,19 @@ function buildRecipeImagePrompt(
   // Add category context for better image relevance
   if (categories && categories.length > 0) {
     const categoryContext = categories
-      .filter(cat => cat.includes('Cuisine:'))
-      .map(cat => cat.split(':')[1]?.trim())
+      .filter((cat) => cat.includes('Cuisine:'))
+      .map((cat) => cat.split(':')[1]?.trim())
       .filter(Boolean)
       .join(', ');
-    
+
     if (categoryContext) {
       enhancedPrompt += `, ${categoryContext} style`;
     }
   }
 
   // Add professional food photography context
-  enhancedPrompt += ', professional food photography, high quality, appetizing, well-lit';
+  enhancedPrompt +=
+    ', professional food photography, high quality, appetizing, well-lit';
 
   return enhancedPrompt;
 }
@@ -179,10 +192,12 @@ function calculateImageCost(size: string, quality: string): number {
   const costs = {
     '1024x1024': { standard: 0.04, hd: 0.08 },
     '1024x1792': { standard: 0.08, hd: 0.12 },
-    '1792x1024': { standard: 0.08, hd: 0.12 }
+    '1792x1024': { standard: 0.08, hd: 0.12 },
   };
 
-  return costs[size as keyof typeof costs]?.[quality as 'standard' | 'hd'] || 0.04;
+  return (
+    costs[size as keyof typeof costs]?.[quality as 'standard' | 'hd'] || 0.04
+  );
 }
 ```
 
@@ -200,8 +215,12 @@ const limiter = rateLimit({
   max: 5, // 5 requests per window
   keyGenerator: (req) => {
     // Use user ID if available, otherwise IP
-    return req.headers['x-user-id'] as string || req.headers['x-forwarded-for'] as string || 'anonymous';
-  }
+    return (
+      (req.headers['x-user-id'] as string) ||
+      (req.headers['x-forwarded-for'] as string) ||
+      'anonymous'
+    );
+  },
 });
 
 export default limiter(handler);
@@ -235,7 +254,7 @@ export function rateLimit(options: RateLimitOptions) {
       const windowStart = now - options.windowMs;
 
       // Clean up old entries
-      Object.keys(store).forEach(k => {
+      Object.keys(store).forEach((k) => {
         if (store[k].resetTime < windowStart) {
           delete store[k];
         }
@@ -245,7 +264,7 @@ export function rateLimit(options: RateLimitOptions) {
       if (!store[key] || store[key].resetTime < now) {
         store[key] = {
           count: 0,
-          resetTime: now + options.windowMs
+          resetTime: now + options.windowMs,
         };
       }
 
@@ -253,7 +272,7 @@ export function rateLimit(options: RateLimitOptions) {
       if (store[key].count >= options.max) {
         return res.status(429).json({
           error: 'Rate limit exceeded. Please try again later.',
-          retryAfter: Math.ceil((store[key].resetTime - now) / 1000)
+          retryAfter: Math.ceil((store[key].resetTime - now) / 1000),
         });
       }
 
@@ -303,9 +322,9 @@ describe('AI Image Generation API', () => {
   });
 
   it('should validate required prompt field', async () => {
-    const req = { 
-      method: 'POST', 
-      body: {} 
+    const req = {
+      method: 'POST',
+      body: {},
     } as any;
     const res = { status: jest.fn().mockReturnThis(), json: jest.fn() } as any;
 
@@ -314,7 +333,7 @@ describe('AI Image Generation API', () => {
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.json).toHaveBeenCalledWith({
       success: false,
-      error: 'Prompt is required and must be a string'
+      error: 'Prompt is required and must be a string',
     });
   });
 
@@ -335,15 +354,17 @@ describe('AI Image Generation Integration', () => {
       body: JSON.stringify({
         prompt: 'A delicious homemade lasagna',
         recipeTitle: 'Classic Italian Lasagna',
-        categories: ['Cuisine: Italian', 'Course: Main']
-      })
+        categories: ['Cuisine: Italian', 'Course: Main'],
+      }),
     });
 
     expect(response.status).toBe(200);
-    
+
     const data = await response.json();
     expect(data.success).toBe(true);
-    expect(data.imageUrl).toMatch(/^https:\/\/oaidalleapiprodscus\.blob\.core\.windows\.net/);
+    expect(data.imageUrl).toMatch(
+      /^https:\/\/oaidalleapiprodscus\.blob\.core\.windows\.net/
+    );
   });
 });
 ```
@@ -362,8 +383,12 @@ describe('AI Image Generation Integration', () => {
 
 ```typescript
 // Add to handler
-console.log(`[AI Image Generation] User: ${userId}, Prompt: ${prompt.substring(0, 100)}...`);
-console.log(`[AI Image Generation] Cost: $${calculateImageCost(size, quality)}`);
+console.log(
+  `[AI Image Generation] User: ${userId}, Prompt: ${prompt.substring(0, 100)}...`
+);
+console.log(
+  `[AI Image Generation] Cost: $${calculateImageCost(size, quality)}`
+);
 ```
 
 ### 2. Error Monitoring

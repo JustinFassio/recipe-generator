@@ -177,7 +177,7 @@ export function RecipeView({
               >
                 {recipe.title}
               </h3>
-              
+
               {/* Recipe Description */}
               {recipe.description && (
                 <div className="mb-4">
@@ -186,7 +186,7 @@ export function RecipeView({
                   </p>
                 </div>
               )}
-              
+
               <div className="flex flex-col gap-2 text-sm text-gray-600 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
                 <div className="flex items-center">
                   <Users className="mr-1 h-4 w-4" />

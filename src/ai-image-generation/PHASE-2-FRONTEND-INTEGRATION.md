@@ -65,7 +65,7 @@ export function useImageGeneration(options?: UseImageGenerationOptions) {
       try {
         // Simulate progress updates
         const progressInterval = setInterval(() => {
-          setGenerationProgress(prev => {
+          setGenerationProgress((prev) => {
             if (prev >= 90) {
               clearInterval(progressInterval);
               return 90;
@@ -91,14 +91,13 @@ export function useImageGeneration(options?: UseImageGenerationOptions) {
         }
 
         const data: GenerateImageResponse = await response.json();
-        
+
         if (!data.success || !data.imageUrl) {
           throw new Error(data.error || 'No image generated');
         }
 
         setGenerationProgress(100);
         return data.imageUrl;
-
       } catch (error) {
         setGenerationProgress(0);
         throw error;
@@ -164,12 +163,12 @@ export function ImageGenerationPanel({
     if (recipeTitle && !prompt) {
       const cuisine = categories?.find(cat => cat.includes('Cuisine:'))?.split(':')[1]?.trim();
       const course = categories?.find(cat => cat.includes('Course:'))?.split(':')[1]?.trim();
-      
+
       let autoPrompt = `A delicious ${recipeTitle.toLowerCase()}`;
       if (cuisine) autoPrompt += ` in ${cuisine} style`;
       if (course) autoPrompt += `, perfect for ${course.toLowerCase()}`;
       autoPrompt += ', professional food photography';
-      
+
       setPrompt(autoPrompt);
     }
   }, [recipeTitle, categories, prompt]);
@@ -195,7 +194,7 @@ export function ImageGenerationPanel({
         size,
         quality
       });
-      
+
       onImageGenerated(imageUrl);
     } catch (error) {
       // Error handling is done in the hook
@@ -313,7 +312,7 @@ export function ImageGenerationPanel({
               <span className="text-sm font-medium">Generating image...</span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
-              <div 
+              <div
                 className="bg-purple-500 h-2 rounded-full transition-all duration-300"
                 style={{ width: `${generationProgress}%` }}
               />
@@ -370,7 +369,7 @@ const [showImageGeneration, setShowImageGeneration] = useState(false);
 // Modify the image upload section
 <div className="space-y-4">
   <Label htmlFor="image">Recipe Image</Label>
-  
+
   {/* Existing image preview and upload */}
   {currentImageUrl && (
     <div className="relative">
@@ -457,7 +456,7 @@ export function ImageGenerationLoader({ progress, message }: ImageGenerationLoad
         <div className="w-16 h-16 border-4 border-purple-200 rounded-full animate-spin border-t-purple-500" />
         <Sparkles className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 h-6 w-6 text-purple-500" />
       </div>
-      
+
       <div className="text-center space-y-2">
         <h3 className="text-lg font-semibold">Generating Your Image</h3>
         <p className="text-gray-600">
@@ -471,7 +470,7 @@ export function ImageGenerationLoader({ progress, message }: ImageGenerationLoad
           <span>{Math.round(progress)}%</span>
         </div>
         <div className="w-full bg-gray-200 rounded-full h-2">
-          <div 
+          <div
             className="bg-purple-500 h-2 rounded-full transition-all duration-300"
             style={{ width: `${progress}%` }}
           />
@@ -485,18 +484,21 @@ export function ImageGenerationLoader({ progress, message }: ImageGenerationLoad
 ## 🎨 UI/UX Considerations
 
 ### 1. Visual Design
+
 - **Consistent with existing design system** (DaisyUI/Tailwind)
 - **Clear visual hierarchy** with proper spacing and typography
 - **Intuitive iconography** using Lucide React icons
 - **Responsive design** that works on all screen sizes
 
 ### 2. User Experience
+
 - **Progressive disclosure** - show advanced options only when needed
 - **Smart defaults** - auto-generate prompts from recipe context
 - **Clear feedback** - loading states, progress indicators, error messages
 - **Non-blocking** - users can continue editing while image generates
 
 ### 3. Accessibility
+
 - **Keyboard navigation** support
 - **Screen reader** compatibility
 - **High contrast** color schemes
@@ -580,12 +582,14 @@ describe('Recipe Form with Image Generation', () => {
 ## 📱 Mobile Responsiveness
 
 ### 1. Responsive Layout
+
 - **Stack buttons vertically** on mobile devices
 - **Full-width modals** on small screens
 - **Touch-friendly** button sizes and spacing
 - **Optimized text input** for mobile keyboards
 
 ### 2. Performance Considerations
+
 - **Lazy loading** of image generation components
 - **Debounced input** for prompt suggestions
 - **Optimized images** for different screen densities

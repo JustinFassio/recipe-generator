@@ -16,7 +16,7 @@ Based on the existing system prompts in `src/lib/openai.ts` and `api/ai/chat.ts`
   "ingredients": [
     {
       "item": "ingredient name",
-      "amount": "quantity needed", 
+      "amount": "quantity needed",
       "prep": "preparation instructions"
     }
   ],
@@ -32,32 +32,38 @@ This structure provides rich context for generating relevant recipe images.
 ## 🏗️ Implementation Phases
 
 ### [Phase 0: Recipe Description Enhancement](./PHASE-0-RECIPE-DESCRIPTION-ENHANCEMENT.md)
+
 - Add rich recipe descriptions to JSON schema
 - Update AI personas to generate descriptions
 - Enhance recipe form and view with descriptions
 - Use descriptions as primary source for image generation
 
 ### [Phase 1: Backend API Setup](./PHASE-1-BACKEND-API.md)
+
 - Create DALL-E 3 API integration
 - Implement image generation endpoint
 - Add error handling and rate limiting
 
 ### [Phase 2: Frontend Integration](./PHASE-2-FRONTEND-INTEGRATION.md)
+
 - Add "Generate with AI" option to upload interface
 - Create image generation UI components
 - Implement loading states and error handling
 
 ### [Phase 3: Recipe Context Integration](./PHASE-3-RECIPE-CONTEXT.md)
+
 - Use recipe JSON data to create intelligent prompts
 - Implement prompt optimization for better image results
 - Add fallback strategies for failed generations
 
 ### [Phase 4: Cost Management & Optimization](./PHASE-4-COST-MANAGEMENT.md)
+
 - Implement usage tracking and limits
 - Add caching for similar recipes
 - Optimize prompt engineering for cost efficiency
 
 ### [Phase 5: Testing & Quality Assurance](./PHASE-5-TESTING.md)
+
 - Comprehensive testing of image generation
 - Quality validation and user feedback
 - Performance optimization and monitoring
@@ -65,11 +71,13 @@ This structure provides rich context for generating relevant recipe images.
 ## 🔧 Technical Architecture
 
 ### API Key Usage
+
 - **Same API Key**: Uses existing `OPENAI_API_KEY` environment variable
 - **Server-Side Only**: Image generation happens on the backend for security
 - **Endpoint**: `/api/ai/generate-image` (new endpoint to be created)
 
 ### Integration Points
+
 - **Recipe Form**: `src/components/recipes/recipe-form.tsx`
 - **Image Upload**: Existing `useUploadImage()` hook
 - **Recipe Parsing**: Existing JSON structure from AI personas

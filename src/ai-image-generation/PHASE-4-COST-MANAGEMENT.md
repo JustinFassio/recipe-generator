@@ -75,13 +75,11 @@ export async function trackImageGeneration(
   usage: Omit<ImageGenerationUsage, 'id' | 'user_id' | 'created_at'>
 ): Promise<void> {
   try {
-    const { error } = await supabase
-      .from('image_generation_usage')
-      .insert({
-        user_id: userId,
-        ...usage,
-        created_at: new Date().toISOString()
-      });
+    const { error } = await supabase.from('image_generation_usage').insert({
+      user_id: userId,
+      ...usage,
+      created_at: new Date().toISOString(),
+    });
 
     if (error) {
       console.error('Failed to track image generation usage:', error);
@@ -102,7 +100,7 @@ export async function getUserUsageStats(
   const timeRangeDays = {
     day: 1,
     week: 7,
-    month: 30
+    month: 30,
   }[timeRange];
 
   const startDate = new Date();
@@ -119,8 +117,8 @@ export async function getUserUsageStats(
     return getDefaultUsageStats();
   }
 
-  const successful = data.filter(usage => usage.success);
-  const failed = data.filter(usage => !usage.success);
+  const successful = data.filter((usage) => usage.success);
+  const failed = data.filter((usage) => !usage.success);
   const totalCost = data.reduce((sum, usage) => sum + usage.cost, 0);
 
   return {
@@ -131,7 +129,7 @@ export async function getUserUsageStats(
     average_cost_per_generation: data.length > 0 ? totalCost / data.length : 0,
     last_generation: data.length > 0 ? data[data.length - 1].created_at : '',
     monthly_usage: timeRange === 'month' ? data.length : 0,
-    monthly_cost: timeRange === 'month' ? totalCost : 0
+    monthly_cost: timeRange === 'month' ? totalCost : 0,
   };
 }
 
@@ -150,21 +148,22 @@ export async function checkCostLimits(userId: string): Promise<{
   // Check daily limit
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  
+
   const { data: dailyUsage } = await supabase
     .from('image_generation_usage')
     .select('cost')
     .eq('user_id', userId)
     .gte('created_at', today.toISOString());
 
-  const dailyCost = dailyUsage?.reduce((sum, usage) => sum + usage.cost, 0) || 0;
+  const dailyCost =
+    dailyUsage?.reduce((sum, usage) => sum + usage.cost, 0) || 0;
 
   if (dailyCost >= limits.daily_limit) {
     return {
       allowed: false,
       limits,
       currentUsage,
-      reason: 'Daily cost limit exceeded'
+      reason: 'Daily cost limit exceeded',
     };
   }
 
@@ -173,14 +172,14 @@ export async function checkCostLimits(userId: string): Promise<{
       allowed: false,
       limits,
       currentUsage,
-      reason: 'Monthly cost limit exceeded'
+      reason: 'Monthly cost limit exceeded',
     };
   }
 
   return {
     allowed: true,
     limits,
-    currentUsage
+    currentUsage,
   };
 }
 
@@ -199,23 +198,23 @@ async function getUserCostLimits(userId: string): Promise<CostLimits> {
 
   const tierLimits: Record<string, CostLimits> = {
     free: {
-      daily_limit: 0.50, // $0.50 per day
-      monthly_limit: 5.00, // $5.00 per month
+      daily_limit: 0.5, // $0.50 per day
+      monthly_limit: 5.0, // $5.00 per month
       per_generation_limit: 0.08, // $0.08 per generation
-      user_tier: 'free'
+      user_tier: 'free',
     },
     premium: {
-      daily_limit: 2.00, // $2.00 per day
-      monthly_limit: 25.00, // $25.00 per month
+      daily_limit: 2.0, // $2.00 per day
+      monthly_limit: 25.0, // $25.00 per month
       per_generation_limit: 0.12, // $0.12 per generation (HD allowed)
-      user_tier: 'premium'
+      user_tier: 'premium',
     },
     pro: {
-      daily_limit: 10.00, // $10.00 per day
-      monthly_limit: 100.00, // $100.00 per month
+      daily_limit: 10.0, // $10.00 per day
+      monthly_limit: 100.0, // $100.00 per month
       per_generation_limit: 0.12, // $0.12 per generation
-      user_tier: 'pro'
-    }
+      user_tier: 'pro',
+    },
   };
 
   return tierLimits[tier] || tierLimits.free;
@@ -233,7 +232,7 @@ function getDefaultUsageStats(): UserUsageStats {
     average_cost_per_generation: 0,
     last_generation: '',
     monthly_usage: 0,
-    monthly_cost: 0
+    monthly_cost: 0,
   };
 }
 ```
@@ -273,19 +272,19 @@ function generatePromptHash(prompt: string, context: RecipeContext): string {
     course: context.course,
     mainIngredients: context.mainIngredients.sort(),
     cookingMethod: context.cookingMethod,
-    complexity: context.complexity
+    complexity: context.complexity,
   });
 
   const combined = `${prompt}|${contextString}`;
-  
+
   // Simple hash function (in production, use crypto.createHash)
   let hash = 0;
   for (let i = 0; i < combined.length; i++) {
     const char = combined.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
+    hash = (hash << 5) - hash + char;
     hash = hash & hash; // Convert to 32-bit integer
   }
-  
+
   return hash.toString(36);
 }
 
@@ -318,7 +317,7 @@ export async function findCachedImage(
       cached: true,
       image_url: exactMatch.image_url,
       similarity_score: 1.0,
-      cost_saved: 0.08 // Estimated cost per generation
+      cost_saved: 0.08, // Estimated cost per generation
     };
   }
 
@@ -337,7 +336,10 @@ export async function findCachedImage(
     let bestScore = 0;
 
     for (const image of similarImages) {
-      const similarity = calculateContextSimilarity(context, image.recipe_context);
+      const similarity = calculateContextSimilarity(
+        context,
+        image.recipe_context
+      );
       if (similarity > bestScore && similarity >= similarityThreshold) {
         bestScore = similarity;
         bestMatch = image;
@@ -355,7 +357,7 @@ export async function findCachedImage(
         cached: true,
         image_url: bestMatch.image_url,
         similarity_score: bestScore,
-        cost_saved: 0.08
+        cost_saved: 0.08,
       };
     }
   }
@@ -366,7 +368,10 @@ export async function findCachedImage(
 /**
  * Calculate similarity between recipe contexts
  */
-function calculateContextSimilarity(context1: RecipeContext, context2: any): number {
+function calculateContextSimilarity(
+  context1: RecipeContext,
+  context2: any
+): number {
   let score = 0;
   let totalFactors = 0;
 
@@ -402,16 +407,19 @@ function calculateContextSimilarity(context1: RecipeContext, context2: any): num
 /**
  * Calculate ingredient overlap percentage
  */
-function calculateIngredientOverlap(ingredients1: string[], ingredients2: string[]): number {
+function calculateIngredientOverlap(
+  ingredients1: string[],
+  ingredients2: string[]
+): number {
   if (ingredients1.length === 0 && ingredients2.length === 0) return 1;
   if (ingredients1.length === 0 || ingredients2.length === 0) return 0;
 
-  const set1 = new Set(ingredients1.map(ing => ing.toLowerCase()));
-  const set2 = new Set(ingredients2.map(ing => ing.toLowerCase()));
-  
-  const intersection = new Set([...set1].filter(x => set2.has(x)));
+  const set1 = new Set(ingredients1.map((ing) => ing.toLowerCase()));
+  const set2 = new Set(ingredients2.map((ing) => ing.toLowerCase()));
+
+  const intersection = new Set([...set1].filter((x) => set2.has(x)));
   const union = new Set([...set1, ...set2]);
-  
+
   return intersection.size / union.size;
 }
 
@@ -428,17 +436,15 @@ export async function cacheGeneratedImage(
   const expiresAt = new Date();
   expiresAt.setDate(expiresAt.getDate() + 30); // Cache for 30 days
 
-  const { error } = await supabase
-    .from('cached_images')
-    .insert({
-      prompt_hash: promptHash,
-      image_url: imageUrl,
-      recipe_context: context,
-      usage_count: 1,
-      created_at: new Date().toISOString(),
-      expires_at: expiresAt.toISOString(),
-      cost_saved: 0
-    });
+  const { error } = await supabase.from('cached_images').insert({
+    prompt_hash: promptHash,
+    image_url: imageUrl,
+    recipe_context: context,
+    usage_count: 1,
+    created_at: new Date().toISOString(),
+    expires_at: expiresAt.toISOString(),
+    cost_saved: 0,
+  });
 
   if (error) {
     console.error('Failed to cache generated image:', error);
@@ -476,24 +482,27 @@ export async function getCacheStats(): Promise<{
   const { data: usageData } = await supabase
     .from('image_generation_usage')
     .select('cached')
-    .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
+    .gte(
+      'created_at',
+      new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
+    );
 
   const totalCached = allCached?.length || 0;
-  const totalCostSaved = (allCached?.reduce((sum, item) => sum + item.usage_count * 0.08, 0)) || 0;
-  
+  const totalCostSaved =
+    allCached?.reduce((sum, item) => sum + item.usage_count * 0.08, 0) || 0;
+
   const totalGenerations = usageData?.length || 0;
-  const cacheHits = usageData?.filter(usage => usage.cached).length || 0;
+  const cacheHits = usageData?.filter((usage) => usage.cached).length || 0;
   const hitRate = totalGenerations > 0 ? cacheHits / totalGenerations : 0;
 
-  const mostUsed = allCached
-    ?.sort((a, b) => b.usage_count - a.usage_count)
-    .slice(0, 10) || [];
+  const mostUsed =
+    allCached?.sort((a, b) => b.usage_count - a.usage_count).slice(0, 10) || [];
 
   return {
     total_cached: totalCached,
     total_cost_saved: totalCostSaved,
     hit_rate: hitRate,
-    most_used: mostUsed
+    most_used: mostUsed,
   };
 }
 ```
@@ -538,10 +547,11 @@ export async function analyzeCostOptimization(
     suggestions.push({
       type: 'size',
       title: 'Optimize Image Sizes',
-      description: 'Consider using smaller image sizes for better cost efficiency',
+      description:
+        'Consider using smaller image sizes for better cost efficiency',
       potentialSavings: sizeAnalysis.potentialSavings,
       impact: 'medium',
-      action: 'Use 1024x1024 instead of larger sizes when possible'
+      action: 'Use 1024x1024 instead of larger sizes when possible',
     });
     estimatedMonthlySavings += sizeAnalysis.potentialSavings;
   }
@@ -555,7 +565,7 @@ export async function analyzeCostOptimization(
       description: 'Use standard quality for most images to reduce costs',
       potentialSavings: qualityAnalysis.potentialSavings,
       impact: 'high',
-      action: 'Use standard quality unless HD is specifically needed'
+      action: 'Use standard quality unless HD is specifically needed',
     });
     estimatedMonthlySavings += qualityAnalysis.potentialSavings;
   }
@@ -566,10 +576,11 @@ export async function analyzeCostOptimization(
     suggestions.push({
       type: 'prompt',
       title: 'Optimize Prompt Length',
-      description: 'Shorter, more focused prompts can be more effective and cost-efficient',
+      description:
+        'Shorter, more focused prompts can be more effective and cost-efficient',
       potentialSavings: promptAnalysis.potentialSavings,
       impact: 'low',
-      action: 'Use more concise prompts with key descriptive words'
+      action: 'Use more concise prompts with key descriptive words',
     });
     estimatedMonthlySavings += promptAnalysis.potentialSavings;
   }
@@ -583,7 +594,7 @@ export async function analyzeCostOptimization(
       description: 'Similar recipes can reuse cached images to save costs',
       potentialSavings: cacheAnalysis.potentialSavings,
       impact: 'high',
-      action: 'Check for similar recipes before generating new images'
+      action: 'Check for similar recipes before generating new images',
     });
     estimatedMonthlySavings += cacheAnalysis.potentialSavings;
   }
@@ -592,13 +603,16 @@ export async function analyzeCostOptimization(
   const currentEfficiency = calculateCurrentEfficiency(usageStats);
 
   // Generate recommended actions
-  const recommendedActions = generateRecommendedActions(suggestions, usageStats);
+  const recommendedActions = generateRecommendedActions(
+    suggestions,
+    usageStats
+  );
 
   return {
     suggestions,
     estimatedMonthlySavings,
     currentEfficiency,
-    recommendedActions
+    recommendedActions,
   };
 }
 
@@ -617,7 +631,7 @@ async function analyzeSizeUsage(userId: string): Promise<{
   // For now, return mock analysis
   return {
     hasOversizedImages: true,
-    potentialSavings: 2.50 // Estimated monthly savings
+    potentialSavings: 2.5, // Estimated monthly savings
   };
 }
 
@@ -631,7 +645,7 @@ async function analyzeQualityUsage(userId: string): Promise<{
   // Analyze HD vs standard usage
   return {
     hasExcessiveHD: true,
-    potentialSavings: 5.00 // Estimated monthly savings
+    potentialSavings: 5.0, // Estimated monthly savings
   };
 }
 
@@ -645,7 +659,7 @@ async function analyzePromptEfficiency(userId: string): Promise<{
   // Analyze prompt length vs effectiveness
   return {
     hasInefficientPrompts: false,
-    potentialSavings: 0.50
+    potentialSavings: 0.5,
   };
 }
 
@@ -659,7 +673,7 @@ async function analyzeCacheUsage(userId: string): Promise<{
   // Analyze cache hit rate
   return {
     hasLowCacheHitRate: true,
-    potentialSavings: 8.00 // High potential savings from better caching
+    potentialSavings: 8.0, // High potential savings from better caching
   };
 }
 
@@ -669,14 +683,15 @@ async function analyzeCacheUsage(userId: string): Promise<{
 function calculateCurrentEfficiency(usageStats: UserUsageStats): number {
   if (usageStats.total_generations === 0) return 1.0;
 
-  const successRate = usageStats.successful_generations / usageStats.total_generations;
+  const successRate =
+    usageStats.successful_generations / usageStats.total_generations;
   const averageCost = usageStats.average_cost_per_generation;
-  
+
   // Ideal average cost is around $0.06 (standard quality, 1024x1024)
   const costEfficiency = Math.max(0, 1 - (averageCost - 0.06) / 0.06);
-  
+
   // Combine success rate and cost efficiency
-  return (successRate * 0.7) + (costEfficiency * 0.3);
+  return successRate * 0.7 + costEfficiency * 0.3;
 }
 
 /**
@@ -694,10 +709,10 @@ function generateRecommendedActions(
   }
 
   // Prioritize high-impact suggestions
-  const highImpactSuggestions = suggestions.filter(s => s.impact === 'high');
+  const highImpactSuggestions = suggestions.filter((s) => s.impact === 'high');
   if (highImpactSuggestions.length > 0) {
     actions.push('Focus on high-impact optimizations first:');
-    highImpactSuggestions.forEach(suggestion => {
+    highImpactSuggestions.forEach((suggestion) => {
       actions.push(`• ${suggestion.action}`);
     });
   }
@@ -728,18 +743,18 @@ export function getCostBreakdown(usageStats: UserUsageStats): {
     {
       category: 'Standard Quality (1024x1024)',
       cost: usageStats.total_cost * 0.6,
-      percentage: 60
+      percentage: 60,
     },
     {
       category: 'HD Quality',
       cost: usageStats.total_cost * 0.3,
-      percentage: 30
+      percentage: 30,
     },
     {
       category: 'Large Images',
       cost: usageStats.total_cost * 0.1,
-      percentage: 10
-    }
+      percentage: 10,
+    },
   ];
 }
 ```
@@ -750,8 +765,14 @@ export function getCostBreakdown(usageStats: UserUsageStats): {
 
 ```typescript
 // Add to existing handler
-import { checkCostLimits, trackImageGeneration } from '@/lib/ai-image-generation/usage-tracker';
-import { findCachedImage, cacheGeneratedImage } from '@/lib/ai-image-generation/image-cache';
+import {
+  checkCostLimits,
+  trackImageGeneration,
+} from '@/lib/ai-image-generation/usage-tracker';
+import {
+  findCachedImage,
+  cacheGeneratedImage,
+} from '@/lib/ai-image-generation/image-cache';
 import { analyzeRecipeContext } from '@/lib/ai-image-generation/recipe-context-analyzer';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -760,11 +781,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     // Extract user ID from request (implement authentication)
     const userId = req.headers['x-user-id'] as string;
-    
+
     if (!userId) {
       return res.status(401).json({
         success: false,
-        error: 'User authentication required'
+        error: 'User authentication required',
       });
     }
 
@@ -775,23 +796,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         success: false,
         error: limitCheck.reason,
         limits: limitCheck.limits,
-        currentUsage: limitCheck.currentUsage
+        currentUsage: limitCheck.currentUsage,
       });
     }
 
     // Check cache first
     let cachedImage = null;
-    if (useIntelligentPrompting && (recipeTitle || ingredients || instructions)) {
+    if (
+      useIntelligentPrompting &&
+      (recipeTitle || ingredients || instructions)
+    ) {
       const recipeData = {
         title: recipeTitle || '',
         categories: categories || [],
         ingredients: ingredients || [],
-        instructions: instructions || ''
+        instructions: instructions || '',
       };
-      
+
       const context = analyzeRecipeContext(recipeData);
       cachedImage = await findCachedImage(finalPrompt, context);
-      
+
       if (cachedImage.cached) {
         // Track cache hit
         await trackImageGeneration(userId, {
@@ -805,7 +829,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           fallback_used: false,
           generation_time_ms: 0,
           cached: true,
-          cache_hit: 'similar_context'
+          cache_hit: 'similar_context',
         });
 
         return res.status(200).json({
@@ -815,15 +839,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           cost_saved: cachedImage.cost_saved,
           usage: {
             promptTokens: finalPrompt.length,
-            totalCost: 0
-          }
+            totalCost: 0,
+          },
         });
       }
     }
 
     // Proceed with generation
     const startTime = Date.now();
-    
+
     // ... existing DALL-E API call ...
 
     const generationTime = Date.now() - startTime;
@@ -840,24 +864,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       success: true,
       fallback_used: false,
       generation_time_ms: generationTime,
-      cached: false
+      cached: false,
     });
 
     // Cache the generated image
-    if (useIntelligentPrompting && (recipeTitle || ingredients || instructions)) {
+    if (
+      useIntelligentPrompting &&
+      (recipeTitle || ingredients || instructions)
+    ) {
       const recipeData = {
         title: recipeTitle || '',
         categories: categories || [],
         ingredients: ingredients || [],
-        instructions: instructions || ''
+        instructions: instructions || '',
       };
-      
+
       const context = analyzeRecipeContext(recipeData);
       await cacheGeneratedImage(finalPrompt, context, generatedImageUrl, cost);
     }
 
     // ... rest of response ...
-
   } catch (error) {
     // Track failed generation
     if (userId) {
@@ -872,7 +898,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         error_message: error.message,
         fallback_used: false,
         generation_time_ms: Date.now() - startTime,
-        cached: false
+        cached: false,
       });
     }
 
@@ -1012,7 +1038,7 @@ export function CostManagementPanel({
               <span>${costLimits.per_generation_limit}</span>
             </div>
           </div>
-          
+
           {costLimits.user_tier === 'free' && (
             <Button className="w-full mt-4" onClick={onUpgrade}>
               Upgrade Plan
@@ -1088,7 +1114,11 @@ CREATE POLICY "Users can view cached images" ON cached_images
 **File**: `src/__tests__/lib/ai-image-generation/usage-tracker.test.ts`
 
 ```typescript
-import { trackImageGeneration, getUserUsageStats, checkCostLimits } from '@/lib/ai-image-generation/usage-tracker';
+import {
+  trackImageGeneration,
+  getUserUsageStats,
+  checkCostLimits,
+} from '@/lib/ai-image-generation/usage-tracker';
 
 describe('Usage Tracker', () => {
   it('should track image generation usage', async () => {
@@ -1102,18 +1132,18 @@ describe('Usage Tracker', () => {
       success: true,
       fallback_used: false,
       generation_time_ms: 1500,
-      cached: false
+      cached: false,
     };
 
     await trackImageGeneration('test-user-id', usage);
-    
+
     // Verify tracking (would check database in real test)
     expect(true).toBe(true);
   });
 
   it('should check cost limits correctly', async () => {
     const result = await checkCostLimits('test-user-id');
-    
+
     expect(result).toHaveProperty('allowed');
     expect(result).toHaveProperty('limits');
     expect(result).toHaveProperty('currentUsage');
