@@ -29,6 +29,7 @@
     "verify": "npm run lint && npm run format:check && tsc --noEmit && npm run test:core && npm run build",
     "verify:quick": "npm run lint && tsc --noEmit && npm run test:core && npm run build",
     "test:critical": "vitest run src/__tests__/integration/recipe-critical-path.test.ts src/__tests__/api/ai-endpoints.test.ts --reporter=verbose",
+    "test:filters": "vitest run src/__tests__/components/filters/filter-sections.test.tsx --reporter=verbose",
     "test:pre-deploy": "./scripts/pre-deployment-tests.sh",
     "env:validate": "node scripts/validate-env.js",
     "env:validate:ci": "node scripts/ci-env-validator.cjs",
