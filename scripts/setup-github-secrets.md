@@ -93,3 +93,5 @@ If the workflow fails:
 **Created**: September 2025  
 **Purpose**: Enable critical path testing in CI/CD pipeline  
 **Status**: Ready for implementation
+
+> **Note**: Secrets have been configured in GitHub repository settings.
