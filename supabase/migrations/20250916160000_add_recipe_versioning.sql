@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS recipe_views (
   version_number INTEGER DEFAULT 1,
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE, -- Only logged in users
   viewed_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  viewed_date DATE DEFAULT CURRENT_DATE,
+  -- viewed_date column removed to avoid production conflicts
   session_id TEXT,
   UNIQUE(recipe_id, version_number, user_id, viewed_at)
 );
@@ -45,8 +45,7 @@ CREATE TABLE IF NOT EXISTS recipe_views (
 CREATE INDEX IF NOT EXISTS idx_recipe_views_recipe_version ON recipe_views(recipe_id, version_number);
 CREATE INDEX IF NOT EXISTS idx_recipe_views_user ON recipe_views(user_id);
 CREATE INDEX IF NOT EXISTS idx_recipe_views_date ON recipe_views(viewed_at);
--- Index on viewed_date (for daily aggregations)
-CREATE INDEX IF NOT EXISTS idx_recipe_views_viewed_date ON recipe_views(viewed_date);
+-- Note: viewed_date column and index will be added in a future migration if needed
 
 -- Enable RLS on new tables
 ALTER TABLE recipe_versions ENABLE ROW LEVEL SECURITY;
