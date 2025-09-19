@@ -11,6 +11,7 @@
 ### **1. Project Health Assessment**
 
 - [ ] **Check current test status**: `npm run test:run`
+- [ ] **Run critical path tests**: `npm run test:critical`
 - [ ] **Verify linting status**: `npm run lint`
 - [ ] **Check formatting**: `npm run format:check`
 - [ ] **TypeScript compilation**: `npx tsc --noEmit`
@@ -43,6 +44,7 @@
 - [ ] **Hook tests**: Test custom hooks with `renderHook`
 - [ ] **Utility tests**: Test pure functions and utilities
 - [ ] **Integration tests**: Test component interactions
+- [ ] **Critical path tests**: Ensure core recipe functionality works
 - [ ] **Mock external dependencies**: Supabase, React Query, Router
 
 ### **5. Code Quality Standards**
@@ -52,6 +54,50 @@
 - [ ] **Prettier formatting**: Consistent code style
 - [ ] **Accessibility**: Proper ARIA labels, semantic HTML
 - [ ] **Performance**: Avoid unnecessary re-renders, optimize imports
+
+---
+
+## 🎯 **Critical Path Testing Requirements**
+
+### **5.1 Recipe Functionality Tests**
+
+- [ ] **Recipe CRUD Operations**: Test create, read, update operations
+- [ ] **Database Schema Integrity**: Verify all required tables and columns exist
+- [ ] **Recipe Versioning**: Test version creation and management
+- [ ] **API Endpoint Structure**: Validate API client methods and imports
+- [ ] **Parser Functionality**: Test recipe text parsing with fallback mechanisms
+- [ ] **Error Handling**: Test graceful failure modes and edge cases
+
+### **5.2 Critical Path Commands**
+
+```bash
+# Run critical path tests (essential before any deployment)
+npm run test:critical
+
+# Run comprehensive pre-deployment validation
+npm run test:pre-deploy
+
+# Run critical path tests with verbose output for debugging
+npm run test:critical -- --reporter=verbose
+```
+
+### **5.3 Critical Path Test Coverage**
+
+- [ ] **Environment Configuration**: API keys and database connections
+- [ ] **Recipe Creation**: End-to-end recipe creation workflow
+- [ ] **Recipe Retrieval**: Database query and data retrieval
+- [ ] **Recipe Updates**: Update operations and versioning
+- [ ] **Database Relationships**: Foreign keys and constraints
+- [ ] **Error Scenarios**: Invalid data and missing resources
+- [ ] **Fallback Mechanisms**: Graceful degradation when AI services unavailable
+
+### **5.4 Production Deployment Validation**
+
+- [ ] **Schema Validation**: Verify production database has all required tables
+- [ ] **Migration Status**: Ensure all migrations applied successfully
+- [ ] **API Connectivity**: Test Supabase connection and authentication
+- [ ] **Core Functionality**: Recipe creation, parsing, and saving work end-to-end
+- [ ] **Version Management**: Recipe versioning system operational
 
 ---
 
@@ -106,6 +152,8 @@ describe('ComponentName', () => {
 ### **9. Automated Checks**
 
 - [ ] **Run full verification**: `npm run verify`
+- [ ] **Run pre-deployment tests**: `npm run test:pre-deploy`
+- [ ] **Run critical path tests**: `npm run test:critical`
 - [ ] **Quick verification**: `npm run verify:quick`
 - [ ] **Test coverage check**: Ensure thresholds are met
 - [ ] **Build verification**: Confirm production build succeeds
@@ -212,6 +260,7 @@ export function utilityFunction(input: string): string {
 ### **17. Final Checks**
 
 - [ ] **All tests pass**: `npm run test:run`
+- [ ] **Critical path tests pass**: `npm run test:critical`
 - [ ] **No linting errors**: `npm run lint`
 - [ ] **Formatting is correct**: `npm run format:check`
 - [ ] **TypeScript compiles**: `npx tsc --noEmit`
@@ -255,6 +304,12 @@ export function utilityFunction(input: string): string {
 # Test failures
 npm run test:run -- --reporter=verbose
 
+# Critical path test failures
+npm run test:critical -- --reporter=verbose
+
+# Pre-deployment validation failures
+npm run test:pre-deploy
+
 # Linting errors
 npm run lint -- --fix
 
@@ -279,11 +334,13 @@ npm run build -- --debug
 
 ### **For AI Agents:**
 
-1. **Before making changes**: Run sections 1-2
-2. **During implementation**: Follow sections 3-8
-3. **Before committing**: Complete sections 9-16
-4. **After changes**: Verify sections 17-20
-5. **If issues arise**: Use section 21-22
+1. **Before making changes**: Run sections 1-2 (including critical path tests)
+2. **During implementation**: Follow sections 3-8 (with critical path validation)
+3. **Before committing**: Complete sections 9-16 (mandatory critical path tests)
+4. **After changes**: Verify sections 17-20 (final critical path validation)
+5. **If issues arise**: Use section 21-22 (including critical path debugging)
+
+**⚠️ CRITICAL**: Always run `npm run test:critical` before any production deployment!
 
 ### **For Human Developers:**
 
@@ -294,10 +351,17 @@ npm run build -- --debug
 
 ---
 
-**Last Updated**: January 2025  
-**Version**: 1.0  
+**Last Updated**: September 2025  
+**Version**: 2.0  
 **Status**: ✅ ACTIVE
+
+**Version 2.0 Changes**:
+
+- Added critical path testing requirements (`npm run test:critical`)
+- Added pre-deployment validation (`npm run test:pre-deploy`)
+- Enhanced production deployment validation
+- Added recipe functionality test coverage requirements
 
 ---
 
-_This checklist ensures that all code changes meet the project's quality standards before reaching the automated Pre-PR Verification System._
+_This checklist ensures that all code changes meet the project's quality standards and that critical recipe functionality is validated before reaching the automated Pre-PR Verification System._
