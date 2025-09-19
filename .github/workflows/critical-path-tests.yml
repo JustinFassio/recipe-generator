@@ -36,10 +36,10 @@ jobs:
           echo "VITE_SUPABASE_ANON_KEY=${{ secrets.VITE_SUPABASE_ANON_KEY }}" >> .env.local
           echo "VITE_OPENAI_MODEL=${{ secrets.VITE_OPENAI_MODEL || 'gpt-4o-mini' }}" >> .env.local
 
-          # Add OpenAI API key if available (for server-side testing)
+          # Note: OpenAI API key is NOT added to .env.local for security
+          # Server-side functions handle OpenAI API calls securely
           if [ -n "${{ secrets.OPENAI_API_KEY }}" ]; then
-            echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> .env.local
-            echo "✅ OpenAI API key configured"
+            echo "✅ OpenAI API key configured (server-side only)"
           else
             echo "⚠️ OpenAI API key not configured - AI parsing tests may use fallbacks"
           fi
@@ -122,7 +122,7 @@ jobs:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
           VITE_OPENAI_MODEL: ${{ secrets.VITE_OPENAI_MODEL || 'gpt-4o-mini' }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          # Note: OPENAI_API_KEY excluded for security - server-side only
 
       - name: Run critical path integration tests
         run: npm run test -- src/__tests__/integration/recipe-critical-path.test.ts --run --reporter=verbose
@@ -130,7 +130,7 @@ jobs:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
           VITE_OPENAI_MODEL: ${{ secrets.VITE_OPENAI_MODEL || 'gpt-4o-mini' }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          # Note: OPENAI_API_KEY excluded for security - server-side only
 
       - name: Test production build
         run: npm run build
@@ -141,7 +141,7 @@ jobs:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
           VITE_OPENAI_MODEL: ${{ secrets.VITE_OPENAI_MODEL || 'gpt-4o-mini' }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          # Note: OPENAI_API_KEY excluded for security - server-side only
 
       - name: Critical path validation summary
         run: |
