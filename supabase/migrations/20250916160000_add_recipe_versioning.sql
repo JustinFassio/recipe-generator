@@ -38,13 +38,14 @@ CREATE TABLE IF NOT EXISTS recipe_views (
   viewed_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   viewed_date DATE DEFAULT CURRENT_DATE,
   session_id TEXT,
-  UNIQUE(recipe_id, version_number, user_id, viewed_date)
+  UNIQUE(recipe_id, version_number, user_id, viewed_at)
 );
 
 -- Create indexes for recipe views
 CREATE INDEX IF NOT EXISTS idx_recipe_views_recipe_version ON recipe_views(recipe_id, version_number);
 CREATE INDEX IF NOT EXISTS idx_recipe_views_user ON recipe_views(user_id);
 CREATE INDEX IF NOT EXISTS idx_recipe_views_date ON recipe_views(viewed_at);
+-- Index on viewed_date (for daily aggregations)
 CREATE INDEX IF NOT EXISTS idx_recipe_views_viewed_date ON recipe_views(viewed_date);
 
 -- Enable RLS on new tables
