@@ -5,6 +5,10 @@
 -- This migration is designed to be idempotent and safe to run on any environment
 -- It creates the table structure that currently exists in production
 
+-- CRITICAL: Add missing current_version_id column to recipes table
+-- This column tracks which version is currently published/active
+ALTER TABLE recipes ADD COLUMN IF NOT EXISTS current_version_id UUID;
+
 -- Create the recipe_content_versions table (core versioning table)
 CREATE TABLE IF NOT EXISTS recipe_content_versions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -116,3 +120,25 @@ WHERE NOT EXISTS (
   WHERE rcv.recipe_id = r.id AND rcv.version_number = 0
 )
 ON CONFLICT (recipe_id, version_number) DO NOTHING;
+
+-- Update recipes table to link to their Version 0 content
+-- This sets current_version_id to point to the Version 0 record
+UPDATE recipes SET current_version_id = (
+  SELECT rcv.id 
+  FROM recipe_content_versions rcv 
+  WHERE rcv.recipe_id = recipes.id AND rcv.version_number = 0
+)
+WHERE current_version_id IS NULL;
+
+-- Add foreign key constraint for current_version_id (after data is populated)
+-- Note: Using a separate statement to ensure compatibility across PostgreSQL versions
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.table_constraints 
+        WHERE constraint_name = 'fk_recipes_current_version'
+    ) THEN
+        ALTER TABLE recipes ADD CONSTRAINT fk_recipes_current_version 
+            FOREIGN KEY (current_version_id) REFERENCES recipe_content_versions(id);
+    END IF;
+END $$;
