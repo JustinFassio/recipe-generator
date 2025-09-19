@@ -3,7 +3,7 @@
 -- This fixes the fundamental issue of duplicate recipe display
 
 -- Step 1.1: Create New Clean Versioning Table
-CREATE TABLE recipe_content_versions (
+CREATE TABLE IF NOT EXISTS recipe_content_versions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   recipe_id UUID NOT NULL REFERENCES recipes(id) ON DELETE CASCADE,
   version_number INTEGER NOT NULL,
@@ -32,15 +32,16 @@ CREATE TABLE recipe_content_versions (
 );
 
 -- Step 1.2: Add Performance Indexes
-CREATE INDEX idx_recipe_content_versions_recipe_id ON recipe_content_versions(recipe_id);
-CREATE INDEX idx_recipe_content_versions_published ON recipe_content_versions(recipe_id, is_published);
-CREATE INDEX idx_recipe_content_versions_number ON recipe_content_versions(recipe_id, version_number);
-CREATE INDEX idx_recipe_content_versions_created_by ON recipe_content_versions(created_by);
+CREATE INDEX IF NOT EXISTS idx_recipe_content_versions_recipe_id ON recipe_content_versions(recipe_id);
+CREATE INDEX IF NOT EXISTS idx_recipe_content_versions_published ON recipe_content_versions(recipe_id, is_published);
+CREATE INDEX IF NOT EXISTS idx_recipe_content_versions_number ON recipe_content_versions(recipe_id, version_number);
+CREATE INDEX IF NOT EXISTS idx_recipe_content_versions_created_by ON recipe_content_versions(created_by);
 
 -- Step 1.3: Add Row Level Security
 ALTER TABLE recipe_content_versions ENABLE ROW LEVEL SECURITY;
 
 -- Policy: Users can view versions of their own recipes or public recipes
+DROP POLICY IF EXISTS "Users can view recipe versions" ON recipe_content_versions;
 CREATE POLICY "Users can view recipe versions" ON recipe_content_versions
   FOR SELECT USING (
     -- User owns the recipe
@@ -55,6 +56,7 @@ CREATE POLICY "Users can view recipe versions" ON recipe_content_versions
   );
 
 -- Policy: Users can create versions of their own recipes
+DROP POLICY IF EXISTS "Users can create versions of own recipes" ON recipe_content_versions;
 CREATE POLICY "Users can create versions of own recipes" ON recipe_content_versions
   FOR INSERT WITH CHECK (
     recipe_id IN (
@@ -64,12 +66,14 @@ CREATE POLICY "Users can create versions of own recipes" ON recipe_content_versi
   );
 
 -- Policy: Users can update their own versions
+DROP POLICY IF EXISTS "Users can update own versions" ON recipe_content_versions;
 CREATE POLICY "Users can update own versions" ON recipe_content_versions
   FOR UPDATE USING (
     created_by = auth.uid()
   );
 
 -- Policy: Users can delete their own versions
+DROP POLICY IF EXISTS "Users can delete own versions" ON recipe_content_versions;
 CREATE POLICY "Users can delete own versions" ON recipe_content_versions
   FOR DELETE USING (
     created_by = auth.uid()
