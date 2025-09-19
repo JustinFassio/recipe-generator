@@ -52,9 +52,11 @@ ALTER TABLE recipe_versions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE recipe_views ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies for recipe_versions
+DROP POLICY IF EXISTS "Users can read all recipe versions" ON recipe_versions;
 CREATE POLICY "Users can read all recipe versions" ON recipe_versions
 FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Users can insert versions of their own recipes" ON recipe_versions;
 CREATE POLICY "Users can insert versions of their own recipes" ON recipe_versions
 FOR INSERT WITH CHECK (
   EXISTS (
@@ -64,6 +66,7 @@ FOR INSERT WITH CHECK (
   )
 );
 
+DROP POLICY IF EXISTS "Users can update versions of their own recipes" ON recipe_versions;
 CREATE POLICY "Users can update versions of their own recipes" ON recipe_versions
 FOR UPDATE USING (
   EXISTS (
@@ -74,9 +77,11 @@ FOR UPDATE USING (
 );
 
 -- RLS Policies for recipe_views
+DROP POLICY IF EXISTS "Users can read all recipe views" ON recipe_views;
 CREATE POLICY "Users can read all recipe views" ON recipe_views
 FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Users can insert their own views" ON recipe_views;
 CREATE POLICY "Users can insert their own views" ON recipe_views
 FOR INSERT WITH CHECK (auth.uid() = user_id);
 
