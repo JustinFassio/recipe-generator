@@ -86,7 +86,8 @@ CREATE POLICY "Users can insert their own views" ON recipe_views
 FOR INSERT WITH CHECK (auth.uid() = user_id);
 
 -- Enhanced stats view with version awareness
-CREATE OR REPLACE VIEW recipe_version_stats AS
+DROP VIEW IF EXISTS recipe_version_stats CASCADE;
+CREATE VIEW recipe_version_stats AS
 SELECT 
   r.id as recipe_id,
   r.title,
@@ -109,7 +110,8 @@ WHERE r.is_public = true
 GROUP BY r.id, r.title, r.version_number, r.creator_rating, r.user_id, r.is_public, r.created_at, r.updated_at, r.parent_recipe_id, r.is_version;
 
 -- Aggregate stats across all versions of a recipe
-CREATE OR REPLACE VIEW recipe_aggregate_stats AS
+DROP VIEW IF EXISTS recipe_aggregate_stats CASCADE;
+CREATE VIEW recipe_aggregate_stats AS
 SELECT 
   COALESCE(r.parent_recipe_id, r.id) as original_recipe_id,
   r.title as original_title,
