@@ -5,8 +5,6 @@ import { ChatInterface } from '@/components/chat/ChatInterface';
 import { RecipeForm } from '@/components/recipes/recipe-form';
 import { Button } from '@/components/ui/button';
 import type { RecipeFormData } from '@/lib/schemas';
-import { FilterBar } from '@/components/recipes/FilterBar';
-import { useSelectionFilters } from '@/hooks/useSelectionFilters';
 
 export function ChatRecipePage() {
   const navigate = useNavigate();
@@ -14,7 +12,6 @@ export function ChatRecipePage() {
     null
   );
   const [showEditor, setShowEditor] = useState(false);
-  const { filters, updateFilters } = useSelectionFilters();
 
   const handleRecipeGenerated = (recipe: RecipeFormData) => {
     setGeneratedRecipe(recipe);
@@ -67,13 +64,6 @@ export function ChatRecipePage() {
             )}
           </div>
         </div>
-
-        {/* AI Filters (desktop bar + mobile drawer) */}
-        <FilterBar
-          filters={filters}
-          onFiltersChange={updateFilters}
-          className="mb-6"
-        />
 
         {/* Always render ChatInterface to preserve conversation state */}
         <div

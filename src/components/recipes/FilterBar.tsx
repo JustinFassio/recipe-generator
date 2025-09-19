@@ -46,6 +46,11 @@ export function FilterBar({
     'categories' | 'cuisines' | 'moods' | 'ingredients' | null
   >(null);
 
+  // Accordion state management - only one filter section open at a time
+  const [openFilterSection, setOpenFilterSection] = useState<
+    'categories' | 'cuisines' | 'moods' | 'ingredients' | null
+  >(null);
+
   // Handle keyboard events for drawer
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -94,6 +99,20 @@ export function FilterBar({
   const closeAllDrawers = () => {
     setIsDrawerOpen(false);
     setActiveNestedDrawer(null);
+  };
+
+  // Accordion behavior handlers
+  const handleFilterSectionToggle = (
+    sectionType: 'categories' | 'cuisines' | 'moods' | 'ingredients',
+    isCurrentlyOpen: boolean
+  ) => {
+    if (isCurrentlyOpen) {
+      // If this section is open, close it
+      setOpenFilterSection(null);
+    } else {
+      // If this section is closed, open it and close others
+      setOpenFilterSection(sectionType);
+    }
   };
 
   // FilterTypeButton component for main drawer
@@ -158,6 +177,10 @@ export function FilterBar({
                 }
                 variant="dropdown"
                 className="w-full sm:w-40"
+                isOpen={openFilterSection === 'categories'}
+                onToggle={(isOpen) =>
+                  handleFilterSectionToggle('categories', isOpen)
+                }
               />
 
               <CuisineFilterSection
@@ -167,6 +190,10 @@ export function FilterBar({
                 }
                 variant="dropdown"
                 className="w-full sm:w-40"
+                isOpen={openFilterSection === 'cuisines'}
+                onToggle={(isOpen) =>
+                  handleFilterSectionToggle('cuisines', isOpen)
+                }
               />
 
               <MoodFilterSection
@@ -174,6 +201,10 @@ export function FilterBar({
                 onMoodsChange={(moods) => updateFilter({ moods })}
                 variant="dropdown"
                 className="w-full sm:w-40"
+                isOpen={openFilterSection === 'moods'}
+                onToggle={(isOpen) =>
+                  handleFilterSectionToggle('moods', isOpen)
+                }
               />
 
               <IngredientFilterSection
@@ -183,6 +214,10 @@ export function FilterBar({
                 }
                 variant="dropdown"
                 className="w-full sm:w-40"
+                isOpen={openFilterSection === 'ingredients'}
+                onToggle={(isOpen) =>
+                  handleFilterSectionToggle('ingredients', isOpen)
+                }
               />
             </div>
 

@@ -10,6 +10,8 @@ interface CuisineFilterSectionProps {
   onCuisinesChange: (cuisines: Cuisine[]) => void;
   variant: 'dropdown' | 'accordion' | 'drawer';
   className?: string;
+  isOpen?: boolean;
+  onToggle?: (isOpen: boolean) => void;
 }
 
 export function CuisineFilterSection({
@@ -17,12 +19,24 @@ export function CuisineFilterSection({
   onCuisinesChange,
   variant,
   className = '',
+  isOpen: externalIsOpen,
+  onToggle,
 }: CuisineFilterSectionProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedRegions, setExpandedRegions] = useState<Set<string>>(
     new Set()
   );
-  const [isOpen, setIsOpen] = useState(false);
+  const [internalIsOpen, setInternalIsOpen] = useState(false);
+
+  // Use external isOpen state if provided (for accordion behavior), otherwise use internal state
+  const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
+  const toggleOpen = () => {
+    if (onToggle) {
+      onToggle(isOpen);
+    } else {
+      setInternalIsOpen(!internalIsOpen);
+    }
+  };
 
   // Filter cuisines based on search term
   const filteredRegions = useMemo(() => {
@@ -73,7 +87,7 @@ export function CuisineFilterSection({
       <div className={`relative ${className}`}>
         <Button
           variant="outline"
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={toggleOpen}
           className="w-full justify-between"
         >
           <span>
