@@ -28,21 +28,34 @@ vi.mock('@/lib/supabase', () => ({
     },
     from: vi.fn(() => {
       const chain = {
-        select: vi.fn(() => {
-          // Create a comprehensive mock chain that supports all query patterns
-          const createChainMock: any = () => ({
-            eq: vi.fn(() => createChainMock()),
-            not: vi.fn(() => createChainMock()),
-            gte: vi.fn(() => createChainMock()),
-            lte: vi.fn(() => createChainMock()),
-            gt: vi.fn(() => createChainMock()),
-            lt: vi.fn(() => createChainMock()),
-            order: vi.fn(() => createChainMock()),
-            limit: vi.fn(() => Promise.resolve({ data: [], error: null })),
-            single: vi.fn(() => Promise.resolve({ data: null, error: null })),
-            then: vi.fn(() => Promise.resolve({ data: [], error: null })),
-          });
-          return createChainMock();
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            not: vi.fn().mockReturnValue({
+              gte: vi.fn().mockReturnValue({
+                order: vi.fn().mockReturnValue({
+                  order: vi.fn().mockReturnValue({
+                    order: vi.fn().mockReturnValue({
+                      limit: vi.fn().mockResolvedValue({ data: [], error: null }),
+                    }),
+                  }),
+                }),
+              }),
+            }),
+            single: vi.fn().mockResolvedValue({ data: null, error: null }),
+            order: vi.fn().mockReturnValue({
+              limit: vi.fn().mockResolvedValue({ data: [], error: null }),
+            }),
+          }),
+          not: vi.fn().mockReturnValue({
+            order: vi.fn().mockReturnValue({
+              limit: vi.fn().mockResolvedValue({ data: [], error: null }),
+            }),
+          }),
+          order: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue({ data: [], error: null }),
+          }),
+          limit: vi.fn().mockResolvedValue({ data: [], error: null }),
+          single: vi.fn().mockResolvedValue({ data: null, error: null }),
         }),
         eq: vi.fn(() => ({
           single: vi.fn(() => Promise.resolve({ data: null, error: null })),
