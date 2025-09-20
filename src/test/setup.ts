@@ -30,7 +30,7 @@ vi.mock('@/lib/supabase', () => ({
       const chain = {
         select: vi.fn(() => {
           // Create a comprehensive mock chain that supports all query patterns
-          const createChainMock = () => ({
+          const createChainMock: any = () => ({
             eq: vi.fn(() => createChainMock()),
             not: vi.fn(() => createChainMock()),
             gte: vi.fn(() => createChainMock()),

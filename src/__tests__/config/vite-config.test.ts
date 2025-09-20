@@ -73,20 +73,23 @@ describe('Development Environment Setup', () => {
   it('should have OpenAI API key configured', () => {
     // Validate that OpenAI API key is present in environment without exposing the actual key
     // This checks the environment variable exists without reading the file content
-    const hasOpenAIKey = process.env.OPENAI_API_KEY !== undefined && 
-                        process.env.OPENAI_API_KEY !== '' &&
-                        process.env.OPENAI_API_KEY !== 'your_openai_api_key_here';
-    
+    const hasOpenAIKey =
+      process.env.OPENAI_API_KEY !== undefined &&
+      process.env.OPENAI_API_KEY !== '' &&
+      process.env.OPENAI_API_KEY !== 'your_openai_api_key_here';
+
     expect(hasOpenAIKey).toBe(true);
   });
 
   it('should have Supabase configuration', () => {
     // Validate Supabase environment variables without reading file content
-    const hasSupabaseUrl = process.env.VITE_SUPABASE_URL !== undefined && 
-                          process.env.VITE_SUPABASE_URL !== '';
-    const hasSupabaseKey = process.env.VITE_SUPABASE_ANON_KEY !== undefined && 
-                          process.env.VITE_SUPABASE_ANON_KEY !== '';
-    
+    const hasSupabaseUrl =
+      process.env.VITE_SUPABASE_URL !== undefined &&
+      process.env.VITE_SUPABASE_URL !== '';
+    const hasSupabaseKey =
+      process.env.VITE_SUPABASE_ANON_KEY !== undefined &&
+      process.env.VITE_SUPABASE_ANON_KEY !== '';
+
     expect(hasSupabaseUrl).toBe(true);
     expect(hasSupabaseKey).toBe(true);
   });
