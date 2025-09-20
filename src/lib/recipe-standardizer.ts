@@ -19,7 +19,8 @@ export async function standardizeRecipeWithAI(
 ): Promise<StandardizedRecipe> {
   try {
     // Call the secure backend API for AI processing
-    const baseUrl = typeof window !== 'undefined' ? '' : 'http://localhost:3000';
+    const baseUrl =
+      typeof window !== 'undefined' ? '' : 'http://localhost:3000';
     const response = await fetch(`${baseUrl}/api/recipe-standardize`, {
       method: 'POST',
       headers: {
