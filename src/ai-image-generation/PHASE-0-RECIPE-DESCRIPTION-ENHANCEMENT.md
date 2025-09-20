@@ -304,7 +304,7 @@ ${ENHANCED_SAVE_RECIPE_PROMPT}`,
 ALTER TABLE recipes
 ADD COLUMN IF NOT EXISTS description TEXT;
 
--- Add description to recipe_content_versions table
+-- Add description to recipe_content_versions table (current versioning system)
 ALTER TABLE recipe_content_versions
 ADD COLUMN IF NOT EXISTS description TEXT;
 
