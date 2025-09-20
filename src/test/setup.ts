@@ -1,3 +1,8 @@
+// Load environment variables for tests
+import { config } from 'dotenv';
+config({ path: '.env.local' });
+config({ path: '.env' });
+
 // Polyfill for HTMLFormElement.prototype.requestSubmit (not implemented in jsdom)
 if (typeof window !== 'undefined' && !HTMLFormElement.prototype.requestSubmit) {
   HTMLFormElement.prototype.requestSubmit = function () {
