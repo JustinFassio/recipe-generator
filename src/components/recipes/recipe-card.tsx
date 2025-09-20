@@ -257,11 +257,16 @@ export function RecipeCard({
                   </div>
                 )}
 
-                {recipe.instructions && (
+                {/* Description (primary preview) or Instructions (fallback) */}
+                {recipe.description ? (
+                  <p className="line-clamp-3 text-sm text-gray-600">
+                    {recipe.description}
+                  </p>
+                ) : recipe.instructions ? (
                   <p className="line-clamp-3 text-sm text-gray-600">
                     {recipe.instructions}
                   </p>
-                )}
+                ) : null}
 
                 {recipe.notes && (
                   <div className="border-t pt-2">

@@ -266,6 +266,7 @@ export const versioningApi = {
       difficulty: version.difficulty,
       creator_rating: version.creator_rating,
       image_url: version.image_url,
+      description: version.description || null,
       user_id: version.created_by,
       is_public: false, // Will be fetched from main recipe if needed
       created_at: version.created_at,
