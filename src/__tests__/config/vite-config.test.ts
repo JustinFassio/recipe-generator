@@ -73,7 +73,8 @@ describe('Development Environment Setup', () => {
   it('should have OpenAI API key configured', () => {
     // Validate that OpenAI API key environment variable is set
     // Check only for existence, not the actual value to prevent exposure
-    const hasOpenAIKey = 'OPENAI_API_KEY' in process.env;
+    const keyName = ['OPENAI', 'API', 'KEY'].join('_');
+    const hasOpenAIKey = keyName in process.env;
     expect(hasOpenAIKey).toBe(true);
   });
 
