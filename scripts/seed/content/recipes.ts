@@ -18,7 +18,8 @@ export const seedRecipesData: SeedRecipe[] = [
   {
     id: '11111111-1111-1111-1111-111111111111',
     title: 'Avocado Toast',
-    description: 'A creamy, satisfying breakfast featuring perfectly ripe avocado mashed with seasonings and spread over crispy sourdough bread. The finishing touch of chili flakes adds a gentle heat that complements the rich, buttery avocado perfectly.',
+    description:
+      'A creamy, satisfying breakfast featuring perfectly ripe avocado mashed with seasonings and spread over crispy sourdough bread. The finishing touch of chili flakes adds a gentle heat that complements the rich, buttery avocado perfectly.',
     ingredients: [
       '2 slices sourdough',
       '1 ripe avocado',
@@ -44,7 +45,8 @@ export const seedRecipesData: SeedRecipe[] = [
   {
     id: '11111111-1111-1111-1111-111111111112',
     title: 'Caprese Salad',
-    description: 'A classic Italian salad showcasing the beautiful simplicity of fresh ingredients. Creamy mozzarella, juicy ripe tomatoes, and fragrant basil leaves come together with a drizzle of golden olive oil and tangy balsamic glaze for a refreshing, elegant dish.',
+    description:
+      'A classic Italian salad showcasing the beautiful simplicity of fresh ingredients. Creamy mozzarella, juicy ripe tomatoes, and fragrant basil leaves come together with a drizzle of golden olive oil and tangy balsamic glaze for a refreshing, elegant dish.',
     ingredients: [
       'fresh mozzarella',
       'tomatoes',
@@ -70,7 +72,8 @@ export const seedRecipesData: SeedRecipe[] = [
   {
     id: '11111111-1111-1111-1111-111111111113',
     title: 'Quick Pasta',
-    description: 'A simple yet flavorful pasta dish that proves delicious meals don\'t need to be complicated. Tender spaghetti tossed with golden garlic, burst cherry tomatoes, and fresh basil creates an aromatic, satisfying dinner that comes together in just 15 minutes.',
+    description:
+      "A simple yet flavorful pasta dish that proves delicious meals don't need to be complicated. Tender spaghetti tossed with golden garlic, burst cherry tomatoes, and fresh basil creates an aromatic, satisfying dinner that comes together in just 15 minutes.",
     ingredients: [
       'spaghetti',
       'garlic',
@@ -96,7 +99,8 @@ export const seedRecipesData: SeedRecipe[] = [
   {
     id: '11111111-1111-1111-1111-111111111114',
     title: 'Veggie Stir Fry',
-    description: 'A vibrant, nutritious stir-fry bursting with crisp-tender vegetables and bold Asian flavors. Fresh broccoli, carrots, and bell peppers are quickly seared and tossed with aromatic ginger, garlic, and savory soy sauce for a healthy, colorful meal.',
+    description:
+      'A vibrant, nutritious stir-fry bursting with crisp-tender vegetables and bold Asian flavors. Fresh broccoli, carrots, and bell peppers are quickly seared and tossed with aromatic ginger, garlic, and savory soy sauce for a healthy, colorful meal.',
     ingredients: [
       'broccoli',
       'carrots',
@@ -125,7 +129,8 @@ export const seedRecipesData: SeedRecipe[] = [
   {
     id: '22222222-2222-2222-2222-222222222221',
     title: 'Classic Caesar Salad',
-    description: 'The timeless Caesar salad that never goes out of style. Crisp romaine lettuce is tossed with creamy caesar dressing, topped with crunchy golden croutons and sharp parmesan cheese, then finished with a bright squeeze of fresh lemon for the perfect balance of flavors.',
+    description:
+      'The timeless Caesar salad that never goes out of style. Crisp romaine lettuce is tossed with creamy caesar dressing, topped with crunchy golden croutons and sharp parmesan cheese, then finished with a bright squeeze of fresh lemon for the perfect balance of flavors.',
     ingredients: [
       'romaine lettuce',
       'parmesan',
