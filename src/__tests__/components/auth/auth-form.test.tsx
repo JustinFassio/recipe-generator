@@ -1,3 +1,4 @@
+import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { AuthForm } from '@/components/auth/auth-form';
@@ -36,13 +37,19 @@ vi.mock('@/lib/supabase', () => ({
       signOut: vi.fn(),
     },
     from: vi.fn(() => ({
-      select: vi.fn(() => ({
-        not: vi.fn(() => ({
-          order: vi.fn(() => ({
-            limit: vi.fn(() => Promise.resolve({ data: [], error: null })),
-          })),
-        })),
-      })),
+      select: vi.fn(() => {
+        // Create a comprehensive mock chain that supports all query patterns
+        const createChainMock = () => ({
+          eq: vi.fn(() => createChainMock()),
+          not: vi.fn(() => createChainMock()),
+          gte: vi.fn(() => createChainMock()),
+          order: vi.fn(() => createChainMock()),
+          limit: vi.fn(() => Promise.resolve({ data: [], error: null })),
+          single: vi.fn(() => Promise.resolve({ data: null, error: null })),
+          then: vi.fn(() => Promise.resolve({ data: [], error: null })),
+        });
+        return createChainMock();
+      }),
       eq: vi.fn(() => ({
         single: vi.fn(() => Promise.resolve({ data: null, error: null })),
       })),
