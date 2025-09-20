@@ -84,7 +84,7 @@ This structure provides rich context for generating relevant recipe images.
 
 ## 📚 Related Documentation
 
-- [Current Recipe JSON Structure](../../lib/openai.ts) - System prompts that generate recipe JSON
+- [Current Recipe JSON Structure](../lib/openai.ts) - System prompts that generate recipe JSON
 - [Image Upload System](../../pages/recipes/recipe-image-update.md) - Current manual upload implementation
 - [OpenAI Integration](../../workflows/openai-integration-flow.md) - Existing API setup and patterns
 
