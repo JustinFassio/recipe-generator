@@ -96,7 +96,9 @@ shouldRunConfigTests
   : describe.skip('Development Environment Setup', () => {
       it('skipped because .env.local is missing and RUN_CONFIG_TESTS is not set', () => {
         console.log('💡 To run config tests: RUN_CONFIG_TESTS=true npm test');
-        console.log('💡 Or create .env.local with required environment variables');
+        console.log(
+          '💡 Or create .env.local with required environment variables'
+        );
         // This test suite is skipped to avoid hard-failures on fresh clones or CI
       });
     });
