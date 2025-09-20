@@ -1,10 +1,12 @@
+import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
-import { AuthForm } from '@/components/auth/auth-form';
-import { AuthProvider } from '@/contexts/AuthProvider';
+import '@testing-library/jest-dom';
+import { AuthForm } from '../../../components/auth/auth-form';
+import { AuthProvider } from '../../../contexts/AuthProvider';
 
 // Mock AuthProvider
-vi.mock('@/contexts/AuthProvider', () => ({
+vi.mock('../../../contexts/AuthProvider', () => ({
   AuthProvider: ({ children }: { children: React.ReactNode }) => children,
   useAuth: vi.fn(() => ({
     user: null,
@@ -22,7 +24,7 @@ const renderWithAuth = (component: React.ReactElement) => {
 };
 
 // Mock the supabase client
-vi.mock('@/lib/supabase', () => ({
+vi.mock('../../../lib/supabase', () => ({
   supabase: {
     auth: {
       signUp: vi.fn(),
@@ -36,13 +38,35 @@ vi.mock('@/lib/supabase', () => ({
       signOut: vi.fn(),
     },
     from: vi.fn(() => ({
-      select: vi.fn(() => ({
-        not: vi.fn(() => ({
-          order: vi.fn(() => ({
-            limit: vi.fn(() => Promise.resolve({ data: [], error: null })),
-          })),
-        })),
-      })),
+      select: vi.fn().mockReturnValue({
+        eq: vi.fn().mockReturnValue({
+          not: vi.fn().mockReturnValue({
+            gte: vi.fn().mockReturnValue({
+              order: vi.fn().mockReturnValue({
+                order: vi.fn().mockReturnValue({
+                  order: vi.fn().mockReturnValue({
+                    limit: vi.fn().mockResolvedValue({ data: [], error: null }),
+                  }),
+                }),
+              }),
+            }),
+          }),
+          single: vi.fn().mockResolvedValue({ data: null, error: null }),
+          order: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue({ data: [], error: null }),
+          }),
+        }),
+        not: vi.fn().mockReturnValue({
+          order: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue({ data: [], error: null }),
+          }),
+        }),
+        order: vi.fn().mockReturnValue({
+          limit: vi.fn().mockResolvedValue({ data: [], error: null }),
+        }),
+        limit: vi.fn().mockResolvedValue({ data: [], error: null }),
+        single: vi.fn().mockResolvedValue({ data: null, error: null }),
+      }),
       eq: vi.fn(() => ({
         single: vi.fn(() => Promise.resolve({ data: null, error: null })),
       })),
@@ -51,7 +75,7 @@ vi.mock('@/lib/supabase', () => ({
 }));
 
 // Mock the toast hook
-vi.mock('@/hooks/use-toast', () => ({
+vi.mock('../../../hooks/use-toast', () => ({
   toast: vi.fn(),
 }));
 

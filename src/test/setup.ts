@@ -1,3 +1,8 @@
+// Load environment variables for tests
+import { config } from 'dotenv';
+config({ path: '.env.local' });
+config({ path: '.env' });
+
 // Polyfill for HTMLFormElement.prototype.requestSubmit (not implemented in jsdom)
 if (typeof window !== 'undefined' && !HTMLFormElement.prototype.requestSubmit) {
   HTMLFormElement.prototype.requestSubmit = function () {
@@ -28,17 +33,37 @@ vi.mock('@/lib/supabase', () => ({
     },
     from: vi.fn(() => {
       const chain = {
-        select: vi.fn(() => ({
-          // support both select().eq().single() and select().order()
-          eq: vi.fn(() => ({
-            single: vi.fn(() => Promise.resolve({ data: null, error: null })),
-          })),
-          order: vi.fn(() => ({
-            limit: vi.fn(() => Promise.resolve({ data: [], error: null })),
-          })),
-          single: vi.fn(() => Promise.resolve({ data: null, error: null })),
-          limit: vi.fn(() => Promise.resolve({ data: [], error: null })),
-        })),
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            not: vi.fn().mockReturnValue({
+              gte: vi.fn().mockReturnValue({
+                order: vi.fn().mockReturnValue({
+                  order: vi.fn().mockReturnValue({
+                    order: vi.fn().mockReturnValue({
+                      limit: vi
+                        .fn()
+                        .mockResolvedValue({ data: [], error: null }),
+                    }),
+                  }),
+                }),
+              }),
+            }),
+            single: vi.fn().mockResolvedValue({ data: null, error: null }),
+            order: vi.fn().mockReturnValue({
+              limit: vi.fn().mockResolvedValue({ data: [], error: null }),
+            }),
+          }),
+          not: vi.fn().mockReturnValue({
+            order: vi.fn().mockReturnValue({
+              limit: vi.fn().mockResolvedValue({ data: [], error: null }),
+            }),
+          }),
+          order: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue({ data: [], error: null }),
+          }),
+          limit: vi.fn().mockResolvedValue({ data: [], error: null }),
+          single: vi.fn().mockResolvedValue({ data: null, error: null }),
+        }),
         eq: vi.fn(() => ({
           single: vi.fn(() => Promise.resolve({ data: null, error: null })),
         })),
@@ -170,6 +195,11 @@ vi.mock('@/lib/user-preferences', () => ({
     spice_tolerance: 3,
   }),
   updateCookingPreferences: vi.fn().mockResolvedValue({ success: true }),
+  getUserGroceries: vi.fn().mockResolvedValue({
+    groceries: [],
+    hasIngredient: vi.fn().mockReturnValue(false),
+  }),
+  updateUserGroceries: vi.fn().mockResolvedValue({ success: true }),
   validateAllergies: vi.fn((allergies: string[]) =>
     allergies.every((allergy) => allergy.trim().length > 0)
   ),

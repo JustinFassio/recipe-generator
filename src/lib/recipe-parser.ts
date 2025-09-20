@@ -129,13 +129,22 @@ function parseJsonRecipe(parsed: Record<string, unknown>): ParsedRecipe {
   }
 
   const title = (parsed.name || parsed.title || 'Untitled Recipe') as string;
+  const description = (parsed.description || '') as string;
   const ingredients = parseIngredients(parsed.ingredients);
   const instructions = parseInstructions(parsed);
   const notes = parseNotes(parsed);
   const categories = parseCategories(parsed);
   const setup = parseSetup(parsed);
 
-  return { title, ingredients, instructions, notes, categories, setup };
+  return {
+    title,
+    description,
+    ingredients,
+    instructions,
+    notes,
+    categories,
+    setup,
+  };
 }
 
 function parseIngredients(ingredients: unknown): string[] {
@@ -723,6 +732,7 @@ function parseFlexibleRecipe(text: string): ParsedRecipe {
 
   return {
     title,
+    description: '', // No description in flexible parsing
     ingredients,
     instructions: instructions.join('\n'),
     notes: notes.join('\n'),
@@ -787,6 +797,7 @@ function extractFromUnstructuredText(text: string): ParsedRecipe {
 
   return {
     title: 'Recipe from Text',
+    description: '', // No description in unstructured text
     ingredients,
     instructions: instructions.join('\n'),
     notes: '',
