@@ -70,12 +70,11 @@ describe('Development Environment Setup', () => {
     expect(envLocalExists).toBe(true);
   });
 
-  it('should have OpenAI API key configured', () => {
-    // Validate that OpenAI API key environment variable is set
-    // Check only for existence, not the actual value to prevent exposure
-    const keyName = ['OPENAI', 'API', 'KEY'].join('_');
-    const hasOpenAIKey = keyName in process.env;
-    expect(hasOpenAIKey).toBe(true);
+  it('should have OpenAI model configured', () => {
+    // Validate that OpenAI model environment variable is set
+    // The API key is server-side only and not exposed to client tests for security
+    const hasOpenAIModel = 'VITE_OPENAI_MODEL' in process.env;
+    expect(hasOpenAIModel).toBe(true);
   });
 
   it('should have Supabase configuration', () => {
