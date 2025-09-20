@@ -1,11 +1,12 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
-import { AuthForm } from '@/components/auth/auth-form';
-import { AuthProvider } from '@/contexts/AuthProvider';
+import '@testing-library/jest-dom';
+import { AuthForm } from '../../../components/auth/auth-form';
+import { AuthProvider } from '../../../contexts/AuthProvider';
 
 // Mock AuthProvider
-vi.mock('@/contexts/AuthProvider', () => ({
+vi.mock('../../../contexts/AuthProvider', () => ({
   AuthProvider: ({ children }: { children: React.ReactNode }) => children,
   useAuth: vi.fn(() => ({
     user: null,
@@ -23,7 +24,7 @@ const renderWithAuth = (component: React.ReactElement) => {
 };
 
 // Mock the supabase client
-vi.mock('@/lib/supabase', () => ({
+vi.mock('../../../lib/supabase', () => ({
   supabase: {
     auth: {
       signUp: vi.fn(),
@@ -74,7 +75,7 @@ vi.mock('@/lib/supabase', () => ({
 }));
 
 // Mock the toast hook
-vi.mock('@/hooks/use-toast', () => ({
+vi.mock('../../../hooks/use-toast', () => ({
   toast: vi.fn(),
 }));
 
