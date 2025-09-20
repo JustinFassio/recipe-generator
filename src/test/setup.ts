@@ -35,7 +35,9 @@ vi.mock('@/lib/supabase', () => ({
                 order: vi.fn().mockReturnValue({
                   order: vi.fn().mockReturnValue({
                     order: vi.fn().mockReturnValue({
-                      limit: vi.fn().mockResolvedValue({ data: [], error: null }),
+                      limit: vi
+                        .fn()
+                        .mockResolvedValue({ data: [], error: null }),
                     }),
                   }),
                 }),
