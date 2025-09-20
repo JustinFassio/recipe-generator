@@ -156,6 +156,7 @@ vi.mock('@/hooks/use-toast', () => ({
   })),
 }));
 
+
 // Mock AuthProvider for tests
 vi.mock('@/contexts/AuthProvider', () => ({
   AuthProvider: ({ children }: { children: React.ReactNode }) => children,

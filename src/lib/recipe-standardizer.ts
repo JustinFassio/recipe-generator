@@ -17,10 +17,17 @@ export interface StandardizedRecipe {
 export async function standardizeRecipeWithAI(
   recipeText: string
 ): Promise<StandardizedRecipe> {
+  // Skip AI processing in test environments to prevent network calls
+  if (process.env.NODE_ENV === 'test' || process.env.VITEST === 'true') {
+    return parseStandardizedRecipe(recipeText);
+  }
+
   try {
     // Call the secure backend API for AI processing
-    const baseUrl =
-      typeof window !== 'undefined' ? '' : 'http://localhost:3000';
+    // Use absolute URL for server-side/test environments, relative for browser
+    const baseUrl = typeof window !== 'undefined' 
+      ? '' 
+      : process.env.API_BASE_URL || 'http://localhost:3000';
     const response = await fetch(`${baseUrl}/api/recipe-standardize`, {
       method: 'POST',
       headers: {
