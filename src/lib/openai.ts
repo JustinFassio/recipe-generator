@@ -9,7 +9,6 @@ CRITICAL: When providing a complete recipe, ALWAYS format it as structured JSON 
 \`\`\`json
 {
   "title": "Recipe Name",
-  "description": "A rich, appetizing description of the dish - describe the flavors, textures, visual appeal, and what makes it special. This should be 2-3 sentences that make someone want to cook and eat this dish.",
   "ingredients": [
     {
       "item": "ingredient name",
@@ -23,12 +22,6 @@ CRITICAL: When providing a complete recipe, ALWAYS format it as structured JSON 
   "notes": "Tips, variations, and additional notes"
 }
 \`\`\`
-
-The description field is crucial - it should be:
-- Appetizing and descriptive (2-3 sentences)
-- Focus on flavors, textures, and visual appeal
-- Make someone want to cook and eat the dish
-- Include what makes this recipe special or unique
 
 This structured format ensures the recipe can be easily saved to the user's collection.`;
 
@@ -94,7 +87,6 @@ ${CONTEXT_USAGE_DIRECTIVE}
 When generating a complete recipe, structure it as a JSON object with:
 {
   "title": "Recipe Name",
-  "description": "A rich, appetizing description of the dish - describe the flavors, textures, visual appeal, and what makes it special. This should be 2-3 sentences that make someone want to cook and eat this dish.",
   "ingredients": [
     {
       "item": "ingredient name",
@@ -136,7 +128,6 @@ ${CONTEXT_USAGE_DIRECTIVE}
 When generating a complete recipe, structure it as a JSON object with:
 {
   "title": "Recipe Name",
-  "description": "A rich, appetizing description of the dish - describe the flavors, textures, visual appeal, and what makes it special. This should be 2-3 sentences that make someone want to cook and eat this dish.",
   "ingredients": [
     {
       "item": "ingredient name",
@@ -178,7 +169,6 @@ ${CONTEXT_USAGE_DIRECTIVE}
 When generating a complete recipe, structure it as a JSON object with:
 {
   "title": "Recipe Name",
-  "description": "A rich, appetizing description of the dish - describe the flavors, textures, visual appeal, and what makes it special. This should be 2-3 sentences that make someone want to cook and eat this dish.",
   "ingredients": [
     {
       "item": "ingredient name",
@@ -225,7 +215,6 @@ ${CONTEXT_USAGE_DIRECTIVE}
 When generating a complete recipe, structure it as a JSON object with:
 {
   "title": "Recipe Name",
-  "description": "A rich, appetizing description of the dish - describe the flavors, textures, visual appeal, and what makes it special. This should be 2-3 sentences that make someone want to cook and eat this dish.",
   "ingredients": [
     {
       "item": "ingredient name",
@@ -274,7 +263,6 @@ ${CONTEXT_USAGE_DIRECTIVE}
 When generating a complete recipe, structure it as a JSON object with:
 {
   "title": "Recipe Name",
-  "description": "A rich, appetizing description of the dish - describe the flavors, textures, visual appeal, and what makes it special. This should be 2-3 sentences that make someone want to cook and eat this dish.",
   "ingredients": [
     {
       "item": "ingredient name",
