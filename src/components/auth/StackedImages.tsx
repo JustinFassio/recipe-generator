@@ -105,13 +105,21 @@ export function StackedImages({
                 zIndex: featuredRecipes.length - index,
               }}
             >
-              <ProgressiveImage
-                src={recipe.image_url || ''}
-                alt={recipe.title}
-                className="w-full h-full rounded-full object-cover"
-                loading="eager"
-                priority={index < 3}
-              />
+              {recipe.image_url ? (
+                <ProgressiveImage
+                  src={recipe.image_url}
+                  alt={recipe.title}
+                  className="w-full h-full rounded-full object-cover"
+                  loading="eager"
+                  priority={index < 3}
+                />
+              ) : (
+                <div className="w-full h-full rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center">
+                  <span className="text-white text-2xl font-bold">
+                    {getFirstName(recipe.author_name).charAt(0).toUpperCase()}
+                  </span>
+                </div>
+              )}
 
               {/* Rating badge */}
               {recipe.creator_rating && (

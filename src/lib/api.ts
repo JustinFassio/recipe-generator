@@ -486,9 +486,8 @@ export const recipeApi = {
       .from('recipes')
       .select('*')
       .in('id', recipeIds)
-      .eq('is_public', true)
-      .not('image_url', 'is', null)
-      .neq('image_url', '');
+      .eq('is_public', true);
+    // Removed image_url filters to include all high-rated recipes
 
     if (recipesError) handleError(recipesError, 'Get recipe details');
     if (!recipes || recipes.length === 0) {
