@@ -87,8 +87,8 @@ jobs:
           source <(grep -E '^[A-Z_]+=' .vercel.env.production | sed 's/\\r$//')
           set +a
           npm run build
-          # Extract Supabase URL to verify it was embedded in the bundle
-          SUPABASE_URL=$(grep '^VITE_SUPABASE_URL=' .vercel.env.production | cut -d= -f2-)
+          # Extract Supabase URL to verify it was embedded in the bundle (strip quotes/CR)
+          SUPABASE_URL=$(awk -F= '/^VITE_SUPABASE_URL=/{val=$2} END{gsub(/\r$/, "", val); gsub(/^"|"$/, "", val); print val}' .vercel.env.production)
           if [ -z "$SUPABASE_URL" ]; then
             echo "❌ Could not read VITE_SUPABASE_URL from snapshot"
             exit 1
