@@ -46,6 +46,8 @@ jobs:
           # Use a temp file to avoid cluttering the workspace
           rm -f .vercel.env.production
           vercel env pull .vercel.env.production --environment=production --yes --token "$VERCEL_TOKEN"
+          # The validator expects .env.vercel.production; copy the pulled snapshot to that name
+          cp .vercel.env.production .env.vercel.production
 
       - name: Assert required vars exist in Vercel Production (authoritative)
         run: |
@@ -105,7 +107,7 @@ jobs:
       - name: Cleanup temp files
         if: always()
         run: |
-          rm -f .vercel.env.production vercel-env-ls.txt
+          rm -f .vercel.env.production vercel-env-ls.txt .env.vercel.production
 
       - name: Upload validation report
         if: always()
