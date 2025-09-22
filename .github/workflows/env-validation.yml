@@ -47,6 +47,22 @@ jobs:
           rm -f .env.vercel.production
           vercel env pull .env.vercel.production --environment=production --yes --token "$VERCEL_TOKEN"
 
+      - name: Assert required Vercel Production vars exist (VITE_SUPABASE_*)
+        run: |
+          if [ ! -f .env.vercel.production ]; then
+            echo "❌ .env.vercel.production not found"
+            exit 1
+          fi
+          if ! grep -q '^VITE_SUPABASE_URL=' .env.vercel.production; then
+            echo "❌ VITE_SUPABASE_URL missing from Vercel Production env snapshot"
+            exit 1
+          fi
+          if ! grep -q '^VITE_SUPABASE_ANON_KEY=' .env.vercel.production; then
+            echo "❌ VITE_SUPABASE_ANON_KEY missing from Vercel Production env snapshot"
+            exit 1
+          fi
+          echo "✅ Required Vercel Production vars present"
+
       - name: Debug environment variables
         run: |
           echo "🔍 Environment variables pulled from Vercel:"
@@ -63,6 +79,30 @@ jobs:
       - name: Validate environment variables
         run: |
           node scripts/ci-env-validator.cjs production
+
+      - name: Smoke build with pulled Vercel Production env
+        run: |
+          # Export the pulled env so Vite gets them at build time
+          set -a
+          source <(grep -E '^[A-Z_]+=' .env.vercel.production | sed 's/\\r$//')
+          set +a
+          npm run build
+          # Extract Supabase URL to verify it was embedded in the bundle
+          SUPABASE_URL=$(grep '^VITE_SUPABASE_URL=' .env.vercel.production | cut -d= -f2-)
+          if [ -z "$SUPABASE_URL" ]; then
+            echo "❌ Could not read VITE_SUPABASE_URL from snapshot"
+            exit 1
+          fi
+          # Ensure built assets reference the Supabase URL and do not contain the runtime missing-env error
+          if ! grep -R --binary-files=text -q "$SUPABASE_URL" dist; then
+            echo "❌ Supabase URL not found in built assets; envs may not have been injected"
+            exit 1
+          fi
+          if grep -R --binary-files=text -q "Missing Supabase environment variables" dist; then
+            echo "❌ Built bundle contains missing-env error string"
+            exit 1
+          fi
+          echo "✅ Smoke build verified: envs injected and no missing-env error in bundle"
 
       - name: Upload validation report
         if: always()
