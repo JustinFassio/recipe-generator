@@ -36,7 +36,6 @@ export interface SeedUser {
 export interface SeedRecipe {
   id: string;
   title: string;
-  description: string;
   ingredients: string[];
   instructions: string;
   notes?: string;

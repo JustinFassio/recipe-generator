@@ -24,7 +24,6 @@ export function AddRecipePage() {
       setShowParser(false);
       setParsedData({
         title: existingRecipe.title,
-        description: existingRecipe.description || '',
         ingredients: existingRecipe.ingredients,
         instructions: existingRecipe.instructions,
         notes: existingRecipe.notes || '',

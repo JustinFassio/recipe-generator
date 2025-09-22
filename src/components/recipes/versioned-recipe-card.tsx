@@ -89,7 +89,6 @@ export function VersionedRecipeCard({
     const versionAsRecipe: PublicRecipe = {
       id: version.recipe_id,
       title: version.title,
-      description: version.description || null,
       ingredients: version.ingredients,
       instructions: version.instructions,
       notes: version.notes || null,
