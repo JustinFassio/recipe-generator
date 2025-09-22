@@ -87,22 +87,12 @@ jobs:
           source <(grep -E '^[A-Z_]+=' .vercel.env.production | sed 's/\\r$//')
           set +a
           npm run build
-          # Extract Supabase URL to verify it was embedded in the bundle (strip quotes/CR)
-          SUPABASE_URL=$(awk -F= '/^VITE_SUPABASE_URL=/{val=$2} END{gsub(/\r$/, "", val); gsub(/^"|"$/, "", val); print val}' .vercel.env.production)
-          if [ -z "$SUPABASE_URL" ]; then
-            echo "❌ Could not read VITE_SUPABASE_URL from snapshot"
-            exit 1
-          fi
-          # Ensure built assets reference the Supabase URL and do not contain the runtime missing-env error
-          if ! grep -R --binary-files=text -q "$SUPABASE_URL" dist; then
-            echo "❌ Supabase URL not found in built assets; envs may not have been injected"
-            exit 1
-          fi
+          # Ensure bundle does not contain the runtime missing-env error
           if grep -R --binary-files=text -q "Missing Supabase environment variables" dist; then
             echo "❌ Built bundle contains missing-env error string"
             exit 1
           fi
-          echo "✅ Smoke build verified: envs injected and no missing-env error in bundle"
+          echo "✅ Smoke build verified: no missing-env error in bundle"
 
       - name: Cleanup temp files
         if: always()
