@@ -459,6 +459,7 @@ export const recipeApi = {
       .from('recipes')
       .select('*')
       .eq('is_public', true)
+      .neq('creator_rating', null)
       .gte('creator_rating', 4) // Only show high-rated recipes (4+ stars)
       .order('creator_rating', { ascending: false })
       .order('created_at', { ascending: false })
