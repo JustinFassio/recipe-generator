@@ -480,6 +480,17 @@ export const recipeApi = {
       return this.getPublicRecipes();
     }
 
+    // Debug: Log what we found in the rating stats
+    console.log(
+      '[DEBUG] Recipe rating stats found:',
+      data.map((item) => ({
+        recipe_id: item.recipe_id,
+        title: item.title,
+        is_public: item.is_public,
+        creator_rating: item.creator_rating,
+      }))
+    );
+
     // Get the full recipe data for these high-rated recipes
     const recipeIds = data.map((item) => item.recipe_id);
     const { data: recipes, error: recipesError } = await supabase
@@ -494,6 +505,17 @@ export const recipeApi = {
       // Fallback if no recipes with images
       return this.getPublicRecipes();
     }
+
+    // Debug: Log what we found in the main recipes table
+    console.log(
+      '[DEBUG] Main recipes found:',
+      recipes.map((recipe) => ({
+        id: recipe.id,
+        title: recipe.title,
+        is_public: recipe.is_public,
+        image_url: recipe.image_url,
+      }))
+    );
 
     // Get profiles for authors
     const userIds = [...new Set(recipes.map((recipe) => recipe.user_id))];
