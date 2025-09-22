@@ -453,66 +453,32 @@ export const recipeApi = {
   async getHighestRatedPublicRecipes(
     limit: number = 10
   ): Promise<PublicRecipe[]> {
-    const { data, error } = await supabase
-      .from('recipe_rating_stats')
-      .select(
-        `
-        recipe_id,
-        title,
-        creator_rating,
-        community_rating_count,
-        community_rating_average,
-        is_public,
-        created_at
-      `
-      )
+    // Simplified approach: get public recipes directly and sort by rating
+    // This avoids any potential issues with the recipe_rating_stats view
+    const { data: recipes, error } = await supabase
+      .from('recipes')
+      .select('*')
       .eq('is_public', true)
       .not('creator_rating', 'is', null)
       .gte('creator_rating', 4) // Only show high-rated recipes (4+ stars)
       .order('creator_rating', { ascending: false })
-      .order('community_rating_average', { ascending: false })
-      .order('community_rating_count', { ascending: false })
+      .order('created_at', { ascending: false })
       .limit(limit);
 
     if (error) handleError(error, 'Get highest rated public recipes');
-    if (!data || data.length === 0) {
+    if (!recipes || recipes.length === 0) {
       // Fallback to regular public recipes if no ratings exist yet
       return this.getPublicRecipes();
     }
 
-    // Debug: Log what we found in the rating stats
+    // Debug: Log what we found
     console.log(
-      '[DEBUG] Recipe rating stats found:',
-      data.map((item) => ({
-        recipe_id: item.recipe_id,
-        title: item.title,
-        is_public: item.is_public,
-        creator_rating: item.creator_rating,
-      }))
-    );
-
-    // Get the full recipe data for these high-rated recipes
-    const recipeIds = data.map((item) => item.recipe_id);
-    const { data: recipes, error: recipesError } = await supabase
-      .from('recipes')
-      .select('*')
-      .in('id', recipeIds)
-      .eq('is_public', true);
-    // Removed image_url filters to include all high-rated recipes
-
-    if (recipesError) handleError(recipesError, 'Get recipe details');
-    if (!recipes || recipes.length === 0) {
-      // Fallback if no recipes with images
-      return this.getPublicRecipes();
-    }
-
-    // Debug: Log what we found in the main recipes table
-    console.log(
-      '[DEBUG] Main recipes found:',
+      '[DEBUG] Public recipes with ratings found:',
       recipes.map((recipe) => ({
         id: recipe.id,
         title: recipe.title,
         is_public: recipe.is_public,
+        creator_rating: recipe.creator_rating,
         image_url: recipe.image_url,
       }))
     );
@@ -535,21 +501,11 @@ export const recipeApi = {
       ])
     );
 
-    // Combine recipes with profile data and maintain rating order
-    const recipeMap = new Map(
-      recipes.map((recipe) => [
-        recipe.id,
-        {
-          ...recipe,
-          author_name: profileMap.get(recipe.user_id) || 'Unknown Author',
-        },
-      ])
-    );
-
-    // Return recipes in rating order
-    return data
-      .map((item) => recipeMap.get(item.recipe_id))
-      .filter((recipe) => recipe !== undefined) as PublicRecipe[];
+    // Combine recipes with profile data
+    return recipes.map((recipe) => ({
+      ...recipe,
+      author_name: profileMap.get(recipe.user_id) || 'Unknown Author',
+    })) as PublicRecipe[];
   },
 
   // Toggle recipe public status
