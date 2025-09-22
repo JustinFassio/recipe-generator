@@ -4,6 +4,7 @@
 export type Recipe = {
   id: string;
   title: string;
+  description: string | null;
   ingredients: string[];
   instructions: string;
   notes: string | null;
@@ -34,6 +35,7 @@ export type RecipeVersion = {
   changelog: string | null;
   // Full content snapshot
   title: string;
+  description: string | null;
   ingredients: string[];
   instructions: string;
   notes: string | null;
