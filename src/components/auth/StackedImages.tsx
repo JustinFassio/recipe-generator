@@ -10,7 +10,7 @@ interface StackedImagesProps {
 }
 
 export function StackedImages({
-  maxImages = 6,
+  maxImages = 10,
   className = '',
 }: StackedImagesProps) {
   const [featuredRecipes, setFeaturedRecipes] = useState<PublicRecipe[]>([]);
