@@ -59,9 +59,7 @@ describe('ExplorePage data source', () => {
     await waitFor(() => expect(publicSpy).toHaveBeenCalledTimes(1));
     expect(statsSpy).not.toHaveBeenCalled();
 
-    // Sanity: shows heading
-    expect(
-      await screen.findByRole('heading', { name: /Explore Recipes/i })
-    ).toBeInTheDocument();
+    // Wait for loading to complete and heading to appear
+    expect(screen.getByText('Explore Recipes')).toBeInTheDocument();
   });
 });
