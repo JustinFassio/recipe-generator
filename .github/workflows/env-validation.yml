@@ -41,27 +41,25 @@ jobs:
       - name: Install Vercel CLI
         run: npm install -g vercel@latest
 
-      - name: Pull Vercel environment variables
+      - name: Pull Vercel environment variables (Production)
         run: |
-          # Remove any existing environment file to ensure fresh pull
-          rm -f .env.vercel.production
-          vercel env pull .env.vercel.production --environment=production --yes --token "$VERCEL_TOKEN"
+          # Use a temp file to avoid cluttering the workspace
+          rm -f .vercel.env.production
+          vercel env pull .vercel.env.production --environment=production --yes --token "$VERCEL_TOKEN"
 
-      - name: Assert required Vercel Production vars exist (VITE_SUPABASE_*)
+      - name: Assert required vars exist in Vercel Production (authoritative)
         run: |
-          if [ ! -f .env.vercel.production ]; then
-            echo "❌ .env.vercel.production not found"
+          # Query Vercel directly; this is the source of truth for the build
+          vercel env ls production --token "$VERCEL_TOKEN" | tee vercel-env-ls.txt
+          if ! grep -q "\bVITE_SUPABASE_URL\b" vercel-env-ls.txt; then
+            echo "❌ Vercel Production is missing VITE_SUPABASE_URL"
             exit 1
           fi
-          if ! grep -q '^VITE_SUPABASE_URL=' .env.vercel.production; then
-            echo "❌ VITE_SUPABASE_URL missing from Vercel Production env snapshot"
+          if ! grep -q "\bVITE_SUPABASE_ANON_KEY\b" vercel-env-ls.txt; then
+            echo "❌ Vercel Production is missing VITE_SUPABASE_ANON_KEY"
             exit 1
           fi
-          if ! grep -q '^VITE_SUPABASE_ANON_KEY=' .env.vercel.production; then
-            echo "❌ VITE_SUPABASE_ANON_KEY missing from Vercel Production env snapshot"
-            exit 1
-          fi
-          echo "✅ Required Vercel Production vars present"
+          echo "✅ Vercel Production lists required VITE_* variables"
 
       - name: Debug environment variables
         run: |
@@ -84,11 +82,11 @@ jobs:
         run: |
           # Export the pulled env so Vite gets them at build time
           set -a
-          source <(grep -E '^[A-Z_]+=' .env.vercel.production | sed 's/\\r$//')
+          source <(grep -E '^[A-Z_]+=' .vercel.env.production | sed 's/\\r$//')
           set +a
           npm run build
           # Extract Supabase URL to verify it was embedded in the bundle
-          SUPABASE_URL=$(grep '^VITE_SUPABASE_URL=' .env.vercel.production | cut -d= -f2-)
+          SUPABASE_URL=$(grep '^VITE_SUPABASE_URL=' .vercel.env.production | cut -d= -f2-)
           if [ -z "$SUPABASE_URL" ]; then
             echo "❌ Could not read VITE_SUPABASE_URL from snapshot"
             exit 1
@@ -104,13 +102,18 @@ jobs:
           fi
           echo "✅ Smoke build verified: envs injected and no missing-env error in bundle"
 
+      - name: Cleanup temp files
+        if: always()
+        run: |
+          rm -f .vercel.env.production vercel-env-ls.txt
+
       - name: Upload validation report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: env-validation-report
           path: |
-            .env.vercel.production
+            .vercel.env.production
             scripts/env-schema.json
           retention-days: 7
 
