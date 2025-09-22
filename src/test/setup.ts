@@ -115,6 +115,7 @@ vi.mock('@tanstack/react-query', () => ({
 // Mock React Router
 vi.mock('react-router-dom', () => ({
   BrowserRouter: ({ children }: { children: React.ReactNode }) => children,
+  MemoryRouter: ({ children }: { children: React.ReactNode }) => children,
   Routes: ({ children }: { children: React.ReactNode }) => children,
   Route: ({ children }: { children: React.ReactNode }) => children,
   useNavigate: vi.fn(() => vi.fn()),
