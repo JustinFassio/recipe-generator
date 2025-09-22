@@ -36,7 +36,9 @@ export default function ExplorePage() {
       if (sortBy === 'trending') {
         data = await recipeApi.getTrendingRecipes(50); // Get more for filtering
       } else {
-        data = await recipeApi.getPublicRecipesWithStats();
+        // Temporary fallback while aggregate view is unavailable
+        data =
+          (await recipeApi.getPublicRecipes()) as unknown as typeof recipes;
       }
 
       setRecipes(data);
