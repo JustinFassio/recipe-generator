@@ -471,18 +471,6 @@ export const recipeApi = {
       return this.getPublicRecipes();
     }
 
-    // Debug: Log what we found
-    console.log(
-      '[DEBUG] Public recipes with ratings found:',
-      recipes.map((recipe) => ({
-        id: recipe.id,
-        title: recipe.title,
-        is_public: recipe.is_public,
-        creator_rating: recipe.creator_rating,
-        image_url: recipe.image_url,
-      }))
-    );
-
     // Get profiles for authors
     const userIds = [...new Set(recipes.map((recipe) => recipe.user_id))];
     const { data: profiles, error: profilesError } = await supabase
