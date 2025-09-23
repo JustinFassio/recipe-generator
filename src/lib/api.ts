@@ -10,6 +10,18 @@ import { versioningApi } from './api/features/versioning-api';
 // Configuration constants for ingredient filtering
 const INGREDIENT_MATCH_CONFIDENCE_THRESHOLD = 50; // Minimum confidence score for ingredient matching (0-100)
 
+// Typed row for the recipe_aggregate_stats view
+interface AggregateStatsRow {
+  id: string;
+  title: string;
+  is_public: boolean;
+  aggregate_avg_rating: number | null;
+  total_ratings: number;
+  total_views: number;
+  total_versions: number;
+  latest_version: number;
+}
+
 // Simple string-based fallback matching (mirrors explore page)
 function applySimpleIngredientFilter(
   list: Recipe[],
@@ -399,8 +411,18 @@ export const recipeApi = {
       return this.getPublicRecipes();
     }
 
-    // Get the latest version recipes for each original recipe
-    const originalIds = aggregateData.map((item) => item.original_recipe_id);
+    const typedAggregate: AggregateStatsRow[] =
+      (aggregateData as unknown as AggregateStatsRow[]) || [];
+
+    // Get the latest version recipes for each recipe (view now exposes `id`)
+    const originalIds = (typedAggregate || [])
+      .map((item) => item.id)
+      .filter((id) => typeof id === 'string' && id.trim() !== '');
+
+    if (!originalIds.length) {
+      // Safety: if view returns no usable IDs, fall back gracefully
+      return this.getPublicRecipes();
+    }
     const { data: latestRecipes, error: recipesError } = await supabase
       .from('recipes')
       .select('*')
@@ -431,8 +453,8 @@ export const recipeApi = {
 
     // Combine data
     const combinedData = (latestRecipes || []).map((recipe) => {
-      const stats = aggregateData.find(
-        (item) => item.original_recipe_id === recipe.id
+      const stats = (typedAggregate || []).find(
+        (item) => item.id === recipe.id
       );
       return {
         ...recipe,
