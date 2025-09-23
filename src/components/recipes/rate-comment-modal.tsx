@@ -4,6 +4,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Star, Send, X } from 'lucide-react';
 import { recipeApi } from '@/lib/api';
+import { ratingApi } from '@/lib/api/features/rating-api';
 import { useAuth } from '@/contexts/AuthProvider';
 import { useToast } from '@/hooks/use-toast';
 import type { VersionRating } from '@/lib/types';
@@ -69,7 +70,7 @@ export function RateCommentModal({
 
     try {
       setSubmitting(true);
-      await recipeApi.rateVersion(
+      await ratingApi.submitRating(
         recipeId,
         versionNumber,
         rating,
