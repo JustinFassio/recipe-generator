@@ -26,7 +26,7 @@ import { parseIngredientText } from '@/lib/groceries/ingredient-parser';
 import { EnhancedIngredientMatcher } from '@/lib/groceries/enhanced-ingredient-matcher';
 import { useGroceries } from '@/hooks/useGroceries';
 import type { Recipe } from '@/lib/types';
-import { CreatorRating, CommunityRating } from '@/components/ui/rating';
+import { CreatorRating, YourComment } from '@/components/ui/rating';
 import { CommentSystem } from './comment-system';
 
 interface RecipeViewProps {
@@ -34,13 +34,11 @@ interface RecipeViewProps {
   onEdit?: () => void;
   onSave?: () => void;
   onBack?: () => void;
-  communityRating?: {
-    average: number;
-    count: number;
-    userRating?: number;
+  userComment?: {
+    rating?: number;
+    comment?: string;
   } | null;
-  onCommunityRate?: (rating: number) => void;
-  ratingLoading?: boolean;
+  onEditComment?: () => void;
 }
 
 export function RecipeView({
@@ -48,9 +46,8 @@ export function RecipeView({
   onEdit,
   onSave,
   onBack,
-  communityRating,
-  onCommunityRate,
-  ratingLoading,
+  userComment,
+  onEditComment,
 }: RecipeViewProps) {
   const { groceries } = useGroceries();
   const {
@@ -227,30 +224,15 @@ export function RecipeView({
                 </div>
               )}
 
-              {/* Community Rating */}
-              {communityRating && communityRating.count > 0 && (
+              {/* Your Comment */}
+              {userComment && (userComment.rating || userComment.comment) && (
                 <div className="mt-4">
-                  <CommunityRating
-                    averageRating={communityRating.average}
-                    totalRatings={communityRating.count}
-                    userRating={communityRating.userRating}
-                    onRate={onCommunityRate}
+                  <YourComment
+                    userRating={userComment.rating}
+                    userComment={userComment.comment}
+                    onEdit={onEditComment}
                     className="max-w-xs"
                   />
-                </div>
-              )}
-
-              {/* Community Rating Loading */}
-              {ratingLoading && (
-                <div className="mt-4 max-w-xs">
-                  <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
-                    <div className="flex items-center justify-center">
-                      <div className="loading loading-spinner loading-sm text-blue-600"></div>
-                      <span className="ml-2 text-sm text-blue-700">
-                        Loading ratings...
-                      </span>
-                    </div>
-                  </div>
                 </div>
               )}
             </div>

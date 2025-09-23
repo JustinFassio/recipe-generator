@@ -193,6 +193,65 @@ export function CommunityRating({
   );
 }
 
+// Your Comment - shows user's personal rating and comment
+interface YourCommentProps {
+  userRating?: number;
+  userComment?: string;
+  onEdit?: () => void;
+  className?: string;
+}
+
+export function YourComment({
+  userRating,
+  userComment,
+  onEdit,
+  className = '',
+}: YourCommentProps) {
+  if (!userRating && !userComment) {
+    return null;
+  }
+
+  return (
+    <div
+      className={`p-3 bg-green-50 rounded-lg border border-green-200 ${className}`}
+    >
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-sm font-medium text-green-900">Your Comment</span>
+        {onEdit && (
+          <button
+            onClick={onEdit}
+            className="text-xs text-green-700 hover:text-green-900 underline"
+          >
+            Edit
+          </button>
+        )}
+      </div>
+
+      {userRating && (
+        <div className="flex items-center gap-3 mb-2">
+          <Rating
+            rating={userRating}
+            readonly={true}
+            size="sm"
+            showValue={false}
+          />
+          <span className="text-sm font-semibold text-green-900">
+            {userRating}/5
+          </span>
+        </div>
+      )}
+
+      {userComment && (
+        <div className="mt-2">
+          <p className="text-sm text-green-800 leading-relaxed">
+            {userComment}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // Combined Rating Display - shows both creator and community ratings
 interface RatingDisplayProps {
   creatorRating: number;

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { recipeApi } from '@/lib/api';
+import { ratingApi } from '@/lib/api/features/rating-api';
 import { useAuth } from '@/contexts/AuthProvider';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
@@ -42,15 +43,10 @@ export function CommentSystem({
   const loadComments = async () => {
     try {
       setLoading(true);
-      const ratingsData = await recipeApi.getVersionRatings(
+      // Use the new ratingApi.getComments method instead of the old recipeApi.getVersionRatings
+      const commentsWithRatings = await ratingApi.getComments(
         recipeId,
         versionNumber
-      );
-
-      // Filter only ratings with comments and get profile data
-      const commentsWithRatings = ratingsData.filter(
-        (rating: { comment?: string }) =>
-          rating.comment && rating.comment.trim() !== ''
       );
 
       // Get profile data for comment authors
@@ -103,7 +99,7 @@ export function CommentSystem({
     if (!user) return;
 
     try {
-      const userRating = await recipeApi.getUserVersionRating(
+      const userRating = await ratingApi.getUserVersionRating(
         recipeId,
         versionNumber
       );
