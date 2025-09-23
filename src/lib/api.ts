@@ -386,8 +386,13 @@ export const recipeApi = {
       .order('aggregate_avg_rating', { ascending: false, nullsFirst: false })
       .order('total_views', { ascending: false });
 
-    if (aggregateError)
-      handleError(aggregateError, 'Get public recipes with aggregate stats');
+    if (aggregateError) {
+      console.warn(
+        '[Explore] Falling back to basic public recipes due to aggregate view error:',
+        aggregateError
+      );
+      return this.getPublicRecipes(); // Graceful fallback
+    }
 
     if (!aggregateData || aggregateData.length === 0) {
       // Fallback to regular public recipes if no aggregate data

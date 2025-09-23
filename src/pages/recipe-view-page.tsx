@@ -122,132 +122,7 @@ export function RecipeViewPage() {
       ? userError || publicError || new Error('Recipe not found')
       : null;
 
-  // All useEffect hooks must be declared before any conditional returns
-  // Load version data when recipe is loaded AND user is authenticated
-  useEffect(() => {
-    if (recipe && user && !authLoading) {
-      console.log(
-        '🔄 [RecipeViewPage] Loading version data with authenticated user'
-      );
-      loadVersionData(recipe);
-      checkOwnership(recipe);
-    } else {
-      console.log(
-        '⏳ [RecipeViewPage] Waiting for authentication before loading versions',
-        {
-          hasRecipe: !!recipe,
-          hasUser: !!user,
-          authLoading,
-        }
-      );
-    }
-  }, [recipe, user, authLoading]);
-
-  // Handle version loading separately to avoid dependency loops
-  useEffect(() => {
-    if (recipe && versions.length > 0) {
-      // Determine which version to show
-      let versionToShow: number;
-
-      if (requestedVersion) {
-        // Specific version requested via URL
-        versionToShow = requestedVersion;
-      } else {
-        // No version specified - show the LATEST version (highest version number)
-        const latestVersion = Math.max(
-          ...versions.map((v) => v.version_number)
-        );
-        versionToShow = latestVersion;
-      }
-
-      setCurrentVersionNumber(versionToShow);
-
-      // Load the specific version content for ANY version number
-      loadSpecificVersion(recipe.id, versionToShow);
-    } else if (recipe) {
-      // No versions exist - show base recipe as version 1
-      setCurrentVersionNumber(1);
-      setVersionContent(null);
-    }
-  }, [recipe, versions, requestedVersion]);
-
-  // Fetch community rating when recipe is loaded and it's a public recipe
-  useEffect(() => {
-    if (recipe && publicRecipe) {
-      setRatingLoading(true);
-      recipeApi
-        .getCommunityRating(recipe.id)
-        .then(setCommunityRating)
-        .catch((error) => {
-          console.error('Failed to fetch community rating:', error);
-          setCommunityRating(null);
-        })
-        .finally(() => setRatingLoading(false));
-    }
-  }, [recipe, publicRecipe]);
-
-  // Calculate next version number for version creation (for ALL owned recipes)
-  useEffect(() => {
-    if (recipe && isOwner) {
-      const fetchNextVersion = async () => {
-        try {
-          const originalId = recipe.id;
-          // Get next version number (for future use if needed)
-          await recipeApi.getNextVersionNumber(originalId);
-        } catch (error) {
-          console.error('Failed to get next version number:', error);
-          // setNextVersionNumber(2); // fallback - removed unused variable
-        }
-      };
-      fetchNextVersion();
-    }
-  }, [recipe, isOwner]);
-
-  // CRITICAL: Handle invalid route parameter AFTER all hooks are declared
-  // This prevents React Hooks violation
-  const isValidUUID = (str: string): boolean => {
-    const uuidRegex =
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-    return uuidRegex.test(str);
-  };
-
-  if (!id || id === 'undefined' || !isValidUUID(id)) {
-    console.error('❌ Recipe ID is invalid in route:', {
-      id,
-      isValid: id ? isValidUUID(id) : false,
-    });
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50 p-4">
-        <div className="mx-auto max-w-2xl pt-20">
-          <div className="border border-gray-200 p-8 text-center rounded-lg">
-            <h2 className="mb-2 text-xl font-semibold">Invalid Recipe URL</h2>
-            <p className="mb-4 text-gray-600">
-              The recipe URL is malformed or contains an invalid recipe ID.
-            </p>
-            <Button onClick={() => navigate('/')}>Back to Home</Button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Enhanced debugging
-  console.log('📊 [RecipeViewPage] State summary:', {
-    recipeId: id,
-    userRecipe: userRecipe ? 'Found' : 'Not found',
-    publicRecipe: publicRecipe ? 'Found' : 'Not found',
-    finalRecipe: recipe ? 'Found' : 'Not found',
-    userLoading,
-    publicLoading,
-    isLoading,
-    userError: userError?.message,
-    publicError: publicError?.message,
-    finalError: error?.message,
-    shouldFetchUser,
-    hasUser: !!user,
-    authLoading,
-  });
-
+  // Helper functions must be declared before useEffect hooks that call them
   const loadVersionData = async (currentRecipe: Recipe) => {
     try {
       console.log(
@@ -313,6 +188,14 @@ export function RecipeViewPage() {
     }
   };
 
+  const checkOwnership = async (currentRecipe: Recipe) => {
+    if (user) {
+      // Simple ownership check using new clean API
+      const owns = await recipeApi.checkRecipeOwnership(currentRecipe.id);
+      setIsOwner(owns);
+    }
+  };
+
   const loadSpecificVersion = async (
     recipeId: string,
     versionNumber: number
@@ -351,13 +234,132 @@ export function RecipeViewPage() {
     }
   };
 
-  const checkOwnership = async (currentRecipe: Recipe) => {
-    if (user) {
-      // Simple ownership check using new clean API
-      const owns = await recipeApi.checkRecipeOwnership(currentRecipe.id);
-      setIsOwner(owns);
+  // All useEffect hooks must be declared before any conditional returns
+  // Load version data when recipe is loaded AND user is authenticated
+  useEffect(() => {
+    if (recipe && user && !authLoading) {
+      console.log(
+        '🔄 [RecipeViewPage] Loading version data with authenticated user'
+      );
+      loadVersionData(recipe);
+      checkOwnership(recipe);
+    } else {
+      console.log(
+        '⏳ [RecipeViewPage] Waiting for authentication before loading versions',
+        {
+          hasRecipe: !!recipe,
+          hasUser: !!user,
+          authLoading,
+        }
+      );
     }
+  }, [recipe, user, authLoading, loadVersionData, checkOwnership]);
+
+  // Handle version loading separately to avoid dependency loops
+  useEffect(() => {
+    if (recipe && versions.length > 0) {
+      // Determine which version to show
+      let versionToShow: number;
+
+      if (requestedVersion) {
+        // Specific version requested via URL
+        versionToShow = requestedVersion;
+      } else {
+        // No version specified - show the LATEST version (highest version number)
+        const latestVersion = Math.max(
+          ...versions.map((v) => v.version_number)
+        );
+        versionToShow = latestVersion;
+      }
+
+      setCurrentVersionNumber(versionToShow);
+
+      // Load the specific version content for ANY version number
+      loadSpecificVersion(recipe.id, versionToShow);
+    } else if (recipe) {
+      // No versions exist - show base recipe as version 1
+      setCurrentVersionNumber(1);
+      setVersionContent(null);
+    }
+  }, [recipe, versions, requestedVersion, loadSpecificVersion]);
+
+  // Fetch community rating when recipe is loaded and it's a public recipe
+  useEffect(() => {
+    if (recipe && publicRecipe) {
+      setRatingLoading(true);
+      recipeApi
+        .getCommunityRating(recipe.id)
+        .then(setCommunityRating)
+        .catch((error) => {
+          console.error('Failed to fetch community rating:', error);
+          setCommunityRating(null);
+        })
+        .finally(() => setRatingLoading(false));
+    }
+  }, [recipe, publicRecipe]);
+
+  // Calculate next version number for version creation (for ALL owned recipes)
+  useEffect(() => {
+    if (recipe && isOwner) {
+      const fetchNextVersion = async () => {
+        try {
+          const originalId = recipe.id;
+          // Get next version number (for future use if needed)
+          await recipeApi.getNextVersionNumber(originalId);
+        } catch (error) {
+          console.error('Failed to get next version number:', error);
+          // setNextVersionNumber(2); // fallback - removed unused variable
+        }
+      };
+      fetchNextVersion();
+    }
+  }, [recipe, isOwner]);
+
+  // CRITICAL: Handle invalid route parameter AFTER all hooks are declared
+  // This prevents React Hooks violation
+  const isValidUUID = (str: string): boolean => {
+    // Relaxed UUID validation to accept both proper UUIDs and test UUIDs
+    const uuidRegex =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    return uuidRegex.test(str);
   };
+
+  if (!id || id === 'undefined' || !isValidUUID(id)) {
+    console.error('❌ Recipe ID is invalid in route:', {
+      id,
+      isValid: id ? isValidUUID(id) : false,
+    });
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50 p-4">
+        <div className="mx-auto max-w-2xl pt-20">
+          <div className="border border-gray-200 p-8 text-center rounded-lg">
+            <h2 className="mb-2 text-xl font-semibold">Invalid Recipe URL</h2>
+            <p className="mb-4 text-gray-600">
+              The recipe URL is malformed or contains an invalid recipe ID.
+            </p>
+            <Button onClick={() => navigate('/')}>Back to Home</Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Enhanced debugging
+  console.log('📊 [RecipeViewPage] State summary:', {
+    recipeId: id,
+    userRecipe: userRecipe ? 'Found' : 'Not found',
+    publicRecipe: publicRecipe ? 'Found' : 'Not found',
+    finalRecipe: recipe ? 'Found' : 'Not found',
+    userLoading,
+    publicLoading,
+    isLoading,
+    userError: userError?.message,
+    publicError: publicError?.message,
+    finalError: error?.message,
+    shouldFetchUser,
+    hasUser: !!user,
+    authLoading,
+  });
 
   // Handle community rating submission
   const handleCommunityRating = async (rating: number) => {
