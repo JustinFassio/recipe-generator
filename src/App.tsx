@@ -73,14 +73,12 @@ function AppContent() {
       <Route
         path="/explore"
         element={
-          <ProtectedRoute>
-            <div className="bg-base-100 min-h-screen">
-              <Header />
-              <main>
-                <ExplorePage />
-              </main>
-            </div>
-          </ProtectedRoute>
+          <div className="bg-base-100 min-h-screen">
+            <Header />
+            <main>
+              <ExplorePage />
+            </main>
+          </div>
         }
       />
       <Route
