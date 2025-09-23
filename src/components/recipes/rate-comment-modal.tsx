@@ -182,16 +182,18 @@ export function RateCommentModal({
                 ))}
               </div>
 
-              {displayRating > 0 && (
-                <div className="text-center">
-                  <p className="text-sm font-medium text-gray-900">
-                    {ratingLabels[displayRating as keyof typeof ratingLabels]}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {displayRating} out of 5 stars
-                  </p>
-                </div>
-              )}
+              <div className="text-center h-12 flex flex-col justify-center">
+                {displayRating > 0 && (
+                  <>
+                    <p className="text-sm font-medium text-gray-900">
+                      {ratingLabels[displayRating as keyof typeof ratingLabels]}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {displayRating} out of 5 stars
+                    </p>
+                  </>
+                )}
+              </div>
             </div>
           </div>
 
