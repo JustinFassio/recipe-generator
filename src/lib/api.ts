@@ -10,6 +10,18 @@ import { versioningApi } from './api/features/versioning-api';
 // Configuration constants for ingredient filtering
 const INGREDIENT_MATCH_CONFIDENCE_THRESHOLD = 50; // Minimum confidence score for ingredient matching (0-100)
 
+// Typed row for the recipe_aggregate_stats view
+interface AggregateStatsRow {
+  id: string;
+  title: string;
+  is_public: boolean;
+  aggregate_avg_rating: number | null;
+  total_ratings: number;
+  total_views: number;
+  total_versions: number;
+  latest_version: number;
+}
+
 // Simple string-based fallback matching (mirrors explore page)
 function applySimpleIngredientFilter(
   list: Recipe[],
@@ -399,10 +411,13 @@ export const recipeApi = {
       return this.getPublicRecipes();
     }
 
+    const typedAggregate: AggregateStatsRow[] =
+      (aggregateData as unknown as AggregateStatsRow[]) || [];
+
     // Get the latest version recipes for each recipe (view now exposes `id`)
-    const originalIds = (aggregateData as Array<Record<string, unknown>>)
-      .map((item) => item.id as string | undefined)
-      .filter((id): id is string => typeof id === 'string' && id.trim() !== '');
+    const originalIds = (typedAggregate || [])
+      .map((item) => item.id)
+      .filter((id) => typeof id === 'string' && id.trim() !== '');
 
     if (!originalIds.length) {
       // Safety: if view returns no usable IDs, fall back gracefully
@@ -438,7 +453,7 @@ export const recipeApi = {
 
     // Combine data
     const combinedData = (latestRecipes || []).map((recipe) => {
-      const stats = (aggregateData as Array<Record<string, unknown>>).find(
+      const stats = (typedAggregate || []).find(
         (item) => item.id === recipe.id
       );
       return {
