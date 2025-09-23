@@ -399,8 +399,15 @@ export const recipeApi = {
       return this.getPublicRecipes();
     }
 
-    // Get the latest version recipes for each original recipe
-    const originalIds = aggregateData.map((item) => item.original_recipe_id);
+    // Get the latest version recipes for each recipe (view now exposes `id`)
+    const originalIds = (aggregateData as Array<Record<string, unknown>>)
+      .map((item) => item.id as string | undefined)
+      .filter((id): id is string => typeof id === 'string' && id.trim() !== '');
+
+    if (!originalIds.length) {
+      // Safety: if view returns no usable IDs, fall back gracefully
+      return this.getPublicRecipes();
+    }
     const { data: latestRecipes, error: recipesError } = await supabase
       .from('recipes')
       .select('*')
@@ -431,8 +438,8 @@ export const recipeApi = {
 
     // Combine data
     const combinedData = (latestRecipes || []).map((recipe) => {
-      const stats = aggregateData.find(
-        (item) => item.original_recipe_id === recipe.id
+      const stats = (aggregateData as Array<Record<string, unknown>>).find(
+        (item) => item.id === recipe.id
       );
       return {
         ...recipe,
