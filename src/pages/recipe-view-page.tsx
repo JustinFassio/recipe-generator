@@ -1,6 +1,6 @@
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useRecipe, usePublicRecipe } from '@/hooks/use-recipes';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { RecipeView } from '@/components/recipes/recipe-view';
 import { VersionSelector } from '@/components/recipes/version-selector';
 import { RecipeAnalyticsDashboard } from '@/components/recipes/recipe-analytics-dashboard';
@@ -123,116 +123,126 @@ export function RecipeViewPage() {
       : null;
 
   // Helper functions must be declared before useEffect hooks that call them
-  const loadVersionData = async (currentRecipe: Recipe) => {
-    try {
-      console.log(
-        `🔍 [loadVersionData] Loading versions for recipe: ${currentRecipe.id}`
-      );
+  const loadVersionData = useCallback(
+    async (currentRecipe: Recipe) => {
+      try {
+        console.log(
+          `🔍 [loadVersionData] Loading versions for recipe: ${currentRecipe.id}`
+        );
 
-      // Load versions using new clean API (no more parent traversal!)
-      const versionsData = await recipeApi.getRecipeVersions(currentRecipe.id);
+        // Load versions using new clean API (no more parent traversal!)
+        const versionsData = await recipeApi.getRecipeVersions(
+          currentRecipe.id
+        );
 
-      console.log(
-        `📊 [loadVersionData] Received ${versionsData?.length || 0} versions:`,
-        versionsData
-      );
+        console.log(
+          `📊 [loadVersionData] Received ${versionsData?.length || 0} versions:`,
+          versionsData
+        );
 
-      setVersions(versionsData);
+        setVersions(versionsData);
 
-      // 🎯 FIXED: Load latest version by default, specific version when requested
-      if (versionsData && versionsData.length > 0) {
-        if (requestedVersion !== null) {
-          // Specific version requested
-          const requestedVersionData = versionsData.find(
-            (v) => v.version_number === requestedVersion
-          );
-          if (requestedVersionData) {
-            console.log(`🔄 Loading requested version: ${requestedVersion}`);
-            setVersionContent(requestedVersionData);
-          } else {
-            console.warn(
-              `⚠️ Requested version ${requestedVersion} not found, falling back to latest`
+        // 🎯 FIXED: Load latest version by default, specific version when requested
+        if (versionsData && versionsData.length > 0) {
+          if (requestedVersion !== null) {
+            // Specific version requested
+            const requestedVersionData = versionsData.find(
+              (v) => v.version_number === requestedVersion
             );
-            const latestVersion = versionsData[0]; // First is latest (descending order)
+            if (requestedVersionData) {
+              console.log(`🔄 Loading requested version: ${requestedVersion}`);
+              setVersionContent(requestedVersionData);
+            } else {
+              console.warn(
+                `⚠️ Requested version ${requestedVersion} not found, falling back to latest`
+              );
+              const latestVersion = versionsData[0]; // First is latest (descending order)
+              setVersionContent(latestVersion);
+            }
+          } else {
+            // No version parameter - load latest version by default
+            const latestVersion = versionsData[0]; // Versions are ordered newest first (descending)
+            console.log(
+              `🔄 No version specified - loading latest version: ${latestVersion.version_number}`
+            );
             setVersionContent(latestVersion);
           }
         } else {
-          // No version parameter - load latest version by default
-          const latestVersion = versionsData[0]; // Versions are ordered newest first (descending)
-          console.log(
-            `🔄 No version specified - loading latest version: ${latestVersion.version_number}`
-          );
-          setVersionContent(latestVersion);
+          // No versions exist - show original recipe content
+          console.log('📖 No versions exist - showing original recipe content');
+          setVersionContent(null);
         }
-      } else {
-        // No versions exist - show original recipe content
-        console.log('📖 No versions exist - showing original recipe content');
-        setVersionContent(null);
+
+        // Aggregate stats temporarily disabled until rebuilt for new schema
+        // const aggregateData = await recipeApi.getAggregateStats(currentRecipe.id);
+        // setAggregateStats(aggregateData);
+
+        // Track view for current version (temporarily disabled until API is implemented)
+        if (publicRecipe) {
+          const versionToTrack =
+            requestedVersion || versionsData?.[0]?.version_number || 1;
+          console.log(
+            `📊 Would track view for version ${versionToTrack} of recipe ${currentRecipe.id}`
+          );
+          // await recipeApi.trackVersionView(currentRecipe.id, versionToTrack);
+        }
+      } catch (error) {
+        console.error('Failed to load version data:', error);
       }
+    },
+    [requestedVersion, publicRecipe]
+  );
 
-      // Aggregate stats temporarily disabled until rebuilt for new schema
-      // const aggregateData = await recipeApi.getAggregateStats(currentRecipe.id);
-      // setAggregateStats(aggregateData);
+  const checkOwnership = useCallback(
+    async (currentRecipe: Recipe) => {
+      if (user) {
+        // Simple ownership check using new clean API
+        const owns = await recipeApi.checkRecipeOwnership(currentRecipe.id);
+        setIsOwner(owns);
+      }
+    },
+    [user]
+  );
 
-      // Track view for current version (temporarily disabled until API is implemented)
-      if (publicRecipe) {
-        const versionToTrack =
-          requestedVersion || versionsData?.[0]?.version_number || 1;
+  const loadSpecificVersion = useCallback(
+    async (recipeId: string, versionNumber: number) => {
+      try {
         console.log(
-          `📊 Would track view for version ${versionToTrack} of recipe ${currentRecipe.id}`
+          `🔄 Loading version ${versionNumber} for recipe ${recipeId}`
         );
-        // await recipeApi.trackVersionView(currentRecipe.id, versionToTrack);
+
+        // Get the specific version from the versions table
+        const { data: version, error } = await supabase
+          .from('recipe_content_versions')
+          .select('*')
+          .eq('recipe_id', recipeId)
+          .eq('version_number', versionNumber)
+          .single();
+
+        if (error) {
+          console.error('Failed to load version:', error);
+          throw error;
+        }
+
+        // Set the version content for display
+        setVersionContent(version);
+
+        console.log(`✅ Loaded version ${versionNumber} content:`, {
+          title: version.title,
+          setupItems: version.setup?.length || 0,
+          hasContent: !!version,
+        });
+      } catch (error) {
+        console.error('Failed to load specific version:', error);
+        toast({
+          title: 'Error',
+          description: `Failed to load version ${versionNumber}`,
+          variant: 'destructive',
+        });
       }
-    } catch (error) {
-      console.error('Failed to load version data:', error);
-    }
-  };
-
-  const checkOwnership = async (currentRecipe: Recipe) => {
-    if (user) {
-      // Simple ownership check using new clean API
-      const owns = await recipeApi.checkRecipeOwnership(currentRecipe.id);
-      setIsOwner(owns);
-    }
-  };
-
-  const loadSpecificVersion = async (
-    recipeId: string,
-    versionNumber: number
-  ) => {
-    try {
-      console.log(`🔄 Loading version ${versionNumber} for recipe ${recipeId}`);
-
-      // Get the specific version from the versions table
-      const { data: version, error } = await supabase
-        .from('recipe_content_versions')
-        .select('*')
-        .eq('recipe_id', recipeId)
-        .eq('version_number', versionNumber)
-        .single();
-
-      if (error) {
-        console.error('Failed to load version:', error);
-        throw error;
-      }
-
-      // Set the version content for display
-      setVersionContent(version);
-
-      console.log(`✅ Loaded version ${versionNumber} content:`, {
-        title: version.title,
-        setupItems: version.setup?.length || 0,
-        hasContent: !!version,
-      });
-    } catch (error) {
-      console.error('Failed to load specific version:', error);
-      toast({
-        title: 'Error',
-        description: `Failed to load version ${versionNumber}`,
-        variant: 'destructive',
-      });
-    }
-  };
+    },
+    [toast]
+  );
 
   // All useEffect hooks must be declared before any conditional returns
   // Load version data when recipe is loaded AND user is authenticated
@@ -318,10 +328,11 @@ export function RecipeViewPage() {
   // CRITICAL: Handle invalid route parameter AFTER all hooks are declared
   // This prevents React Hooks violation
   const isValidUUID = (str: string): boolean => {
-    // Relaxed UUID validation to accept both proper UUIDs and test UUIDs
-    const uuidRegex =
+    // NOTE: Relaxed UUID validation to accept both spec-compliant UUIDs and seeded/test IDs.
+    // We intentionally drop version/variant constraints to support legacy/test routes.
+    const relaxedUuidRegex =
       /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-    return uuidRegex.test(str);
+    return relaxedUuidRegex.test(str);
   };
 
   if (!id || id === 'undefined' || !isValidUUID(id)) {
