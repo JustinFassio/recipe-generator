@@ -59,10 +59,28 @@ export function RateCommentModal({
   };
 
   const handleSubmit = async () => {
-    if (!user || rating === 0) {
+    if (!user) {
       toast({
-        title: 'Missing Information',
-        description: 'Please provide a rating (1-5 stars)',
+        title: 'Authentication Required',
+        description: 'Please sign in to rate and comment',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (rating === 0) {
+      toast({
+        title: 'Rating Required',
+        description: 'Please provide a star rating (1-5 stars)',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (!comment.trim()) {
+      toast({
+        title: 'Comment Required',
+        description: 'Please share your thoughts about this recipe',
         variant: 'destructive',
       });
       return;
@@ -178,7 +196,7 @@ export function RateCommentModal({
           {/* Comment Section */}
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Comment (optional)
+              Comment *
             </label>
             <Textarea
               value={comment}
@@ -188,6 +206,7 @@ export function RateCommentModal({
               className="w-full resize-none"
               disabled={submitting}
               maxLength={500}
+              required
             />
             <p className="text-xs text-gray-500 mt-1">
               {comment.length}/500 characters
@@ -214,7 +233,7 @@ export function RateCommentModal({
             </Button>
             <Button
               onClick={handleSubmit}
-              disabled={submitting || rating === 0}
+              disabled={submitting || rating === 0 || !comment.trim()}
             >
               {submitting ? (
                 'Submitting...'
