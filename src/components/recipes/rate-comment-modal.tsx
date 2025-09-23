@@ -159,13 +159,15 @@ export function RateCommentModal({
               Your Rating *
             </label>
             <div className="flex flex-col items-center space-y-2">
-              <div className="flex items-center space-x-1">
+              <div
+                className="flex items-center space-x-1"
+                onMouseLeave={() => setHoveredRating(0)}
+              >
                 {[1, 2, 3, 4, 5].map((star) => (
                   <button
                     key={star}
                     onClick={() => setRating(star)}
                     onMouseEnter={() => setHoveredRating(star)}
-                    onMouseLeave={() => setHoveredRating(0)}
                     className="transition-transform hover:scale-110 focus:outline-none"
                     disabled={submitting}
                   >
