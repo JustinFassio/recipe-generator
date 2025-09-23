@@ -34,7 +34,9 @@ export const ratingApi = {
       payload.comment = comment;
     }
 
-    const { error } = await supabase.from('recipe_ratings').upsert(payload);
+    const { error } = await supabase.from('recipe_ratings').upsert(payload, {
+      onConflict: 'recipe_id,user_id',
+    });
     if (error) handleError(error, 'Submit rating with optional comment');
   },
 
