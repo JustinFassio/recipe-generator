@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Star, StarHalf } from 'lucide-react';
 // Button import removed as it's not used in this component
 import { supabase } from '@/lib/supabase';
+import { ratingApi } from '@/lib/api/features/rating-api';
 
 interface RatingDisplayProps {
   recipeId: string;
@@ -41,31 +42,54 @@ export function RatingDisplay({
         `📊 [RatingDisplay] Loading ${showAggregateRating ? 'aggregate' : 'specific'} rating data for recipe: ${recipeId}${versionNumber ? `, version: ${versionNumber}` : ''}`
       );
 
-      // For now, create mock rating data since we don't have rating tables yet
-      // TODO: Replace with real ratingApi calls when rating tables are created
-      const mockRatingData: RatingData = {
-        average: Math.random() * 5,
-        count: Math.floor(Math.random() * 50),
-        distribution: [
-          Math.floor(Math.random() * 5),
-          Math.floor(Math.random() * 5),
-          Math.floor(Math.random() * 8),
-          Math.floor(Math.random() * 15),
-          Math.floor(Math.random() * 20),
-        ],
-      };
+      // Get real rating data from database
+      const comments = await ratingApi.getComments(
+        recipeId,
+        versionNumber || undefined
+      );
 
-      setRatingData(mockRatingData);
+      if (comments.length === 0) {
+        setRatingData({ average: 0, count: 0, distribution: [0, 0, 0, 0, 0] });
+      } else {
+        // Calculate real statistics from comments
+        const ratings = comments
+          .map((c) => c.rating)
+          .filter((r) => r !== null) as number[];
+        const average =
+          ratings.length > 0
+            ? ratings.reduce((sum, r) => sum + r, 0) / ratings.length
+            : 0;
+
+        // Calculate distribution
+        const distribution = [0, 0, 0, 0, 0];
+        ratings.forEach((rating) => {
+          if (rating >= 1 && rating <= 5) {
+            distribution[rating - 1]++;
+          }
+        });
+
+        setRatingData({
+          average,
+          count: ratings.length,
+          distribution,
+        });
+      }
 
       // Load user's rating if authenticated
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      if (user) {
-        // TODO: Replace with real getUserRating call when rating tables exist
-        setUserRating(
-          Math.random() > 0.5 ? Math.floor(Math.random() * 5) + 1 : null
-        );
+      if (user && versionNumber) {
+        try {
+          const userRating = await ratingApi.getUserVersionRating(
+            recipeId,
+            versionNumber
+          );
+          setUserRating(userRating?.rating || null);
+        } catch {
+          console.log('No existing user rating found');
+          setUserRating(null);
+        }
       }
     } catch (error) {
       console.error('❌ [RatingDisplay] Failed to load rating data:', error);
@@ -83,8 +107,8 @@ export function RatingDisplay({
         `⭐ [RatingDisplay] Submitting rating: ${rating} for recipe: ${recipeId}${versionNumber ? `, version: ${versionNumber}` : ''}`
       );
 
-      // TODO: Replace with real ratingApi.submitRating call when rating tables exist
-      // await ratingApi.submitRating(recipeId, versionNumber, rating);
+      // Submit real rating to database
+      await ratingApi.submitRating(recipeId, versionNumber || null, rating);
 
       setUserRating(rating);
       await loadRatingData(); // Refresh data
