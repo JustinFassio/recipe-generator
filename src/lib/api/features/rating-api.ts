@@ -60,4 +60,29 @@ export const ratingApi = {
     if (error) handleError(error, 'Get comments');
     return (data as unknown as CommentRow[]) || [];
   },
+
+  async getUserVersionRating(
+    recipeId: string,
+    versionNumber: number
+  ): Promise<CommentRow | null> {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return null;
+
+    const { data, error } = await supabase
+      .from('recipe_ratings')
+      .select('*')
+      .eq('recipe_id', recipeId)
+      .eq('version_number', versionNumber)
+      .eq('user_id', user.id)
+      .single();
+
+    if (error && error.code !== 'PGRST116') {
+      // PGRST116 means no rows found, which is fine
+      handleError(error, 'Get user version rating');
+    }
+
+    return (data as unknown as CommentRow) || null;
+  },
 };
