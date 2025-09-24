@@ -121,7 +121,8 @@ export function CommentSystem({
 
     try {
       setSubmitting(true);
-      await recipeApi.rateVersion(
+      // Use the dedicated rating API to upsert the user's rating + comment
+      await ratingApi.submitRating(
         recipeId,
         versionNumber,
         newRating,
