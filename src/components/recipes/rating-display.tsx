@@ -79,11 +79,13 @@ export function RatingDisplay({
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      if (user && versionNumber) {
+      if (user) {
         try {
+          // If no specific version, try to get the latest version or use version 1
+          const targetVersion = versionNumber || 1;
           const userRating = await ratingApi.getUserVersionRating(
             recipeId,
-            versionNumber
+            targetVersion
           );
           setUserRating(userRating?.rating || null);
         } catch {
