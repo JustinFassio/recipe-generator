@@ -165,10 +165,16 @@ export function RateCommentModal({
               <div
                 className="flex items-center space-x-1"
                 onMouseLeave={() => setHoveredRating(0)}
+                role="radiogroup"
+                aria-label="Rate recipe from 1 to 5 stars"
               >
                 {[1, 2, 3, 4, 5].map((star) => (
                   <button
                     key={star}
+                    type="button"
+                    role="radio"
+                    aria-checked={star === rating}
+                    aria-label={`Rate ${star} out of 5 stars`}
                     onClick={() => setRating(star)}
                     onMouseEnter={() => setHoveredRating(star)}
                     className="transition-transform hover:scale-110 focus:outline-none"
