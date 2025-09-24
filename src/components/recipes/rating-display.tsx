@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Star, StarHalf } from 'lucide-react';
 // Button import removed as it's not used in this component
 import { supabase } from '@/lib/supabase';
@@ -30,25 +30,7 @@ export function RatingDisplay({
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
-    loadRatingData();
-  }, [recipeId, versionNumber, showAggregateRating]);
-
-  // Refresh when a global rating update occurs (e.g., modal or other component)
-  useEffect(() => {
-    const handler = () => loadRatingData();
-    window.addEventListener('rating-updated', handler as EventListener);
-    window.addEventListener('user-comment-updated', handler as EventListener);
-    return () => {
-      window.removeEventListener('rating-updated', handler as EventListener);
-      window.removeEventListener(
-        'user-comment-updated',
-        handler as EventListener
-      );
-    };
-  }, [loadRatingData]);
-
-  const loadRatingData = async () => {
+  const loadRatingData = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -113,7 +95,25 @@ export function RatingDisplay({
     } finally {
       setLoading(false);
     }
-  };
+  }, [recipeId, versionNumber, showAggregateRating]);
+
+  useEffect(() => {
+    loadRatingData();
+  }, [loadRatingData]);
+
+  // Refresh when a global rating update occurs (e.g., modal or other component)
+  useEffect(() => {
+    const handler = () => loadRatingData();
+    window.addEventListener('rating-updated', handler as EventListener);
+    window.addEventListener('user-comment-updated', handler as EventListener);
+    return () => {
+      window.removeEventListener('rating-updated', handler as EventListener);
+      window.removeEventListener(
+        'user-comment-updated',
+        handler as EventListener
+      );
+    };
+  }, [loadRatingData]);
 
   const handleRating = async (rating: number) => {
     try {
