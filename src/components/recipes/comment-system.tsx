@@ -139,6 +139,8 @@ export function CommentSystem({
       // Reload comments and user rating
       await loadComments();
       await loadUserRating();
+      // Notify other parts of the app (e.g., Your Comment card) to refresh
+      window.dispatchEvent(new CustomEvent('user-comment-updated'));
       setShowCommentForm(false);
     } catch (error) {
       console.error('Failed to submit rating/comment:', error);

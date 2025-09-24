@@ -324,6 +324,17 @@ export function RecipeViewPage() {
     }
   }, [recipe, user, authLoading, loadUserComment]);
 
+  // Refresh the Your Comment card when a comment is updated elsewhere
+  useEffect(() => {
+    const handler = () => loadUserComment();
+    window.addEventListener('user-comment-updated', handler as EventListener);
+    return () =>
+      window.removeEventListener(
+        'user-comment-updated',
+        handler as EventListener
+      );
+  }, [loadUserComment]);
+
   // Calculate next version number for version creation (for ALL owned recipes)
   useEffect(() => {
     if (recipe && isOwner) {
