@@ -388,14 +388,14 @@ export function RecipeViewPage() {
     authLoading,
   });
 
-  // Handle edit comment
+  // Handle edit comment: scroll to comments and open the edit form
   const handleEditComment = () => {
-    // This could open the RateCommentModal or navigate to a comment edit page
-    // For now, we'll just show a toast
-    toast({
-      title: 'Edit Comment',
-      description: 'Use the Rate & Comment button below to edit your comment.',
-    });
+    const section = document.getElementById('comments-section');
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    // Signal the comments component to open its form
+    window.dispatchEvent(new CustomEvent('open-comment-form'));
   };
 
   // Handle version selection

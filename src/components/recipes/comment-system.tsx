@@ -194,8 +194,16 @@ export function CommentSystem({
     return date.toLocaleDateString();
   };
 
+  // Listen for global request to open the comment form (e.g., from Your Comment -> Edit)
+  useEffect(() => {
+    const handler = () => setShowCommentForm(true);
+    window.addEventListener('open-comment-form', handler as EventListener);
+    return () =>
+      window.removeEventListener('open-comment-form', handler as EventListener);
+  }, []);
+
   return (
-    <div className={`space-y-6 ${className}`}>
+    <div id="comments-section" className={`space-y-6 ${className}`}>
       {/* Comments Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
