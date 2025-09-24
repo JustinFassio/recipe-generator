@@ -5,9 +5,11 @@
       "args": [
         "-y",
         "@supabase/mcp-server-supabase@latest",
-        "--project-ref=sxvdkipywmjycithdfpp",
-        "--access-token=${SUPABASE_ACCESS_TOKEN}"
-      ]
+        "--project-ref=sxvdkipywmjycithdfpp"
+      ],
+      "env": {
+        "SUPABASE_ACCESS_TOKEN": "${SUPABASE_ACCESS_TOKEN}"
+      }
     },
     "supabase-local": {
       "command": "npx",
