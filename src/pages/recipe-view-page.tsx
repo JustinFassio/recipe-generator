@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthProvider';
 import { recipeApi } from '@/lib/api';
+import { ratingApi } from '@/lib/api/features/rating-api';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
 import type { Recipe, RecipeVersion } from '@/lib/types';
@@ -83,13 +84,10 @@ export function RecipeViewPage() {
   );
 
   // All state hooks must be declared before any conditional returns
-  // Community rating state
-  const [communityRating, setCommunityRating] = useState<{
-    average: number;
-    count: number;
-    userRating?: number;
+  const [userComment, setUserComment] = useState<{
+    rating?: number;
+    comment?: string;
   } | null>(null);
-  const [ratingLoading, setRatingLoading] = useState(false);
 
   // Version navigation state
   const [showVersions, setShowVersions] = useState(false);
@@ -293,20 +291,49 @@ export function RecipeViewPage() {
     }
   }, [recipe, versions, requestedVersion, loadSpecificVersion]);
 
-  // Fetch community rating when recipe is loaded and it's a public recipe
-  useEffect(() => {
-    if (recipe && publicRecipe) {
-      setRatingLoading(true);
-      recipeApi
-        .getCommunityRating(recipe.id)
-        .then(setCommunityRating)
-        .catch((error) => {
-          console.error('Failed to fetch community rating:', error);
-          setCommunityRating(null);
-        })
-        .finally(() => setRatingLoading(false));
+  // Load user's comment for the current recipe/version
+  const loadUserComment = useCallback(async () => {
+    if (!user || !id) return;
+
+    try {
+      const currentVersion =
+        versionContent?.version_number || requestedVersion || 1;
+      const userRating = await ratingApi.getUserVersionRating(
+        id,
+        currentVersion
+      );
+
+      if (userRating) {
+        setUserComment({
+          rating: userRating.rating,
+          comment: userRating.comment || undefined,
+        });
+      } else {
+        setUserComment(null);
+      }
+    } catch (error) {
+      console.error('Failed to load user comment:', error);
+      setUserComment(null);
     }
-  }, [recipe, publicRecipe]);
+  }, [user, id, versionContent?.version_number, requestedVersion]);
+
+  // Load user's comment when recipe is loaded and user is authenticated
+  useEffect(() => {
+    if (recipe && user && !authLoading) {
+      loadUserComment();
+    }
+  }, [recipe, user, authLoading, loadUserComment]);
+
+  // Refresh the Your Comment card when a comment is updated elsewhere
+  useEffect(() => {
+    const handler = () => loadUserComment();
+    window.addEventListener('user-comment-updated', handler as EventListener);
+    return () =>
+      window.removeEventListener(
+        'user-comment-updated',
+        handler as EventListener
+      );
+  }, [loadUserComment]);
 
   // Calculate next version number for version creation (for ALL owned recipes)
   useEffect(() => {
@@ -372,28 +399,14 @@ export function RecipeViewPage() {
     authLoading,
   });
 
-  // Handle community rating submission
-  const handleCommunityRating = async (rating: number) => {
-    if (!recipe) return;
-
-    try {
-      await recipeApi.submitCommunityRating(recipe.id, rating);
-      toast({
-        title: 'Rating submitted',
-        description: 'Thank you for rating this recipe!',
-      });
-
-      // Refresh community rating data
-      const updatedRating = await recipeApi.getCommunityRating(recipe.id);
-      setCommunityRating(updatedRating);
-    } catch (error) {
-      console.error('Error submitting rating:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to submit rating. Please try again.',
-        variant: 'destructive',
-      });
+  // Handle edit comment: scroll to comments and open the edit form
+  const handleEditComment = () => {
+    const section = document.getElementById('comments-section');
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
+    // Signal the comments component to open its form
+    window.dispatchEvent(new CustomEvent('open-comment-form'));
   };
 
   // Handle version selection
@@ -763,9 +776,8 @@ export function RecipeViewPage() {
             onEdit={shouldShowEdit ? handleEdit : undefined}
             onSave={shouldShowSave ? handleSave : undefined}
             onBack={!versions.length ? handleBack : undefined} // Hide back button if we have version nav
-            communityRating={communityRating}
-            onCommunityRate={handleCommunityRating}
-            ratingLoading={ratingLoading}
+            userComment={userComment}
+            onEditComment={handleEditComment}
           />
         )}
 

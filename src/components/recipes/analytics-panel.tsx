@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Eye, Users, TrendingUp, Calendar } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
+import { ratingApi } from '@/lib/api/features/rating-api';
 
 interface AnalyticsPanelProps {
   recipeId: string;
@@ -40,31 +42,64 @@ export function AnalyticsPanel({
         `📈 [AnalyticsPanel] Loading analytics for recipe: ${recipeId}${versionNumber ? `, version: ${versionNumber}` : ''}`
       );
 
-      // For now, create mock analytics data since we don't have analytics tables yet
-      // TODO: Replace with real analyticsApi calls when analytics tables are created
+      // Get real analytics data from database
+      const comments = await ratingApi.getComments(
+        recipeId,
+        versionNumber || undefined
+      );
 
-      // Create deterministic mock data based on recipe ID for consistent testing
-      const seedValue = recipeId
-        .split('')
-        .reduce((acc, char, idx) => acc + char.charCodeAt(0) * (idx + 1), 0);
-      const seededRandom = (min: number, max: number) => {
-        const seed = (seedValue * 9301 + 49297) % 233280;
-        return Math.floor((seed / 233280) * (max - min) + min);
+      // Get view count from recipe_views table
+      let views = 0;
+      let uniqueUsers = 0;
+      let lastViewed: string | null = null;
+
+      try {
+        const { data: viewData } = await supabase
+          .from('recipe_views')
+          .select('*')
+          .eq('recipe_id', recipeId);
+
+        if (versionNumber) {
+          const versionViews =
+            viewData?.filter((v) => v.version_number === versionNumber) || [];
+          views = versionViews.length;
+          uniqueUsers = new Set(versionViews.map((v) => v.user_id)).size;
+          lastViewed =
+            versionViews.length > 0
+              ? versionViews.sort(
+                  (a, b) =>
+                    new Date(b.viewed_date).getTime() -
+                    new Date(a.viewed_date).getTime()
+                )[0].viewed_date
+              : null;
+        } else {
+          views = viewData?.length || 0;
+          uniqueUsers = new Set(viewData?.map((v) => v.user_id) || []).size;
+          lastViewed =
+            viewData && viewData.length > 0
+              ? viewData.sort(
+                  (a, b) =>
+                    new Date(b.viewed_date).getTime() -
+                    new Date(a.viewed_date).getTime()
+                )[0].viewed_date
+              : null;
+        }
+      } catch {
+        console.log('No view data available');
+      }
+
+      const realAnalyticsData: AnalyticsData = {
+        views,
+        uniqueUsers,
+        engagementRate:
+          views > 0 ? Math.round((comments.length / views) * 100) : 0,
+        lastViewed,
+        commentsCount: comments.length,
+        sharesCount: 0, // Not implemented yet
+        savesCount: 0, // Not implemented yet
       };
 
-      const mockAnalyticsData: AnalyticsData = {
-        views: seededRandom(10, 510),
-        uniqueUsers: seededRandom(5, 105),
-        engagementRate: seededRandom(10, 95),
-        lastViewed: new Date(
-          Date.now() - seededRandom(0, 7 * 24 * 60 * 60 * 1000)
-        ).toISOString(),
-        commentsCount: seededRandom(0, 20),
-        sharesCount: seededRandom(0, 15),
-        savesCount: seededRandom(0, 30),
-      };
-
-      setAnalytics(mockAnalyticsData);
+      setAnalytics(realAnalyticsData);
     } catch (error) {
       console.error('❌ [AnalyticsPanel] Failed to load analytics:', error);
       setAnalytics({
@@ -84,8 +119,18 @@ export function AnalyticsPanel({
         `👁️ [AnalyticsPanel] Tracking view for recipe: ${recipeId}${versionNumber ? `, version: ${versionNumber}` : ''}`
       );
 
-      // TODO: Replace with real analyticsApi.trackRecipeView call when analytics tables exist
-      // await analyticsApi.trackRecipeView(recipeId, versionNumber);
+      // Track real view in database
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user) {
+        await supabase.from('recipe_views').insert({
+          recipe_id: recipeId,
+          version_number: versionNumber || null,
+          user_id: user.id,
+          viewed_date: new Date().toISOString(),
+        });
+      }
     } catch (error) {
       console.error('❌ [AnalyticsPanel] Failed to track view:', error);
     }

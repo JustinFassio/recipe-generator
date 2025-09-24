@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { recipeApi } from '@/lib/api';
+import { ratingApi } from '@/lib/api/features/rating-api';
 import { useAuth } from '@/contexts/AuthProvider';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
@@ -42,15 +43,10 @@ export function CommentSystem({
   const loadComments = async () => {
     try {
       setLoading(true);
-      const ratingsData = await recipeApi.getVersionRatings(
+      // Use the new ratingApi.getComments method instead of the old recipeApi.getVersionRatings
+      const commentsWithRatings = await ratingApi.getComments(
         recipeId,
         versionNumber
-      );
-
-      // Filter only ratings with comments and get profile data
-      const commentsWithRatings = ratingsData.filter(
-        (rating: { comment?: string }) =>
-          rating.comment && rating.comment.trim() !== ''
       );
 
       // Get profile data for comment authors
@@ -76,15 +72,11 @@ export function CommentSystem({
 
       const profileMap = new Map(profiles.map((p) => [p.id, p]));
 
-      const commentsWithProfiles = commentsWithRatings.map(
-        (comment: { user_id: string; [key: string]: unknown }) => ({
-          ...comment,
-          author_name:
-            profileMap.get(comment.user_id)?.full_name || 'Anonymous',
-          author_avatar:
-            profileMap.get(comment.user_id)?.avatar_url || undefined,
-        })
-      ) as CommentWithProfile[];
+      const commentsWithProfiles = commentsWithRatings.map((comment) => ({
+        ...comment,
+        author_name: profileMap.get(comment.user_id)?.full_name || 'Anonymous',
+        author_avatar: profileMap.get(comment.user_id)?.avatar_url || undefined,
+      })) as CommentWithProfile[];
 
       setComments(commentsWithProfiles);
     } catch (error) {
@@ -103,7 +95,7 @@ export function CommentSystem({
     if (!user) return;
 
     try {
-      const userRating = await recipeApi.getUserVersionRating(
+      const userRating = await ratingApi.getUserVersionRating(
         recipeId,
         versionNumber
       );
@@ -129,7 +121,8 @@ export function CommentSystem({
 
     try {
       setSubmitting(true);
-      await recipeApi.rateVersion(
+      // Use the dedicated rating API to upsert the user's rating + comment
+      await ratingApi.submitRating(
         recipeId,
         versionNumber,
         newRating,
@@ -146,6 +139,9 @@ export function CommentSystem({
       // Reload comments and user rating
       await loadComments();
       await loadUserRating();
+      // Notify other parts of the app (e.g., Your Comment card) to refresh
+      window.dispatchEvent(new CustomEvent('user-comment-updated'));
+      window.dispatchEvent(new CustomEvent('rating-updated'));
       setShowCommentForm(false);
     } catch (error) {
       console.error('Failed to submit rating/comment:', error);
@@ -202,8 +198,16 @@ export function CommentSystem({
     return date.toLocaleDateString();
   };
 
+  // Listen for global request to open the comment form (e.g., from Your Comment -> Edit)
+  useEffect(() => {
+    const handler = () => setShowCommentForm(true);
+    window.addEventListener('open-comment-form', handler as EventListener);
+    return () =>
+      window.removeEventListener('open-comment-form', handler as EventListener);
+  }, []);
+
   return (
-    <div className={`space-y-6 ${className}`}>
+    <div id="comments-section" className={`space-y-6 ${className}`}>
       {/* Comments Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">

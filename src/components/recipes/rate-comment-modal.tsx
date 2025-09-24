@@ -4,6 +4,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Star, Send, X } from 'lucide-react';
 import { recipeApi } from '@/lib/api';
+import { ratingApi } from '@/lib/api/features/rating-api';
 import { useAuth } from '@/contexts/AuthProvider';
 import { useToast } from '@/hooks/use-toast';
 import type { VersionRating } from '@/lib/types';
@@ -58,10 +59,28 @@ export function RateCommentModal({
   };
 
   const handleSubmit = async () => {
-    if (!user || rating === 0) {
+    if (!user) {
       toast({
-        title: 'Missing Information',
-        description: 'Please provide a rating (1-5 stars)',
+        title: 'Authentication Required',
+        description: 'Please sign in to rate and comment',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (rating === 0) {
+      toast({
+        title: 'Rating Required',
+        description: 'Please provide a star rating (1-5 stars)',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (!comment.trim()) {
+      toast({
+        title: 'Comment Required',
+        description: 'Please share your thoughts about this recipe',
         variant: 'destructive',
       });
       return;
@@ -69,7 +88,7 @@ export function RateCommentModal({
 
     try {
       setSubmitting(true);
-      await recipeApi.rateVersion(
+      await ratingApi.submitRating(
         recipeId,
         versionNumber,
         rating,
@@ -85,6 +104,9 @@ export function RateCommentModal({
 
       onSubmitted();
       onClose();
+
+      // Broadcast rating update so rating cards refresh immediately
+      window.dispatchEvent(new CustomEvent('rating-updated'));
     } catch (error) {
       console.error('Failed to submit rating:', error);
       toast({
@@ -140,13 +162,21 @@ export function RateCommentModal({
               Your Rating *
             </label>
             <div className="flex flex-col items-center space-y-2">
-              <div className="flex items-center space-x-1">
+              <div
+                className="flex items-center space-x-1"
+                onMouseLeave={() => setHoveredRating(0)}
+                role="radiogroup"
+                aria-label="Rate recipe from 1 to 5 stars"
+              >
                 {[1, 2, 3, 4, 5].map((star) => (
                   <button
                     key={star}
+                    type="button"
+                    role="radio"
+                    aria-checked={star === rating}
+                    aria-label={`Rate ${star} out of 5 stars`}
                     onClick={() => setRating(star)}
                     onMouseEnter={() => setHoveredRating(star)}
-                    onMouseLeave={() => setHoveredRating(0)}
                     className="transition-transform hover:scale-110 focus:outline-none"
                     disabled={submitting}
                   >
@@ -161,23 +191,25 @@ export function RateCommentModal({
                 ))}
               </div>
 
-              {displayRating > 0 && (
-                <div className="text-center">
-                  <p className="text-sm font-medium text-gray-900">
-                    {ratingLabels[displayRating as keyof typeof ratingLabels]}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {displayRating} out of 5 stars
-                  </p>
-                </div>
-              )}
+              <div className="text-center h-12 flex flex-col justify-center">
+                {displayRating > 0 && (
+                  <>
+                    <p className="text-sm font-medium text-gray-900">
+                      {ratingLabels[displayRating as keyof typeof ratingLabels]}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {displayRating} out of 5 stars
+                    </p>
+                  </>
+                )}
+              </div>
             </div>
           </div>
 
           {/* Comment Section */}
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Comment (optional)
+              Comment *
             </label>
             <Textarea
               value={comment}
@@ -187,6 +219,7 @@ export function RateCommentModal({
               className="w-full resize-none"
               disabled={submitting}
               maxLength={500}
+              required
             />
             <p className="text-xs text-gray-500 mt-1">
               {comment.length}/500 characters
@@ -213,7 +246,7 @@ export function RateCommentModal({
             </Button>
             <Button
               onClick={handleSubmit}
-              disabled={submitting || rating === 0}
+              disabled={submitting || rating === 0 || !comment.trim()}
             >
               {submitting ? (
                 'Submitting...'

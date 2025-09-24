@@ -53,7 +53,7 @@ export function RecipeAnalyticsDashboard({
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
           <RatingDisplay
             recipeId={recipeId}
-            versionNumber={currentVersion}
+            versionNumber={currentVersion || 1}
             allowRating={true}
           />
         </div>
