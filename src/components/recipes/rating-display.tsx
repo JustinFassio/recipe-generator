@@ -34,6 +34,20 @@ export function RatingDisplay({
     loadRatingData();
   }, [recipeId, versionNumber, showAggregateRating]);
 
+  // Refresh when a global rating update occurs (e.g., modal or other component)
+  useEffect(() => {
+    const handler = () => loadRatingData();
+    window.addEventListener('rating-updated', handler as EventListener);
+    window.addEventListener('user-comment-updated', handler as EventListener);
+    return () => {
+      window.removeEventListener('rating-updated', handler as EventListener);
+      window.removeEventListener(
+        'user-comment-updated',
+        handler as EventListener
+      );
+    };
+  }, [loadRatingData]);
+
   const loadRatingData = async () => {
     try {
       setLoading(true);
@@ -114,6 +128,9 @@ export function RatingDisplay({
 
       setUserRating(rating);
       await loadRatingData(); // Refresh data
+
+      // Notify other rating cards to refresh (aggregate, other instances)
+      window.dispatchEvent(new CustomEvent('rating-updated'));
 
       console.log('✅ [RatingDisplay] Rating submitted successfully');
     } catch (error) {

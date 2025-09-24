@@ -104,6 +104,9 @@ export function RateCommentModal({
 
       onSubmitted();
       onClose();
+
+      // Broadcast rating update so rating cards refresh immediately
+      window.dispatchEvent(new CustomEvent('rating-updated'));
     } catch (error) {
       console.error('Failed to submit rating:', error);
       toast({
