@@ -99,6 +99,39 @@ Compact display without value text:
 
 ---
 
+### Composite Card Example (matches screenshot)
+
+The version/aggregate rating cards shown in the analytics dashboard use the base `Rating` widget internally, composed by `src/components/recipes/rating-display.tsx` to render:
+
+- Title (e.g., "Version 1 Rating" or "Overall Rating (All Versions)")
+- Average rating stars and count text
+- "Your Rating" row using an interactive `Rating` when allowed
+- A rating distribution bar chart
+
+Example usage:
+
+```tsx
+// Version-specific panel (left card)
+<RatingDisplay
+  recipeId={recipeId}
+  versionNumber={currentVersion || 1}
+  allowRating={true}
+  className="p-6 bg-blue-50 border border-blue-200 rounded-lg"
+/>
+
+// Aggregate panel (right card)
+<RatingDisplay
+  recipeId={recipeId}
+  showAggregateRating={true}
+  allowRating={false}
+  className="p-6 bg-green-50 border border-green-200 rounded-lg"
+/>
+```
+
+These cards load real data via `ratingApi.getComments(...)`, compute average and distribution, and (for the version panel) show the signed-in user’s own rating inline using the base `Rating` widget.
+
+---
+
 ### Integration Notes
 
 - The widget itself is stateless w.r.t. persistence; parent components own the value and persistence.
