@@ -24,25 +24,61 @@ The Shopping Cart feature uses a **minimal database approach** by extending the 
 
 ## 📊 **Current Database Structure**
 
-### **Existing `user_groceries` Table**
+### **Existing `user_groceries` Table** ✅ **VERIFIED VIA MCP**
 
 ```sql
--- Current production table structure (verified via MCP)
+-- Current production table structure (verified via MCP on 2025-09-25)
 CREATE TABLE user_groceries (
-    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
     groceries JSONB NOT NULL DEFAULT '{}'::jsonb,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    -- Constraints
+    CONSTRAINT user_groceries_pkey PRIMARY KEY (user_id),
+    CONSTRAINT user_groceries_user_id_fkey FOREIGN KEY (user_id) REFERENCES profiles(id)
 );
 
--- Existing RLS policies
+-- Table comment
+COMMENT ON TABLE user_groceries IS 'User grocery selections for AI recipe personalization';
+COMMENT ON COLUMN user_groceries.groceries IS 'JSONB structure: {"category": ["ingredient1", "ingredient2"]}';
+
+-- Row Level Security (ENABLED)
 ALTER TABLE user_groceries ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Users can manage their groceries"
+-- RLS Policy: user_groceries_own_data
+CREATE POLICY "user_groceries_own_data"
     ON user_groceries FOR ALL
     TO authenticated
     USING (auth.uid() = user_id);
+
+-- Indexes
+CREATE UNIQUE INDEX user_groceries_pkey ON user_groceries USING btree (user_id);
 ```
+
+### **Current Groceries JSONB Structure** ✅ **VERIFIED VIA MCP**
+
+The `groceries` column uses Chef Isabella's categorization system with the following structure:
+
+```json
+{
+  "fresh_produce": ["Carrots", "Tomatoes", "Broccoli", "Apples"],
+  "proteins": ["Chicken Thighs", "Eggs", "Green Lentils", "Beef Stew Meat"],
+  "dairy_cold": ["Salted Butter", "Skim Milk", "Cream Cheese"],
+  "bakery_grains": ["All-Purpose Flour", "Rice", "Pasta", "Sourdough Bread"],
+  "pantry_staples": ["Maple Syrup", "Peanut Butter", "Kidney Beans"],
+  "flavor_builders": ["Black Pepper", "Onion Powder", "Chili Powder"],
+  "cooking_essentials": ["Extra Virgin Olive Oil", "Coconut Oil"],
+  "frozen": ["Frozen Pineapple", "Frozen Blueberries", "Frozen Fries"]
+}
+```
+
+**Category Variations Found in Production:**
+
+- Some users have `dairy` instead of `dairy_cold`
+- Some users have `vegetables` and `fruits` instead of `fresh_produce`
+- Some users have `pantry` instead of `pantry_staples`
+- Some users have `spices` instead of `flavor_builders`
 
 ### **Shopping Cart Migration Script**
 
