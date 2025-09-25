@@ -23,19 +23,36 @@ The Shopping Cart feature includes a **dedicated AI Chat Assistant** that provid
 
 ---
 
-## 📋 **User Story Implementation**
+## 📋 **Multi-Cuisine Detection System**
 
-### **Alice's Mexican Cooking Journey**
+### **Universal Cuisine Recognition**
+
+The AI assistant is designed to detect and support **multiple cuisine types** by analyzing shopping cart ingredients and recommending comprehensive staple collections for each cooking style.
+
+**Supported Cuisine Categories:**
+
+- **Mexican**: Cumin, Mexican oregano, poblano peppers, limes, masa harina
+- **Italian**: Fresh basil, good olive oil, Parmigiano-Reggiano, San Marzano tomatoes
+- **French**: Herbes de Provence, shallots, butter, white wine, crème fraîche
+- **Asian**: Fresh ginger, soy sauce, sesame oil, rice vinegar, green onions
+- **Mediterranean**: Olive oil, lemon, feta cheese, olives, fresh herbs
+- **Indian**: Garam masala, turmeric, cumin, coriander, ghee
+- **American Southern**: Buttermilk, bacon, cornmeal, hot sauce, pecans
+- **Thai**: Fish sauce, coconut milk, lemongrass, Thai chilies, lime leaves
+
+### **Example: Alice's Mexican Cooking Journey**
 
 > _"Alice Baker is making Mexican dishes and wants to know what spices, vegetables, fruits and aromatics she should have as staples in her My Groceries page to regularly make authentic Mexican food."_
 
 **AI Assistant Workflow:**
 
 1. **Analyzes Shopping Cart**: Detects Mexican ingredients (jalapeños, cilantro, lime, etc.)
-2. **Identifies Cuisine Pattern**: Recognizes Mexican cooking style with 85% confidence
+2. **Identifies Cuisine Pattern**: Recognizes Mexican cooking style with 92% confidence
 3. **Suggests Authentic Staples**: Recommends cumin, Mexican oregano, poblano peppers, etc.
 4. **Provides Cultural Context**: Explains ingredient uses and authenticity
 5. **Integrates with My Groceries**: Allows one-click addition to permanent collection
+
+**Note**: _Mexican cuisine is used as the primary example throughout this document, but the system supports all major cuisine types with the same level of detail and cultural authenticity._
 
 ---
 
@@ -121,15 +138,12 @@ The AI maintains context about:
 
 ---
 
-## 🌮 **Mexican Cuisine Example**
+## 🌍 **Multi-Cuisine Detection Examples**
 
 ### **Cuisine Detection Triggers**
 
-When Alice's shopping cart contains:
-
-- `jalapeños`, `cilantro`, `lime`, `avocados`, `tomatoes`, `onions`
-
-**AI Detection Result:**
+**Mexican Cuisine Detection:**
+When shopping cart contains: `jalapeños`, `cilantro`, `lime`, `avocados`, `tomatoes`, `onions`
 
 ```json
 {
@@ -143,35 +157,124 @@ When Alice's shopping cart contains:
 }
 ```
 
-### **Staple Recommendations for Mexican Cooking**
+**Italian Cuisine Detection:**
+When shopping cart contains: `basil`, `parmesan`, `olive oil`, `tomatoes`, `garlic`, `mozzarella`
 
-#### **Essential Spices (Importance: Essential)**
+```json
+{
+  "primary": {
+    "cuisine": "Italian",
+    "confidence": 0.89,
+    "indicators": ["basil", "parmesan", "olive oil", "mozzarella"],
+    "subStyles": ["Northern Italian", "Southern Italian"]
+  },
+  "mixed": false
+}
+```
+
+**Asian Cuisine Detection:**
+When shopping cart contains: `soy sauce`, `ginger`, `sesame oil`, `green onions`, `rice vinegar`
+
+```json
+{
+  "primary": {
+    "cuisine": "Asian",
+    "confidence": 0.85,
+    "indicators": ["soy sauce", "ginger", "sesame oil", "green onions"],
+    "subStyles": ["Chinese", "Japanese", "Korean"]
+  },
+  "mixed": false
+}
+```
+
+**Mixed Cuisine Detection:**
+When shopping cart contains ingredients from multiple cuisines:
+
+```json
+{
+  "primary": {
+    "cuisine": "Italian",
+    "confidence": 0.65,
+    "indicators": ["basil", "olive oil", "parmesan"]
+  },
+  "secondary": [
+    {
+      "cuisine": "Asian",
+      "confidence": 0.45,
+      "indicators": ["soy sauce", "ginger"]
+    }
+  ],
+  "mixed": true
+}
+```
+
+### **Staple Recommendations by Cuisine**
+
+#### **Mexican Cuisine Staples**
+
+**Essential Spices:**
 
 - **Cumin (Comino)**: _"The soul of Mexican cooking. Essential for beans, meat, and sauces."_
 - **Mexican Oregano**: _"Different from Mediterranean oregano. Floral and citrusy."_
 - **Chili Powder**: _"Blend of dried chiles. Foundation for many Mexican dishes."_
-- **Paprika**: _"Adds color and mild pepper flavor to dishes."_
 
-#### **Essential Vegetables (Importance: Essential)**
+**Essential Vegetables:**
 
 - **White Onions**: _"Preferred over yellow in Mexican cooking. Sharp, clean flavor."_
 - **Roma Tomatoes**: _"Meaty texture perfect for salsas and sauces."_
 - **Poblano Peppers**: _"Mild heat, rich flavor. Essential for chiles rellenos."_
-- **Garlic**: _"Used fresh in most Mexican dishes."_
 
-#### **Essential Fruits (Importance: Recommended)**
+**Essential Fruits & Aromatics:**
 
 - **Limes**: _"Mexican limes are smaller and more acidic. Essential for authenticity."_
-- **Tomatillos**: _"Green tomato relatives. Key ingredient for salsa verde."_
-- **Oranges**: _"Used in marinades and mole sauces."_
-
-#### **Essential Aromatics (Importance: Essential)**
-
 - **Fresh Cilantro**: _"Herb that defines Mexican cuisine. Use leaves and stems."_
-- **Bay Leaves**: _"Used in bean cooking and stews."_
-- **Epazote**: _"Traditional herb for beans. Reduces gas and adds unique flavor."_
+- **Tomatillos**: _"Green tomato relatives. Key ingredient for salsa verde."_
 
-### **AI Conversation Example**
+#### **Italian Cuisine Staples**
+
+**Essential Herbs & Spices:**
+
+- **Fresh Basil**: _"The king of Italian herbs. Essential for pasta, pizza, and sauces."_
+- **Oregano**: _"Mediterranean oregano for authentic Italian flavor."_
+- **Red Pepper Flakes**: _"Adds heat to pasta dishes and pizza."_
+
+**Essential Ingredients:**
+
+- **Good Olive Oil**: _"Foundation of Italian cuisine. For cooking and finishing dishes."_
+- **Parmigiano-Reggiano**: _"The king of Italian cheeses. For pasta, risotto, and salads."_
+- **San Marzano Tomatoes**: _"Sweet, low-acid tomatoes perfect for authentic sauce."_
+
+#### **French Cuisine Staples**
+
+**Essential Herbs & Aromatics:**
+
+- **Herbes de Provence**: _"Classic French herb blend for meat and vegetables."_
+- **Fresh Thyme**: _"Essential for French cooking. Pairs with butter and wine."_
+- **Shallots**: _"Milder than onions. Foundation of French sauces."_
+
+**Essential Ingredients:**
+
+- **Butter**: _"Unsalted European-style butter for authentic French flavor."_
+- **White Wine**: _"Dry white wine for deglazing and sauces."_
+- **Crème Fraîche**: _"Rich, tangy cream for sauces and finishing dishes."_
+
+#### **Asian Cuisine Staples**
+
+**Essential Sauces & Seasonings:**
+
+- **Soy Sauce**: _"Light and dark varieties. Foundation of umami flavor."_
+- **Sesame Oil**: _"Toasted sesame oil for finishing dishes. A little goes a long way."_
+- **Rice Vinegar**: _"Mild acidity perfect for dressings and marinades."_
+
+**Essential Fresh Ingredients:**
+
+- **Fresh Ginger**: _"Essential for stir-fries, marinades, and soups."_
+- **Green Onions**: _"Used for garnish and flavor in most Asian dishes."_
+- **Garlic**: _"Fresh garlic cloves for authentic Asian flavors."_
+
+### **Multi-Cuisine AI Conversation Examples**
+
+#### **Mexican Cuisine Detection Example**
 
 ```
 🤖 AI Assistant: I notice you're shopping for Mexican ingredients! 🌮
@@ -206,10 +309,66 @@ Mexican oregano (Monarda fischeri) is completely different from Mediterranean or
 • Pairs perfectly with beans and meat
 • Essential for authentic pozole and mole
 
-Mediterranean oregano would taste out of place in Mexican dishes.
-The difference is like using basil vs. mint - similar families but totally different flavors!
-
 Want to explore more authentic Mexican staples? 🇲🇽
+```
+
+#### **Italian Cuisine Detection Example**
+
+```
+🤖 AI Assistant: I see you're gathering Italian ingredients! 🇮🇹
+Your cart has fresh basil, parmesan, and olive oil - the holy trinity of Italian cooking!
+
+For authentic Italian dishes, would you like recommendations for essential pantry staples?
+
+👤 User: Yes, I want to cook real Italian food, not just pasta with jarred sauce.
+
+🤖 AI Assistant: Excellent! Here are Italian essentials that will transform your cooking:
+
+**QUALITY INGREDIENTS** 🫒
+• San Marzano tomatoes (sweet, low-acid - perfect for sauce)
+• Extra virgin olive oil (for finishing, not just cooking)
+• Aged Parmigiano-Reggiano (24+ months for best flavor)
+
+**FRESH HERBS** 🌿
+• Fresh basil (never dried for pasta)
+• Fresh oregano (Mediterranean variety)
+• Italian parsley (flat-leaf, more flavor than curly)
+
+The key to Italian cooking is using fewer, higher-quality ingredients!
+
+👤 User: What's special about San Marzano tomatoes?
+
+🤖 AI Assistant: San Marzano tomatoes are the gold standard! 🍅
+• Grown in volcanic soil near Naples
+• Naturally sweet with low acidity
+• Thin skin that breaks down perfectly in sauce
+• DOP certified ones are worth the extra cost
+
+Regular canned tomatoes will work, but San Marzanos make restaurant-quality sauce at home!
+```
+
+#### **Mixed Cuisine Detection Example**
+
+```
+🤖 AI Assistant: Interesting mix in your cart! 🌍
+I'm detecting both Italian (basil, parmesan) and Asian (soy sauce, ginger) ingredients.
+Are you planning fusion dishes or cooking multiple cuisines?
+
+👤 User: Both! I love mixing flavors from different cultures.
+
+🤖 AI Assistant: Fusion cooking is amazing! Here are versatile staples that work across cuisines:
+
+**UNIVERSAL FLAVOR BUILDERS** 🧄
+• Fresh garlic (essential in Italian, Asian, and most cuisines)
+• Good olive oil (great for Italian and Mediterranean-Asian fusion)
+• Fresh ginger (pairs surprisingly well with Italian herbs)
+
+**FUSION-FRIENDLY INGREDIENTS** 🌿
+• Green onions (work in Asian dishes and Italian frittatas)
+• Sesame oil (adds depth to Italian pasta dishes)
+• Rice vinegar (lighter than balsamic for delicate Italian salads)
+
+Want specific fusion recipe ideas using your current ingredients?
 ```
 
 ---
@@ -233,6 +392,10 @@ class CuisineDetectionEngine {
         'chipotle',
         'cumin',
         'mexican oregano',
+        'masa harina',
+        'chili powder',
+        'white onions',
+        'epazote',
       ],
       weights: { cilantro: 0.3, lime: 0.25, jalapeños: 0.2 },
       threshold: 0.6,
@@ -248,11 +411,97 @@ class CuisineDetectionEngine {
         'garlic',
         'balsamic',
         'prosciutto',
+        'san marzano',
+        'pine nuts',
+        'arugula',
+        'pancetta',
+        'pecorino',
       ],
       weights: { basil: 0.3, parmesan: 0.25, 'olive oil': 0.2 },
       threshold: 0.6,
     },
-    // ... more cuisines
+    french: {
+      indicators: [
+        'butter',
+        'shallots',
+        'thyme',
+        'herbes de provence',
+        'white wine',
+        'crème fraîche',
+        'tarragon',
+        'cognac',
+        'gruyère',
+        'baguette',
+        'leeks',
+        'dijon mustard',
+        'capers',
+        'anchovies',
+      ],
+      weights: { butter: 0.3, shallots: 0.25, thyme: 0.2 },
+      threshold: 0.6,
+    },
+    asian: {
+      indicators: [
+        'soy sauce',
+        'ginger',
+        'sesame oil',
+        'rice vinegar',
+        'green onions',
+        'miso',
+        'wasabi',
+        'nori',
+        'sake',
+        'mirin',
+        'rice',
+        'tofu',
+        'shiitake',
+        'bok choy',
+        'fish sauce',
+      ],
+      weights: { 'soy sauce': 0.3, ginger: 0.25, 'sesame oil': 0.2 },
+      threshold: 0.6,
+    },
+    indian: {
+      indicators: [
+        'garam masala',
+        'turmeric',
+        'cumin',
+        'coriander',
+        'cardamom',
+        'ghee',
+        'curry leaves',
+        'basmati',
+        'paneer',
+        'naan',
+        'mustard seeds',
+        'fenugreek',
+        'tamarind',
+        'coconut',
+      ],
+      weights: { 'garam masala': 0.3, turmeric: 0.25, cumin: 0.2 },
+      threshold: 0.6,
+    },
+    thai: {
+      indicators: [
+        'fish sauce',
+        'coconut milk',
+        'lemongrass',
+        'thai basil',
+        'lime leaves',
+        'galangal',
+        'thai chilies',
+        'palm sugar',
+        'tamarind',
+        'jasmine rice',
+        'curry paste',
+        'peanuts',
+        'lime',
+        'cilantro',
+      ],
+      weights: { 'fish sauce': 0.3, 'coconut milk': 0.25, lemongrass: 0.2 },
+      threshold: 0.6,
+    },
+    // Additional cuisines supported...
   };
 
   detectCuisine(ingredients: string[]): DetectedCuisine {
@@ -417,6 +666,22 @@ function ShoppingCartAI({ detectedCuisine }: ShoppingCartAIProps) {
 
 ## 📝 **Conclusion**
 
-The Shopping Cart AI Integration transforms ingredient shopping from a mundane task into an educational, culturally-enriching experience. By analyzing Alice's Mexican cooking ingredients and suggesting authentic staples like Mexican oregano and cumin, the AI helps users build comprehensive ingredient collections that enable authentic cuisine exploration.
+The Shopping Cart AI Integration transforms ingredient shopping from a mundane task into an educational, culturally-enriching experience across **multiple cuisine types**. Whether analyzing Mexican ingredients (like Alice's jalapeños and cilantro), Italian staples (basil and parmesan), French essentials (butter and shallots), or Asian fundamentals (soy sauce and ginger), the AI helps users build comprehensive ingredient collections for authentic cooking.
 
-The system balances technical sophistication with user-friendly interactions, ensuring that both novice and experienced cooks can benefit from culturally-accurate, contextually-relevant ingredient recommendations that enhance their culinary journey.
+**Key Multi-Cuisine Capabilities:**
+
+- **Universal Detection**: Recognizes 8+ major cuisine types with high accuracy
+- **Cultural Authenticity**: Provides genuine ingredient recommendations for each cuisine
+- **Educational Context**: Explains why specific ingredients are essential to each cooking style
+- **Flexible Support**: Handles mixed cuisines and fusion cooking approaches
+- **Comprehensive Coverage**: From Mexican oregano to French crème fraîche to Thai fish sauce
+
+The system balances technical sophistication with user-friendly interactions, ensuring that both novice and experienced cooks can benefit from culturally-accurate, contextually-relevant ingredient recommendations that enhance their culinary journey across all cooking traditions.
+
+**Example Use Cases:**
+
+- **Mexican Enthusiast**: Build authentic taco and mole ingredient collection
+- **Italian Purist**: Stock genuine pasta and risotto essentials
+- **French Home Cook**: Assemble classic sauce and technique ingredients
+- **Asian Fusion Explorer**: Combine traditional and modern Asian flavors
+- **Global Adventurer**: Mix and match ingredients across multiple cuisines
