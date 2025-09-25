@@ -1,4 +1,4 @@
-import { LogOut, Menu, X, User, Settings } from 'lucide-react';
+import { LogOut, Menu, X, User, Settings, ShoppingCart } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthProvider';
 import { useLocation, useNavigate } from 'react-router-dom';
 // AccessibilityProvider removed to prevent duplicate theme application
@@ -69,6 +69,18 @@ export function Header() {
               }
             >
               My Groceries
+            </Button>
+            <Button
+              variant={location.pathname === '/cart' ? 'default' : 'ghost'}
+              onClick={() => navigate('/cart')}
+              className={
+                location.pathname === '/cart'
+                  ? 'bg-warning text-warning-content hover:bg-warning/80'
+                  : ''
+              }
+            >
+              <ShoppingCart className="w-4 h-4 mr-2" />
+              Cart
             </Button>
             <Button
               variant={
@@ -223,6 +235,17 @@ export function Header() {
               className={`w-full justify-start ${location.pathname === '/groceries' ? 'bg-success text-success-content hover:bg-success/80' : ''}`}
             >
               My Groceries
+            </Button>
+            <Button
+              variant={location.pathname === '/cart' ? 'default' : 'ghost'}
+              onClick={() => {
+                navigate('/cart');
+                closeMobileMenu();
+              }}
+              className={`w-full justify-start ${location.pathname === '/cart' ? 'bg-warning text-warning-content hover:bg-warning/80' : ''}`}
+            >
+              <ShoppingCart className="w-4 h-4 mr-2" />
+              Shopping Cart
             </Button>
             <Button
               variant={
