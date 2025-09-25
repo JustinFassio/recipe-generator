@@ -400,6 +400,16 @@ export function RecipeView({
                                 onSaved={refreshGlobalIngredients}
                               />
                             )}
+                            {match.matchType === 'global' && (
+                              <AddToShoppingListButton
+                                ingredients={[ingredient]}
+                                recipeId={recipe.id}
+                                recipeTitle={recipe.title}
+                                variant="outline"
+                                size="sm"
+                                showCount={false}
+                              />
+                            )}
                           </div>
                         )}
                       </div>
