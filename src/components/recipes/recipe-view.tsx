@@ -28,6 +28,7 @@ import { useGroceries } from '@/hooks/useGroceries';
 import type { Recipe } from '@/lib/types';
 import { CreatorRating, YourComment } from '@/components/ui/rating';
 import { CommentSystem } from './comment-system';
+import { AddToShoppingListButton } from '@/components/shopping-cart/AddToShoppingListButton';
 
 interface RecipeViewProps {
   recipe: Recipe;
@@ -153,6 +154,14 @@ export function RecipeView({
             Save Recipe
           </Button>
         )}
+        <AddToShoppingListButton
+          ingredients={recipe.ingredients}
+          recipeId={recipe.id}
+          recipeTitle={recipe.title}
+          variant="outline"
+          size="default"
+          showCount={false}
+        />
       </div>
 
       {/* Recipe Header */}
@@ -419,28 +428,40 @@ export function RecipeView({
                   </div>
                 ))}
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                className="mt-3 border-blue-300 text-blue-700 hover:bg-blue-100"
-                onClick={() => {
-                  // Export shopping list as a text file
-                  const text = missingIngredients
-                    .map((match) => match.recipeIngredient)
-                    .join('\n');
-                  const blob = new Blob([text], { type: 'text/plain' });
-                  const url = URL.createObjectURL(blob);
-                  const a = document.createElement('a');
-                  a.href = url;
-                  a.download = 'shopping-list.txt';
-                  document.body.appendChild(a);
-                  a.click();
-                  document.body.removeChild(a);
-                  URL.revokeObjectURL(url);
-                }}
-              >
-                📋 Export Shopping List
-              </Button>
+              <div className="flex gap-2 mt-3">
+                <AddToShoppingListButton
+                  ingredients={missingIngredients.map(
+                    (match) => match.recipeIngredient
+                  )}
+                  recipeId={recipe.id}
+                  recipeTitle={recipe.title}
+                  variant="outline"
+                  size="sm"
+                  className="border-blue-300 text-blue-700 hover:bg-blue-100"
+                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-blue-300 text-blue-700 hover:bg-blue-100"
+                  onClick={() => {
+                    // Export shopping list as a text file
+                    const text = missingIngredients
+                      .map((match) => match.recipeIngredient)
+                      .join('\n');
+                    const blob = new Blob([text], { type: 'text/plain' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `${recipe.title}-shopping-list.txt`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                  }}
+                >
+                  📋 Export as File
+                </Button>
+              </div>
             </div>
           )}
         </div>

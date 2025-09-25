@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, Loader2 } from 'lucide-react';
+import { Send, Brain, User, Loader2 } from 'lucide-react';
 
 interface Message {
   id: string;
@@ -85,7 +85,7 @@ export function ShoppingCartChat({
       >
         {messages.length === 0 ? (
           <div className="text-center text-base-content/60 py-8">
-            <Bot className="w-12 h-12 mx-auto mb-2 opacity-50" />
+            <Brain className="w-12 h-12 mx-auto mb-2 opacity-50" />
             <p>Ask me about ingredients for any cuisine!</p>
             <p className="text-sm mt-1">
               I'll help you build the perfect shopping list.
@@ -106,7 +106,7 @@ export function ShoppingCartChat({
               >
                 <div className="flex items-start gap-2">
                   {message.role === 'assistant' && (
-                    <Bot className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                    <Brain className="w-4 h-4 mt-0.5 flex-shrink-0" />
                   )}
                   {message.role === 'user' && (
                     <User className="w-4 h-4 mt-0.5 flex-shrink-0" />
@@ -130,7 +130,7 @@ export function ShoppingCartChat({
           <div className="flex justify-start">
             <div className="bg-base-100 text-base-content border border-base-300 p-3 rounded-lg">
               <div className="flex items-center gap-2">
-                <Bot className="w-4 h-4" />
+                <Brain className="w-4 h-4" />
                 <Loader2 className="w-4 h-4 animate-spin" />
                 <span>Thinking...</span>
               </div>

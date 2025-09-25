@@ -10,6 +10,7 @@ import {
   Utensils,
   MessageSquare,
   Package,
+  Brain,
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
@@ -374,7 +375,9 @@ export default function ShoppingCartPage() {
             <div className="card-body">
               {/* AI Assistant Header */}
               <div className="flex items-center gap-2 mb-4">
-                <span className="text-2xl">🤖</span>
+                <div className="p-2 bg-primary/10 rounded-full">
+                  <Brain className="w-6 h-6 text-primary" />
+                </div>
                 <div>
                   <h3 className="font-semibold">Your Cooking Assistant</h3>
                   <p className="text-sm text-base-content/70">
