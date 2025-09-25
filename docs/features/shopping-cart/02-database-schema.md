@@ -22,9 +22,29 @@ The Shopping Cart feature uses a **minimal database approach** by extending the 
 
 ---
 
-## 📊 **Database Extension**
+## 📊 **Current Database Structure**
 
-### **Migration Script**
+### **Existing `user_groceries` Table**
+
+```sql
+-- Current production table structure (verified via MCP)
+CREATE TABLE user_groceries (
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    groceries JSONB NOT NULL DEFAULT '{}'::jsonb,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Existing RLS policies
+ALTER TABLE user_groceries ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can manage their groceries"
+    ON user_groceries FOR ALL
+    TO authenticated
+    USING (auth.uid() = user_id);
+```
+
+### **Shopping Cart Migration Script**
 
 ```sql
 -- File: supabase/migrations/YYYYMMDD_add_shopping_cart_columns.sql
@@ -56,6 +76,23 @@ COMMENT ON COLUMN user_groceries.shopping_contexts IS
     'Shopping item contexts: {"ingredient_name": {"sources": [...], "quantities": [...], "notes": "..."}}';
 
 COMMIT;
+```
+
+### **Post-Migration Table Structure**
+
+```sql
+-- Complete user_groceries table after shopping cart extension
+CREATE TABLE user_groceries (
+    -- Existing columns
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    groceries JSONB NOT NULL DEFAULT '{}'::jsonb,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    -- New shopping cart columns
+    shopping_list JSONB DEFAULT '{}',
+    shopping_contexts JSONB DEFAULT '{}'
+);
 ```
 
 ---
