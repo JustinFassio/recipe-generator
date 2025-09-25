@@ -19,7 +19,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import CategoryChip from '@/components/ui/CategoryChip';
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useGlobalIngredients } from '@/hooks/useGlobalIngredients';
 import { SaveToGlobalButton } from '@/components/groceries/save-to-global-button';
 import { parseIngredientText } from '@/lib/groceries/ingredient-parser';
@@ -57,10 +57,24 @@ export function RecipeView({
   } = useGlobalIngredients();
 
   // Create enhanced matcher that includes global ingredients
-  const enhancedMatcher = useMemo(() => {
-    if (Object.keys(groceries).length === 0) return null;
-    return new EnhancedIngredientMatcher(groceries);
-  }, [groceries, globalIngredients]); // Recreate when global ingredients change
+  const [enhancedMatcher, setEnhancedMatcher] =
+    useState<EnhancedIngredientMatcher | null>(null);
+
+  // Initialize enhanced matcher when groceries or global ingredients change
+  useEffect(() => {
+    if (Object.keys(groceries).length === 0) {
+      setEnhancedMatcher(null);
+      return;
+    }
+
+    const initializeMatcher = async () => {
+      const matcher = new EnhancedIngredientMatcher(groceries);
+      await matcher.initialize();
+      setEnhancedMatcher(matcher);
+    };
+
+    initializeMatcher();
+  }, [groceries, globalIngredients]);
 
   // Calculate compatibility using enhanced matcher
   const compatibility = useMemo(() => {
