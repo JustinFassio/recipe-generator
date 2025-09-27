@@ -212,7 +212,7 @@ export const seedRecipesData: SeedRecipe[] = [
       'Sauté chicken and vegetables. Add rice and saffron. Add broth and cook until rice is tender. Add shrimp at the end.',
     notes: 'Traditional Spanish comfort food.',
     image_url: 'https://picsum.photos/seed/paella/800/600',
-    user_email: 'carol@example.com',
+    user_email: 'cora@example.com',
     is_public: true,
     categories: [
       'Course: Main',
@@ -238,7 +238,7 @@ export const seedRecipesData: SeedRecipe[] = [
       'Sauté curry paste in coconut milk. Add chicken and vegetables. Simmer until cooked through. Finish with basil.',
     notes: 'Adjust spice level to taste.',
     image_url: 'https://picsum.photos/seed/thai_curry/800/600',
-    user_email: 'carol@example.com',
+    user_email: 'cora@example.com',
     is_public: false,
     categories: [
       'Course: Main',
@@ -265,7 +265,7 @@ export const seedRecipesData: SeedRecipe[] = [
       'Make meringue with egg whites and sugar. Fold in almond flour and powdered sugar. Pipe and bake.',
     notes: 'Patience is key for perfect macarons.',
     image_url: 'https://picsum.photos/seed/macarons/800/600',
-    user_email: 'dave@example.com',
+    user_email: 'david@example.com',
     is_public: true,
     categories: [
       'Course: Dessert',
@@ -291,7 +291,7 @@ export const seedRecipesData: SeedRecipe[] = [
       'Mix dry ingredients. Add wet ingredients and knead. Let rise, then bake until golden.',
     notes: 'Great for sandwiches and toast.',
     image_url: 'https://picsum.photos/seed/gf_bread/800/600',
-    user_email: 'dave@example.com',
+    user_email: 'david@example.com',
     is_public: true,
     categories: [
       'Course: Side',
@@ -312,7 +312,7 @@ export const seedRecipesData: SeedRecipe[] = [
       'Scoop yogurt into bowl. Top with berries, granola, and chia seeds. Drizzle with honey.',
     notes: 'Perfect post-workout breakfast.',
     image_url: 'https://picsum.photos/seed/yogurt_bowl/800/600',
-    user_email: 'eve@example.com',
+    user_email: 'emma@example.com',
     is_public: true,
     categories: [
       'Course: Breakfast',
@@ -338,7 +338,7 @@ export const seedRecipesData: SeedRecipe[] = [
       'Season salmon with salt, pepper, and dill. Air fry at 400°F for 8-10 minutes. Serve with lemon.',
     notes: 'Quick and healthy weeknight dinner.',
     image_url: 'https://picsum.photos/seed/air_fryer_salmon/800/600',
-    user_email: 'eve@example.com',
+    user_email: 'emma@example.com',
     is_public: true,
     categories: [
       'Course: Main',

@@ -230,43 +230,59 @@ async function upsertCooking(userId: string, cooking: SeedUser['cooking']) {
 export async function seedAllUsers() {
   console.log('🚀 Starting users seed...\n');
 
-  for (const u of seedUsers) {
-    // Create or fetch existing user
-    const { data: created, error: createError } =
-      await admin.auth.admin.createUser({
-        email: u.email,
-        password: u.password,
-        email_confirm: true,
-        user_metadata: { full_name: u.fullName },
-      });
+  // Clear existing test users to ensure clean state
+  console.log('🧹 Clearing existing test users...');
+  const { data: existingUsers, error: listError } =
+    await admin.auth.admin.listUsers({
+      page: 1,
+      perPage: 100,
+    });
 
-    if (createError) {
-      if (String(createError.message).includes('already registered')) {
-        console.log(
-          `ℹ️  User ${u.email} already exists, continuing with existing user...`
-        );
-      } else {
-        logError(`Failed creating user ${u.email}:`, createError.message);
-        process.exitCode = 1;
-        continue;
+  if (!listError && existingUsers?.users) {
+    for (const user of existingUsers.users) {
+      if (user.email && seedUsers.some((u) => u.email === user.email)) {
+        console.log(`🗑️  Deleting existing test user: ${user.email}`);
+        await admin.auth.admin.deleteUser(user.id);
       }
     }
+  }
 
-    // If user already exists, fetch it
-    const userId = created?.user?.id;
-    let effectiveUserId: string = userId || '';
-    if (!effectiveUserId) {
-      const { data: existing, error: listError } =
-        await admin.auth.admin.listUsers({
-          page: 1,
-          perPage: 100,
+  for (const u of seedUsers) {
+    let effectiveUserId: string = '';
+
+    // First, try to find existing user
+    const { data: existingUsers, error: listError } =
+      await admin.auth.admin.listUsers({
+        page: 1,
+        perPage: 100,
+      });
+
+    if (listError) {
+      logError(`Error listing users:`, listError);
+      continue;
+    }
+
+    const existingUser = findUserByEmail(existingUsers.users, u.email);
+
+    if (existingUser?.id) {
+      console.log(`ℹ️  User ${u.email} already exists, using existing user...`);
+      effectiveUserId = existingUser.id;
+    } else {
+      // Create new user only if it doesn't exist
+      const { data: created, error: createError } =
+        await admin.auth.admin.createUser({
+          email: u.email,
+          password: u.password,
+          email_confirm: true,
+          user_metadata: { full_name: u.fullName },
         });
-      if (listError) throw listError;
-      const match = findUserByEmail(existing.users, u.email);
-      if (!match || !match.id) {
-        throw new Error(`Could not find or create user ${u.email}`);
+
+      if (createError) {
+        logError(`Failed creating user ${u.email}:`, createError.message);
+        continue;
       }
-      effectiveUserId = match.id;
+
+      effectiveUserId = created?.user?.id || '';
     }
 
     // Ensure we have a valid user ID before proceeding
