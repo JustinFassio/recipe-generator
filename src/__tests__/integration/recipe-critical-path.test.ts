@@ -12,21 +12,13 @@
  */
 
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase';
 import { parseRecipeFromText } from '@/lib/recipe-parser';
 import { recipeApi } from '@/lib/api';
 // Types imported for testing purposes only
 // import type { Recipe } from '@/lib/types';
 
-// Test configuration
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-  throw new Error('Missing Supabase configuration for integration tests');
-}
-
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Using mocked Supabase client from test setup
 
 // Test data
 const SAMPLE_RECIPE_TEXT = `
