@@ -18,6 +18,12 @@ export function StackedImages({
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Skip fetching during SSR or in test environment
+    if (typeof window === 'undefined' || process.env.NODE_ENV === 'test') {
+      setLoading(false);
+      return;
+    }
+
     const loadFeaturedRecipes = async () => {
       try {
         setLoading(true);
