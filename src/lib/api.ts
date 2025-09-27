@@ -46,10 +46,9 @@ interface ProfileSummary {
 export const recipeApi = {
   // Fetch all recipes for the current user with optional filters
   async getUserRecipes(filters?: RecipeFilters): Promise<Recipe[]> {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) throw new Error('User not authenticated');
+    const { data } = await supabase.auth.getUser();
+    if (!data || !data.user) throw new Error('User not authenticated');
+    const user = data.user;
 
     // Optimize: Only select needed fields for list view to reduce data transfer
     let query = supabase
@@ -585,10 +584,9 @@ export const recipeApi = {
       );
     }
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) throw new Error('User not authenticated');
+    const { data } = await supabase.auth.getUser();
+    if (!data || !data.user) throw new Error('User not authenticated');
+    const user = data.user;
 
     try {
       // Create the recipe first
@@ -703,10 +701,9 @@ export const recipeApi = {
 
   // Save (clone) a public recipe to user's collection
   async savePublicRecipe(recipeId: string): Promise<Recipe> {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) throw new Error('User not authenticated');
+    const { data } = await supabase.auth.getUser();
+    if (!data || !data.user) throw new Error('User not authenticated');
+    const user = data.user;
 
     // Get the public recipe
     const { data: sourceRecipe, error: fetchError } = await supabase
@@ -742,10 +739,9 @@ export const recipeApi = {
 
   // Upload recipe image
   async uploadImage(file: File): Promise<string> {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) throw new Error('User not authenticated');
+    const { data } = await supabase.auth.getUser();
+    if (!data || !data.user) throw new Error('User not authenticated');
+    const user = data.user;
 
     // Derive a safe extension from MIME type if available, otherwise fall back to original name
     const mimeType = file.type || 'application/octet-stream';
@@ -837,10 +833,9 @@ export const recipeApi = {
 
   // Creator Rating API
   async updateCreatorRating(recipeId: string, rating: number): Promise<void> {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) throw new Error('User not authenticated');
+    const { data } = await supabase.auth.getUser();
+    if (!data || !data.user) throw new Error('User not authenticated');
+    const user = data.user;
 
     const { error } = await supabase
       .from('recipes')
@@ -897,10 +892,9 @@ export const recipeApi = {
   },
 
   async submitCommunityRating(recipeId: string, rating: number): Promise<void> {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) throw new Error('User not authenticated');
+    const { data } = await supabase.auth.getUser();
+    if (!data || !data.user) throw new Error('User not authenticated');
+    const user = data.user;
 
     const { error } = await supabase.from('recipe_ratings').upsert({
       recipe_id: recipeId,

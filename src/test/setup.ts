@@ -16,7 +16,12 @@ import { vi } from 'vitest';
 vi.mock('@/lib/supabase', () => ({
   supabase: {
     auth: {
-      getUser: vi.fn(),
+      getUser: vi.fn(() =>
+        Promise.resolve({
+          data: { user: { id: 'test-user-id', email: 'test@example.com' } },
+          error: null,
+        })
+      ),
       getSession: vi.fn(() =>
         Promise.resolve({
           data: { session: null },
