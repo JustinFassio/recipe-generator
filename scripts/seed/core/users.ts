@@ -4,12 +4,7 @@
  */
 
 import { admin } from '../utils/client';
-import {
-  SeedUser,
-  logSuccess,
-  logError,
-  findUserByEmail,
-} from '../utils/shared';
+import { SeedUser, logSuccess, logError } from '../utils/shared';
 
 // Test users data
 export const seedUsers: SeedUser[] = [
@@ -239,57 +234,46 @@ export async function seedAllUsers() {
     });
 
   if (!listError && existingUsers?.users) {
+    const deletionPromises = [];
     for (const user of existingUsers.users) {
       if (user.email && seedUsers.some((u) => u.email === user.email)) {
         console.log(`🗑️  Deleting existing test user: ${user.email}`);
-        await admin.auth.admin.deleteUser(user.id);
+        deletionPromises.push(admin.auth.admin.deleteUser(user.id));
       }
     }
+    // Wait for all deletions to complete
+    await Promise.all(deletionPromises);
+    console.log('✅ All existing test users deleted');
   }
 
   for (const u of seedUsers) {
     let effectiveUserId: string = '';
 
-    // First, try to find existing user
-    const { data: existingUsers, error: listError } =
-      await admin.auth.admin.listUsers({
-        page: 1,
-        perPage: 100,
+    // Since we cleared all users, we should always create new ones
+    console.log(`👤 Creating user: ${u.email}`);
+    const { data: created, error: createError } =
+      await admin.auth.admin.createUser({
+        email: u.email,
+        password: u.password,
+        email_confirm: true,
+        user_metadata: { full_name: u.fullName },
       });
 
-    if (listError) {
-      logError(`Error listing users:`, listError);
+    if (createError) {
+      logError(`Failed creating user ${u.email}:`, createError.message);
       continue;
     }
 
-    const existingUser = findUserByEmail(existingUsers.users, u.email);
-
-    if (existingUser?.id) {
-      console.log(`ℹ️  User ${u.email} already exists, using existing user...`);
-      effectiveUserId = existingUser.id;
-    } else {
-      // Create new user only if it doesn't exist
-      const { data: created, error: createError } =
-        await admin.auth.admin.createUser({
-          email: u.email,
-          password: u.password,
-          email_confirm: true,
-          user_metadata: { full_name: u.fullName },
-        });
-
-      if (createError) {
-        logError(`Failed creating user ${u.email}:`, createError.message);
-        continue;
-      }
-
-      effectiveUserId = created?.user?.id || '';
-    }
+    effectiveUserId = created?.user?.id || '';
 
     // Ensure we have a valid user ID before proceeding
     if (!effectiveUserId) {
       logError(`Failed to get user ID for ${u.email}`);
       continue;
     }
+
+    // Small delay to ensure user is fully created
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
     // Create related data in correct order
     // 1. First create the profile (required for usernames foreign key)

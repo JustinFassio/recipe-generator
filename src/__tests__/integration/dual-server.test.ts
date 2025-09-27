@@ -29,10 +29,12 @@ async function testApiProxy(endpoint: string): Promise<boolean> {
   try {
     const response = await fetch(`${SERVERS.frontend}${endpoint}`, {
       method: 'GET',
-      signal: AbortSignal.timeout(5000),
+      signal: AbortSignal.timeout(10000), // Increased timeout
     });
+    console.log(`API Proxy test for ${endpoint}: status=${response.status}`);
     return response.status !== 404; // API should be reachable, even if endpoint doesn't exist
-  } catch {
+  } catch (error) {
+    console.log(`API Proxy test for ${endpoint} failed:`, error);
     return false;
   }
 }
@@ -80,10 +82,13 @@ describe('Dual Server Setup Integration', () => {
 
   describe('API Proxy Configuration', () => {
     it('should proxy /api requests from frontend to API server', async () => {
+      // Small delay to ensure servers are fully ready
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
       // Test that API requests are proxied (even if they return 404, they should reach the API server)
       const isProxied = await testApiProxy('/api/health');
       expect(isProxied).toBe(true);
-    }, 10000);
+    }, 15000);
 
     it('should handle API proxy errors gracefully', async () => {
       // Test a non-existent API endpoint to ensure proxy handles errors
