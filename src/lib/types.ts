@@ -169,6 +169,8 @@ export type CookingPreferences = {
 export type UserGroceries = {
   user_id: string;
   groceries: Record<string, string[]>;
+  shopping_list?: Record<string, string>;
+  shopping_contexts?: Record<string, unknown>;
   created_at: string;
   updated_at: string;
 };

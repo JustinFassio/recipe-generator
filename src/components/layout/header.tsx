@@ -60,15 +60,15 @@ export function Header() {
               Explore
             </Button>
             <Button
-              variant={location.pathname === '/groceries' ? 'default' : 'ghost'}
-              onClick={() => navigate('/groceries')}
+              variant={location.pathname === '/kitchen' ? 'default' : 'ghost'}
+              onClick={() => navigate('/kitchen')}
               className={
-                location.pathname === '/groceries'
+                location.pathname === '/kitchen'
                   ? 'bg-success text-success-content hover:bg-success/80'
                   : ''
               }
             >
-              My Groceries
+              My Kitchen
             </Button>
             <Button
               variant={location.pathname === '/cart' ? 'default' : 'ghost'}
@@ -227,14 +227,14 @@ export function Header() {
               Explore
             </Button>
             <Button
-              variant={location.pathname === '/groceries' ? 'default' : 'ghost'}
+              variant={location.pathname === '/kitchen' ? 'default' : 'ghost'}
               onClick={() => {
-                navigate('/groceries');
+                navigate('/kitchen');
                 closeMobileMenu();
               }}
-              className={`w-full justify-start ${location.pathname === '/groceries' ? 'bg-success text-success-content hover:bg-success/80' : ''}`}
+              className={`w-full justify-start ${location.pathname === '/kitchen' ? 'bg-success text-success-content hover:bg-success/80' : ''}`}
             >
-              My Groceries
+              My Kitchen
             </Button>
             <Button
               variant={location.pathname === '/cart' ? 'default' : 'ghost'}

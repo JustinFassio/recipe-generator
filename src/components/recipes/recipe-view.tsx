@@ -15,6 +15,8 @@ import {
   AlertCircle,
   Globe,
   Save,
+  Plus,
+  Shield,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -22,13 +24,16 @@ import CategoryChip from '@/components/ui/CategoryChip';
 import { useMemo, useState, useEffect } from 'react';
 import { useGlobalIngredients } from '@/hooks/useGlobalIngredients';
 import { SaveToGlobalButton } from '@/components/groceries/save-to-global-button';
+import { GroceryCard } from '@/components/groceries/GroceryCard';
 import { parseIngredientText } from '@/lib/groceries/ingredient-parser';
 import { EnhancedIngredientMatcher } from '@/lib/groceries/enhanced-ingredient-matcher';
 import { useGroceries } from '@/hooks/useGroceries';
+import { useIngredientMatching } from '@/hooks/useIngredientMatching';
 import type { Recipe } from '@/lib/types';
 import { CreatorRating, YourComment } from '@/components/ui/rating';
 import { CommentSystem } from './comment-system';
 import { AddToShoppingListButton } from '@/components/shopping-cart/AddToShoppingListButton';
+import { useUserGroceryCart } from '@/hooks/useUserGroceryCart';
 
 interface RecipeViewProps {
   recipe: Recipe;
@@ -50,34 +55,48 @@ export function RecipeView({
   userComment,
   onEditComment,
 }: RecipeViewProps) {
-  const { groceries } = useGroceries();
+  const groceries = useGroceries();
   const {
     /* saveIngredientToGlobal, */ refreshGlobalIngredients,
     globalIngredients,
+    getGlobalIngredient,
   } = useGlobalIngredients();
 
-  // Create enhanced matcher that includes global ingredients
+  // Use basic ingredient matching for grocery compatibility (user's actual groceries only)
+  const basicIngredientMatching = useIngredientMatching();
+
+  // Use user grocery cart to check if ingredients are in user's collection
+  const { isInCart, addToCart, loading: cartLoading } = useUserGroceryCart();
+
+  // Simple state to track clicked ingredients (immediate UI feedback)
+  const [clickedIngredients, setClickedIngredients] = useState<Set<string>>(
+    new Set()
+  );
+
+  // Create enhanced matcher that includes global ingredients (for individual ingredient workflow)
   const [enhancedMatcher, setEnhancedMatcher] =
     useState<EnhancedIngredientMatcher | null>(null);
 
   // Initialize enhanced matcher when groceries or global ingredients change
   useEffect(() => {
-    if (Object.keys(groceries).length === 0) {
-      setEnhancedMatcher(null);
-      return;
-    }
-
     const initializeMatcher = async () => {
-      const matcher = new EnhancedIngredientMatcher(groceries);
+      // Always initialize matcher, even with empty groceries for new users
+      // This allows global ingredients to load and shopping functionality to work
+      const matcher = new EnhancedIngredientMatcher(groceries.groceries);
       await matcher.initialize();
       setEnhancedMatcher(matcher);
     };
 
     initializeMatcher();
-  }, [groceries, globalIngredients]);
+  }, [groceries.groceries, globalIngredients]);
 
-  // Calculate compatibility using enhanced matcher
-  const compatibility = useMemo(() => {
+  // Calculate ACTUAL grocery compatibility using basic matcher (user's groceries only)
+  const groceryCompatibility = useMemo(() => {
+    return basicIngredientMatching.calculateCompatibility(recipe);
+  }, [basicIngredientMatching, recipe]);
+
+  // Calculate enhanced compatibility for individual ingredient workflow (includes global ingredients)
+  const enhancedCompatibility = useMemo(() => {
     if (!enhancedMatcher) {
       return {
         recipeId: recipe.id,
@@ -95,8 +114,56 @@ export function RecipeView({
     return enhancedMatcher.calculateRecipeCompatibility(recipe);
   }, [enhancedMatcher, recipe]);
 
-  const availabilityPercentage = compatibility.compatibilityScore;
-  const missingIngredients = compatibility.missingIngredients;
+  // Use grocery compatibility for the compatibility section (user's actual groceries)
+  const availabilityPercentage = groceryCompatibility.compatibilityScore;
+
+  // Use grocery compatibility for shopping list (what user actually needs to buy)
+  // Filter out ingredients that are marked as "available" in groceries
+  const missingIngredients = useMemo(() => {
+    return groceryCompatibility.missingIngredients.filter((match) => {
+      const parsedIngredient = parseIngredientText(match.recipeIngredient);
+
+      // Check all categories to see if ingredient is marked as available
+      for (const ingredients of Object.values(groceries.groceries)) {
+        if (ingredients.includes(parsedIngredient.name)) {
+          return false; // Ingredient is available, exclude from shopping list
+        }
+      }
+
+      return true; // Ingredient not available, include in shopping list
+    });
+  }, [groceryCompatibility.missingIngredients, groceries.groceries]);
+
+  // Handle adding global ingredients to user's grocery collection
+  const handleAddToGroceries = async (category: string, name: string) => {
+    // IMMEDIATELY mark as clicked (hide button right away)
+    setClickedIngredients((prev) => new Set([...prev, name]));
+
+    // Then do the actual add (in background)
+    try {
+      const success = await addToCart(category, name);
+
+      if (success) {
+        // IMPORTANT: Mark ingredient as "available" by default when added from recipe
+        // This ensures it appears as selected (blue) in groceries and is excluded from shopping list
+        groceries.toggleIngredient(category, name);
+
+        // Refresh groceries state to sync with database
+        await groceries.loadGroceries();
+      }
+
+      return success;
+    } catch (error) {
+      console.error('Failed to add ingredient to cart:', error);
+      // On error, remove from clicked state so button reappears
+      setClickedIngredients((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(name);
+        return newSet;
+      });
+      return false;
+    }
+  };
 
   const getIngredientStatusIcon = (match: { matchType: string }) => {
     switch (match.matchType) {
@@ -264,7 +331,7 @@ export function RecipeView({
       </div>
 
       {/* Grocery Compatibility Section */}
-      {enhancedMatcher && Object.keys(groceries).length > 0 && (
+      {enhancedMatcher && Object.keys(groceries.groceries).length > 0 && (
         <div
           className={createDaisyUICardClasses(
             'bordered bg-gradient-to-r from-green-50 to-blue-50'
@@ -281,8 +348,8 @@ export function RecipeView({
                   {availabilityPercentage}%
                 </div>
                 <div className="text-sm text-green-700">
-                  {compatibility.availableIngredients.length} of{' '}
-                  {compatibility.totalIngredients} ingredients
+                  {groceryCompatibility.availableIngredients.length} of{' '}
+                  {groceryCompatibility.totalIngredients} ingredients
                 </div>
               </div>
             </div>
@@ -339,7 +406,7 @@ export function RecipeView({
             Ingredients
             {enhancedMatcher && (
               <span className="text-sm font-normal text-gray-600">
-                ({compatibility.availableIngredients.length} available)
+                ({enhancedCompatibility.availableIngredients.length} available)
               </span>
             )}
           </h3>
@@ -376,58 +443,142 @@ export function RecipeView({
                     </div>
                   ) : (
                     // Enhanced ingredient with availability indicator
-                    <div className="flex items-center w-full">
-                      <div className="mt-0.5 mr-3 flex h-6 w-6 flex-shrink-0 items-center justify-center">
-                        {enhancedMatcher ? (
-                          getIngredientStatusIcon(match)
-                        ) : (
-                          <div className="h-2 w-2 rounded-full bg-orange-500"></div>
-                        )}
+                    <>
+                      <div className="flex items-center w-full">
+                        <div className="mt-0.5 mr-3 flex h-6 w-6 flex-shrink-0 items-center justify-center">
+                          {enhancedMatcher ? (
+                            getIngredientStatusIcon(match)
+                          ) : (
+                            <div className="h-2 w-2 rounded-full bg-orange-500"></div>
+                          )}
+                        </div>
+                        <div className="flex-1 flex items-center justify-between">
+                          <p
+                            className={`leading-relaxed ${
+                              isAvailable
+                                ? 'text-gray-900 font-medium'
+                                : 'text-gray-700'
+                            }`}
+                          >
+                            {ingredient}
+                          </p>
+                          {enhancedMatcher && (
+                            <div className="flex items-center space-x-2">
+                              {getIngredientBadge(match)}
+                              {match.matchedGroceryIngredient && (
+                                <span className="text-xs text-gray-500">
+                                  (matches: {match.matchedGroceryIngredient})
+                                </span>
+                              )}
+                              {match.matchType === 'none' && (
+                                <SaveToGlobalButton
+                                  ingredient={
+                                    parseIngredientText(ingredient).name
+                                  }
+                                  recipeContext={{
+                                    recipeId: recipe.id,
+                                    recipeCategories: recipe.categories || [],
+                                  }}
+                                  onSaved={refreshGlobalIngredients}
+                                />
+                              )}
+                              {match.matchType === 'global' && (
+                                <>
+                                  {(() => {
+                                    // Find the actual global ingredient data using the normalized name
+                                    const parsedIngredient =
+                                      parseIngredientText(ingredient);
+                                    const normalizedName =
+                                      enhancedMatcher?.normalizeName(
+                                        parsedIngredient.name
+                                      ) || parsedIngredient.name.toLowerCase();
+                                    const globalIngredient =
+                                      getGlobalIngredient(normalizedName);
+
+                                    // Create a GlobalIngredient object from the match data if lookup fails
+                                    const globalIngredientData =
+                                      globalIngredient || {
+                                        id: `global-${match.matchedGroceryIngredient}`,
+                                        name:
+                                          match.matchedGroceryIngredient ||
+                                          parsedIngredient.name,
+                                        normalized_name:
+                                          enhancedMatcher.normalizeName(
+                                            match.matchedGroceryIngredient ||
+                                              parsedIngredient.name
+                                          ),
+                                        category:
+                                          match.matchedCategory || 'pantry',
+                                        synonyms: [],
+                                        usage_count: 1,
+                                        first_seen_at: new Date().toISOString(),
+                                        last_seen_at: new Date().toISOString(),
+                                        created_by: null,
+                                        is_verified: false,
+                                        is_system: true,
+                                        created_at: new Date().toISOString(),
+                                        updated_at: new Date().toISOString(),
+                                      };
+
+                                    // Check if ingredient should show Add button or Shopping List button
+                                    const wasClicked = clickedIngredients.has(
+                                      globalIngredientData.name
+                                    );
+                                    const isAlreadyInCart = isInCart(
+                                      globalIngredientData.name
+                                    );
+                                    const shouldShowButton =
+                                      !wasClicked && !isAlreadyInCart;
+
+                                    return shouldShowButton ? (
+                                      <div className="inline-flex items-center rounded border p-1 bg-white text-xs max-w-xs">
+                                        <div className="min-w-0 mr-2">
+                                          <div className="font-medium truncate">
+                                            {globalIngredientData.name}
+                                          </div>
+                                          {globalIngredientData.is_system && (
+                                            <span className="inline-flex items-center text-[9px] px-1 py-0.5 rounded bg-purple-50 text-purple-700 border border-purple-200">
+                                              <Shield className="h-2 w-2 mr-0.5" />{' '}
+                                              System
+                                            </span>
+                                          )}
+                                        </div>
+                                        <Button
+                                          size="sm"
+                                          onClick={() =>
+                                            handleAddToGroceries(
+                                              globalIngredientData.category,
+                                              globalIngredientData.name
+                                            )
+                                          }
+                                          disabled={cartLoading}
+                                          className="h-6 px-2 text-xs"
+                                        >
+                                          <Plus className="h-2 w-2 mr-1" /> Add
+                                        </Button>
+                                      </div>
+                                    ) : (
+                                      // Show GroceryCard for ingredients already in cart (to toggle availability)
+                                      <GroceryCard
+                                        ingredient={globalIngredientData.name}
+                                        category={globalIngredientData.category}
+                                        loading={cartLoading}
+                                        className="text-xs h-6 px-2"
+                                        isSelected={groceries.hasIngredient(
+                                          globalIngredientData.category,
+                                          globalIngredientData.name
+                                        )}
+                                        onToggle={groceries.toggleIngredient}
+                                      />
+                                    );
+                                  })()}
+                                </>
+                              )}
+                            </div>
+                          )}
+                        </div>
                       </div>
-                      <div className="flex-1 flex items-center justify-between">
-                        <p
-                          className={`leading-relaxed ${
-                            isAvailable
-                              ? 'text-gray-900 font-medium'
-                              : 'text-gray-700'
-                          }`}
-                        >
-                          {ingredient}
-                        </p>
-                        {enhancedMatcher && (
-                          <div className="flex items-center space-x-2">
-                            {getIngredientBadge(match)}
-                            {match.matchedGroceryIngredient && (
-                              <span className="text-xs text-gray-500">
-                                (matches: {match.matchedGroceryIngredient})
-                              </span>
-                            )}
-                            {match.matchType === 'none' && (
-                              <SaveToGlobalButton
-                                ingredient={
-                                  parseIngredientText(ingredient).name
-                                }
-                                recipeContext={{
-                                  recipeId: recipe.id,
-                                  recipeCategories: recipe.categories || [],
-                                }}
-                                onSaved={refreshGlobalIngredients}
-                              />
-                            )}
-                            {match.matchType === 'global' && (
-                              <AddToShoppingListButton
-                                ingredients={[ingredient]}
-                                recipeId={recipe.id}
-                                recipeTitle={recipe.title}
-                                variant="outline"
-                                size="sm"
-                                showCount={false}
-                              />
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    </div>
+                    </>
                   )}
                 </div>
               );
@@ -435,57 +586,71 @@ export function RecipeView({
           </div>
 
           {/* Shopping List for Missing Ingredients */}
-          {missingIngredients.length > 0 && (
+          {enhancedMatcher && (
             <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
               <h4 className="font-medium text-blue-800 mb-3 flex items-center">
                 <ShoppingCart className="h-4 w-4 mr-2" />
                 Shopping List ({missingIngredients.length} items)
               </h4>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {missingIngredients.map((match, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center text-sm text-blue-700"
+              {missingIngredients.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {missingIngredients.map((match, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center text-sm text-blue-700"
+                    >
+                      <div className="w-2 h-2 bg-blue-400 rounded-full mr-2" />
+                      {match.recipeIngredient}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-4">
+                  <Check className="h-8 w-8 mx-auto text-green-600 mb-2" />
+                  <p className="text-green-700 font-medium">
+                    You have all ingredients!
+                  </p>
+                  <p className="text-green-600 text-sm">
+                    No shopping needed for this recipe.
+                  </p>
+                </div>
+              )}
+              {missingIngredients.length > 0 && (
+                <div className="flex gap-2 mt-3">
+                  <AddToShoppingListButton
+                    ingredients={missingIngredients.map(
+                      (match) => match.recipeIngredient
+                    )}
+                    recipeId={recipe.id}
+                    recipeTitle={recipe.title}
+                    variant="outline"
+                    size="sm"
+                    className="border-blue-300 text-blue-700 hover:bg-blue-100"
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border-blue-300 text-blue-700 hover:bg-blue-100"
+                    onClick={() => {
+                      // Export shopping list as a text file
+                      const text = missingIngredients
+                        .map((match) => match.recipeIngredient)
+                        .join('\n');
+                      const blob = new Blob([text], { type: 'text/plain' });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement('a');
+                      a.href = url;
+                      a.download = `${recipe.title}-shopping-list.txt`;
+                      document.body.appendChild(a);
+                      a.click();
+                      document.body.removeChild(a);
+                      URL.revokeObjectURL(url);
+                    }}
                   >
-                    <div className="w-2 h-2 bg-blue-400 rounded-full mr-2" />
-                    {match.recipeIngredient}
-                  </div>
-                ))}
-              </div>
-              <div className="flex gap-2 mt-3">
-                <AddToShoppingListButton
-                  ingredients={missingIngredients.map(
-                    (match) => match.recipeIngredient
-                  )}
-                  recipeId={recipe.id}
-                  recipeTitle={recipe.title}
-                  variant="outline"
-                  size="sm"
-                  className="border-blue-300 text-blue-700 hover:bg-blue-100"
-                />
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="border-blue-300 text-blue-700 hover:bg-blue-100"
-                  onClick={() => {
-                    // Export shopping list as a text file
-                    const text = missingIngredients
-                      .map((match) => match.recipeIngredient)
-                      .join('\n');
-                    const blob = new Blob([text], { type: 'text/plain' });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `${recipe.title}-shopping-list.txt`;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
-                  }}
-                >
-                  📋 Export as File
-                </Button>
-              </div>
+                    📋 Export as File
+                  </Button>
+                </div>
+              )}
             </div>
           )}
         </div>

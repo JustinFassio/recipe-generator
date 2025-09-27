@@ -1,27 +1,22 @@
 import { useState } from 'react';
-import { useShoppingList, ShoppingItem } from '@/hooks/useShoppingList';
+import { useGroceriesQuery } from '@/hooks/useGroceriesQuery';
 import { useShoppingCartAI } from '@/hooks/useShoppingCartAI';
 import { ShoppingCartChat } from '@/components/shopping-cart/ShoppingCartChat';
-import {
-  Trash2,
-  Plus,
-  Check,
-  ShoppingCart,
-  Utensils,
-  MessageSquare,
-  Package,
-  Brain,
-} from 'lucide-react';
+import { Check, ShoppingCart, Brain } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
-// Shopping item component
+// Shopping item component - commented out as unused
+/*
 interface ShoppingItemCardProps {
   item: ShoppingItem;
   onToggleCompleted: (itemId: string) => void;
   onRemove: (itemId: string) => void;
   onUpdate: (itemId: string, updates: Partial<ShoppingItem>) => void;
 }
+*/
 
+// Unused component - keeping for reference
+/*
 function ShoppingItemCard({
   item,
   onToggleCompleted,
@@ -72,10 +67,10 @@ function ShoppingItemCard({
     >
       <div className="card-body p-4">
         <div className="flex items-start gap-3">
-          {/* Completion checkbox */}
           <button
             className={`btn btn-circle btn-sm ${item.completed ? 'btn-success' : 'btn-outline'}`}
             onClick={() => onToggleCompleted(item.id)}
+            title={item.source === 'groceries-restock' ? 'Mark as purchased - will add back to kitchen' : 'Mark as completed'}
           >
             {item.completed ? (
               <Check className="w-4 h-4" />
@@ -84,7 +79,6 @@ function ShoppingItemCard({
             )}
           </button>
 
-          {/* Item details */}
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
               <h3
@@ -104,14 +98,12 @@ function ShoppingItemCard({
               </div>
             </div>
 
-            {/* Source context */}
             {item.sourceTitle && (
               <p className="text-sm text-base-content/70 mb-2">
                 From: {item.sourceTitle}
               </p>
             )}
 
-            {/* Quantity and notes */}
             {!isEditing ? (
               <div className="space-y-1">
                 {item.quantity && (
@@ -160,7 +152,6 @@ function ShoppingItemCard({
             )}
           </div>
 
-          {/* Actions */}
           <div className="dropdown dropdown-end">
             <div tabIndex={0} role="button" className="btn btn-ghost btn-sm">
               ⋮
@@ -188,22 +179,11 @@ function ShoppingItemCard({
     </div>
   );
 }
+*/
 
 // Main shopping cart page
 export default function ShoppingCartPage() {
-  const {
-    shoppingList,
-    loading,
-    error,
-    removeFromShoppingList,
-    toggleItemCompleted,
-    updateShoppingItem,
-    clearCompletedItems,
-    clearAllItems,
-    getIncompleteItems,
-    getCompletedItems,
-    getShoppingListCount,
-  } = useShoppingList();
+  const groceries = useGroceriesQuery();
 
   const { getChatResponse } = useShoppingCartAI();
 
@@ -211,9 +191,26 @@ export default function ShoppingCartPage() {
     'incomplete' | 'completed' | 'all'
   >('incomplete');
 
-  const incompleteItems = getIncompleteItems();
-  const completedItems = getCompletedItems();
-  const allItems = Object.values(shoppingList);
+  // Simple format shopping list items
+  const shoppingListItems = Object.entries(groceries.shoppingList);
+  const incompleteItems = shoppingListItems.filter(
+    ([, status]) => status === 'pending'
+  );
+  const completedItems = shoppingListItems.filter(
+    ([, status]) => status === 'purchased'
+  );
+  const allItems = shoppingListItems;
+
+  // Debug logging
+  if (import.meta.env.DEV) {
+    console.log('ShoppingCartPage data:', {
+      shoppingList: groceries.shoppingList,
+      shoppingListItems,
+      incompleteItems,
+      completedItems,
+      allItems,
+    });
+  }
 
   const getDisplayItems = () => {
     switch (activeTab) {
@@ -238,8 +235,19 @@ export default function ShoppingCartPage() {
       return;
     }
 
-    const success = await clearCompletedItems();
-    if (success && activeTab === 'completed') {
+    // Remove completed items from shopping list
+    const updatedShoppingList = { ...groceries.shoppingList } as Record<
+      string,
+      string
+    >;
+    completedItems.forEach(([ingredient]) => {
+      delete updatedShoppingList[ingredient];
+    });
+
+    // React Query will handle the update automatically
+    // No need to manually save
+
+    if (activeTab === 'completed') {
       setActiveTab('incomplete');
     }
   };
@@ -250,14 +258,16 @@ export default function ShoppingCartPage() {
         'Are you sure you want to clear all items from your shopping list?'
       )
     ) {
-      const success = await clearAllItems();
-      if (success) {
-        setActiveTab('incomplete');
-      }
+      // Clear all shopping list items
+
+      // React Query will handle the update automatically
+      // No need to manually save
+
+      setActiveTab('incomplete');
     }
   };
 
-  if (loading) {
+  if (groceries.loading) {
     return (
       <div className="container mx-auto p-6">
         <div className="flex items-center justify-center min-h-96">
@@ -267,11 +277,11 @@ export default function ShoppingCartPage() {
     );
   }
 
-  if (error) {
+  if (groceries.error) {
     return (
       <div className="container mx-auto p-6">
         <div className="alert alert-error">
-          <span>Error loading shopping list: {error}</span>
+          <span>Error loading shopping list: {groceries.error}</span>
         </div>
       </div>
     );
@@ -286,8 +296,7 @@ export default function ShoppingCartPage() {
           <div>
             <h1 className="text-3xl font-bold">Shopping Cart</h1>
             <p className="text-base-content/70">
-              {getShoppingListCount()} items • {incompleteItems.length}{' '}
-              remaining
+              {allItems.length} items • {incompleteItems.length} remaining
             </p>
           </div>
         </div>
@@ -351,19 +360,53 @@ export default function ShoppingCartPage() {
                   <p className="text-base-content/70 mb-4">
                     {activeTab === 'completed'
                       ? 'Complete some items to see them here.'
-                      : 'Ask the AI assistant what ingredients you need, or add items from recipes.'}
+                      : 'Mark ingredients as unavailable in your kitchen to add them to your shopping list.'}
                   </p>
                 </div>
               </div>
             ) : (
-              getDisplayItems().map((item) => (
-                <ShoppingItemCard
-                  key={item.id}
-                  item={item}
-                  onToggleCompleted={toggleItemCompleted}
-                  onRemove={removeFromShoppingList}
-                  onUpdate={updateShoppingItem}
-                />
+              getDisplayItems().map(([ingredient, status]) => (
+                <div
+                  key={ingredient}
+                  className="card bg-base-100 shadow-sm border"
+                >
+                  <div className="card-body p-4">
+                    <div className="flex items-start gap-3">
+                      <button
+                        className={`btn btn-circle btn-sm ${status === 'purchased' ? 'btn-success' : 'btn-outline'}`}
+                        onClick={() => {
+                          // Find the category for this ingredient
+                          const category =
+                            Object.keys(groceries.groceries).find((cat) =>
+                              (groceries.groceries as Record<string, string[]>)[
+                                cat
+                              ].includes(ingredient)
+                            ) || 'pantry_staples'; // fallback category
+
+                          // Toggle ingredient (React Query handles the database update)
+                          groceries.toggleIngredient(category, ingredient);
+                        }}
+                      >
+                        {status === 'purchased' ? (
+                          <Check className="w-4 h-4" />
+                        ) : (
+                          <div className="w-4 h-4" />
+                        )}
+                      </button>
+                      <div className="flex-1">
+                        <h3
+                          className={`font-semibold ${status === 'purchased' ? 'line-through' : ''}`}
+                        >
+                          {ingredient}
+                        </h3>
+                        <div className="badge badge-primary badge-sm">
+                          <ShoppingCart className="w-4 h-4" />
+                          <span>Kitchen Restock</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               ))
             )}
           </div>

@@ -122,7 +122,23 @@ export function useShoppingList(): UseShoppingListReturn {
         throw fetchError;
       }
 
-      setShoppingList(data?.shopping_list || {});
+      // Convert simple format to complex format for internal use
+      const simpleShoppingList = data?.shopping_list || {};
+      const complexShoppingList: Record<string, ShoppingItem> = {};
+
+      Object.entries(simpleShoppingList).forEach(([name, status]) => {
+        const item: ShoppingItem = {
+          id: `item_${name}_${Date.now()}`,
+          name,
+          category: 'unknown', // We'll need to track this separately
+          source: 'manual',
+          completed: status === 'purchased',
+          addedAt: new Date().toISOString(),
+        };
+        complexShoppingList[item.id] = item;
+      });
+
+      setShoppingList(complexShoppingList);
       setShoppingContexts(data?.shopping_contexts || {});
     } catch (err) {
       const errorMessage =
@@ -138,8 +154,8 @@ export function useShoppingList(): UseShoppingListReturn {
   const addToShoppingList = useCallback(
     async (
       name: string,
-      category: string,
-      source: ShoppingItem['source'],
+      _category: string,
+      _source: ShoppingItem['source'],
       options: {
         sourceId?: string;
         sourceTitle?: string;
@@ -162,6 +178,8 @@ export function useShoppingList(): UseShoppingListReturn {
           (item) => item.name.toLowerCase() === name.toLowerCase()
         );
 
+        console.log('Options received:', options);
+
         if (existingItem) {
           toast({
             title: 'Item Already in List',
@@ -171,26 +189,19 @@ export function useShoppingList(): UseShoppingListReturn {
           return true;
         }
 
-        // Create new shopping item
-        const newItem: ShoppingItem = {
-          id: `item_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-          name,
-          category,
-          source,
-          sourceId: options.sourceId,
-          sourceTitle: options.sourceTitle,
-          quantity: options.quantity,
-          notes: options.notes,
-          completed: false,
-          addedAt: new Date().toISOString(),
-        };
-
+        // Create new shopping item in the simple format expected by the database
         const updatedShoppingList = {
           ...shoppingList,
-          [newItem.id]: newItem,
+          [name]: 'pending',
         };
 
         // Save to database
+        console.log('Saving shopping list to database:', {
+          user_id: user.id,
+          shopping_list: updatedShoppingList,
+          updated_at: new Date().toISOString(),
+        });
+
         const { error: saveError } = await supabase
           .from('user_groceries')
           .upsert({
@@ -199,10 +210,13 @@ export function useShoppingList(): UseShoppingListReturn {
             updated_at: new Date().toISOString(),
           });
 
-        if (saveError) throw saveError;
+        if (saveError) {
+          console.error('Database save error:', saveError);
+          throw saveError;
+        }
 
         // Update local state
-        setShoppingList(updatedShoppingList);
+        setShoppingList(updatedShoppingList as Record<string, ShoppingItem>);
 
         toast({
           title: 'Added to Shopping List',
@@ -245,12 +259,20 @@ export function useShoppingList(): UseShoppingListReturn {
         const itemName = updatedShoppingList[itemId]?.name;
         delete updatedShoppingList[itemId];
 
+        // Convert back to simple format for database
+        const simpleShoppingList: Record<string, string> = {};
+        Object.values(updatedShoppingList).forEach((shoppingItem) => {
+          simpleShoppingList[shoppingItem.name] = shoppingItem.completed
+            ? 'purchased'
+            : 'pending';
+        });
+
         // Save to database
         const { error: saveError } = await supabase
           .from('user_groceries')
           .upsert({
             user_id: user.id,
-            shopping_list: updatedShoppingList,
+            shopping_list: simpleShoppingList,
             updated_at: new Date().toISOString(),
           });
 
@@ -292,20 +314,31 @@ export function useShoppingList(): UseShoppingListReturn {
       if (!user?.id) return false;
 
       try {
+        const item = shoppingList[itemId];
+        if (!item) return false;
+
         const updatedShoppingList = {
           ...shoppingList,
           [itemId]: {
-            ...shoppingList[itemId],
-            completed: !shoppingList[itemId].completed,
+            ...item,
+            completed: !item.completed,
           },
         };
+
+        // Convert back to simple format for database
+        const simpleShoppingList: Record<string, string> = {};
+        Object.values(updatedShoppingList).forEach((shoppingItem) => {
+          simpleShoppingList[shoppingItem.name] = shoppingItem.completed
+            ? 'purchased'
+            : 'pending';
+        });
 
         // Save to database
         const { error: saveError } = await supabase
           .from('user_groceries')
           .upsert({
             user_id: user.id,
-            shopping_list: updatedShoppingList,
+            shopping_list: simpleShoppingList,
             updated_at: new Date().toISOString(),
           });
 
@@ -313,6 +346,34 @@ export function useShoppingList(): UseShoppingListReturn {
 
         // Update local state
         setShoppingList(updatedShoppingList);
+
+        // If this is a groceries-restock item being marked as completed,
+        // we need to add it back to the kitchen inventory
+        if (item.source === 'groceries-restock' && !item.completed) {
+          // Import the groceries hook to add back to kitchen
+          const { updateUserGroceries } = await import(
+            '@/lib/user-preferences'
+          );
+
+          // Get current groceries data
+          const { data: groceryData } = await supabase
+            .from('user_groceries')
+            .select('groceries')
+            .eq('user_id', user.id)
+            .single();
+
+          const currentGroceries = groceryData?.groceries || {};
+          const category = item.category;
+
+          // Add the ingredient back to the kitchen
+          const updatedGroceries = {
+            ...currentGroceries,
+            [category]: [...(currentGroceries[category] || []), item.name],
+          };
+
+          // Save updated groceries
+          await updateUserGroceries(user.id, updatedGroceries);
+        }
 
         return true;
       } catch (err) {

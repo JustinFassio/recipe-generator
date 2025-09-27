@@ -4,12 +4,12 @@ These test accounts are created by the local seeding script and are intended for
 
 ## Credentials
 
-- alice@example.com — Password123! (username: alice)
-- bob@example.com — Password123! (username: bob)
-- cora@example.com — Password123! (username: cora)
-- david@example.com — Password123! (username: david)
-- emma@example.com — Password123! (username: emma)
-- frank@example.com — Password123! (username: frank)
+- alice@example.com — Password123! (username: alice) - **HAS 12 RECIPES**
+- bob@example.com — Password123! (username: bob) - **HAS 3 RECIPES**
+- carol@example.com — Password123! (username: carol) - **NO RECIPES**
+- dave@example.com — Password123! (username: dave) - **NO RECIPES**
+- eve@example.com — Password123! (username: eve) - **NO RECIPES**
+- frank@example.com — Password123! (username: frank) - **NO RECIPES**
 
 ## Mood Tags
 
@@ -40,17 +40,9 @@ All recipes are automatically tagged with 1-2 mood tags based on their existing 
   - **Pantry**: olive oil, pasta, rice, canned tomatoes, vegetable stock, soy sauce
   - **Dairy**: milk, mozzarella, parmesan, yogurt
   - **Fruits**: lemons, limes, apples, berries
-- **Recipes**: 10 total (4 private, 6 shared)
-  - Avocado Toast (shared) - Course: Breakfast, Collection: Vegetarian, Collection: Quick & Easy, Technique: No-Cook, Occasion: Weekday, Dietary: Plant-Based, **Mood: Quick, Mood: Simple**
-  - Caprese Salad (shared) - Course: Appetizer, Dish Type: Salad, Cuisine: Italian, Collection: Vegetarian, Collection: Fresh & Light, Technique: No-Cook, Occasion: Summer, Dietary: Plant-Based, **Mood: Refreshing, Mood: Simple**
-  - Quick Pasta (shared) - Course: Main, Dish Type: Pasta, Cuisine: Italian, Occasion: Weeknight, Collection: Vegetarian, Collection: Quick & Easy, Technique: Sauté, Dietary: Plant-Based, Time: Under 30 Minutes, **Mood: Quick, Mood: Simple**
-  - Veggie Stir Fry (shared) - Course: Main, Dish Type: Stir-Fry, Cuisine: Asian, Technique: Sauté, Collection: Vegetarian, Collection: Healthy, Occasion: Weeknight, Dietary: Plant-Based, Time: Under 30 Minutes, **Mood: Quick, Mood: Healthy**
-  - Mediterranean Quinoa Bowl (private) - Course: Main, Dish Type: Bowl, Cuisine: Mediterranean, Collection: Healthy, Collection: Vegetarian, Technique: No-Cook, Occasion: Lunch, Dietary: High-Protein, Time: 30-60 Minutes, **Mood: Healthy, Mood: Simple**
-  - Sweet Potato Buddha Bowl (shared) - Course: Main, Dish Type: Bowl, Cuisine: Fusion, Collection: Healthy, Collection: Vegetarian, Technique: Roast, Occasion: Dinner, Dietary: Plant-Based, Time: 45-60 Minutes, **Mood: Healthy, Mood: Adventurous**
-  - Mushroom Risotto (private) - Course: Main, Dish Type: Risotto, Cuisine: Italian, Collection: Comfort Food, Collection: Vegetarian, Technique: Stir, Occasion: Date Night, Dietary: Vegetarian, Time: 45-60 Minutes, **Mood: Comfort, Mood: Patient**
-  - Lentil Soup (shared) - Course: Main, Dish Type: Soup, Cuisine: Mediterranean, Collection: Healthy, Collection: Vegetarian, Technique: Simmer, Occasion: Weeknight, Dietary: High-Protein, Time: 45-60 Minutes, **Mood: Healthy, Mood: Comfort**
-  - Chocolate Avocado Mousse (private) - Course: Dessert, Dish Type: Mousse, Collection: Healthy, Collection: Vegetarian, Technique: No-Cook, Occasion: Special Occasion, Dietary: Plant-Based, Time: Under 30 Minutes, **Mood: Sweet, Mood: Celebratory**
-  - Zucchini Noodles with Pesto (private) - Course: Main, Dish Type: Noodles, Cuisine: Italian, Collection: Low-Carb, Collection: Vegetarian, Technique: No-Cook, Occasion: Summer, Dietary: Low-Carb, Time: Under 20 Minutes, **Mood: Refreshing, Mood: Quick**
+- **Recipes**: 12 total (7 private, 5 shared) - **ACTUALLY SEEDED**
+  - **Public**: Avocado Toast, Green Smoothie Bowl, Quinoa Salad, Secret Family Pancakes, Tomato Basil Pasta, Vegetable Stir Fry
+  - **Private**: Experimental Fusion Tacos, Green Smoothie Bowl (duplicate), Late Night Comfort Ramen, Personal Workout Smoothie, Quinoa Salad (2 duplicates)
 
 ### Bob Carter (bob@example.com)
 
@@ -68,16 +60,8 @@ All recipes are automatically tagged with 1-2 mood tags based on their existing 
   - **Pantry**: olive oil, vegetable oil, brown sugar, chicken stock, soy sauce, vinegar
   - **Dairy**: butter, cheddar, milk
   - **Fruits**: lemons, limes
-- **Recipes**: 9 total (6 private, 3 shared)
-  - Classic Caesar Salad (shared) - Course: Appetizer, Dish Type: Salad, Cuisine: American, Collection: Classic, Technique: No-Cook, Occasion: Any, Dietary: Gluten-Free, Time: Under 15 Minutes, **Mood: Traditional, Mood: Quick**
-  - Grilled Chicken Breast (shared) - Course: Main, Technique: Grill, Collection: High-Protein, Collection: Lean Protein, Occasion: Meal Prep, Occasion: Weeknight, Dietary: Low-Carb, Time: Under 30 Minutes, **Mood: Quick, Mood: High-Protein**
-  - BBQ Ribs (shared) - Course: Main, Cuisine: BBQ, Cuisine: American, Technique: Smoke, Technique: Low & Slow, Occasion: Weekend, Occasion: Special Occasion, Collection: Meat Lover, Time: Over 2 Hours, **Mood: Patient, Mood: Sharing**
-  - Smoked Brisket (shared) - Course: Main, Cuisine: BBQ, Cuisine: American, Collection: Meat Lover, Collection: BBQ, Technique: Smoke, Technique: Low & Slow, Occasion: Special Occasion, Occasion: Weekend, Time: Over 12 Hours, **Mood: Patient, Mood: Celebratory**
-  - Grilled Salmon with Herbs (private) - Course: Main, Collection: Seafood, Collection: Healthy, Collection: Lean Protein, Technique: Grill, Occasion: Weeknight, Occasion: Date Night, Dietary: Low-Carb, Time: Under 30 Minutes, **Mood: Quick, Mood: Romantic**
-  - Beer Can Chicken (private) - Course: Main, Cuisine: BBQ, Cuisine: American, Collection: BBQ, Collection: Meat Lover, Technique: Grill, Occasion: Weekend, Occasion: Party, Dietary: Low-Carb, Time: 1-2 Hours, **Mood: Sharing, Mood: Patient**
-  - Grilled Vegetable Platter (shared) - Course: Side, Dish Type: Vegetables, Collection: BBQ, Collection: Vegetarian, Technique: Grill, Occasion: Weekend, Occasion: Party, Dietary: Plant-Based, Time: Under 30 Minutes, **Mood: Sharing, Mood: Refreshing**
-  - Slow Cooker Pulled Pork (private) - Course: Main, Cuisine: BBQ, Cuisine: American, Collection: BBQ, Collection: Meat Lover, Technique: Slow Cooker, Technique: Low & Slow, Occasion: Weekend, Occasion: Party, Time: Over 8 Hours, **Mood: Patient, Mood: Sharing**
-  - Grilled Corn on the Cob (private) - Course: Side, Dish Type: Vegetables, Cuisine: American, Collection: BBQ, Collection: Summer, Technique: Grill, Occasion: Weekend, Occasion: Summer, Dietary: Vegetarian, Time: Under 20 Minutes, **Mood: Refreshing, Mood: Sharing**
+- **Recipes**: 3 total (0 private, 3 shared) - **ACTUALLY SEEDED**
+  - **Public**: BBQ Ribs, Classic Caesar Salad, Grilled Chicken Breast
 
 ### Cora Diaz (cora@example.com)
 
