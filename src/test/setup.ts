@@ -62,9 +62,9 @@ vi.mock('@/lib/supabase', () => ({
                 data: {
                   id: 'test-recipe-id',
                   title: 'Test Recipe',
-                  ingredients: ['1 cup flour', '2 eggs', '1 cup sugar'],
+                  ingredients: ['1 cup flour', '2 eggs', '1 cup milk'],
                   instructions:
-                    'Mix ingredients and bake at 350°F for 30 minutes.',
+                    'Mix ingredients and bake at 350°F for 20 minutes.',
                   user_id: 'test-user-id',
                   is_public: false,
                   created_at: '2024-01-01T00:00:00Z',
@@ -83,9 +83,9 @@ vi.mock('@/lib/supabase', () => ({
                   data: {
                     id: 'test-recipe-id',
                     title: 'Test Recipe',
-                    ingredients: ['1 cup flour', '2 eggs', '1 cup sugar'],
+                    ingredients: ['1 cup flour', '2 eggs', '1 cup milk'],
                     instructions:
-                      'Mix ingredients and bake at 350°F for 30 minutes.',
+                      'Mix ingredients and bake at 350°F for 20 minutes.',
                     user_id: 'test-user-id',
                     is_public: false,
                     created_at: '2024-01-01T00:00:00Z',
@@ -297,9 +297,9 @@ global.fetch = vi.fn().mockResolvedValue({
 vi.mock('@/lib/recipe-parser', () => ({
   parseRecipeFromText: vi.fn().mockResolvedValue({
     title: 'Test Recipe',
-    ingredients: ['1 cup flour', '2 eggs', '1 cup sugar'],
-    instructions: 'Mix ingredients and bake at 350°F for 30 minutes.',
-    categories: ['dessert'],
+    ingredients: ['1 cup flour', '2 eggs', '1 cup milk'],
+    instructions: 'Mix ingredients and bake at 350°F for 20 minutes.',
+    categories: ['Course: Dessert', 'Cuisine: American'],
   }),
 }));
 
@@ -307,14 +307,14 @@ vi.mock('@/lib/recipe-parser', () => ({
 vi.mock('@/lib/recipe-standardizer', () => ({
   standardizeRecipeWithAI: vi.fn().mockResolvedValue({
     title: 'Test Recipe',
-    ingredients: ['1 cup flour', '2 eggs', '1 cup sugar'],
-    instructions: 'Mix ingredients and bake at 350°F for 30 minutes.',
-    categories: ['dessert'],
+    ingredients: ['1 cup flour', '2 eggs', '1 cup milk'],
+    instructions: 'Mix ingredients and bake at 350°F for 20 minutes.',
+    categories: ['Course: Dessert', 'Cuisine: American'],
   }),
   convertToParsedRecipe: vi.fn().mockReturnValue({
     title: 'Test Recipe',
-    ingredients: ['1 cup flour', '2 eggs', '1 cup sugar'],
-    instructions: 'Mix ingredients and bake at 350°F for 30 minutes.',
-    categories: ['dessert'],
+    ingredients: ['1 cup flour', '2 eggs', '1 cup milk'],
+    instructions: 'Mix ingredients and bake at 350°F for 20 minutes.',
+    categories: ['Course: Dessert', 'Cuisine: American'],
   }),
 }));
