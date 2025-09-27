@@ -16,15 +16,15 @@ app.get('/api/health', (req, res) => {
 // Recipe standardize endpoint
 app.post('/api/recipe-standardize', express.json(), (req, res) => {
   const { recipeText } = req.body;
-  
+
   if (!recipeText) {
     return res.status(400).json({ error: 'recipeText is required' });
   }
-  
+
   // Simple response for now
   res.json({
     standardized: recipeText,
-    message: 'Recipe standardized successfully'
+    message: 'Recipe standardized successfully',
   });
 });
 
