@@ -19,7 +19,9 @@ export async function standardizeRecipeWithAI(
 ): Promise<StandardizedRecipe> {
   // Skip AI processing in test environments and use local parsing instead
   if (process.env.NODE_ENV === 'test') {
-    console.log('Test environment detected, using local parsing instead of AI API');
+    console.log(
+      'Test environment detected, using local parsing instead of AI API'
+    );
     return parseStandardizedRecipe(recipeText);
   }
 
