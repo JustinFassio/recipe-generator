@@ -19,7 +19,15 @@ export async function standardizeRecipeWithAI(
 ): Promise<StandardizedRecipe> {
   try {
     // Call the secure backend API for AI processing
-    const response = await fetch('/api/recipe-standardize', {
+    // Use absolute URL in Node.js environments (tests, CI), relative URL in browser
+    const apiUrl =
+      typeof window === 'undefined'
+        ? process.env.API_BASE_URL
+          ? `${process.env.API_BASE_URL}/api/recipe-standardize`
+          : 'http://localhost:3000/api/recipe-standardize'
+        : '/api/recipe-standardize';
+
+    const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
