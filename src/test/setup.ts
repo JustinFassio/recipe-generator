@@ -129,6 +129,16 @@ vi.mock('react-router-dom', () => ({
   useParams: vi.fn(() => ({})),
 }));
 
+// Mock API Client
+vi.mock('@/lib/api-client', () => ({
+  APIClient: vi.fn().mockImplementation(() => ({
+    chatWithPersona: vi.fn().mockResolvedValue({
+      response: 'Mocked AI response',
+      usage: { prompt_tokens: 10, completion_tokens: 20, total_tokens: 30 },
+    }),
+  })),
+}));
+
 // Mock toast
 vi.mock('@/hooks/use-toast', () => ({
   toast: vi.fn(),
@@ -239,3 +249,10 @@ global.IntersectionObserver = vi.fn().mockImplementation(() => ({
   unobserve: vi.fn(),
   disconnect: vi.fn(),
 }));
+
+// Mock global fetch to prevent real HTTP requests during tests
+global.fetch = vi.fn().mockResolvedValue({
+  ok: true,
+  json: vi.fn().mockResolvedValue({}),
+  text: vi.fn().mockResolvedValue(''),
+});
