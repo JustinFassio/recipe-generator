@@ -159,7 +159,19 @@ async function ensureUsername(userId: string, username: string) {
     .upsert({ user_id: userId, username }, { onConflict: 'user_id' });
 
   if (error) {
-    logError(`Failed to set username '${username}' for user ${userId}:`, error);
+    if (
+      error.code === '23503' &&
+      error.message.includes('foreign key constraint')
+    ) {
+      logError(
+        `Foreign key constraint error for username '${username}': Profile may not exist for user ${userId}. Skipping username assignment.`
+      );
+    } else {
+      logError(
+        `Failed to set username '${username}' for user ${userId}:`,
+        error
+      );
+    }
   } else {
     logSuccess(`Username '${username}' set for user ${userId}`);
   }
@@ -181,7 +193,11 @@ async function createProfile(
 
   if (error) {
     logError(`Failed to create profile for user ${userId}:`, error);
+    return false;
   }
+
+  logSuccess(`Profile created/updated for user ${userId}`);
+  return true;
 }
 
 async function upsertSafety(userId: string, safety: SeedUser['safety']) {
@@ -224,13 +240,16 @@ export async function seedAllUsers() {
         user_metadata: { full_name: u.fullName },
       });
 
-    if (
-      createError &&
-      !String(createError.message).includes('already registered')
-    ) {
-      logError(`Failed creating user ${u.email}:`, createError.message);
-      process.exitCode = 1;
-      continue;
+    if (createError) {
+      if (String(createError.message).includes('already registered')) {
+        console.log(
+          `ℹ️  User ${u.email} already exists, continuing with existing user...`
+        );
+      } else {
+        logError(`Failed creating user ${u.email}:`, createError.message);
+        process.exitCode = 1;
+        continue;
+      }
     }
 
     // If user already exists, fetch it
@@ -256,9 +275,24 @@ export async function seedAllUsers() {
       continue;
     }
 
-    // Create related data
-    await ensureUsername(effectiveUserId, u.username);
-    await createProfile(effectiveUserId, u.fullName, u.profile || {});
+    // Create related data in correct order
+    // 1. First create the profile (required for usernames foreign key)
+    const profileCreated = await createProfile(
+      effectiveUserId,
+      u.fullName,
+      u.profile || {}
+    );
+
+    // 2. Then set the username (only if profile was created successfully)
+    if (profileCreated) {
+      await ensureUsername(effectiveUserId, u.username);
+    } else {
+      logError(
+        `Skipping username assignment for ${u.email} due to profile creation failure`
+      );
+    }
+
+    // 3. Finally create preferences (can be done in any order)
     await upsertSafety(effectiveUserId, u.safety);
     await upsertCooking(effectiveUserId, u.cooking);
   }
