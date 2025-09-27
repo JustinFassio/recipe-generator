@@ -49,31 +49,33 @@ export function RecipeViewPage() {
     authLoading,
   });
 
-  // Optimize: Use single query strategy to eliminate redundant API calls
-  // - Authenticated users: Use user query (can see both public + private recipes)
-  // - Unauthenticated users: Use public query (public recipes only)
+  // Query strategy: Try user query first (if authenticated), then fall back to public query
+  // - Authenticated users: Try user query first, then public query as fallback
+  // - Unauthenticated users: Use public query only
   const shouldFetchUser = !!user && !authLoading;
-  const shouldFetchPublic = !shouldFetchUser; // Only fetch public if not authenticated
+  const shouldFetchPublic = true; // Always enable public query as fallback
 
   console.log('🚀 [RecipeViewPage] Query optimization strategy:', {
     shouldFetchUser,
     shouldFetchPublic,
     hasUser: !!user,
     authLoading,
-    strategy: shouldFetchUser ? 'user-query-only' : 'public-query-only',
+    strategy: shouldFetchUser
+      ? 'user-first-public-fallback'
+      : 'public-query-only',
   });
-
-  const {
-    data: publicRecipe,
-    isLoading: publicLoading,
-    error: publicError,
-  } = usePublicRecipe(id!, { enabled: shouldFetchPublic });
 
   const {
     data: userRecipe,
     isLoading: userLoading,
     error: userError,
   } = useRecipe(shouldFetchUser ? id! : '');
+
+  const {
+    data: publicRecipe,
+    isLoading: publicLoading,
+    error: publicError,
+  } = usePublicRecipe(id!, { enabled: shouldFetchPublic });
 
   // Use whichever one succeeds (base recipe from database)
   const baseRecipe = userRecipe || publicRecipe;

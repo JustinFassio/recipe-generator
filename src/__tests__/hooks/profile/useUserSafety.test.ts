@@ -19,6 +19,8 @@ vi.mock('@/lib/user-preferences', () => ({
   getUserSafety: vi.fn(),
   updateUserSafety: vi.fn(),
   validateAllergies: vi.fn(),
+  getUserGroceries: vi.fn(),
+  updateUserGroceries: vi.fn(),
 }));
 
 describe('useUserSafety', () => {

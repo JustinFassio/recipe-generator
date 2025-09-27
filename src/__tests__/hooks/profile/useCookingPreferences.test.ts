@@ -18,6 +18,8 @@ vi.mock('@/hooks/use-toast', () => ({
 vi.mock('@/lib/user-preferences', () => ({
   getCookingPreferences: vi.fn(),
   updateCookingPreferences: vi.fn(),
+  getUserGroceries: vi.fn(),
+  updateUserGroceries: vi.fn(),
   MIN_SPICE_TOLERANCE: 1,
   MAX_SPICE_TOLERANCE: 5,
 }));

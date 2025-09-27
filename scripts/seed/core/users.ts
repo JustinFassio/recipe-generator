@@ -4,12 +4,7 @@
  */
 
 import { admin } from '../utils/client';
-import {
-  SeedUser,
-  logSuccess,
-  logError,
-  findUserByEmail,
-} from '../utils/shared';
+import { SeedUser, logSuccess, logError } from '../utils/shared';
 
 // Test users data
 export const seedUsers: SeedUser[] = [
@@ -159,7 +154,19 @@ async function ensureUsername(userId: string, username: string) {
     .upsert({ user_id: userId, username }, { onConflict: 'user_id' });
 
   if (error) {
-    logError(`Failed to set username '${username}' for user ${userId}:`, error);
+    if (
+      error.code === '23503' &&
+      error.message.includes('foreign key constraint')
+    ) {
+      logError(
+        `Foreign key constraint error for username '${username}': Profile may not exist for user ${userId}. Skipping username assignment.`
+      );
+    } else {
+      logError(
+        `Failed to set username '${username}' for user ${userId}:`,
+        error
+      );
+    }
   } else {
     logSuccess(`Username '${username}' set for user ${userId}`);
   }
@@ -181,7 +188,11 @@ async function createProfile(
 
   if (error) {
     logError(`Failed to create profile for user ${userId}:`, error);
+    return false;
   }
+
+  logSuccess(`Profile created/updated for user ${userId}`);
+  return true;
 }
 
 async function upsertSafety(userId: string, safety: SeedUser['safety']) {
@@ -214,8 +225,32 @@ async function upsertCooking(userId: string, cooking: SeedUser['cooking']) {
 export async function seedAllUsers() {
   console.log('🚀 Starting users seed...\n');
 
+  // Clear existing test users to ensure clean state
+  console.log('🧹 Clearing existing test users...');
+  const { data: existingUsers, error: listError } =
+    await admin.auth.admin.listUsers({
+      page: 1,
+      perPage: 100,
+    });
+
+  if (!listError && existingUsers?.users) {
+    const deletionPromises = [];
+    for (const user of existingUsers.users) {
+      if (user.email && seedUsers.some((u) => u.email === user.email)) {
+        console.log(`🗑️  Deleting existing test user: ${user.email}`);
+        deletionPromises.push(admin.auth.admin.deleteUser(user.id));
+      }
+    }
+    // Wait for all deletions to complete
+    await Promise.all(deletionPromises);
+    console.log('✅ All existing test users deleted');
+  }
+
   for (const u of seedUsers) {
-    // Create or fetch existing user
+    let effectiveUserId: string = '';
+
+    // Since we cleared all users, we should always create new ones
+    console.log(`👤 Creating user: ${u.email}`);
     const { data: created, error: createError } =
       await admin.auth.admin.createUser({
         email: u.email,
@@ -224,31 +259,12 @@ export async function seedAllUsers() {
         user_metadata: { full_name: u.fullName },
       });
 
-    if (
-      createError &&
-      !String(createError.message).includes('already registered')
-    ) {
+    if (createError) {
       logError(`Failed creating user ${u.email}:`, createError.message);
-      process.exitCode = 1;
       continue;
     }
 
-    // If user already exists, fetch it
-    const userId = created?.user?.id;
-    let effectiveUserId: string = userId || '';
-    if (!effectiveUserId) {
-      const { data: existing, error: listError } =
-        await admin.auth.admin.listUsers({
-          page: 1,
-          perPage: 100,
-        });
-      if (listError) throw listError;
-      const match = findUserByEmail(existing.users, u.email);
-      if (!match || !match.id) {
-        throw new Error(`Could not find or create user ${u.email}`);
-      }
-      effectiveUserId = match.id;
-    }
+    effectiveUserId = created?.user?.id || '';
 
     // Ensure we have a valid user ID before proceeding
     if (!effectiveUserId) {
@@ -256,9 +272,27 @@ export async function seedAllUsers() {
       continue;
     }
 
-    // Create related data
-    await ensureUsername(effectiveUserId, u.username);
-    await createProfile(effectiveUserId, u.fullName, u.profile || {});
+    // Small delay to ensure user is fully created
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    // Create related data in correct order
+    // 1. First create the profile (required for usernames foreign key)
+    const profileCreated = await createProfile(
+      effectiveUserId,
+      u.fullName,
+      u.profile || {}
+    );
+
+    // 2. Then set the username (only if profile was created successfully)
+    if (profileCreated) {
+      await ensureUsername(effectiveUserId, u.username);
+    } else {
+      logError(
+        `Skipping username assignment for ${u.email} due to profile creation failure`
+      );
+    }
+
+    // 3. Finally create preferences (can be done in any order)
     await upsertSafety(effectiveUserId, u.safety);
     await upsertCooking(effectiveUserId, u.cooking);
   }

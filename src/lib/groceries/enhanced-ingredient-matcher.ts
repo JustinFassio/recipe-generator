@@ -42,7 +42,15 @@ export class EnhancedIngredientMatcher extends IngredientMatcher {
 
   constructor(groceries: Record<string, string[]>) {
     super(groceries);
-    this.loadGlobalIngredients();
+    // Don't load global ingredients in constructor - they should be loaded explicitly
+  }
+
+  /**
+   * Initialize the matcher by loading global ingredients
+   * This should be called before using the matcher for ingredient matching
+   */
+  async initialize(): Promise<void> {
+    await this.loadGlobalIngredients();
   }
 
   /**
