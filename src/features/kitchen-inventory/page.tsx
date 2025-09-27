@@ -161,12 +161,6 @@ export function KitchenInventoryPage() {
                   kitchen
                 </p>
               )}
-              {/* Debug: Show actual groceries state */}
-              {import.meta.env.DEV && (
-                <p className="text-xs text-gray-500">
-                  DEBUG: groceries={JSON.stringify(groceries.groceries)}
-                </p>
-              )}
               {groceries.getShoppingListCount() > 0 && (
                 <p className="text-sm text-orange-600 font-medium">
                   {groceries.getShoppingListCount()} item
