@@ -39,8 +39,31 @@ async function testApiProxy(endpoint: string): Promise<boolean> {
 
 describe('Dual Server Setup Integration', () => {
   beforeAll(async () => {
-    // Give servers time to start if they're starting
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    // Wait for both servers to be available
+    const maxRetries = 10;
+    const retryDelay = 2000;
+
+    for (let i = 0; i < maxRetries; i++) {
+      const frontendReady = await checkServerHealth(SERVERS.frontend);
+      const apiReady = await checkServerHealth(SERVERS.api);
+
+      if (frontendReady && apiReady) {
+        console.log('✅ Both servers are ready');
+        return;
+      }
+
+      console.log(`⏳ Waiting for servers... (attempt ${i + 1}/${maxRetries})`);
+      console.log(`   Frontend (5174): ${frontendReady ? '✅' : '❌'}`);
+      console.log(`   API (3000): ${apiReady ? '✅' : '❌'}`);
+
+      if (i < maxRetries - 1) {
+        await new Promise((resolve) => setTimeout(resolve, retryDelay));
+      }
+    }
+
+    throw new Error(
+      'Servers did not start within the expected time. Please ensure both servers are running:\n  - Frontend: npm run dev:frontend\n  - API: npm run dev:api'
+    );
   });
 
   describe('Server Health Checks', () => {
