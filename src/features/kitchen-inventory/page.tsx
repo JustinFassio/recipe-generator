@@ -9,7 +9,7 @@ import {
 import { createDaisyUICardClasses } from '@/lib/card-migration';
 import { IngredientMatchingTest } from '@/components/groceries/ingredient-matching-test';
 import { GroceryCard } from '@/components/groceries/GroceryCard';
-import { Save, RefreshCw, Globe } from 'lucide-react';
+import { RefreshCw, Globe } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useGlobalIngredients } from '@/hooks/useGlobalIngredients';
 import { getCategories } from '@/lib/ingredients/repository';
@@ -57,12 +57,6 @@ export function KitchenInventoryPage() {
 
   const getCategoryCount = (category: string) => {
     return groceries.getCategoryCount(category);
-  };
-
-  const handleSave = async () => {
-    // React Query automatically handles saving when toggling ingredients
-    // This is now just a refresh to show current state
-    groceries.refetch();
   };
 
   const handleRefresh = async () => {
@@ -194,19 +188,6 @@ export function KitchenInventoryPage() {
                   className={`mr-2 h-4 w-4 ${groceries.loading ? 'animate-spin' : ''}`}
                 />
                 Refresh
-              </Button>
-              <Button
-                onClick={handleSave}
-                disabled={groceries.loading}
-                className="bg-orange-500 hover:bg-orange-600"
-              >
-                <Save className="mr-2 h-4 w-4" />
-                Save
-                {groceries.getShoppingListCount() > 0 &&
-                  ` (${groceries.getShoppingListCount()} in cart)`}
-                {/* Debug: Show shopping list count in button */}
-                {import.meta.env.DEV &&
-                  ` [DEBUG: ${groceries.getShoppingListCount()}]`}
               </Button>
             </div>
           </div>
