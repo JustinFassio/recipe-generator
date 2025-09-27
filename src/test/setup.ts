@@ -57,13 +57,43 @@ vi.mock('@/lib/supabase', () => ({
         })),
         insert: vi.fn(() => ({
           select: vi.fn(() => ({
-            single: vi.fn(() => Promise.resolve({ data: null, error: null })),
+            single: vi.fn(() =>
+              Promise.resolve({
+                data: {
+                  id: 'test-recipe-id',
+                  title: 'Test Recipe',
+                  ingredients: ['1 cup flour', '2 eggs', '1 cup sugar'],
+                  instructions:
+                    'Mix ingredients and bake at 350°F for 30 minutes.',
+                  user_id: 'test-user-id',
+                  is_public: false,
+                  created_at: '2024-01-01T00:00:00Z',
+                  updated_at: '2024-01-01T00:00:00Z',
+                },
+                error: null,
+              })
+            ),
           })),
         })),
         update: vi.fn(() => ({
           eq: vi.fn(() => ({
             select: vi.fn(() => ({
-              single: vi.fn(() => Promise.resolve({ data: null, error: null })),
+              single: vi.fn(() =>
+                Promise.resolve({
+                  data: {
+                    id: 'test-recipe-id',
+                    title: 'Test Recipe',
+                    ingredients: ['1 cup flour', '2 eggs', '1 cup sugar'],
+                    instructions:
+                      'Mix ingredients and bake at 350°F for 30 minutes.',
+                    user_id: 'test-user-id',
+                    is_public: false,
+                    created_at: '2024-01-01T00:00:00Z',
+                    updated_at: '2024-01-01T00:00:00Z',
+                  },
+                  error: null,
+                })
+              ),
             })),
           })),
         })),
@@ -260,4 +290,31 @@ global.fetch = vi.fn().mockResolvedValue({
   ok: true,
   json: vi.fn().mockResolvedValue({}),
   text: vi.fn().mockResolvedValue(''),
+  blob: vi.fn().mockResolvedValue(new Blob()),
 });
+
+// Mock recipe parser to prevent empty ingredients in tests
+vi.mock('@/lib/recipe-parser', () => ({
+  parseRecipeFromText: vi.fn().mockResolvedValue({
+    title: 'Test Recipe',
+    ingredients: ['1 cup flour', '2 eggs', '1 cup sugar'],
+    instructions: 'Mix ingredients and bake at 350°F for 30 minutes.',
+    categories: ['dessert'],
+  }),
+}));
+
+// Mock recipe standardizer
+vi.mock('@/lib/recipe-standardizer', () => ({
+  standardizeRecipeWithAI: vi.fn().mockResolvedValue({
+    title: 'Test Recipe',
+    ingredients: ['1 cup flour', '2 eggs', '1 cup sugar'],
+    instructions: 'Mix ingredients and bake at 350°F for 30 minutes.',
+    categories: ['dessert'],
+  }),
+  convertToParsedRecipe: vi.fn().mockReturnValue({
+    title: 'Test Recipe',
+    ingredients: ['1 cup flour', '2 eggs', '1 cup sugar'],
+    instructions: 'Mix ingredients and bake at 350°F for 30 minutes.',
+    categories: ['dessert'],
+  }),
+}));
