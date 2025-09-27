@@ -1,10 +1,12 @@
 // Polyfill for HTMLFormElement.prototype.requestSubmit (not implemented in jsdom)
-if (typeof window !== 'undefined' && !HTMLFormElement.prototype.requestSubmit) {
-  HTMLFormElement.prototype.requestSubmit = function () {
-    this.dispatchEvent(
-      new Event('submit', { bubbles: true, cancelable: true })
-    );
-  };
+if (typeof window !== 'undefined' && typeof HTMLFormElement !== 'undefined') {
+  if (!HTMLFormElement.prototype.requestSubmit) {
+    HTMLFormElement.prototype.requestSubmit = function () {
+      this.dispatchEvent(
+        new Event('submit', { bubbles: true, cancelable: true })
+      );
+    };
+  }
 }
 
 import '@testing-library/jest-dom';
@@ -25,6 +27,12 @@ vi.mock('@/lib/supabase', () => ({
         data: { subscription: { unsubscribe: vi.fn() } },
       })),
       signOut: vi.fn(() => Promise.resolve({ error: null })),
+      signInAnonymously: vi.fn(() =>
+        Promise.resolve({
+          data: { user: { id: 'anonymous-user', email: null } },
+          error: null,
+        })
+      ),
     },
     from: vi.fn(() => {
       const chain = {
