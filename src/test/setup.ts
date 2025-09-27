@@ -170,6 +170,11 @@ vi.mock('@/lib/user-preferences', () => ({
     spice_tolerance: 3,
   }),
   updateCookingPreferences: vi.fn().mockResolvedValue({ success: true }),
+  getUserGroceries: vi.fn().mockResolvedValue({
+    groceries: {},
+    shopping_list: {},
+  }),
+  updateUserGroceries: vi.fn().mockResolvedValue({ success: true }),
   validateAllergies: vi.fn((allergies: string[]) =>
     allergies.every((allergy) => allergy.trim().length > 0)
   ),
