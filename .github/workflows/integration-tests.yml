@@ -36,7 +36,7 @@ jobs:
           npx supabase db reset
           npm run seed:full
         env:
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN4dmRraXB5d21qeWNpdGhkZnBwIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NTgyMTMwNSwiZXhwIjoyMDcxMzk3MzA1fQ.hdQpuML-BDFl4CQhsVxUH3tlsuZsrDHf1kO9FAX9dTE' }}
           SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
 
       - name: Run integration tests with dual servers
@@ -45,7 +45,7 @@ jobs:
           NODE_ENV: test
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN4dmRraXB5d21qeWNpdGhkZnBwIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NTgyMTMwNSwiZXhwIjoyMDcxMzk3MzA1fQ.hdQpuML-BDFl4CQhsVxUH3tlsuZsrDHf1kO9FAX9dTE' }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           API_BASE_URL: http://localhost:3000
 
