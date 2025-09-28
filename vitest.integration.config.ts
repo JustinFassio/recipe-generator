@@ -5,7 +5,7 @@ import path from 'path';
 export default defineConfig({
   plugins: [react()],
   test: {
-    // No setup files - completely isolated for integration tests
+    setupFiles: ['./src/test/integration-setup.ts'],
     environment: 'node', // Use node environment for integration tests
     globals: true,
     testTimeout: 30000,

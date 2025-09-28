@@ -52,7 +52,9 @@ export function RecipeForm({
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [isOnline, setIsOnline] = useState(
+    typeof navigator !== 'undefined' ? navigator.onLine : true
+  );
   const [isMobile, setIsMobile] = useState(false);
   const [lastError, setLastError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
@@ -60,11 +62,15 @@ export function RecipeForm({
   // Mobile detection and network status monitoring
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
+      setIsMobile(
+        typeof navigator !== 'undefined'
+          ? /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+          : false
+      );
     };
 
     const updateOnlineStatus = () => {
-      setIsOnline(navigator.onLine);
+      setIsOnline(typeof navigator !== 'undefined' ? navigator.onLine : true);
     };
 
     checkMobile();
