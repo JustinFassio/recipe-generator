@@ -1,10 +1,24 @@
 // Polyfill for HTMLFormElement.prototype.requestSubmit (not implemented in jsdom)
 if (typeof window !== 'undefined' && typeof HTMLFormElement !== 'undefined') {
   if (!HTMLFormElement.prototype.requestSubmit) {
-    HTMLFormElement.prototype.requestSubmit = function () {
-      this.dispatchEvent(
-        new Event('submit', { bubbles: true, cancelable: true })
-      );
+    HTMLFormElement.prototype.requestSubmit = function (
+      submitter?: HTMLElement
+    ) {
+      // Create a submit event and dispatch it
+      const submitEvent = new Event('submit', {
+        bubbles: true,
+        cancelable: true,
+      });
+
+      // Add submitter property if provided
+      if (submitter) {
+        Object.defineProperty(submitEvent, 'submitter', {
+          value: submitter,
+          writable: false,
+        });
+      }
+
+      this.dispatchEvent(submitEvent);
     };
   }
 }

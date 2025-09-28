@@ -4,14 +4,7 @@ import { ProfileInfoForm } from '@/components/profile/basic/ProfileInfoForm';
 import { useProfileBasics } from '@/hooks/profile/useProfileBasics';
 import { useUsernameAvailability } from '@/hooks/profile/useUsernameAvailability';
 
-// Polyfill for HTMLFormElement.prototype.requestSubmit (not implemented in jsdom)
-if (!HTMLFormElement.prototype.requestSubmit) {
-  HTMLFormElement.prototype.requestSubmit = function () {
-    this.dispatchEvent(
-      new Event('submit', { bubbles: true, cancelable: true })
-    );
-  };
-}
+// requestSubmit polyfill is handled in global test setup
 
 // Mock the hooks
 vi.mock('@/hooks/profile/useProfileBasics');
