@@ -57,11 +57,14 @@ const createdRecipeIds: string[] = [];
 
 describe('Recipe Critical Path Integration Tests', () => {
   beforeAll(async () => {
-    // Create a test user or use existing test user
-    const { data: user, error } = await supabase.auth.signInAnonymously();
+    // Use existing test user from seed data
+    const { data: user, error } = await supabase.auth.signInWithPassword({
+      email: 'alice@example.com',
+      password: 'Password123!'
+    });
     if (error) {
       console.warn(
-        'Could not create anonymous user, tests may fail:',
+        'Could not sign in test user, tests may fail:',
         error.message
       );
     } else {
