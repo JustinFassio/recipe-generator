@@ -12,104 +12,11 @@ if (typeof window !== 'undefined' && typeof HTMLFormElement !== 'undefined') {
 import '@testing-library/jest-dom';
 import { vi } from 'vitest';
 
-// Mock environment variables
+// Enhanced Supabase mock with full functionality
+import { createEnhancedSupabaseMock } from './mocks/enhanced-supabase-mock';
+
 vi.mock('@/lib/supabase', () => ({
-  supabase: {
-    auth: {
-      getUser: vi.fn(() =>
-        Promise.resolve({
-          data: { user: { id: 'test-user-id', email: 'test@example.com' } },
-          error: null,
-        })
-      ),
-      getSession: vi.fn(() =>
-        Promise.resolve({
-          data: { session: null },
-          error: null,
-        })
-      ),
-      onAuthStateChange: vi.fn(() => ({
-        data: { subscription: { unsubscribe: vi.fn() } },
-      })),
-      signOut: vi.fn(() => Promise.resolve({ error: null })),
-      signInAnonymously: vi.fn(() =>
-        Promise.resolve({
-          data: { user: { id: 'anonymous-user', email: null } },
-          error: null,
-        })
-      ),
-    },
-    from: vi.fn(() => {
-      const chain = {
-        select: vi.fn(() => ({
-          // support both select().eq().single() and select().order()
-          eq: vi.fn(() => ({
-            single: vi.fn(() => Promise.resolve({ data: null, error: null })),
-          })),
-          order: vi.fn(() => ({
-            limit: vi.fn(() => Promise.resolve({ data: [], error: null })),
-          })),
-          single: vi.fn(() => Promise.resolve({ data: null, error: null })),
-          limit: vi.fn(() => Promise.resolve({ data: [], error: null })),
-        })),
-        eq: vi.fn(() => ({
-          single: vi.fn(() => Promise.resolve({ data: null, error: null })),
-        })),
-        insert: vi.fn(() => ({
-          select: vi.fn(() => ({
-            single: vi.fn(() =>
-              Promise.resolve({
-                data: {
-                  id: 'test-recipe-id',
-                  title: 'Test Recipe',
-                  ingredients: ['1 cup flour', '2 eggs', '1 cup milk'],
-                  instructions:
-                    'Mix ingredients and bake at 350°F for 20 minutes.',
-                  user_id: 'test-user-id',
-                  is_public: false,
-                  created_at: '2024-01-01T00:00:00Z',
-                  updated_at: '2024-01-01T00:00:00Z',
-                },
-                error: null,
-              })
-            ),
-          })),
-        })),
-        update: vi.fn(() => ({
-          eq: vi.fn(() => ({
-            select: vi.fn(() => ({
-              single: vi.fn(() =>
-                Promise.resolve({
-                  data: {
-                    id: 'test-recipe-id',
-                    title: 'Test Recipe',
-                    ingredients: ['1 cup flour', '2 eggs', '1 cup milk'],
-                    instructions:
-                      'Mix ingredients and bake at 350°F for 20 minutes.',
-                    user_id: 'test-user-id',
-                    is_public: false,
-                    created_at: '2024-01-01T00:00:00Z',
-                    updated_at: '2024-01-01T00:00:00Z',
-                  },
-                  error: null,
-                })
-              ),
-            })),
-          })),
-        })),
-        delete: vi.fn(() => ({
-          eq: vi.fn(() => Promise.resolve({ error: null })),
-        })),
-      };
-      return chain;
-    }),
-    storage: {
-      from: vi.fn(() => ({
-        upload: vi.fn(() => Promise.resolve({ error: null })),
-        getPublicUrl: vi.fn(() => ({ data: { publicUrl: 'test-url' } })),
-      })),
-    },
-  },
+  supabase: createEnhancedSupabaseMock(),
 }));
 
 // Mock React Query with proper implementation
@@ -293,28 +200,29 @@ global.fetch = vi.fn().mockResolvedValue({
   blob: vi.fn().mockResolvedValue(new Blob()),
 });
 
-// Mock recipe parser to prevent empty ingredients in tests
-vi.mock('@/lib/recipe-parser', () => ({
-  parseRecipeFromText: vi.fn().mockResolvedValue({
-    title: 'Test Recipe',
-    ingredients: ['1 cup flour', '2 eggs', '1 cup milk'],
-    instructions: 'Mix ingredients and bake at 350°F for 20 minutes.',
-    categories: ['Course: Dessert', 'Cuisine: American'],
-  }),
-}));
+// Mock recipe parser to prevent empty ingredients in tests - but not for recipe parsing tests
+// Note: This mock is disabled to allow recipe parsing tests to use the real implementation
+// vi.mock('@/lib/recipe-parser', () => ({
+//   parseRecipeFromText: vi.fn().mockResolvedValue({
+//     title: 'Test Recipe',
+//     ingredients: ['1 cup flour', '2 eggs', '1 cup milk'],
+//     instructions: 'Mix ingredients and bake at 350°F for 20 minutes.',
+//     categories: ['Course: Dessert', 'Cuisine: American'],
+//   }),
+// }));
 
-// Mock recipe standardizer
-vi.mock('@/lib/recipe-standardizer', () => ({
-  standardizeRecipeWithAI: vi.fn().mockResolvedValue({
-    title: 'Test Recipe',
-    ingredients: ['1 cup flour', '2 eggs', '1 cup milk'],
-    instructions: 'Mix ingredients and bake at 350°F for 20 minutes.',
-    categories: ['Course: Dessert', 'Cuisine: American'],
-  }),
-  convertToParsedRecipe: vi.fn().mockReturnValue({
-    title: 'Test Recipe',
-    ingredients: ['1 cup flour', '2 eggs', '1 cup milk'],
-    instructions: 'Mix ingredients and bake at 350°F for 20 minutes.',
-    categories: ['Course: Dessert', 'Cuisine: American'],
-  }),
-}));
+// Mock recipe standardizer - disabled to allow recipe parsing tests to use real implementation
+// vi.mock('@/lib/recipe-standardizer', () => ({
+//   standardizeRecipeWithAI: vi.fn().mockResolvedValue({
+//     title: 'Test Recipe',
+//     ingredients: ['1 cup flour', '2 eggs', '1 cup milk'],
+//     instructions: 'Mix ingredients and bake at 350°F for 20 minutes.',
+//     categories: ['Course: Dessert', 'Cuisine: American'],
+//   }),
+//   convertToParsedRecipe: vi.fn().mockReturnValue({
+//     title: 'Test Recipe',
+//     ingredients: ['1 cup flour', '2 eggs', '1 cup milk'],
+//     instructions: 'Mix ingredients and bake at 350°F for 20 minutes.',
+//     categories: ['Course: Dessert', 'Cuisine: American'],
+//   }),
+// }));
