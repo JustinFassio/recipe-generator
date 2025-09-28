@@ -9,6 +9,7 @@ import { describe, it, expect, beforeAll } from 'vitest';
 const SERVERS = {
   frontend: 'http://localhost:5174',
   api: 'http://localhost:3000',
+  apiAlt: 'http://localhost:3001', // Vercel may use 3001 if 3000 is busy
 };
 
 // Helper function to check if a server is running
@@ -63,15 +64,25 @@ describe('Dual Server Setup Integration', () => {
     for (let i = 0; i < maxRetries; i++) {
       const frontendReady = await checkServerHealth(SERVERS.frontend);
       const apiReady = await checkServerHealth(SERVERS.api, '/api/health');
+      const apiAltReady = await checkServerHealth(
+        SERVERS.apiAlt,
+        '/api/health'
+      );
 
-      if (frontendReady && apiReady) {
+      if (frontendReady && (apiReady || apiAltReady)) {
         console.log('✅ Both servers are ready');
+        if (apiAltReady && !apiReady) {
+          console.log(
+            '   Note: API server is running on port 3001 (Vercel port conflict resolution)'
+          );
+        }
         return;
       }
 
       console.log(`⏳ Waiting for servers... (attempt ${i + 1}/${maxRetries})`);
       console.log(`   Frontend (5174): ${frontendReady ? '✅' : '❌'}`);
       console.log(`   API (3000): ${apiReady ? '✅' : '❌'}`);
+      console.log(`   API (3001): ${apiAltReady ? '✅' : '❌'}`);
 
       if (i < maxRetries - 1) {
         await new Promise((resolve) => setTimeout(resolve, retryDelay));
