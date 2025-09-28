@@ -12,9 +12,10 @@ const SERVERS = {
 };
 
 // Helper function to check if a server is running
-async function checkServerHealth(url: string): Promise<boolean> {
+async function checkServerHealth(url: string, healthEndpoint?: string): Promise<boolean> {
   try {
-    const response = await fetch(url, {
+    const testUrl = healthEndpoint ? `${url}${healthEndpoint}` : url;
+    const response = await fetch(testUrl, {
       method: 'GET',
       signal: AbortSignal.timeout(5000),
     });
@@ -47,7 +48,7 @@ describe('Dual Server Setup Integration', () => {
 
     for (let i = 0; i < maxRetries; i++) {
       const frontendReady = await checkServerHealth(SERVERS.frontend);
-      const apiReady = await checkServerHealth(SERVERS.api);
+      const apiReady = await checkServerHealth(SERVERS.api, '/api/health');
 
       if (frontendReady && apiReady) {
         console.log('✅ Both servers are ready');
@@ -75,7 +76,7 @@ describe('Dual Server Setup Integration', () => {
     }, 10000);
 
     it('should have Vercel API server running on port 3000', async () => {
-      const isRunning = await checkServerHealth(SERVERS.api);
+      const isRunning = await checkServerHealth(SERVERS.api, '/api/health');
       expect(isRunning).toBe(true);
     }, 10000);
   });
