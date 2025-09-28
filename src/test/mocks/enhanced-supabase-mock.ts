@@ -160,7 +160,7 @@ const createQueryBuilder = (table: string) => {
       select: vi.fn(() => ({
         single: vi.fn(() => {
           const id = generateId(table.replace('s', ''));
-          const item = {
+          const item: Record<string, unknown> = {
             id,
             ...data,
             created_at: createTimestamp(),
@@ -176,14 +176,14 @@ const createQueryBuilder = (table: string) => {
                 id: versionId,
                 recipe_id: id,
                 version_number: 0,
-                title: (item.title as string) || 'Test Recipe',
-                ingredients: (item.ingredients as string[]) || [
+                title: (data.title as string) || 'Test Recipe',
+                ingredients: (data.ingredients as string[]) || [
                   '1 cup flour',
                   '2 eggs',
                   '1 cup milk',
                 ],
                 instructions:
-                  (item.instructions as string) ||
+                  (data.instructions as string) ||
                   'Mix ingredients and bake at 350°F for 20 minutes.',
                 created_at: createTimestamp(),
                 updated_at: createTimestamp(),
@@ -212,7 +212,7 @@ const createQueryBuilder = (table: string) => {
       })),
     })),
     update: vi.fn((data: Record<string, unknown>) => ({
-      eq: vi.fn((column: string, value: unknown) => ({
+      eq: vi.fn((_column: string, value: unknown) => ({
         select: vi.fn(() => ({
           single: vi.fn(() => {
             let item: Record<string, unknown> | null = null;
