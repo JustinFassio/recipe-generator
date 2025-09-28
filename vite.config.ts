@@ -14,7 +14,7 @@ export default defineConfig({
     // This proxy forwards /api requests to the local Vercel dev server
     proxy: {
       '/api': {
-        target: 'http://localhost:3000',
+        target: 'http://localhost:3001',
         changeOrigin: true,
         configure: (proxy) => {
           // Avoid proxy errors breaking HMR
