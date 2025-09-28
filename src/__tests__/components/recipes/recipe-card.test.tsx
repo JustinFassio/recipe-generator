@@ -1,15 +1,15 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { RecipeCard } from '@/components/recipes/recipe-card';
-import { useDeleteRecipe } from '@/hooks/use-recipes';
-import { recipeApi } from '@/lib/api';
-import { useAuth } from '@/contexts/AuthProvider';
+import { RecipeCard } from '../../../components/recipes/recipe-card';
+import { useDeleteRecipe } from '../../../hooks/use-recipes';
+import { recipeApi } from '../../../lib/api';
+import { useAuth } from '../../../contexts/AuthProvider';
 
 // Mock the hooks and API
-vi.mock('@/hooks/use-recipes');
-vi.mock('@/lib/api');
-vi.mock('@/contexts/AuthProvider');
+vi.mock('../../../hooks/use-recipes');
+vi.mock('../../../lib/api');
+vi.mock('../../../contexts/AuthProvider');
 
 const mockUseDeleteRecipe = useDeleteRecipe as vi.MockedFunction<
   typeof useDeleteRecipe
@@ -53,7 +53,7 @@ describe('RecipeCard', () => {
       mutate: vi.fn(),
       isLoading: false,
       error: null,
-    } as ReturnType<typeof useDeleteRecipe>);
+    } as unknown as ReturnType<typeof useDeleteRecipe>);
 
     // Mock recipeApi
     mockRecipeApi.toggleRecipePublic = vi.fn().mockResolvedValue(undefined);
@@ -63,7 +63,7 @@ describe('RecipeCard', () => {
       user: { id: 'user1' },
       isLoading: false,
       error: null,
-    } as ReturnType<typeof useAuth>);
+    } as unknown as ReturnType<typeof useAuth>);
   });
 
   // Helper function to get action buttons
@@ -221,7 +221,7 @@ describe('RecipeCard', () => {
       mutate: mockMutate,
       isLoading: false,
       error: null,
-    } as ReturnType<typeof useDeleteRecipe>);
+    } as unknown as ReturnType<typeof useDeleteRecipe>);
 
     render(
       <TestWrapper>
@@ -283,7 +283,7 @@ describe('RecipeCard', () => {
       user: { id: 'different-user' },
       isLoading: false,
       error: null,
-    } as ReturnType<typeof useAuth>);
+    } as unknown as ReturnType<typeof useAuth>);
 
     render(
       <TestWrapper>
@@ -333,7 +333,7 @@ describe('RecipeCard', () => {
       mutate: vi.fn(),
       isLoading: false,
       error: new Error('Delete failed'),
-    } as ReturnType<typeof useDeleteRecipe>);
+    } as unknown as ReturnType<typeof useDeleteRecipe>);
 
     render(
       <TestWrapper>
@@ -358,7 +358,7 @@ describe('RecipeCard', () => {
       mutate: vi.fn(),
       isLoading: true,
       error: null,
-    } as ReturnType<typeof useDeleteRecipe>);
+    } as unknown as ReturnType<typeof useDeleteRecipe>);
 
     render(
       <TestWrapper>
