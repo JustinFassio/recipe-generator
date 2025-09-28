@@ -12,7 +12,10 @@ const SERVERS = {
 };
 
 // Helper function to check if a server is running
-async function checkServerHealth(url: string, healthEndpoint?: string): Promise<boolean> {
+async function checkServerHealth(
+  url: string,
+  healthEndpoint?: string
+): Promise<boolean> {
   try {
     const testUrl = healthEndpoint ? `${url}${healthEndpoint}` : url;
     const response = await fetch(testUrl, {
