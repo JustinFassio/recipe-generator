@@ -7,10 +7,10 @@
 import { vi } from 'vitest';
 
 // Mock data storage
-const mockRecipes = new Map();
-const mockVersions = new Map();
-const mockProfiles = new Map();
-const mockUsernames = new Map();
+const mockRecipes = new Map<string, Record<string, unknown>>();
+const mockVersions = new Map<string, Record<string, unknown>>();
+const mockProfiles = new Map<string, Record<string, unknown>>();
+const mockUsernames = new Map<string, Record<string, unknown>>();
 
 // Helper function to generate realistic IDs
 const generateId = (prefix: string = 'test') =>
@@ -18,23 +18,6 @@ const generateId = (prefix: string = 'test') =>
 
 // Helper function to create realistic timestamps
 const createTimestamp = () => new Date().toISOString();
-
-// Helper function to create realistic version data
-const createMockVersion = (
-  recipeId: string,
-  versionNumber: number = 0,
-  overrides: Record<string, unknown> = {}
-) => ({
-  id: generateId('version'),
-  recipe_id: recipeId,
-  version_number: versionNumber,
-  title: 'Test Recipe',
-  ingredients: ['1 cup flour', '2 eggs', '1 cup milk'],
-  instructions: 'Mix ingredients and bake at 350°F for 20 minutes.',
-  created_at: createTimestamp(),
-  updated_at: createTimestamp(),
-  ...overrides,
-});
 
 // Query state interface
 interface QueryState {
@@ -49,7 +32,7 @@ interface QueryState {
 const executeQuery = (queryState: QueryState) => {
   const { table, filters, orderBy, limitCount, singleResult } = queryState;
 
-  let data: unknown[] = [];
+  let data: Record<string, unknown>[] = [];
 
   // Get data based on table
   switch (table) {
@@ -74,28 +57,21 @@ const executeQuery = (queryState: QueryState) => {
   for (const filter of filters) {
     switch (filter.type) {
       case 'eq':
-        data = data.filter((item: unknown) => {
-          const obj = item as Record<string, unknown>;
-          return obj[filter.column] === filter.value;
-        });
+        data = data.filter((item) => item[filter.column] === filter.value);
         break;
       case 'contains':
-        data = data.filter((item: unknown) => {
-          const obj = item as Record<string, unknown>;
-          const arrayValue = obj[filter.column] as unknown[];
-          return arrayValue?.some((val: unknown) =>
-            (filter.value as unknown[]).includes(val)
-          );
+        data = data.filter((item) => {
+          const value = item[filter.column];
+          return Array.isArray(value) && value.includes(filter.value);
         });
         break;
       case 'overlaps':
-        data = data.filter((item: unknown) => {
-          const obj = item as Record<string, unknown>;
-          const arrayValue = obj[filter.column] as unknown[];
-          return arrayValue?.some((val: unknown) =>
-            (filter.value as unknown[]).some((v: unknown) =>
-              String(val).includes(String(v))
-            )
+        data = data.filter((item) => {
+          const value = item[filter.column];
+          return (
+            Array.isArray(value) &&
+            Array.isArray(filter.value) &&
+            value.some((v) => filter.value.includes(v))
           );
         });
         break;
@@ -104,12 +80,10 @@ const executeQuery = (queryState: QueryState) => {
 
   // Apply order
   if (orderBy.length > 0) {
-    data.sort((a: unknown, b: unknown) => {
+    data.sort((a, b) => {
       for (const order of orderBy) {
-        const objA = a as Record<string, unknown>;
-        const objB = b as Record<string, unknown>;
-        const valA = objA[order.column];
-        const valB = objB[order.column];
+        const valA = a[order.column];
+        const valB = b[order.column];
         if (valA < valB) return order.ascending ? -1 : 1;
         if (valA > valB) return order.ascending ? 1 : -1;
       }
@@ -180,29 +154,7 @@ const createQueryBuilder = (table: string) => {
         }
       }
     ),
-  };
-  return builder;
-};
-
-// Enhanced Supabase mock
-export const createEnhancedSupabaseMock = () => ({
-  auth: {
-    getUser: vi.fn(() =>
-      Promise.resolve({ data: { user: null }, error: null })
-    ),
-    signInWithPassword: vi.fn(() =>
-      Promise.resolve({ data: { user: null }, error: null })
-    ),
-    signOut: vi.fn(() => Promise.resolve({ error: null })),
-    onAuthStateChange: vi.fn(() => ({
-      data: { subscription: { unsubscribe: vi.fn() } },
-    })),
-  },
-  from: vi.fn((table: string) => {
-    const builder = createQueryBuilder(table);
-
-    // Add insert method
-    builder.insert = vi.fn((data: Record<string, unknown>) => ({
+    insert: vi.fn((data: Record<string, unknown>) => ({
       select: vi.fn(() => ({
         single: vi.fn(() => {
           const id = generateId(table.replace('s', ''));
@@ -218,11 +170,22 @@ export const createEnhancedSupabaseMock = () => ({
             case 'recipes': {
               // Create version 0 when recipe is created
               const versionId = generateId('version');
-              const version = createMockVersion(id, 0, {
-                title: item.title,
-                ingredients: item.ingredients,
-                instructions: item.instructions,
-              });
+              const version = {
+                id: versionId,
+                recipe_id: id,
+                version_number: 0,
+                title: item.title || 'Test Recipe',
+                ingredients: item.ingredients || [
+                  '1 cup flour',
+                  '2 eggs',
+                  '1 cup milk',
+                ],
+                instructions:
+                  item.instructions ||
+                  'Mix ingredients and bake at 350°F for 20 minutes.',
+                created_at: createTimestamp(),
+                updated_at: createTimestamp(),
+              };
               mockVersions.set(versionId, version);
 
               // Set current_version_id on recipe
@@ -231,74 +194,63 @@ export const createEnhancedSupabaseMock = () => ({
               break;
             }
             case 'recipe_versions':
-            case 'recipe_content_versions': {
+            case 'recipe_content_versions':
               mockVersions.set(id, item);
               break;
-            }
-            case 'profiles': {
+            case 'profiles':
               mockProfiles.set(id, item);
               break;
-            }
-            case 'usernames': {
+            case 'usernames':
               mockUsernames.set(id, item);
               break;
-            }
           }
 
           return Promise.resolve({ data: item, error: null });
         }),
       })),
-    }));
-
-    // Add update method
-    builder.update = vi.fn((data: Record<string, unknown>) => ({
+    })),
+    update: vi.fn((data: Record<string, unknown>) => ({
       eq: vi.fn((column: string, value: unknown) => ({
         select: vi.fn(() => ({
           single: vi.fn(() => {
-            let item: unknown = null;
+            let item: Record<string, unknown> | null = null;
             switch (table) {
-              case 'recipes': {
-                item = mockRecipes.get(value);
+              case 'recipes':
+                item = mockRecipes.get(value as string);
                 if (item) {
                   Object.assign(item, data, { updated_at: createTimestamp() });
                   mockRecipes.set(value as string, item);
                 }
                 break;
-              }
               case 'recipe_versions':
-              case 'recipe_content_versions': {
-                item = mockVersions.get(value);
+              case 'recipe_content_versions':
+                item = mockVersions.get(value as string);
                 if (item) {
                   Object.assign(item, data, { updated_at: createTimestamp() });
                   mockVersions.set(value as string, item);
                 }
                 break;
-              }
-              case 'profiles': {
-                item = mockProfiles.get(value);
+              case 'profiles':
+                item = mockProfiles.get(value as string);
                 if (item) {
                   Object.assign(item, data, { updated_at: createTimestamp() });
                   mockProfiles.set(value as string, item);
                 }
                 break;
-              }
-              case 'usernames': {
-                item = mockUsernames.get(value);
+              case 'usernames':
+                item = mockUsernames.get(value as string);
                 if (item) {
                   Object.assign(item, data, { updated_at: createTimestamp() });
                   mockUsernames.set(value as string, item);
                 }
                 break;
-              }
             }
             return Promise.resolve({ data: item, error: null });
           }),
         })),
       })),
-    }));
-
-    // Add delete method
-    builder.delete = vi.fn(() => ({
+    })),
+    delete: vi.fn(() => ({
       eq: vi.fn((column: string, value: unknown) => {
         switch (table) {
           case 'recipes':
@@ -317,20 +269,42 @@ export const createEnhancedSupabaseMock = () => ({
         }
         return Promise.resolve({ error: null });
       }),
-    }));
+    })),
+  };
 
-    return builder;
-  }),
+  return builder;
+};
+
+export const createEnhancedSupabaseMock = () => ({
+  auth: {
+    getUser: vi.fn().mockResolvedValue({
+      data: { user: { id: 'test-user-id', email: 'test@example.com' } },
+      error: null,
+    }),
+    signInWithPassword: vi.fn().mockResolvedValue({
+      data: { user: { id: 'test-user-id', email: 'test@example.com' } },
+      error: null,
+    }),
+    signUp: vi.fn().mockResolvedValue({
+      data: { user: { id: 'test-user-id', email: 'test@example.com' } },
+      error: null,
+    }),
+    signOut: vi.fn().mockResolvedValue({ error: null }),
+    onAuthStateChange: vi.fn().mockReturnValue({
+      data: { subscription: { unsubscribe: vi.fn() } },
+    }),
+  },
+  from: vi.fn((table: string) => createQueryBuilder(table)),
   storage: {
     from: vi.fn(() => ({
-      upload: vi.fn(() =>
-        Promise.resolve({ data: { path: 'test-path' }, error: null })
-      ),
-      download: vi.fn(() => Promise.resolve({ data: new Blob(), error: null })),
-      remove: vi.fn(() => Promise.resolve({ data: [], error: null })),
-      getPublicUrl: vi.fn(() => ({
-        data: { publicUrl: 'https://example.com/test' },
-      })),
+      upload: vi
+        .fn()
+        .mockResolvedValue({ data: { path: 'test-path' }, error: null }),
+      download: vi.fn().mockResolvedValue({ data: new Blob(), error: null }),
+      remove: vi.fn().mockResolvedValue({ data: null, error: null }),
+      getPublicUrl: vi
+        .fn()
+        .mockReturnValue({ data: { publicUrl: 'https://example.com/test' } }),
     })),
   },
 });
