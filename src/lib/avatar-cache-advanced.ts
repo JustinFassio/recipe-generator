@@ -207,8 +207,8 @@ class AdvancedAvatarCache {
 
           if (response.ok) {
             const blob = await response.blob();
-            const etag = response.headers.get('etag');
-            const lastModified = response.headers.get('last-modified');
+            const etag = response.headers?.get('etag');
+            const lastModified = response.headers?.get('last-modified');
 
             this.setCached(
               originalUrl,

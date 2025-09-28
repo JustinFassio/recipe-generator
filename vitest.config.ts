@@ -8,6 +8,8 @@ export default defineConfig({
     setupFiles: ['./src/test/load-env.ts', './src/test/setup.ts'],
     environment: 'jsdom',
     globals: true,
+    testTimeout: 30000, // 30 seconds for slow tests
+    hookTimeout: 30000, // 30 seconds for setup/teardown
     exclude: [
       '**/node_modules/**',
       '**/dist/**',

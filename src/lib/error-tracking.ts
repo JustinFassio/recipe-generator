@@ -74,8 +74,9 @@ class ErrorTracker {
         message,
         details: {
           ...details,
-          userAgent: navigator?.userAgent,
-          url: window?.location?.href,
+          userAgent:
+            typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
+          url: typeof window !== 'undefined' ? window.location.href : undefined,
         },
         resolved: false,
         count: 1,
@@ -180,6 +181,11 @@ class ErrorTracker {
 
   // Setup global error handlers
   private setupGlobalErrorHandlers() {
+    // Only setup handlers in browser environment
+    if (typeof window === 'undefined') {
+      return;
+    }
+
     // Catch unhandled JavaScript errors
     window.addEventListener('error', (event) => {
       this.trackError('error', 'ui', event.message, {
@@ -202,9 +208,7 @@ class ErrorTracker {
     });
 
     // Catch React errors (if using error boundary)
-    if (typeof window !== 'undefined') {
-      (window as unknown as Record<string, unknown>).__ERROR_TRACKER__ = this;
-    }
+    (window as unknown as Record<string, unknown>).__ERROR_TRACKER__ = this;
   }
 
   // Check if any alert rules should be triggered

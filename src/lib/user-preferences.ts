@@ -332,16 +332,24 @@ export async function getUserGroceries(
  */
 export async function updateUserGroceries(
   userId: string,
-  groceries: Record<string, string[]>
+  groceries: Record<string, string[]>,
+  shoppingList?: Record<string, string>
 ): Promise<{ success: boolean; error?: string }> {
   try {
     logger.debug('Updating user groceries for user:', userId);
 
-    const { error } = await supabase.from('user_groceries').upsert({
+    const updateData: Record<string, unknown> = {
       user_id: userId,
       groceries,
       updated_at: new Date().toISOString(),
-    });
+    };
+
+    // Include shopping_list if provided
+    if (shoppingList !== undefined) {
+      updateData.shopping_list = shoppingList;
+    }
+
+    const { error } = await supabase.from('user_groceries').upsert(updateData);
 
     if (error) {
       logger.error('Error updating user groceries:', error);

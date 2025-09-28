@@ -1,72 +1,36 @@
 // Polyfill for HTMLFormElement.prototype.requestSubmit (not implemented in jsdom)
-if (typeof window !== 'undefined' && !HTMLFormElement.prototype.requestSubmit) {
-  HTMLFormElement.prototype.requestSubmit = function () {
-    this.dispatchEvent(
-      new Event('submit', { bubbles: true, cancelable: true })
-    );
-  };
+if (typeof window !== 'undefined' && typeof HTMLFormElement !== 'undefined') {
+  if (!HTMLFormElement.prototype.requestSubmit) {
+    HTMLFormElement.prototype.requestSubmit = function (
+      submitter?: HTMLElement
+    ) {
+      // Create a submit event and dispatch it
+      const submitEvent = new Event('submit', {
+        bubbles: true,
+        cancelable: true,
+      });
+
+      // Add submitter property if provided
+      if (submitter) {
+        Object.defineProperty(submitEvent, 'submitter', {
+          value: submitter,
+          writable: false,
+        });
+      }
+
+      this.dispatchEvent(submitEvent);
+    };
+  }
 }
 
 import '@testing-library/jest-dom';
 import { vi } from 'vitest';
 
-// Mock environment variables
+// Enhanced Supabase mock with full functionality
+import { createEnhancedSupabaseMock } from './mocks/enhanced-supabase-mock';
+
 vi.mock('@/lib/supabase', () => ({
-  supabase: {
-    auth: {
-      getUser: vi.fn(),
-      getSession: vi.fn(() =>
-        Promise.resolve({
-          data: { session: null },
-          error: null,
-        })
-      ),
-      onAuthStateChange: vi.fn(() => ({
-        data: { subscription: { unsubscribe: vi.fn() } },
-      })),
-      signOut: vi.fn(() => Promise.resolve({ error: null })),
-    },
-    from: vi.fn(() => {
-      const chain = {
-        select: vi.fn(() => ({
-          // support both select().eq().single() and select().order()
-          eq: vi.fn(() => ({
-            single: vi.fn(() => Promise.resolve({ data: null, error: null })),
-          })),
-          order: vi.fn(() => ({
-            limit: vi.fn(() => Promise.resolve({ data: [], error: null })),
-          })),
-          single: vi.fn(() => Promise.resolve({ data: null, error: null })),
-          limit: vi.fn(() => Promise.resolve({ data: [], error: null })),
-        })),
-        eq: vi.fn(() => ({
-          single: vi.fn(() => Promise.resolve({ data: null, error: null })),
-        })),
-        insert: vi.fn(() => ({
-          select: vi.fn(() => ({
-            single: vi.fn(() => Promise.resolve({ data: null, error: null })),
-          })),
-        })),
-        update: vi.fn(() => ({
-          eq: vi.fn(() => ({
-            select: vi.fn(() => ({
-              single: vi.fn(() => Promise.resolve({ data: null, error: null })),
-            })),
-          })),
-        })),
-        delete: vi.fn(() => ({
-          eq: vi.fn(() => Promise.resolve({ error: null })),
-        })),
-      };
-      return chain;
-    }),
-    storage: {
-      from: vi.fn(() => ({
-        upload: vi.fn(() => Promise.resolve({ error: null })),
-        getPublicUrl: vi.fn(() => ({ data: { publicUrl: 'test-url' } })),
-      })),
-    },
-  },
+  supabase: createEnhancedSupabaseMock(),
 }));
 
 // Mock React Query with proper implementation
@@ -121,6 +85,16 @@ vi.mock('react-router-dom', () => ({
   useParams: vi.fn(() => ({})),
 }));
 
+// Mock API Client
+vi.mock('@/lib/api-client', () => ({
+  APIClient: vi.fn().mockImplementation(() => ({
+    chatWithPersona: vi.fn().mockResolvedValue({
+      response: 'Mocked AI response',
+      usage: { prompt_tokens: 10, completion_tokens: 20, total_tokens: 30 },
+    }),
+  })),
+}));
+
 // Mock toast
 vi.mock('@/hooks/use-toast', () => ({
   toast: vi.fn(),
@@ -170,6 +144,11 @@ vi.mock('@/lib/user-preferences', () => ({
     spice_tolerance: 3,
   }),
   updateCookingPreferences: vi.fn().mockResolvedValue({ success: true }),
+  getUserGroceries: vi.fn().mockResolvedValue({
+    groceries: {},
+    shopping_list: {},
+  }),
+  updateUserGroceries: vi.fn().mockResolvedValue({ success: true }),
   validateAllergies: vi.fn((allergies: string[]) =>
     allergies.every((allergy) => allergy.trim().length > 0)
   ),
@@ -226,3 +205,38 @@ global.IntersectionObserver = vi.fn().mockImplementation(() => ({
   unobserve: vi.fn(),
   disconnect: vi.fn(),
 }));
+
+// Mock global fetch to prevent real HTTP requests during tests
+global.fetch = vi.fn().mockResolvedValue({
+  ok: true,
+  json: vi.fn().mockResolvedValue({}),
+  text: vi.fn().mockResolvedValue(''),
+  blob: vi.fn().mockResolvedValue(new Blob()),
+});
+
+// Mock recipe parser to prevent empty ingredients in tests - but not for recipe parsing tests
+// Note: This mock is disabled to allow recipe parsing tests to use the real implementation
+// vi.mock('@/lib/recipe-parser', () => ({
+//   parseRecipeFromText: vi.fn().mockResolvedValue({
+//     title: 'Test Recipe',
+//     ingredients: ['1 cup flour', '2 eggs', '1 cup milk'],
+//     instructions: 'Mix ingredients and bake at 350°F for 20 minutes.',
+//     categories: ['Course: Dessert', 'Cuisine: American'],
+//   }),
+// }));
+
+// Mock recipe standardizer - disabled to allow recipe parsing tests to use real implementation
+// vi.mock('@/lib/recipe-standardizer', () => ({
+//   standardizeRecipeWithAI: vi.fn().mockResolvedValue({
+//     title: 'Test Recipe',
+//     ingredients: ['1 cup flour', '2 eggs', '1 cup milk'],
+//     instructions: 'Mix ingredients and bake at 350°F for 20 minutes.',
+//     categories: ['Course: Dessert', 'Cuisine: American'],
+//   }),
+//   convertToParsedRecipe: vi.fn().mockReturnValue({
+//     title: 'Test Recipe',
+//     ingredients: ['1 cup flour', '2 eggs', '1 cup milk'],
+//     instructions: 'Mix ingredients and bake at 350°F for 20 minutes.',
+//     categories: ['Course: Dessert', 'Cuisine: American'],
+//   }),
+// }));

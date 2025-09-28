@@ -1,152 +1,124 @@
-import { describe, it, expect, beforeAll } from 'vitest';
-import { createClient } from '@supabase/supabase-js';
+import { describe, it, expect, beforeAll, vi } from 'vitest';
+import { createDbClient, shouldRunDbTests } from './_utils/dbClient';
+import { setupDatabaseTests } from '../../test/database-setup';
 
-describe('Category Migration', () => {
-  let supabase: ReturnType<typeof createClient>;
+// Unmock Supabase for database tests
+vi.unmock('@supabase/supabase-js');
 
-  beforeAll(async () => {
-    // Skip if environment variables are not available (CI environment)
-    if (!process.env.VITE_SUPABASE_URL || !process.env.VITE_SUPABASE_ANON_KEY) {
-      console.warn(
-        'Skipping Category Migration tests - Supabase environment variables not available'
-      );
-      return;
-    }
+const RUN = shouldRunDbTests();
 
-    supabase = createClient(
-      process.env.VITE_SUPABASE_URL,
-      process.env.VITE_SUPABASE_ANON_KEY
-    );
-  });
+RUN
+  ? describe('Category Migration', () => {
+      let supabase: ReturnType<typeof createDbClient>;
 
-  it('should have categories column', async () => {
-    if (!supabase) {
-      console.warn('Skipping test - Supabase client not available');
-      return;
-    }
+      beforeAll(async () => {
+        console.log('shouldRunDbTests():', shouldRunDbTests());
+        console.log('Environment check:', {
+          url: process.env.VITE_SUPABASE_URL,
+          anonKey: process.env.VITE_SUPABASE_ANON_KEY,
+          serviceKey: process.env.SUPABASE_SERVICE_ROLE,
+          serviceKeyLength: process.env.SUPABASE_SERVICE_ROLE?.length,
+        });
 
-    const { data, error } = await supabase
-      .from('recipes')
-      .select('categories')
-      .limit(1);
+        // Use database setup for conditional mocking
+        supabase = setupDatabaseTests();
+        console.log('Supabase client created:', !!supabase);
+      });
 
-    expect(error).toBeNull();
-    expect(data).toBeDefined();
-  });
+      it('should have categories column', async () => {
+        const { data, error } = await supabase
+          .from('recipes')
+          .select('categories')
+          .limit(1);
 
-  it('should have categories column in schema', async () => {
-    if (!supabase) {
-      console.warn('Skipping test - Supabase client not available');
-      return;
-    }
+        console.log('Error details:', error);
+        expect(error).toBeNull();
+        expect(data).toBeDefined();
+      });
 
-    const { data, error } = await supabase
-      .from('recipes')
-      .select('categories')
-      .limit(1);
+      it('should have categories column in schema', async () => {
+        const { data, error } = await supabase
+          .from('recipes')
+          .select('categories')
+          .limit(1);
 
-    expect(error).toBeNull();
-    expect(data).toBeDefined();
-  });
+        expect(error).toBeNull();
+        expect(data).toBeDefined();
+      });
 
-  it('should support category filtering queries', async () => {
-    if (!supabase) {
-      console.warn('Skipping test - Supabase client not available');
-      return;
-    }
+      it('should support category filtering queries', async () => {
+        const { data, error } = await supabase
+          .from('recipes')
+          .select('*')
+          .contains('categories', ['Course: Main']);
 
-    const { data, error } = await supabase
-      .from('recipes')
-      .select('*')
-      .contains('categories', ['Course: Main']);
+        expect(error).toBeNull();
+        expect(Array.isArray(data)).toBe(true);
+      });
 
-    expect(error).toBeNull();
-    expect(Array.isArray(data)).toBe(true);
-  });
+      it('should support category filtering', async () => {
+        const { data, error } = await supabase
+          .from('recipes')
+          .select('*')
+          .contains('categories', ['Course: Main']);
 
-  it('should support category filtering', async () => {
-    if (!supabase) {
-      console.warn('Skipping test - Supabase client not available');
-      return;
-    }
+        expect(error).toBeNull();
+        expect(Array.isArray(data)).toBe(true);
+      });
 
-    const { data, error } = await supabase
-      .from('recipes')
-      .select('*')
-      .contains('categories', ['Course: Main']);
+      it('should support category overlap filtering', async () => {
+        const { data, error } = await supabase
+          .from('recipes')
+          .select('*')
+          .overlaps('categories', ['Course: Main', 'Course: Appetizer']);
 
-    expect(error).toBeNull();
-    expect(Array.isArray(data)).toBe(true);
-  });
+        expect(error).toBeNull();
+        expect(Array.isArray(data)).toBe(true);
+      });
 
-  it('should support category overlap filtering', async () => {
-    if (!supabase) {
-      console.warn('Skipping test - Supabase client not available');
-      return;
-    }
+      it('should verify category column structure', async () => {
+        const { data, error } = await supabase
+          .from('recipes')
+          .select('id, title, categories')
+          .limit(1);
 
-    const { data, error } = await supabase
-      .from('recipes')
-      .select('*')
-      .overlaps('categories', ['Course: Main', 'Course: Appetizer']);
+        expect(error).toBeNull();
+        if (data && data.length > 0) {
+          expect(data[0]).toHaveProperty('categories');
+          expect(Array.isArray(data[0].categories)).toBe(true);
+        }
+      });
 
-    expect(error).toBeNull();
-    expect(Array.isArray(data)).toBe(true);
-  });
+      it('should support category array operations', async () => {
+        // Test basic category operations
+        const { data, error } = await supabase
+          .from('recipes')
+          .select('id, title, categories')
+          .limit(5);
 
-  it('should verify category column structure', async () => {
-    if (!supabase) {
-      console.warn('Skipping test - Supabase client not available');
-      return;
-    }
+        expect(error).toBeNull();
+        expect(Array.isArray(data)).toBe(true);
 
-    const { data, error } = await supabase
-      .from('recipes')
-      .select('id, title, categories')
-      .limit(1);
+        if (data.length > 0) {
+          expect(data[0]).toHaveProperty('categories');
+          expect(Array.isArray(data[0].categories)).toBe(true);
+        }
+      });
 
-    expect(error).toBeNull();
-    if (data && data.length > 0) {
-      expect(data[0]).toHaveProperty('categories');
-      expect(Array.isArray(data[0].categories)).toBe(true);
-    }
-  });
+      it('should verify GIN index functionality', async () => {
+        // Test that the GIN index allows efficient category queries
+        const { data, error } = await supabase
+          .from('recipes')
+          .select('id, title, categories')
+          .contains('categories', ['Course: Main'])
+          .limit(10);
 
-  it('should support category array operations', async () => {
-    if (!supabase) {
-      console.warn('Skipping test - Supabase client not available');
-      return;
-    }
-
-    // Test basic category operations
-    const { data, error } = await supabase
-      .from('recipes')
-      .select('id, title, categories')
-      .limit(5);
-
-    expect(error).toBeNull();
-    expect(Array.isArray(data)).toBe(true);
-
-    if (data.length > 0) {
-      expect(data[0]).toHaveProperty('categories');
-      expect(Array.isArray(data[0].categories)).toBe(true);
-    }
-  });
-
-  it('should verify GIN index functionality', async () => {
-    if (!supabase) {
-      console.warn('Skipping test - Supabase client not available');
-      return;
-    }
-
-    // Test that the GIN index allows efficient category queries
-    const { data, error } = await supabase
-      .from('recipes')
-      .select('id, title, categories')
-      .contains('categories', ['Course: Main'])
-      .limit(10);
-
-    expect(error).toBeNull();
-    expect(Array.isArray(data)).toBe(true);
-  });
-});
+        expect(error).toBeNull();
+        expect(Array.isArray(data)).toBe(true);
+      });
+    })
+  : describe.skip('Category Migration', () => {
+      it('should skip tests when database is not available', () => {
+        // This test will be skipped when RUN is false
+      });
+    });

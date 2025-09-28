@@ -5,12 +5,13 @@ import { useGroceries } from '@/hooks/useGroceries';
 import { useUserGroceryCart } from '@/hooks/useUserGroceryCart';
 import { createDaisyUICardClasses } from '@/lib/card-migration';
 import { Button } from '@/components/ui/button';
-import { Search, Plus, Check, RefreshCw, Trash2, Shield } from 'lucide-react';
+import { Search, RefreshCw } from 'lucide-react';
 import {
   getCategoryMetadata,
   getAvailableCategories,
 } from '@/lib/groceries/category-mapping';
 import type { GlobalIngredient } from '@/lib/groceries/enhanced-ingredient-matcher';
+import { IngredientCard } from '@/components/groceries/IngredientCard';
 
 export default function GlobalIngredientsPage() {
   const {
@@ -183,119 +184,27 @@ export default function GlobalIngredientsPage() {
                     {items.map((ing) => {
                       // Use the new multi-category-aware cart checking
                       const isInUserCart = isInCart(ing.name); // Multi-category aware check
-                      const isSystemAvailable =
+                      const isSystemAvailable = Boolean(
                         ing.is_system &&
-                        !hiddenNormalizedNames.has(ing.normalized_name); // Available system ingredient
+                          !hiddenNormalizedNames.has(ing.normalized_name)
+                      ); // Available system ingredient
                       const isHidden = hiddenNormalizedNames.has(
                         ing.normalized_name
                       ); // Explicitly hidden
+
                       return (
-                        <div
+                        <IngredientCard
                           key={ing.id}
-                          className="flex items-center justify-between rounded border p-2 bg-white"
-                        >
-                          <div className="min-w-0">
-                            <div className="font-medium truncate flex items-center gap-2">
-                              <span className="truncate">{ing.name}</span>
-                              {isHidden && (
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  className="text-blue-600 p-0 h-auto min-h-0"
-                                  onClick={() =>
-                                    handleToggleHidden(
-                                      ing.name,
-                                      ing.normalized_name
-                                    )
-                                  }
-                                >
-                                  <Trash2 className="h-3 w-3 mr-1" /> Restore
-                                </Button>
-                              )}
-                            </div>
-                            {ing.synonyms?.length > 0 && (
-                              <div className="text-xs text-gray-500 truncate">
-                                aka: {ing.synonyms.slice(0, 2).join(', ')}
-                                {ing.synonyms.length > 2 ? '…' : ''}
-                              </div>
-                            )}
-                            {(ing.is_system || isHidden) && (
-                              <div className="mt-1 flex items-center gap-2">
-                                {ing.is_system && (
-                                  <span className="inline-flex items-center text-[10px] px-1.5 py-0.5 rounded bg-purple-50 text-purple-700 border border-purple-200">
-                                    <Shield className="h-3 w-3 mr-1" /> System
-                                  </span>
-                                )}
-                                {isHidden && (
-                                  <span className="inline-flex items-center text-[10px] px-1.5 py-0.5 rounded bg-gray-50 text-gray-700 border border-gray-200">
-                                    Hidden
-                                  </span>
-                                )}
-                              </div>
-                            )}
-                          </div>
-                          <div className="flex flex-col items-end gap-1">
-                            {/* Hide/Remove button for system ingredients */}
-                            {isSystemAvailable && (
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                className="text-red-600"
-                                onClick={() =>
-                                  handleToggleHidden(
-                                    ing.name,
-                                    ing.normalized_name
-                                  )
-                                }
-                              >
-                                <Trash2 className="h-3 w-3" /> Hide
-                              </Button>
-                            )}
-
-                            {/* Remove from cart button for user-added ingredients */}
-                            {!ing.is_system && isInUserCart && (
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                className="text-red-600"
-                                onClick={() =>
-                                  handleRemoveFromGroceries(ing.name)
-                                }
-                              >
-                                <Trash2 className="h-3 w-3" /> Remove
-                              </Button>
-                            )}
-
-                            {/* Status indicators and action buttons */}
-                            {isInUserCart && !isHidden ? (
-                              <span className="inline-flex items-center text-xs px-2 py-1 rounded border border-green-300 text-green-700 bg-green-50">
-                                <Check className="h-3 w-3 mr-1" /> Added
-                              </span>
-                            ) : isSystemAvailable && !isInUserCart ? (
-                              // Show "Add" button for system ingredients not in user's cart
-                              <Button
-                                size="sm"
-                                onClick={() =>
-                                  handleAddToGroceries(ing.category, ing.name)
-                                }
-                                disabled={groceries.loading || cartLoading}
-                              >
-                                <Plus className="h-3 w-3 mr-1" /> Add
-                              </Button>
-                            ) : !ing.is_system && !isInUserCart ? (
-                              // Show "Add" button for user-contributed ingredients not in cart
-                              <Button
-                                size="sm"
-                                onClick={() =>
-                                  handleAddToGroceries(ing.category, ing.name)
-                                }
-                                disabled={groceries.loading || cartLoading}
-                              >
-                                <Plus className="h-3 w-3 mr-1" /> Add
-                              </Button>
-                            ) : null}
-                          </div>
-                        </div>
+                          ingredient={ing}
+                          isInUserCart={isInUserCart}
+                          isSystemAvailable={isSystemAvailable}
+                          isHidden={isHidden}
+                          onAddToGroceries={handleAddToGroceries}
+                          onRemoveFromGroceries={handleRemoveFromGroceries}
+                          onToggleHidden={handleToggleHidden}
+                          loading={groceries.loading || false}
+                          cartLoading={cartLoading || false}
+                        />
                       );
                     })}
                   </div>

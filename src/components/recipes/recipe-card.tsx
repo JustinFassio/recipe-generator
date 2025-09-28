@@ -10,7 +10,6 @@ import {
   Share,
   Check,
   Loader2,
-  MoreHorizontal,
   ShoppingCart,
 } from 'lucide-react';
 import CategoryChip from '@/components/ui/CategoryChip';
@@ -70,8 +69,7 @@ export function RecipeCard({
   // Only show share button if explicitly requested and user owns the recipe
   const canShare = showShareButton && user?.id === recipe.user_id;
 
-  // Unique drawer ID for this recipe card
-  const drawerId = `recipe-actions-${recipe.id}`;
+  // No longer using drawer - removed for simplicity
 
   const getCompatibilityColor = (score: number) => {
     if (score >= 80) return 'text-green-600 bg-green-100 border-green-200';
@@ -118,275 +116,183 @@ export function RecipeCard({
 
   return (
     <>
-      {/* DaisyUI Drawer Component - Mobile-First Action Menu */}
-      <div className="drawer">
-        {/* Hidden checkbox to control drawer state */}
-        <input id={drawerId} type="checkbox" className="drawer-toggle" />
+      {/* Simple Card Layout - No Drawer */}
+      <div
+        className={`${createDaisyUICardClasses('bordered')} group relative overflow-hidden border border-gray-200 transition-all duration-200 hover:border-gray-300 hover:shadow-lg`}
+      >
+        {recipe.image_url && (
+          <div className="aspect-video overflow-hidden">
+            <img
+              src={getOptimizedImageUrl(
+                recipe.image_url,
+                recipe.updated_at,
+                recipe.created_at
+              )}
+              alt={recipe.title}
+              className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-105"
+            />
+          </div>
+        )}
 
-        {/* Main recipe card content */}
-        <div className="drawer-content">
-          <div
-            className={`${createDaisyUICardClasses('bordered')} group relative overflow-hidden border border-gray-200 transition-all duration-200 hover:border-gray-300 hover:shadow-lg`}
+        {/* Recipe Title - Above Image */}
+        <div className="px-4 pt-4 pb-2">
+          <h3
+            className={`${createDaisyUICardTitleClasses()} text-lg font-semibold leading-tight text-gray-800`}
+            title={recipe.title}
           >
-            {recipe.image_url && (
-              <div className="aspect-video overflow-hidden">
-                <img
-                  src={getOptimizedImageUrl(
-                    recipe.image_url,
-                    recipe.updated_at,
-                    recipe.created_at
-                  )}
-                  alt={recipe.title}
-                  className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-105"
-                />
+            {recipe.title.length > RECIPE_TITLE_MAX_LENGTH
+              ? `${recipe.title.substring(0, RECIPE_TITLE_MAX_LENGTH).trim()}...`
+              : recipe.title}
+          </h3>
+        </div>
+
+        {/* Action Buttons - Top Right */}
+        <div className="absolute top-2 right-2 z-20 flex space-x-1">
+          <button
+            onClick={() => onView?.(recipe)}
+            className="btn btn-circle btn-ghost btn-sm bg-white/95 hover:bg-white border border-gray-200 hover:border-gray-300 shadow-lg"
+            aria-label="View recipe"
+          >
+            <Eye className="h-4 w-4" />
+          </button>
+          {showEditDelete && (
+            <button
+              onClick={() => onEdit?.(recipe)}
+              className="btn btn-circle btn-ghost btn-sm bg-white/95 hover:bg-white border border-gray-200 hover:border-gray-300 shadow-lg"
+              aria-label="Edit recipe"
+            >
+              <Edit className="h-4 w-4" />
+            </button>
+          )}
+          {canShare && (
+            <button
+              onClick={handleShareToggle}
+              disabled={isSharing}
+              className="btn btn-circle btn-ghost btn-sm bg-white/95 hover:bg-white border border-gray-200 hover:border-gray-300 shadow-lg disabled:opacity-50"
+              aria-label={isPublic ? 'Unshare recipe' : 'Share recipe'}
+            >
+              {isSharing ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : isPublic ? (
+                <Check className="h-4 w-4" />
+              ) : (
+                <Share className="h-4 w-4" />
+              )}
+            </button>
+          )}
+          {showEditDelete && (
+            <button
+              onClick={() => setShowDeleteDialog(true)}
+              className="btn btn-circle btn-ghost btn-sm bg-white/95 hover:bg-white border border-red-200 hover:border-red-300 shadow-lg text-red-600 hover:text-red-700"
+              aria-label="Delete recipe"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          )}
+        </div>
+
+        <div className="card-body pb-3 pt-0">
+          <div className="space-y-3">
+            <div className="flex items-center justify-between text-sm text-gray-500">
+              <div className="flex items-center space-x-2">
+                <span
+                  className={createDaisyUIBadgeClasses('secondary', 'text-xs')}
+                >
+                  {recipe.ingredients.length} ingredients
+                </span>
+
+                {/* Grocery Compatibility Badge */}
+                {hasGroceries && ingredientMatching.isReady && (
+                  <Badge
+                    variant="outline"
+                    className={`text-xs border ${getCompatibilityColor(availabilityPercentage)}`}
+                  >
+                    <div className="flex items-center space-x-1">
+                      {getCompatibilityIcon(availabilityPercentage)}
+                      <span>{availabilityPercentage}% match</span>
+                    </div>
+                  </Badge>
+                )}
+              </div>
+
+              <span className="text-xs">
+                {new Date(recipe.created_at).toLocaleDateString('en-US')}
+              </span>
+            </div>
+
+            {/* Available ingredients preview */}
+            {hasGroceries &&
+              ingredientMatching.isReady &&
+              compatibility.availableIngredients.length > 0 && (
+                <div className="text-xs text-green-600">
+                  <div className="flex items-center space-x-1">
+                    <Check className="h-3 w-3" />
+                    <span>
+                      You have:{' '}
+                      {compatibility.availableIngredients
+                        .slice(0, 3)
+                        .map(
+                          (match) =>
+                            match.matchedGroceryIngredient ||
+                            match.recipeIngredient
+                        )
+                        .join(', ')}
+                      {compatibility.availableIngredients.length > 3 &&
+                        ` +${compatibility.availableIngredients.length - 3} more`}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+            {/* Creator Rating */}
+            {recipe.creator_rating && (
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-1">
+                  {[...Array(5)].map((_, i) => (
+                    <span
+                      key={i}
+                      className={`text-sm ${
+                        i < recipe.creator_rating!
+                          ? 'text-orange-400'
+                          : 'text-gray-300'
+                      }`}
+                    >
+                      ★
+                    </span>
+                  ))}
+                </div>
+                <span className="text-xs text-gray-600">
+                  {recipe.creator_rating}/5
+                </span>
               </div>
             )}
 
-            {/* Recipe Title - Above Image */}
-            <div className="px-4 pt-4 pb-2">
-              <h3
-                className={`${createDaisyUICardTitleClasses()} text-lg font-semibold leading-tight text-gray-800`}
-                title={recipe.title}
-              >
-                {recipe.title.length > RECIPE_TITLE_MAX_LENGTH
-                  ? `${recipe.title.substring(0, RECIPE_TITLE_MAX_LENGTH).trim()}...`
-                  : recipe.title}
-              </h3>
-            </div>
-
-            {/* Mobile Action Trigger Button - Top Right */}
-            <div className="absolute top-2 right-2 z-20">
-              <label
-                htmlFor={drawerId}
-                className="btn btn-circle btn-ghost btn-sm bg-white/95 hover:bg-white border border-gray-200 hover:border-gray-300 shadow-lg"
-                aria-label="Recipe actions"
-              >
-                <MoreHorizontal className="h-4 w-4" />
-              </label>
-            </div>
-
-            <div className="card-body pb-3 pt-0">
-              <div className="space-y-3">
-                <div className="flex items-center justify-between text-sm text-gray-500">
-                  <div className="flex items-center space-x-2">
-                    <span
-                      className={createDaisyUIBadgeClasses(
-                        'secondary',
-                        'text-xs'
-                      )}
-                    >
-                      {recipe.ingredients.length} ingredients
-                    </span>
-
-                    {/* Grocery Compatibility Badge */}
-                    {hasGroceries && ingredientMatching.isReady && (
-                      <Badge
-                        variant="outline"
-                        className={`text-xs border ${getCompatibilityColor(availabilityPercentage)}`}
-                      >
-                        <div className="flex items-center space-x-1">
-                          {getCompatibilityIcon(availabilityPercentage)}
-                          <span>{availabilityPercentage}% match</span>
-                        </div>
-                      </Badge>
-                    )}
-                  </div>
-
-                  <span className="text-xs">
-                    {new Date(recipe.created_at).toLocaleDateString('en-US')}
-                  </span>
-                </div>
-
-                {/* Available ingredients preview */}
-                {hasGroceries &&
-                  ingredientMatching.isReady &&
-                  compatibility.availableIngredients.length > 0 && (
-                    <div className="text-xs text-green-600">
-                      <div className="flex items-center space-x-1">
-                        <Check className="h-3 w-3" />
-                        <span>
-                          You have:{' '}
-                          {compatibility.availableIngredients
-                            .slice(0, 3)
-                            .map(
-                              (match) =>
-                                match.matchedGroceryIngredient ||
-                                match.recipeIngredient
-                            )
-                            .join(', ')}
-                          {compatibility.availableIngredients.length > 3 &&
-                            ` +${compatibility.availableIngredients.length - 3} more`}
-                        </span>
-                      </div>
-                    </div>
-                  )}
-
-                {/* Creator Rating */}
-                {recipe.creator_rating && (
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-1">
-                      {[...Array(5)].map((_, i) => (
-                        <span
-                          key={i}
-                          className={`text-sm ${
-                            i < recipe.creator_rating!
-                              ? 'text-orange-400'
-                              : 'text-gray-300'
-                          }`}
-                        >
-                          ★
-                        </span>
-                      ))}
-                    </div>
-                    <span className="text-xs text-gray-600">
-                      {recipe.creator_rating}/5
-                    </span>
-                  </div>
-                )}
-
-                {recipe.categories && recipe.categories.length > 0 && (
-                  <div className="flex flex-wrap gap-1">
-                    {recipe.categories.map((category, index) => (
-                      <CategoryChip
-                        key={`${category}-${index}`}
-                        category={category}
-                        variant="readonly"
-                        size="sm"
-                      />
-                    ))}
-                  </div>
-                )}
-
-                {recipe.instructions && (
-                  <p className="line-clamp-3 text-sm text-gray-600">
-                    {recipe.instructions}
-                  </p>
-                )}
-
-                {recipe.notes && (
-                  <div className="border-t pt-2">
-                    <p className="line-clamp-2 text-xs text-gray-500 italic">
-                      {recipe.notes}
-                    </p>
-                  </div>
-                )}
+            {recipe.categories && recipe.categories.length > 0 && (
+              <div className="flex flex-wrap gap-1">
+                {recipe.categories.map((category, index) => (
+                  <CategoryChip
+                    key={`${category}-${index}`}
+                    category={category}
+                    variant="readonly"
+                    size="sm"
+                  />
+                ))}
               </div>
-            </div>
-          </div>
-        </div>
+            )}
 
-        {/* Slide-out Action Panel - Right Side */}
-        <div className="drawer-side">
-          <label
-            htmlFor={drawerId}
-            aria-label="close sidebar"
-            className="drawer-overlay"
-          ></label>
-          <div className="menu p-4 w-80 min-h-full bg-base-100 text-base-content">
-            <div className="mb-4">
-              <h3 className="text-lg font-semibold text-gray-800">
-                Recipe Actions
-              </h3>
-              <p className="text-sm text-gray-600">{recipe.title}</p>
+            {recipe.instructions && (
+              <p className="line-clamp-3 text-sm text-gray-600">
+                {recipe.instructions}
+              </p>
+            )}
 
-              {/* Compatibility Info in Drawer */}
-              {hasGroceries && ingredientMatching.isReady && (
-                <div
-                  className={`mt-3 p-3 rounded-lg border ${getCompatibilityColor(availabilityPercentage)}`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      {getCompatibilityIcon(availabilityPercentage)}
-                      <span className="font-medium">
-                        {availabilityPercentage}% ingredient match
-                      </span>
-                    </div>
-                  </div>
-                  <div className="text-xs mt-1 opacity-80">
-                    {compatibility.availableIngredients.length} of{' '}
-                    {compatibility.totalIngredients} ingredients available
-                  </div>
-                  {compatibility.missingIngredients.length > 0 && (
-                    <div className="text-xs mt-2 opacity-70">
-                      Missing: {compatibility.missingIngredients.length}{' '}
-                      ingredients
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-
-            <ul className="space-y-2">
-              {/* View Button */}
-              <li>
-                <button
-                  onClick={() => onView?.(recipe)}
-                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 transition-colors"
-                >
-                  <Eye className="h-5 w-5 text-blue-600" />
-                  <span>View Recipe</span>
-                </button>
-              </li>
-
-              {/* Edit Button - Only show if showEditDelete is true */}
-              {showEditDelete && (
-                <li>
-                  <button
-                    onClick={() => onEdit?.(recipe)}
-                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 transition-colors"
-                  >
-                    <Edit className="h-5 w-5 text-green-600" />
-                    <span>Edit Recipe</span>
-                  </button>
-                </li>
-              )}
-
-              {/* Share Button */}
-              {canShare && (
-                <li>
-                  <button
-                    onClick={handleShareToggle}
-                    disabled={isSharing}
-                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 transition-colors disabled:opacity-50"
-                  >
-                    {isSharing ? (
-                      <Loader2 className="h-5 w-5 animate-spin text-purple-600" />
-                    ) : isPublic ? (
-                      <Check className="h-5 w-5 text-purple-600" />
-                    ) : (
-                      <Share className="h-5 w-5 text-purple-600" />
-                    )}
-                    <span>
-                      {isSharing
-                        ? 'Updating...'
-                        : isPublic
-                          ? 'Unshare Recipe'
-                          : 'Share Recipe'}
-                    </span>
-                  </button>
-                </li>
-              )}
-
-              {/* Delete Button - Only show if showEditDelete is true */}
-              {showEditDelete && (
-                <li>
-                  <button
-                    onClick={() => setShowDeleteDialog(true)}
-                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-red-50 transition-colors text-red-600"
-                  >
-                    <Trash2 className="h-5 w-5" />
-                    <span>Delete Recipe</span>
-                  </button>
-                </li>
-              )}
-            </ul>
-
-            {/* Close Button */}
-            <div className="mt-6 pt-4 border-t">
-              <label htmlFor={drawerId} className="btn btn-outline btn-block">
-                Close
-              </label>
-            </div>
+            {recipe.notes && (
+              <div className="border-t pt-2">
+                <p className="line-clamp-2 text-xs text-gray-500 italic">
+                  {recipe.notes}
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>

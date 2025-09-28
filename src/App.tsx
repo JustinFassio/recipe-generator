@@ -17,8 +17,9 @@ import { AuthForm } from '@/components/auth/auth-form';
 import { ThemeProvider } from '@/components/ui/theme-provider';
 import Phase4Demo from '@/components/demo/Phase4Demo';
 import EvaluationReportPage from '@/pages/evaluation-reports/EvaluationReportPage';
-import { GroceriesPage } from '@/pages/groceries-page';
+import { KitchenInventoryPage } from '@/features/kitchen-inventory';
 import GlobalIngredientsPage from '@/pages/global-ingredients-page';
+import ShoppingCartPage from '@/pages/shopping-cart-page';
 import { SelectionProvider } from '@/contexts/SelectionContext';
 
 import { Toaster } from '@/components/ui/toaster';
@@ -175,13 +176,27 @@ function AppContent() {
         }
       />
       <Route
-        path="/groceries"
+        path="/kitchen"
         element={
           <ProtectedRoute>
             <div className="bg-base-100 min-h-screen">
               <Header />
               <main>
-                <GroceriesPage />
+                <KitchenInventoryPage />
+              </main>
+            </div>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/cart"
+        element={
+          <ProtectedRoute>
+            <div className="bg-base-100 min-h-screen">
+              <Header />
+              <main>
+                <ShoppingCartPage />
               </main>
             </div>
           </ProtectedRoute>
