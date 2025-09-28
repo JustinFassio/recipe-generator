@@ -60,7 +60,7 @@ describe('Recipe Critical Path Integration Tests', () => {
     // Use existing test user from seed data
     const { data: user, error } = await supabase.auth.signInWithPassword({
       email: 'alice@example.com',
-      password: 'Password123!'
+      password: 'Password123!',
     });
     if (error) {
       console.warn(
