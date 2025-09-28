@@ -62,7 +62,9 @@ const executeQuery = (queryState: QueryState) => {
       case 'contains':
         data = data.filter((item) => {
           const value = item[filter.column];
-          return Array.isArray(value) && value.includes(filter.value);
+          return (
+            Array.isArray(value) && value.includes(filter.value as unknown)
+          );
         });
         break;
       case 'overlaps':
@@ -71,7 +73,7 @@ const executeQuery = (queryState: QueryState) => {
           return (
             Array.isArray(value) &&
             Array.isArray(filter.value) &&
-            value.some((v) => filter.value.includes(v))
+            value.some((v) => (filter.value as unknown[]).includes(v))
           );
         });
         break;
@@ -82,8 +84,8 @@ const executeQuery = (queryState: QueryState) => {
   if (orderBy.length > 0) {
     data.sort((a, b) => {
       for (const order of orderBy) {
-        const valA = a[order.column];
-        const valB = b[order.column];
+        const valA = a[order.column] as string | number;
+        const valB = b[order.column] as string | number;
         if (valA < valB) return order.ascending ? -1 : 1;
         if (valA > valB) return order.ascending ? 1 : -1;
       }
@@ -110,7 +112,7 @@ const createQueryBuilder = (table: string) => {
     singleResult: false,
   };
 
-  const builder = {
+  const builder: Record<string, unknown> = {
     select: vi.fn(() => {
       return builder;
     }),
@@ -174,14 +176,14 @@ const createQueryBuilder = (table: string) => {
                 id: versionId,
                 recipe_id: id,
                 version_number: 0,
-                title: item.title || 'Test Recipe',
-                ingredients: item.ingredients || [
+                title: (item.title as string) || 'Test Recipe',
+                ingredients: (item.ingredients as string[]) || [
                   '1 cup flour',
                   '2 eggs',
                   '1 cup milk',
                 ],
                 instructions:
-                  item.instructions ||
+                  (item.instructions as string) ||
                   'Mix ingredients and bake at 350°F for 20 minutes.',
                 created_at: createTimestamp(),
                 updated_at: createTimestamp(),
@@ -216,7 +218,7 @@ const createQueryBuilder = (table: string) => {
             let item: Record<string, unknown> | null = null;
             switch (table) {
               case 'recipes':
-                item = mockRecipes.get(value as string);
+                item = mockRecipes.get(value as string) || null;
                 if (item) {
                   Object.assign(item, data, { updated_at: createTimestamp() });
                   mockRecipes.set(value as string, item);
@@ -224,21 +226,21 @@ const createQueryBuilder = (table: string) => {
                 break;
               case 'recipe_versions':
               case 'recipe_content_versions':
-                item = mockVersions.get(value as string);
+                item = mockVersions.get(value as string) || null;
                 if (item) {
                   Object.assign(item, data, { updated_at: createTimestamp() });
                   mockVersions.set(value as string, item);
                 }
                 break;
               case 'profiles':
-                item = mockProfiles.get(value as string);
+                item = mockProfiles.get(value as string) || null;
                 if (item) {
                   Object.assign(item, data, { updated_at: createTimestamp() });
                   mockProfiles.set(value as string, item);
                 }
                 break;
               case 'usernames':
-                item = mockUsernames.get(value as string);
+                item = mockUsernames.get(value as string) || null;
                 if (item) {
                   Object.assign(item, data, { updated_at: createTimestamp() });
                   mockUsernames.set(value as string, item);
@@ -251,7 +253,7 @@ const createQueryBuilder = (table: string) => {
       })),
     })),
     delete: vi.fn(() => ({
-      eq: vi.fn((column: string, value: unknown) => {
+      eq: vi.fn((_column: string, value: unknown) => {
         switch (table) {
           case 'recipes':
             mockRecipes.delete(value as string);
