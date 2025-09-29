@@ -537,7 +537,7 @@ src/hooks/
 - [Filter Bar Architecture Audit Report](../audit/filter-bar-audit.md)
 - [Profile Modularization Success Story](../profile-modularization/) (similar project)
 - [Component Architecture Guidelines](../../DEV-GUIDE.md)
-- [Testing Strategy Guide](../../TESTING-GUIDE.md)
+- [Testing Strategy Guide](../../testing/TESTING-GUIDE.md)
 
 ### **Team Resources**
 
