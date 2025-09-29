@@ -7,6 +7,7 @@ import {
 } from '@/lib/evaluation-report-db';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
 import { User, BookOpen, RefreshCw } from 'lucide-react';
 
 // Import components
@@ -164,9 +165,12 @@ export default function EvaluationReportPage() {
                 Clearwater yet.
               </p>
               <Button asChild>
-                <a href="/coach-chat?persona=drLunaClearwater">
+                <Link to="/coach-chat?persona=drLunaClearwater">
                   Start Health Evaluation
-                </a>
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="ml-2">
+                <Link to="/health-coaches">Browse Health Coaches</Link>
               </Button>
             </div>
           </div>
@@ -177,12 +181,19 @@ export default function EvaluationReportPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold mb-2">Health Evaluation Reports</h1>
-        <p className="text-muted-foreground">
-          Comprehensive health assessments and personalized recommendations from
-          Dr. Luna Clearwater
-        </p>
+      <div className="mb-6 flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-3xl font-bold mb-2">Health Evaluation Reports</h1>
+          <p className="text-muted-foreground">
+            Comprehensive health assessments and personalized recommendations
+            from Dr. Luna Clearwater
+          </p>
+        </div>
+        <div className="mt-1">
+          <Button asChild variant="outline">
+            <Link to="/health-coaches">Browse Health Coaches</Link>
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">

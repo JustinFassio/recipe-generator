@@ -11,6 +11,140 @@ import type {
   DatabaseEvaluationReport,
 } from './evaluation-report-types';
 
+// Normalize database rows to the shape the UI expects.
+// Handles legacy seeds where report_data did not wrap under user_evaluation_report.
+function normalizeDbReport(db: DatabaseEvaluationReport): EvaluationReport {
+  const data = db.report_data as unknown as Record<string, unknown>;
+  if (data && (data as Record<string, unknown>).user_evaluation_report) {
+    return data as unknown as EvaluationReport;
+  }
+
+  // Legacy shape: wrap flat report_data under user_evaluation_report and add required fields
+  return {
+    user_evaluation_report: {
+      report_id: db.report_id,
+      evaluation_date: db.evaluation_date,
+      dietitian: db.dietitian,
+      report_version: db.report_version,
+      user_profile_summary: {
+        user_id: db.user_id,
+        evaluation_completeness: 100,
+        data_quality_score: 80,
+        last_updated: new Date().toISOString(),
+      },
+      safety_assessment: {
+        status: 'REVIEW_NEEDED',
+        critical_alerts: [],
+        dietary_restrictions: [],
+        medical_considerations: [],
+      },
+      personalization_matrix: {
+        skill_profile: {
+          current_level: 'beginner',
+          confidence_score: 70,
+          growth_trajectory: 'steady',
+          recommended_techniques: [],
+          advancement_timeline: '4-6 weeks',
+        },
+        time_analysis: {
+          available_time_per_meal: 30,
+          time_utilization_efficiency: 60,
+          optimization_opportunities: [],
+          quick_meal_quota: '3/week',
+        },
+        equipment_optimization: {
+          utilization_rate: 50,
+          underused_tools: [],
+          missing_beneficial_tools: [],
+          technique_adaptations: '',
+        },
+        cultural_preferences: {
+          primary_cuisines: [],
+          flavor_profile_affinity: '',
+          spice_tolerance_calibration: 3,
+          fusion_receptiveness: 'open',
+        },
+        ingredient_landscape: {
+          embrace_list: [],
+          avoid_list: [],
+          exploration_candidates: [],
+          substitution_success_rate: 0,
+        },
+      },
+      nutritional_analysis: {
+        current_status: {
+          overall_diet_quality_score: 70,
+          nutritional_completeness: 70,
+          anti_inflammatory_index: 65,
+          gut_health_score: 60,
+          metabolic_health_score: 65,
+        },
+        deficiency_risks: [],
+        optimization_priorities: [],
+      },
+      personalized_recommendations: {
+        immediate_actions: [],
+        weekly_structure: {
+          meal_framework: {
+            breakfast_template: 'Protein + Fiber + Healthy Fat',
+            lunch_template: 'Grains + Vegetables + Protein',
+            dinner_template: 'Balanced Plate',
+            snack_strategy: 'High-protein, nutrient-dense snacks',
+          },
+          cuisine_rotation: {
+            monday: 'Mediterranean',
+            tuesday: 'Mexican',
+            wednesday: 'Asian',
+            thursday: 'Italian',
+            friday: 'Comfort',
+            weekend: 'Flexible',
+          },
+        },
+        progressive_challenges: [],
+      },
+      meal_suggestions: {
+        signature_recipes: [],
+        quick_options: [],
+        batch_cooking_priorities: [],
+      },
+      progress_tracking: {
+        key_metrics: [],
+        milestone_markers: [],
+      },
+      risk_mitigation: {
+        adherence_barriers: [],
+        safety_reminders: [],
+      },
+      support_resources: {
+        education_modules: [],
+        tools_provided: [],
+        community_connections: [],
+      },
+      next_steps: {
+        immediate_72_hours: [],
+        week_1_goals: [],
+        week_1_objectives: [],
+      },
+      professional_notes: {
+        strengths_observed: 'Legacy seed content imported.',
+        growth_opportunities: 'Provide structured evaluation data.',
+        collaboration_recommendations: 'Follow-up evaluation recommended.',
+        reassessment_schedule: '4-6 weeks',
+      },
+      report_metadata: {
+        confidence_level: 70,
+        data_completeness: 60,
+        personalization_depth: 'developing',
+        evidence_base: 'developing',
+        last_literature_review: new Date().toISOString().split('T')[0],
+        next_update_recommended: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+          .toISOString()
+          .split('T')[0],
+      },
+    },
+  };
+}
+
 /**
  * Save an evaluation report to the database
  */
@@ -27,7 +161,8 @@ export const saveEvaluationReportToDB = async (
         evaluation_date: report.user_evaluation_report.evaluation_date,
         dietitian: report.user_evaluation_report.dietitian,
         report_version: report.user_evaluation_report.report_version,
-        report_data: report.user_evaluation_report,
+        // Store the full wrapper object to match DatabaseEvaluationReport type
+        report_data: report,
       })
       .select()
       .single();
@@ -69,8 +204,8 @@ export const getUserEvaluationReportsFromDB = async (
 
     // Convert database format to EvaluationReport format
     // Note: dbReport.report_data already contains the complete user_evaluation_report object
-    const reports: EvaluationReport[] = data.map(
-      (dbReport) => dbReport.report_data
+    const reports: EvaluationReport[] = data.map((dbReport) =>
+      normalizeDbReport(dbReport as unknown as DatabaseEvaluationReport)
     );
 
     return reports;
@@ -105,7 +240,7 @@ export const getEvaluationReportByIdFromDB = async (
     }
 
     // Note: data.report_data already contains the complete user_evaluation_report object
-    return data.report_data;
+    return normalizeDbReport(data as unknown as DatabaseEvaluationReport);
   } catch (error) {
     console.error('Error loading evaluation report from database:', error);
     return null;
@@ -197,7 +332,7 @@ export const getLatestEvaluationReportFromDB = async (
     }
 
     // Note: data.report_data already contains the complete user_evaluation_report object
-    return data.report_data;
+    return normalizeDbReport(data as unknown as DatabaseEvaluationReport);
   } catch (error) {
     console.error(
       'Error loading latest evaluation report from database:',

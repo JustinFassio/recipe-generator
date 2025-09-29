@@ -1,10 +1,19 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { ChatInterface } from '@/components/chat/ChatInterface';
 import { Button } from '@/components/ui/button';
 
 export function CoachChatPage() {
   const navigate = useNavigate();
+  const [params] = useSearchParams();
+  const personaParam = params.get('persona') as
+    | 'chef'
+    | 'nutritionist'
+    | 'homeCook'
+    | 'assistantNutritionist'
+    | 'jamieBrightwell'
+    | 'drLunaClearwater'
+    | null;
 
   // For coach chat, we don't need recipe generation functionality
   const handleCoachResponse = () => {
@@ -39,7 +48,10 @@ export function CoachChatPage() {
         </div>
 
         <div className="bg-base-100 rounded-lg shadow-sm">
-          <ChatInterface onRecipeGenerated={handleCoachResponse} />
+          <ChatInterface
+            onRecipeGenerated={handleCoachResponse}
+            defaultPersona={personaParam ?? undefined}
+          />
         </div>
       </div>
     </div>
