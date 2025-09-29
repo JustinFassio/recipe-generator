@@ -1,24 +1,27 @@
 import React from 'react';
+import '@testing-library/jest-dom';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import type { MockedFunction, Mocked } from 'vitest';
 import { RecipeCard } from '../../../components/recipes/recipe-card';
 import { useDeleteRecipe } from '../../../hooks/use-recipes';
 import { recipeApi } from '../../../lib/api';
 import { useAuth } from '../../../contexts/AuthProvider';
+import type { Recipe } from '../../../lib/types';
 
 // Mock the hooks and API
 vi.mock('../../../hooks/use-recipes');
 vi.mock('../../../lib/api');
 vi.mock('../../../contexts/AuthProvider');
 
-const mockUseDeleteRecipe = useDeleteRecipe as vi.MockedFunction<
+const mockUseDeleteRecipe = useDeleteRecipe as unknown as MockedFunction<
   typeof useDeleteRecipe
 >;
-const mockRecipeApi = recipeApi as vi.Mocked<typeof recipeApi>;
-const mockUseAuth = useAuth as vi.MockedFunction<typeof useAuth>;
+const mockRecipeApi = recipeApi as unknown as Mocked<typeof recipeApi>;
+const mockUseAuth = useAuth as unknown as MockedFunction<typeof useAuth>;
 
 // Mock recipe data
-const mockRecipe = {
+const mockRecipe: Recipe = {
   id: '1',
   title: 'Test Recipe',
   ingredients: ['ingredient1', 'ingredient2', 'ingredient3'],
@@ -30,7 +33,11 @@ const mockRecipe = {
   updated_at: '2023-12-30T00:00:00Z',
   user_id: 'user1',
   is_public: false,
-  setup: 'Test setup instructions',
+  setup: ['Test setup instructions'],
+  cooking_time: null,
+  difficulty: null,
+  creator_rating: null,
+  current_version_id: null,
 };
 
 // Mock callback functions
@@ -61,8 +68,11 @@ describe('RecipeCard', () => {
     // Mock useAuth hook
     mockUseAuth.mockReturnValue({
       user: { id: 'user1' },
-      isLoading: false,
+      profile: null,
+      loading: false,
       error: null,
+      signOut: vi.fn(async () => {}),
+      refreshProfile: vi.fn(async () => {}),
     } as unknown as ReturnType<typeof useAuth>);
   });
 
@@ -121,7 +131,7 @@ describe('RecipeCard', () => {
   });
 
   it('renders recipe without image when image_url is not provided', () => {
-    const recipeWithoutImage = { ...mockRecipe, image_url: undefined };
+    const recipeWithoutImage: Recipe = { ...mockRecipe, image_url: null };
 
     render(
       <TestWrapper>
@@ -281,8 +291,11 @@ describe('RecipeCard', () => {
   it('should not show Share button when user does not own recipe', () => {
     mockUseAuth.mockReturnValue({
       user: { id: 'different-user' },
-      isLoading: false,
+      profile: null,
+      loading: false,
       error: null,
+      signOut: vi.fn(async () => {}),
+      refreshProfile: vi.fn(async () => {}),
     } as unknown as ReturnType<typeof useAuth>);
 
     render(
