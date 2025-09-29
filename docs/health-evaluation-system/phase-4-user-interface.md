@@ -103,8 +103,13 @@ export const ProgressChart: React.FC<ProgressChartProps> = ({
         callbacks: {
           label: (context: any) => {
             const value = context.parsed.y;
-            const change = context.raw.change_percentage;
-            return `${metric}: ${value} (${change > 0 ? '+' : ''}${change.toFixed(1)}%)`;
+            // Safely access change_percentage with null checks to prevent runtime errors
+            const change = context.raw && typeof context.raw.change_percentage === 'number' ? context.raw.change_percentage : null;
+            if (change !== null) {
+              return `${metric}: ${value} (${change > 0 ? '+' : ''}${change.toFixed(1)}%)`;
+            } else {
+              return `${metric}: ${value}`;
+            }
           }
         }
       }

@@ -29,7 +29,7 @@ CREATE TABLE evaluation_progress_tracking (
   metric_value NUMERIC NOT NULL,
   metric_unit TEXT,
   progress_direction TEXT CHECK (progress_direction IN ('improving', 'declining', 'stable')),
-  significance_level NUMERIC DEFAULT 0.5,
+  significance_level NUMERIC DEFAULT 0.5 CHECK (significance_level >= 0 AND significance_level <= 1),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -66,7 +66,7 @@ CREATE TABLE progress_analytics (
   user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
   analysis_type TEXT NOT NULL,
   analysis_data JSONB NOT NULL,
-  confidence_score NUMERIC DEFAULT 0.5,
+  confidence_score NUMERIC DEFAULT 0.5 CHECK (confidence_score >= 0 AND confidence_score <= 1),
   insights TEXT[],
   recommendations TEXT[],
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()

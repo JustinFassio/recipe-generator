@@ -12,6 +12,79 @@
 3. **Progress Scoring**: Create standardized progress measurement system
 4. **Pattern Recognition**: Detect meaningful changes and anomalies
 
+## Configuration Management
+
+### Dynamic Weight Configuration
+
+The progress analysis system supports configurable category weights to enable personalized scoring based on user priorities and health conditions.
+
+#### Weight Configuration Interface
+
+```typescript
+// src/lib/progress-analysis/weight-config.ts
+export interface CategoryWeights {
+  nutritional: number;
+  skill_development: number;
+  behavioral: number;
+  goal_achievement: number;
+}
+
+export class WeightConfigManager {
+  private static readonly DEFAULT_WEIGHTS: CategoryWeights = {
+    nutritional: 0.3,
+    skill_development: 0.25,
+    behavioral: 0.25,
+    goal_achievement: 0.2,
+  };
+
+  static async getUserWeights(userId: string): Promise<CategoryWeights> {
+    // Load from user preferences or database
+    const { data } = await supabase
+      .from('user_progress_config')
+      .select('category_weights')
+      .eq('user_id', userId)
+      .single();
+
+    return data?.category_weights || this.DEFAULT_WEIGHTS;
+  }
+
+  static async updateUserWeights(
+    userId: string,
+    weights: CategoryWeights
+  ): Promise<void> {
+    // Validate weights sum to 1.0
+    const total = Object.values(weights).reduce(
+      (sum, weight) => sum + weight,
+      0
+    );
+    if (Math.abs(total - 1.0) > 0.01) {
+      throw new Error('Category weights must sum to 1.0');
+    }
+
+    await supabase.from('user_progress_config').upsert({
+      user_id: userId,
+      category_weights: weights,
+      updated_at: new Date().toISOString(),
+    });
+  }
+}
+```
+
+#### Database Schema for Weight Configuration
+
+```sql
+CREATE TABLE user_progress_config (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  category_weights JSONB NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(user_id)
+);
+
+CREATE INDEX idx_user_progress_config_user ON user_progress_config(user_id);
+```
+
 ## Technical Implementation
 
 ### 1. Progress Comparison Engine
@@ -397,12 +470,26 @@ export interface ProgressScore {
 }
 
 export class ProgressScorer {
-  private readonly CATEGORY_WEIGHTS = {
-    nutritional: 0.3,
-    skill_development: 0.25,
-    behavioral: 0.25,
-    goal_achievement: 0.2,
+  private CATEGORY_WEIGHTS: {
+    nutritional: number;
+    skill_development: number;
+    behavioral: number;
+    goal_achievement: number;
   };
+
+  constructor(categoryWeights?: {
+    nutritional: number;
+    skill_development: number;
+    behavioral: number;
+    goal_achievement: number;
+  }) {
+    this.CATEGORY_WEIGHTS = categoryWeights || {
+      nutritional: 0.3,
+      skill_development: 0.25,
+      behavioral: 0.25,
+      goal_achievement: 0.2,
+    };
+  }
 
   async calculateProgressScore(
     userId: string,
@@ -515,6 +602,40 @@ export class ProgressScorer {
     if (changePercentage >= 0) return 0.4;
     if (changePercentage >= -5) return 0.2;
     return 0.0;
+  }
+
+  /**
+   * Update category weights for personalized scoring
+   * @param weights New weight configuration
+   */
+  updateWeights(weights: {
+    nutritional: number;
+    skill_development: number;
+    behavioral: number;
+    goal_achievement: number;
+  }): void {
+    // Validate that weights sum to 1.0
+    const total = Object.values(weights).reduce(
+      (sum, weight) => sum + weight,
+      0
+    );
+    if (Math.abs(total - 1.0) > 0.01) {
+      throw new Error('Category weights must sum to 1.0');
+    }
+
+    this.CATEGORY_WEIGHTS = weights;
+  }
+
+  /**
+   * Get current category weights
+   */
+  getWeights(): {
+    nutritional: number;
+    skill_development: number;
+    behavioral: number;
+    goal_achievement: number;
+  } {
+    return { ...this.CATEGORY_WEIGHTS };
   }
 }
 ```

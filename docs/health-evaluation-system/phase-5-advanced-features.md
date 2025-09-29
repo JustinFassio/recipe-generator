@@ -43,10 +43,13 @@ export interface HealthTrajectory {
 export class HealthTrajectoryPredictor {
   async predictHealthTrajectory(
     userId: string,
-    timeHorizon: number = 12 // months
+    timeHorizon: number = this.DEFAULT_PREDICTION_HORIZON_MONTHS // months
   ): Promise<HealthTrajectory> {
     // Get comprehensive historical data
-    const historicalData = await this.getHistoricalData(userId, 24); // 24 months
+    const historicalData = await this.getHistoricalData(
+      userId,
+      this.HISTORICAL_DATA_MONTHS
+    ); // months
 
     // Analyze current trends
     const trendAnalysis = await this.analyzeTrends(historicalData);
@@ -202,6 +205,18 @@ export class RiskAssessor {
     };
   }
 
+  // Risk assessment thresholds and confidence levels
+  // These constants improve maintainability and make business logic explicit
+  private static readonly NUTRITIONAL_RISK_THRESHOLD = 60;
+  private static readonly NUTRITIONAL_RISK_CONFIDENCE = 0.9;
+  private static readonly BEHAVIORAL_RISK_THRESHOLD = 50;
+  private static readonly BEHAVIORAL_RISK_CONFIDENCE = 0.7;
+
+  // Prediction and analysis constants
+  private static readonly DEFAULT_PREDICTION_HORIZON_MONTHS = 12;
+  private static readonly HISTORICAL_DATA_MONTHS = 24;
+  private static readonly ACHIEVEMENT_PROGRESS_MAX = 100;
+
   private async analyzeCurrentRisks(
     evaluation: EvaluationReport
   ): Promise<RiskFactor[]> {
@@ -211,7 +226,7 @@ export class RiskAssessor {
     const nutritionalScore =
       evaluation.user_evaluation_report.nutritional_analysis.current_status
         .overall_diet_quality_score;
-    if (nutritionalScore < 60) {
+    if (nutritionalScore < this.NUTRITIONAL_RISK_THRESHOLD) {
       risks.push({
         category: 'nutritional',
         severity: 'high',
@@ -219,21 +234,24 @@ export class RiskAssessor {
           'Low diet quality score indicates nutritional deficiencies',
         impact: 'Increased risk of chronic diseases and energy depletion',
         timeframe: 'immediate',
-        confidence: 0.9,
+        confidence: this.NUTRITIONAL_RISK_CONFIDENCE,
       });
     }
 
     // Behavioral risks
     const behavioralTrends =
       evaluation.user_evaluation_report.personalization_matrix;
-    if (behavioralTrends.skill_profile.confidence_score < 50) {
+    if (
+      behavioralTrends.skill_profile.confidence_score <
+      this.BEHAVIORAL_RISK_THRESHOLD
+    ) {
       risks.push({
         category: 'behavioral',
         severity: 'medium',
         description: 'Low cooking confidence may lead to poor food choices',
         impact: 'Reliance on processed foods and takeout',
         timeframe: 'short_term',
-        confidence: 0.7,
+        confidence: this.BEHAVIORAL_RISK_CONFIDENCE,
       });
     }
 
@@ -299,7 +317,7 @@ export class AchievementSystem {
         unlockedAchievements.push({
           ...achievement,
           unlocked_at: new Date(),
-          progress: 100,
+          progress: this.ACHIEVEMENT_PROGRESS_MAX,
         });
       } else {
         // Calculate progress for locked achievements
