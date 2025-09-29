@@ -2,7 +2,6 @@ import React from 'react';
 import '@testing-library/jest-dom';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { MockedFunction, Mocked } from 'vitest';
 import { RecipeCard } from '../../../components/recipes/recipe-card';
 import { useDeleteRecipe } from '../../../hooks/use-recipes';
 import { recipeApi } from '../../../lib/api';
@@ -14,11 +13,9 @@ vi.mock('../../../hooks/use-recipes');
 vi.mock('../../../lib/api');
 vi.mock('../../../contexts/AuthProvider');
 
-const mockUseDeleteRecipe = useDeleteRecipe as unknown as MockedFunction<
-  typeof useDeleteRecipe
->;
-const mockRecipeApi = recipeApi as unknown as Mocked<typeof recipeApi>;
-const mockUseAuth = useAuth as unknown as MockedFunction<typeof useAuth>;
+const mockUseDeleteRecipe = vi.mocked(useDeleteRecipe);
+const mockRecipeApi = vi.mocked(recipeApi);
+const mockUseAuth = vi.mocked(useAuth);
 
 // Mock recipe data
 const mockRecipe: Recipe = {
