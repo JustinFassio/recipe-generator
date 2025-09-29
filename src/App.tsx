@@ -18,6 +18,7 @@ import { ThemeProvider } from '@/components/ui/theme-provider';
 import Phase4Demo from '@/components/demo/Phase4Demo';
 import EvaluationReportPage from '@/pages/evaluation-reports/EvaluationReportPage';
 import { KitchenInventoryPage } from '@/features/kitchen-inventory';
+import { HealthCoachesPage } from '@/features/health-coach';
 import GlobalIngredientsPage from '@/pages/global-ingredients-page';
 import ShoppingCartPage from '@/pages/shopping-cart-page';
 import { SelectionProvider } from '@/contexts/SelectionContext';
@@ -170,6 +171,19 @@ function AppContent() {
               <Header />
               <main>
                 <EvaluationReportPage />
+              </main>
+            </div>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/health-coaches"
+        element={
+          <ProtectedRoute>
+            <div className="bg-base-100 min-h-screen">
+              <Header />
+              <main>
+                <HealthCoachesPage />
               </main>
             </div>
           </ProtectedRoute>

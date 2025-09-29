@@ -1,0 +1,1 @@
+export { HealthCoachesPage } from './page';
