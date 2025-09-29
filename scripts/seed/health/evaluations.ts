@@ -96,9 +96,9 @@ export async function seedEvaluationReports() {
       continue;
     }
 
-    // Build structured user_evaluation_report payload expected by the app
+    // Build structured report data payload expected by the app
     const isAlice = report.userEmail === 'alice@example.com';
-    const user_evaluation_report = {
+    const structuredReportData = {
       report_id: report.reportId,
       evaluation_date: report.evaluationDate,
       dietitian: report.dietitian,
@@ -259,7 +259,7 @@ export async function seedEvaluationReports() {
         evaluation_date: report.evaluationDate,
         dietitian: report.dietitian,
         report_version: report.reportVersion,
-        report_data: user_evaluation_report,
+        report_data: structuredReportData,
       },
       { onConflict: 'user_id,report_id' }
     );

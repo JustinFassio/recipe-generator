@@ -15,7 +15,7 @@ import type {
 // Handles legacy seeds where report_data did not wrap under user_evaluation_report.
 function normalizeDbReport(db: DatabaseEvaluationReport): EvaluationReport {
   const data = db.report_data as unknown as Record<string, unknown>;
-  if (data && (data as Record<string, unknown>).user_evaluation_report) {
+  if (data && data.user_evaluation_report) {
     return data as unknown as EvaluationReport;
   }
 

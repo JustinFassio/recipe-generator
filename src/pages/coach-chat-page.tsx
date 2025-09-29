@@ -2,18 +2,12 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { ChatInterface } from '@/components/chat/ChatInterface';
 import { Button } from '@/components/ui/button';
+import type { PersonaType } from '@/lib/openai';
 
 export function CoachChatPage() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
-  const personaParam = params.get('persona') as
-    | 'chef'
-    | 'nutritionist'
-    | 'homeCook'
-    | 'assistantNutritionist'
-    | 'jamieBrightwell'
-    | 'drLunaClearwater'
-    | null;
+  const personaParam = params.get('persona') as PersonaType | null;
 
   // For coach chat, we don't need recipe generation functionality
   const handleCoachResponse = () => {
