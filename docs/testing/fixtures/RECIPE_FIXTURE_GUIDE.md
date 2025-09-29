@@ -43,9 +43,10 @@ The real hook returns `AuthContextType`. Mock with the full shape:
 ```ts
 vi.mock('@/contexts/AuthProvider');
 import { useAuth } from '@/contexts/AuthProvider';
+import type { User } from '@supabase/supabase-js';
 
 vi.mocked(useAuth).mockReturnValue({
-  user: { id: 'user1' } as any,
+  user: { id: 'user1' } as User,
   profile: null,
   loading: false,
   error: null,
