@@ -601,7 +601,7 @@ const useContextFilters = () => {
 
 - [FilterBar Component API](./README.md#component-api)
 - [Development Guidelines](../DEV-GUIDE.md)
-- [Testing Guide](../TESTING-GUIDE.md)
+- [Testing Guide](../testing/TESTING-GUIDE.md)
 
 ### **Examples**
 
