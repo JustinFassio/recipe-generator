@@ -562,7 +562,7 @@ npm run audit:performance       # Performance audit
 - [ ] `README.md` - Updated with new FilterBar usage
 - [ ] `MIGRATION-GUIDE.md` - Complete migration documentation
 - [ ] `DEV-GUIDE.md` - Development guidelines updated
-- [ ] `TESTING-GUIDE.md` - Testing patterns updated
+- [ ] `testing/TESTING-GUIDE.md` - Testing patterns updated
 - [ ] Component JSDoc - Comprehensive API documentation
 
 ### **Architecture Documentation**
