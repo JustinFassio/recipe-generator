@@ -2,6 +2,19 @@
 
 The ingredient system powers matching, filtering, global catalogs, and recipe compatibility. It blends user groceries, a curated system catalog, and a global ingredient store with AI-assisted extraction and learning.
 
+## **📊 Current Coverage Status**
+
+- **Total Cuisines**: 81 cuisines supported
+- **Total Ingredients**: 1,296+ authentic ingredients
+- **Categories**: 8 Chef Isabella categories
+- **Coverage**: Complete culinary diversity and dietary inclusivity
+
+## **📋 Documentation**
+
+- **[Global Ingredients Audit Report](./GLOBAL_INGREDIENTS_AUDIT_REPORT.md)**: Comprehensive audit of the current global ingredients system
+- **[Global Ingredients Expansion Plan](./GLOBAL_INGREDIENTS_EXPANSION_PLAN.md)**: Strategic plan to align global ingredients with cuisine staples coverage
+- **[Implementation Checklist](./IMPLEMENTATION_CHECKLIST.md)**: Detailed checklist for implementing the global ingredients expansion
+
 ### Core Modules
 
 - **Matching Engine**
