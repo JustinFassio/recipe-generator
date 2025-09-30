@@ -1,7 +1,14 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useShoppingList } from './useShoppingList';
 import { useUserGroceryCart } from './useUserGroceryCart';
 import { useConversation } from './useConversation';
+import { useIngredientMatching } from './useIngredientMatching'; // EXISTING HOOK
+import { CuisineStaplesManager } from '@/lib/shopping-cart/cuisine-staples';
+import { IngredientMatcher } from '@/lib/groceries/ingredient-matcher';
+import type {
+  CuisineStaple,
+  MissingStaples,
+} from '@/lib/shopping-cart/cuisine-staples';
 
 // Shopping cart context for AI
 export interface ShoppingCartContext {
@@ -24,13 +31,22 @@ export interface AIPromptContext {
 }
 
 export interface UseShoppingCartAIReturn {
-  // AI interaction
+  // Existing methods
   getChatResponse: (message: string) => Promise<void>;
   addToShoppingCart: (ingredients: string[]) => Promise<void>;
-
-  // Context building
   buildContext: () => ShoppingCartContext;
   buildPromptContext: () => string;
+
+  // NEW: Cuisine staples using existing infrastructure
+  availableCuisines: string[];
+  getCuisineStaples: (cuisine: string) => CuisineStaple[];
+  getMissingStaples: (cuisine: string) => MissingStaples;
+  getAllMissingStaples: () => MissingStaples[];
+  getRecommendedAdditions: (
+    cuisine: string,
+    maxRecommendations?: number
+  ) => CuisineStaple[];
+  addStaplesToGroceries: (staples: string[]) => Promise<void>;
 }
 
 /**
@@ -39,8 +55,26 @@ export interface UseShoppingCartAIReturn {
  */
 export function useShoppingCartAI(): UseShoppingCartAIReturn {
   const { shoppingList, addToShoppingList } = useShoppingList();
-  const { userGroceryCart } = useUserGroceryCart();
+  const { userGroceryCart, addToCart } = useUserGroceryCart();
   const { sendMessage } = useConversation();
+
+  // LEVERAGE EXISTING HOOK: Use the battle-tested ingredient matching
+  const { matchIngredient } = useIngredientMatching();
+
+  // NEW: Cuisine staples manager
+  const cuisineStaplesManager = useMemo(() => new CuisineStaplesManager(), []);
+
+  // Create ingredient matcher for cuisine analysis
+  const ingredientMatcher = useMemo(
+    () => new IngredientMatcher(userGroceryCart),
+    [userGroceryCart]
+  );
+
+  // Get available cuisines
+  const availableCuisines = useMemo(
+    () => cuisineStaplesManager.getAvailableCuisines(),
+    [cuisineStaplesManager]
+  );
 
   // Build shopping cart context for AI
   const buildContext = useCallback((): ShoppingCartContext => {
@@ -50,7 +84,7 @@ export function useShoppingCartAI(): UseShoppingCartAIReturn {
     };
   }, [shoppingList, userGroceryCart]);
 
-  // Build prompt context string for AI
+  // Enhanced context building with cuisine staples info
   const buildPromptContext = useCallback((): string => {
     const cartIngredients = Object.values(shoppingList).map(
       (item) => item.name
@@ -59,31 +93,40 @@ export function useShoppingCartAI(): UseShoppingCartAIReturn {
       (category) => userGroceryCart[category] || []
     );
 
+    // Get missing staples for context
+    const allMissingStaples = cuisineStaplesManager.getAllMissingStaples(
+      userGroceryCart,
+      ingredientMatcher
+    );
+    const cuisineContext =
+      allMissingStaples.length > 0
+        ? `\nMissing cuisine staples: ${allMissingStaples.map((c) => `${c.cuisine} (${c.coverage}% coverage)`).join(', ')}`
+        : '';
+
     return `
 Current shopping cart: ${cartIngredients.join(', ') || 'empty'}
-My groceries: ${groceryIngredients.join(', ') || 'none'}
+My groceries: ${groceryIngredients.join(', ') || 'none'}${cuisineContext}
     `.trim();
-  }, [shoppingList, userGroceryCart]);
+  }, [shoppingList, userGroceryCart, cuisineStaplesManager, ingredientMatcher]);
 
-  // Get AI chat response with shopping context
+  // Enhanced chat response with cuisine context
   const getChatResponse = useCallback(
     async (message: string) => {
       const context = buildPromptContext();
-
-      // Prepend context to the message for the AI
       const contextualMessage = `${context}\n\nUser question: ${message}`;
-
       return sendMessage(contextualMessage);
     },
     [buildPromptContext, sendMessage]
   );
 
-  // Add multiple ingredients to shopping cart
+  // Add multiple ingredients to shopping cart using existing categorization
   const addToShoppingCart = useCallback(
     async (ingredients: string[]): Promise<void> => {
       for (const ingredient of ingredients) {
-        // Try to categorize the ingredient (simple heuristic)
-        const category = categorizeIngredient(ingredient);
+        // Use existing ingredient matching to find the best category
+        const match = matchIngredient(ingredient);
+        const category =
+          match.matchedCategory || categorizeIngredient(ingredient);
 
         await addToShoppingList(ingredient, category, 'ai-chat', {
           sourceTitle: 'AI Shopping Assistant',
@@ -91,14 +134,76 @@ My groceries: ${groceryIngredients.join(', ') || 'none'}
         });
       }
     },
-    [addToShoppingList]
+    [addToShoppingList, matchIngredient]
+  );
+
+  // Add staples to groceries using existing cart system
+  const addStaplesToGroceries = useCallback(
+    async (staples: string[]): Promise<void> => {
+      for (const staple of staples) {
+        // Use existing matching to find best category
+        const match = matchIngredient(staple);
+        const category = match.matchedCategory || categorizeIngredient(staple);
+
+        await addToCart(category, staple);
+      }
+    },
+    [addToCart, matchIngredient]
+  );
+
+  // Get cuisine staples
+  const getCuisineStaples = useCallback(
+    (cuisine: string) => cuisineStaplesManager.getCuisineStaples(cuisine),
+    [cuisineStaplesManager]
+  );
+
+  // Get missing staples for a cuisine
+  const getMissingStaples = useCallback(
+    (cuisine: string) =>
+      cuisineStaplesManager.findMissingStaples(
+        cuisine,
+        userGroceryCart,
+        ingredientMatcher
+      ),
+    [cuisineStaplesManager, userGroceryCart, ingredientMatcher]
+  );
+
+  // Get all missing staples
+  const getAllMissingStaples = useCallback(
+    () =>
+      cuisineStaplesManager.getAllMissingStaples(
+        userGroceryCart,
+        ingredientMatcher
+      ),
+    [cuisineStaplesManager, userGroceryCart, ingredientMatcher]
+  );
+
+  // Get recommended additions for a cuisine
+  const getRecommendedAdditions = useCallback(
+    (cuisine: string, maxRecommendations = 5) =>
+      cuisineStaplesManager.getRecommendedAdditions(
+        cuisine,
+        userGroceryCart,
+        ingredientMatcher,
+        maxRecommendations
+      ),
+    [cuisineStaplesManager, userGroceryCart, ingredientMatcher]
   );
 
   return {
+    // Existing methods
     getChatResponse,
     addToShoppingCart,
     buildContext,
     buildPromptContext,
+
+    // NEW methods leveraging existing infrastructure
+    availableCuisines,
+    getCuisineStaples,
+    getMissingStaples,
+    getAllMissingStaples,
+    getRecommendedAdditions,
+    addStaplesToGroceries,
   };
 }
 
