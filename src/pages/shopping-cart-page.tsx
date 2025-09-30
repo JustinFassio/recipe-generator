@@ -560,6 +560,17 @@ export default function ShoppingCartPage() {
                 <ShoppingCartChat
                   placeholder="What do I need for authentic Mexican cooking?"
                   onChatResponse={getChatResponse}
+                  onAddAll={async () => {
+                    // Compute top recommendations from the best-matching cuisine and add them
+                    const allMissing = getAllMissingStaples();
+                    if (allMissing.length === 0) return;
+                    const focus = allMissing[0];
+                    const recs = getRecommendedAdditions(
+                      focus.cuisine.toLowerCase(),
+                      6
+                    ).map((s) => s.ingredient);
+                    await addStaplesToGroceriesAsUnavailable(recs);
+                  }}
                   className="h-full"
                 />
               </div>

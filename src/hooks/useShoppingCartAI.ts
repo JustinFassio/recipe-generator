@@ -129,7 +129,9 @@ My groceries: ${groceryIngredients.join(', ') || 'none'}${cuisineContext}
           ],
           'chef'
         );
-        return response.message;
+        const cta =
+          '\n\nWould you like me to add the ingredients to your kitchen?';
+        return `${response.message}${cta}`;
       } catch {
         // Fallback to deterministic suggestions if AI fails
         const allMissing = cuisineStaplesManager.getAllMissingStaples(
@@ -149,7 +151,9 @@ My groceries: ${groceryIngredients.join(', ') || 'none'}${cuisineContext}
         const bullets = recommendations
           .map((s) => `• ${s.ingredient} — ${s.reason}`)
           .join('\n');
-        return `Here are some ${focus.cuisine} additions while AI is unavailable:\n\n${bullets}`;
+        const cta =
+          '\n\nWould you like me to add the ingredients to your kitchen?';
+        return `Here are some ${focus.cuisine} additions while AI is unavailable:\n\n${bullets}${cta}`;
       }
     },
     [
