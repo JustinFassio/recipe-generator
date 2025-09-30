@@ -9,13 +9,15 @@ interface Message {
 }
 
 interface ShoppingCartChatProps {
-  onChatResponse: (message: string) => Promise<void>;
+  onChatResponse: (message: string) => Promise<string>;
+  onAddAll?: () => Promise<void>;
   placeholder?: string;
   className?: string;
 }
 
 export function ShoppingCartChat({
   onChatResponse,
+  onAddAll,
   placeholder = 'Ask me about ingredients...',
   className = '',
 }: ShoppingCartChatProps) {
@@ -23,12 +25,28 @@ export function ShoppingCartChat({
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const messageRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Auto-scroll to bottom when new messages arrive
+  // Scroll strategy:
+  // - When the latest message is from the user, scroll to bottom (to see typing/response area)
+  // - When the latest message is from the assistant, align the start of that message to the top
   useEffect(() => {
-    if (scrollAreaRef.current) {
-      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
+    const container = scrollAreaRef.current;
+    if (!container || messages.length === 0) return;
+
+    const last = messages[messages.length - 1];
+    if (last.role === 'user') {
+      // Keep previous behavior for user messages
+      container.scrollTop = container.scrollHeight;
+      return;
+    }
+
+    // For assistant messages, scroll so the start of the message is visible at the top
+    const lastEl = messageRefs.current[last.id];
+    if (lastEl && container) {
+      // Align the top of the assistant message with the top of the scroll container
+      container.scrollTop = lastEl.offsetTop - container.offsetTop;
     }
   }, [messages]);
 
@@ -44,19 +62,41 @@ export function ShoppingCartChat({
     };
 
     setMessages((prev) => [...prev, userMessage]);
+
+    // Quick intent: add all / yes
+    if (
+      /^(add\s*all|yes\b|please\s*add\s*all)/i.test(userMessage.content) &&
+      onAddAll
+    ) {
+      setInputValue('');
+      setIsLoading(true);
+      try {
+        await onAddAll();
+        const assistantAck: Message = {
+          id: `assistant-${Date.now()}`,
+          role: 'assistant',
+          content:
+            'Added the recommended ingredients to your kitchen as unavailable. They will appear in your shopping list.',
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, assistantAck]);
+      } catch (error) {
+        console.error('Add all error:', error);
+      } finally {
+        setIsLoading(false);
+      }
+      return;
+    }
+
     setInputValue('');
     setIsLoading(true);
 
     try {
-      await onChatResponse(userMessage.content);
-
-      // For now, show a generic response since we're using the existing conversation system
-      // In a full implementation, we'd need to integrate with the conversation state
+      const reply = await onChatResponse(userMessage.content);
       const assistantMessage: Message = {
         id: `assistant-${Date.now()}`,
         role: 'assistant',
-        content:
-          "Thank you for your question! I've processed your request. For now, please use the existing chat interface for full AI functionality.",
+        content: reply,
         timestamp: new Date(),
       };
 
@@ -95,6 +135,9 @@ export function ShoppingCartChat({
           messages.map((message) => (
             <div
               key={message.id}
+              ref={(el) => {
+                messageRefs.current[message.id] = el;
+              }}
               className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
             >
               <div

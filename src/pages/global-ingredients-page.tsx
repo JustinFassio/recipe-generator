@@ -12,6 +12,7 @@ import {
 } from '@/lib/groceries/category-mapping';
 import type { GlobalIngredient } from '@/lib/groceries/enhanced-ingredient-matcher';
 import { IngredientCard } from '@/components/groceries/IngredientCard';
+import { upsertSystemIngredient } from '@/lib/ingredients/upsertSystemIngredient';
 
 export default function GlobalIngredientsPage() {
   const {
@@ -60,6 +61,7 @@ export default function GlobalIngredientsPage() {
   // Note: Normalization logic removed - now using multi-category-aware isInCart() function
 
   const handleAddToGroceries = async (category: string, name: string) => {
+    await upsertSystemIngredient(name, category);
     await addToCart(category, name);
   };
 
