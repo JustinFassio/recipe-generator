@@ -1,7 +1,11 @@
 import { useCallback, useMemo } from 'react';
 import { useShoppingList } from './useShoppingList';
 import { useUserGroceryCart } from './useUserGroceryCart';
-// Live AI calls will route directly via openaiAPI to avoid altering hook order
+// Live AI calls are routed directly via openaiAPI instead of using the conversation hook.
+// This avoids violating the Rules of Hooks in React, which require hooks to be called
+// unconditionally and in the same order on every render. Using a hook conditionally or
+// inside a callback (as would be required for dynamic AI calls) could break hook order
+// and cause runtime errors.
 import { openaiAPI } from '@/lib/openai';
 import { useIngredientMatching } from './useIngredientMatching'; // EXISTING HOOK
 import { CuisineStaplesManager } from '@/lib/shopping-cart/cuisine-staples';
@@ -57,8 +61,6 @@ export interface UseShoppingCartAIReturn {
 export function useShoppingCartAI(): UseShoppingCartAIReturn {
   const { shoppingList, addToShoppingList } = useShoppingList();
   const { userGroceryCart, addToCart } = useUserGroceryCart();
-  // Conversation not needed for deterministic recommendations reply
-  // const { sendMessage } = useConversation();
 
   // LEVERAGE EXISTING HOOK: Use the battle-tested ingredient matching
   const { matchIngredient } = useIngredientMatching();
