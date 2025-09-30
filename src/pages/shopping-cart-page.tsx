@@ -7,6 +7,7 @@ import { ShoppingCartChat } from '@/components/shopping-cart/ShoppingCartChat';
 import { IngredientCard } from '@/components/groceries/IngredientCard';
 import { Check, ShoppingCart, Brain } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { upsertSystemIngredient } from '@/lib/ingredients/upsertSystemIngredient';
 
 // Shopping item component - commented out as unused
 /*
@@ -216,6 +217,7 @@ export default function ShoppingCartPage() {
     name: string
   ) => {
     try {
+      await upsertSystemIngredient(name, category);
       // Add to groceries in unavailable state
       addIngredients(category, [name]);
       toast({
@@ -252,6 +254,7 @@ export default function ShoppingCartPage() {
     try {
       for (const staple of staples) {
         const category = categorizeIngredient(staple);
+        await upsertSystemIngredient(staple, category);
         addIngredients(category, [staple]);
       }
 

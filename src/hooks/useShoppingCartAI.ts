@@ -1,7 +1,8 @@
 import { useCallback, useMemo } from 'react';
 import { useShoppingList } from './useShoppingList';
 import { useUserGroceryCart } from './useUserGroceryCart';
-import { useConversation } from './useConversation';
+// Live AI calls will route directly via openaiAPI to avoid altering hook order
+import { openaiAPI } from '@/lib/openai';
 import { useIngredientMatching } from './useIngredientMatching'; // EXISTING HOOK
 import { CuisineStaplesManager } from '@/lib/shopping-cart/cuisine-staples';
 import { IngredientMatcher } from '@/lib/groceries/ingredient-matcher';
@@ -32,7 +33,7 @@ export interface AIPromptContext {
 
 export interface UseShoppingCartAIReturn {
   // Existing methods
-  getChatResponse: (message: string) => Promise<void>;
+  getChatResponse: (message: string) => Promise<string>;
   addToShoppingCart: (ingredients: string[]) => Promise<void>;
   buildContext: () => ShoppingCartContext;
   buildPromptContext: () => string;
@@ -56,7 +57,8 @@ export interface UseShoppingCartAIReturn {
 export function useShoppingCartAI(): UseShoppingCartAIReturn {
   const { shoppingList, addToShoppingList } = useShoppingList();
   const { userGroceryCart, addToCart } = useUserGroceryCart();
-  const { sendMessage } = useConversation();
+  // Conversation not needed for deterministic recommendations reply
+  // const { sendMessage } = useConversation();
 
   // LEVERAGE EXISTING HOOK: Use the battle-tested ingredient matching
   const { matchIngredient } = useIngredientMatching();
@@ -111,12 +113,51 @@ My groceries: ${groceryIngredients.join(', ') || 'none'}${cuisineContext}
 
   // Enhanced chat response with cuisine context
   const getChatResponse = useCallback(
-    async (message: string) => {
-      const context = buildPromptContext();
-      const contextualMessage = `${context}\n\nUser question: ${message}`;
-      return sendMessage(contextualMessage);
+    async (message: string): Promise<string> => {
+      try {
+        // Build live context and call OpenAI directly with a default persona
+        const context = buildPromptContext();
+        const userPrompt = `${context}\n\nUser question: ${message}`;
+        const response = await openaiAPI.chatWithPersona(
+          [
+            {
+              id: Date.now().toString(),
+              role: 'user',
+              content: userPrompt,
+              timestamp: new Date(),
+            },
+          ],
+          'chef'
+        );
+        return response.message;
+      } catch {
+        // Fallback to deterministic suggestions if AI fails
+        const allMissing = cuisineStaplesManager.getAllMissingStaples(
+          userGroceryCart,
+          ingredientMatcher
+        );
+        if (allMissing.length === 0) {
+          return "You're in great shape! I don't see obvious gaps for major cuisines.";
+        }
+        const focus = allMissing[0];
+        const recommendations = cuisineStaplesManager.getRecommendedAdditions(
+          focus.cuisine,
+          userGroceryCart,
+          ingredientMatcher,
+          6
+        );
+        const bullets = recommendations
+          .map((s) => `• ${s.ingredient} — ${s.reason}`)
+          .join('\n');
+        return `Here are some ${focus.cuisine} additions while AI is unavailable:\n\n${bullets}`;
+      }
     },
-    [buildPromptContext, sendMessage]
+    [
+      buildPromptContext,
+      cuisineStaplesManager,
+      userGroceryCart,
+      ingredientMatcher,
+    ]
   );
 
   // Add multiple ingredients to shopping cart using existing categorization
