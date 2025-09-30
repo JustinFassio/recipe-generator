@@ -10,12 +10,14 @@ interface Message {
 
 interface ShoppingCartChatProps {
   onChatResponse: (message: string) => Promise<string>;
+  onAddAll?: () => Promise<void>;
   placeholder?: string;
   className?: string;
 }
 
 export function ShoppingCartChat({
   onChatResponse,
+  onAddAll,
   placeholder = 'Ask me about ingredients...',
   className = '',
 }: ShoppingCartChatProps) {
@@ -60,6 +62,32 @@ export function ShoppingCartChat({
     };
 
     setMessages((prev) => [...prev, userMessage]);
+
+    // Quick intent: add all / yes
+    if (
+      /^(add\s*all|yes\b|please\s*add\s*all)/i.test(userMessage.content) &&
+      onAddAll
+    ) {
+      setInputValue('');
+      setIsLoading(true);
+      try {
+        await onAddAll();
+        const assistantAck: Message = {
+          id: `assistant-${Date.now()}`,
+          role: 'assistant',
+          content:
+            'Added the recommended ingredients to your kitchen as unavailable. They will appear in your shopping list.',
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, assistantAck]);
+      } catch (error) {
+        console.error('Add all error:', error);
+      } finally {
+        setIsLoading(false);
+      }
+      return;
+    }
+
     setInputValue('');
     setIsLoading(true);
 
