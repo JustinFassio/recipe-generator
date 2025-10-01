@@ -6,7 +6,7 @@
 /**
  * Normalizes text by removing accented characters and standardizing format.
  * This ensures consistent text processing across different parts of the application.
- * 
+ *
  * @param input - The text to normalize
  * @returns Normalized text with accented characters decomposed and diacritical marks removed
  */
@@ -19,7 +19,7 @@ export function normalizeAccentedCharacters(input: string): string {
 /**
  * Complete text normalization for ingredient matching.
  * Combines accented character normalization with additional processing.
- * 
+ *
  * @param input - The text to normalize
  * @returns Fully normalized text suitable for ingredient matching
  */
