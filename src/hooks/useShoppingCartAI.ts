@@ -8,12 +8,12 @@ import { useUserGroceryCart } from './useUserGroceryCart';
 // and cause runtime errors.
 import { openaiAPI } from '@/lib/openai';
 import { useIngredientMatching } from './useIngredientMatching'; // EXISTING HOOK
-import { CuisineStaplesManager } from '@/lib/shopping-cart/cuisine-staples';
+import { CuisineStaplesManager } from '@/lib/shopping-cart/cuisine-staples/manager';
 import { IngredientMatcher } from '@/lib/groceries/ingredient-matcher';
 import type {
   CuisineStaple,
   MissingStaples,
-} from '@/lib/shopping-cart/cuisine-staples';
+} from '@/lib/shopping-cart/cuisine-staples/types';
 
 // Shopping cart context for AI
 export interface ShoppingCartContext {

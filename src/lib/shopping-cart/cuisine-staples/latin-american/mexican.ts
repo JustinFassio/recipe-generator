@@ -1,0 +1,86 @@
+import { CuisineStaplesData } from '../../cuisine-staples/types';
+
+export const mexican: CuisineStaplesData = {
+  cuisine: 'Mexican',
+  description: 'Core Mexican staples for salsas, tacos, and stews',
+  subStyles: ['Central', 'Yucatán', 'Oaxacan', 'Northern'],
+  staples: [
+    {
+      ingredient: 'cumin',
+      category: 'flavor_builders',
+      priority: 'essential',
+      reason: 'Signature spice',
+      usage: 'Seasonings',
+    },
+    {
+      ingredient: 'chili powder',
+      category: 'flavor_builders',
+      priority: 'essential',
+      reason: 'Signature blend',
+      usage: 'Tacos, stews',
+    },
+    {
+      ingredient: 'garlic',
+      category: 'fresh_produce',
+      priority: 'essential',
+      reason: 'Aromatic',
+      usage: 'Salsas, stews',
+    },
+    {
+      ingredient: 'onion',
+      category: 'fresh_produce',
+      priority: 'essential',
+      reason: 'Aromatic',
+      usage: 'Salsas, sautés',
+    },
+    {
+      ingredient: 'tomatoes',
+      category: 'fresh_produce',
+      priority: 'essential',
+      reason: 'Salsas and sauces',
+      usage: 'Salsas, stews',
+    },
+    {
+      ingredient: 'jalapeño',
+      category: 'fresh_produce',
+      priority: 'recommended',
+      reason: 'Heat',
+      usage: 'Salsas, toppings',
+    },
+    {
+      ingredient: 'cilantro',
+      category: 'fresh_produce',
+      priority: 'recommended',
+      reason: 'Freshness',
+      usage: 'Salsas, garnish',
+    },
+    {
+      ingredient: 'lime',
+      category: 'fresh_produce',
+      priority: 'recommended',
+      reason: 'Acidity',
+      usage: 'Finishing',
+    },
+    {
+      ingredient: 'tortillas',
+      category: 'pantry_staples',
+      priority: 'essential',
+      reason: 'Base',
+      usage: 'Tacos, enchiladas',
+    },
+    {
+      ingredient: 'beans',
+      category: 'pantry_staples',
+      priority: 'recommended',
+      reason: 'Protein',
+      usage: 'Refried, sides',
+    },
+    {
+      ingredient: 'rice',
+      category: 'pantry_staples',
+      priority: 'recommended',
+      reason: 'Starch',
+      usage: 'Sides',
+    },
+  ],
+};

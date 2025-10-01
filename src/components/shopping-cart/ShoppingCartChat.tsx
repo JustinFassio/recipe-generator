@@ -13,6 +13,7 @@ interface ShoppingCartChatProps {
   onAddAll?: () => Promise<void>;
   placeholder?: string;
   className?: string;
+  onTranscriptChange?: (text: string) => void;
 }
 
 export function ShoppingCartChat({
@@ -20,6 +21,7 @@ export function ShoppingCartChat({
   onAddAll,
   placeholder = 'Ask me about ingredients...',
   className = '',
+  onTranscriptChange,
 }: ShoppingCartChatProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
@@ -49,6 +51,13 @@ export function ShoppingCartChat({
       container.scrollTop = lastEl.offsetTop - container.offsetTop;
     }
   }, [messages]);
+
+  // Emit transcript when messages change
+  useEffect(() => {
+    if (!onTranscriptChange) return;
+    const transcript = messages.map((m) => m.content).join('\n\n');
+    onTranscriptChange(transcript);
+  }, [messages, onTranscriptChange]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

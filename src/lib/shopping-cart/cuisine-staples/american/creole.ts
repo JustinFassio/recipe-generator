@@ -1,0 +1,86 @@
+import { CuisineStaplesData } from '../../cuisine-staples/types';
+
+export const creole: CuisineStaplesData = {
+  cuisine: 'Creole',
+  description: 'New Orleans Creole staples with roux, seafood, and aromatics',
+  subStyles: ['New Orleans'],
+  staples: [
+    {
+      ingredient: 'onion',
+      category: 'fresh_produce',
+      priority: 'essential',
+      reason: 'Part of trinity',
+      usage: 'Gumbo, étouffée',
+    },
+    {
+      ingredient: 'celery',
+      category: 'fresh_produce',
+      priority: 'essential',
+      reason: 'Part of trinity',
+      usage: 'Gumbo, étouffée',
+    },
+    {
+      ingredient: 'green bell pepper',
+      category: 'fresh_produce',
+      priority: 'essential',
+      reason: 'Part of trinity',
+      usage: 'Gumbo, étouffée',
+    },
+    {
+      ingredient: 'garlic',
+      category: 'fresh_produce',
+      priority: 'recommended',
+      reason: 'Aromatic',
+      usage: 'Stews, sautés',
+    },
+    {
+      ingredient: 'butter',
+      category: 'dairy_cold',
+      priority: 'recommended',
+      reason: 'Roux',
+      usage: 'Light roux',
+    },
+    {
+      ingredient: 'flour',
+      category: 'pantry_staples',
+      priority: 'essential',
+      reason: 'Roux',
+      usage: 'Light/dark roux',
+    },
+    {
+      ingredient: 'shrimp',
+      category: 'proteins',
+      priority: 'recommended',
+      reason: 'Seafood staple',
+      usage: 'Creole dishes',
+    },
+    {
+      ingredient: 'tomatoes',
+      category: 'fresh_produce',
+      priority: 'recommended',
+      reason: 'Creole base',
+      usage: 'Sauces, stews',
+    },
+    {
+      ingredient: 'bay leaves',
+      category: 'flavor_builders',
+      priority: 'recommended',
+      reason: 'Aroma',
+      usage: 'Stews',
+    },
+    {
+      ingredient: 'thyme',
+      category: 'flavor_builders',
+      priority: 'recommended',
+      reason: 'Herb',
+      usage: 'Stews',
+    },
+    {
+      ingredient: 'rice',
+      category: 'pantry_staples',
+      priority: 'essential',
+      reason: 'Base starch',
+      usage: 'Jambalaya, sides',
+    },
+  ],
+};
