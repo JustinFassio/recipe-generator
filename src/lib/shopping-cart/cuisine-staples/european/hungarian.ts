@@ -1,4 +1,4 @@
-import { CuisineStaplesData } from '../../cuisine-staples/types';
+import { CuisineStaplesData } from '../types';
 
 export const hungarian: CuisineStaplesData = {
   cuisine: 'Hungarian',
