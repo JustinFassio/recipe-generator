@@ -641,6 +641,7 @@ export function RecipeForm({
             const formData = watch();
             return {
               title: formData.title,
+              description: formData.description || '',
               ingredients: formData.ingredients,
               instructions: formData.instructions,
               notes: formData.notes,
