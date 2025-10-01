@@ -9,7 +9,7 @@ import {
 import { createDaisyUICardClasses } from '@/lib/card-migration';
 import { IngredientMatchingTest } from '@/components/groceries/ingredient-matching-test';
 import { GroceryCard } from '@/components/groceries/GroceryCard';
-import { RefreshCw, Globe } from 'lucide-react';
+import { RefreshCw, Globe, Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useGlobalIngredients } from '@/hooks/useGlobalIngredients';
 import { getCategories } from '@/lib/ingredients/repository';
@@ -23,6 +23,7 @@ export function KitchenInventoryPage() {
   const [normalizedCategories, setNormalizedCategories] = useState<string[]>(
     []
   );
+  const [query, setQuery] = useState('');
 
   const availableCategories = useMemo(() => {
     // Prefer normalized categories if present; fallback to legacy mapping
@@ -110,14 +111,20 @@ export function KitchenInventoryPage() {
       return !hiddenNormalizedNames.has(normalized);
     };
 
+    const filterByQuery = (name: string) => {
+      return !query.trim() || name.toLowerCase().includes(query.toLowerCase());
+    };
+
     return allIngredients
       .filter(filterHidden)
+      .filter(filterByQuery)
       .sort((a, b) => a.localeCompare(b));
   }, [
     activeCategory,
     groceries.groceries,
     groceries.shoppingList,
     hiddenNormalizedNames,
+    query,
   ]);
 
   if (!user) {
@@ -145,31 +152,40 @@ export function KitchenInventoryPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50">
       <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">My Kitchen</h1>
-              <p className="text-gray-600">
-                Manage your kitchen inventory. Mark items as available (in
-                stock) or unavailable (need to buy). Unavailable items are added
-                to your shopping list.
+        <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">My Kitchen</h1>
+            <p className="text-gray-600">
+              Manage your kitchen inventory. Mark items as available (in stock)
+              or unavailable (need to buy). Unavailable items are added to your
+              shopping list.
+            </p>
+            {groceries.getTotalCount() > 0 && (
+              <p className="text-sm text-green-600 font-medium">
+                {groceries.getTotalCount()} ingredient
+                {groceries.getTotalCount() !== 1 ? 's' : ''} available in your
+                kitchen
               </p>
-              {groceries.getTotalCount() > 0 && (
-                <p className="text-sm text-green-600 font-medium">
-                  {groceries.getTotalCount()} ingredient
-                  {groceries.getTotalCount() !== 1 ? 's' : ''} available in your
-                  kitchen
-                </p>
-              )}
-              {groceries.getShoppingListCount() > 0 && (
-                <p className="text-sm text-orange-600 font-medium">
-                  {groceries.getShoppingListCount()} item
-                  {groceries.getShoppingListCount() !== 1 ? 's' : ''} in
-                  shopping list
-                </p>
-              )}
+            )}
+            {groceries.getShoppingListCount() > 0 && (
+              <p className="text-sm text-orange-600 font-medium">
+                {groceries.getShoppingListCount()} item
+                {groceries.getShoppingListCount() !== 1 ? 's' : ''} in shopping
+                list
+              </p>
+            )}
+          </div>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+            <div className="relative w-full sm:w-auto">
+              <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search ingredients..."
+                className="border border-gray-300 rounded-md px-3 py-1.5 pl-8 text-sm w-full sm:w-64 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-black"
+              />
             </div>
-            <div className="flex space-x-2">
+            <div className="flex items-center gap-2">
               <Link to="/global-ingredients" className="btn btn-outline">
                 <Globe className="mr-2 h-4 w-4" /> Global Ingredients
               </Link>

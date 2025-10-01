@@ -1,4 +1,5 @@
 import type { Recipe } from '@/lib/types';
+import { normalizeAccentedCharacters } from '@/lib/utils/text-normalization';
 
 export interface IngredientMatch {
   recipeIngredient: string;
@@ -195,22 +196,24 @@ export class IngredientMatcher {
   }
 
   protected normalizeIngredient(ingredient: string): string {
-    return ingredient
-      .toLowerCase()
-      .replace(/[^\w\s]/g, ' ') // Remove punctuation
-      .replace(
-        /\b(fresh|dried|ground|whole|chopped|diced|sliced|minced|melted|softened|room temperature)\b/g,
-        ''
-      ) // Remove prep words
-      .replace(
-        /\b(cups?|cup|tbsp|tablespoons?|tsp|teaspoons?|oz|ounces?|lbs?|pounds?|grams?|g|ml|liters?)\b/g,
-        ''
-      ) // Remove measurements
-      .replace(/\b(large|medium|small|extra|about|approximately)\b/g, '') // Remove size descriptors
-      .replace(/\b(\d+(?:\.\d+)?)\b/g, '') // Remove numbers (including decimals)
-      .replace(/\b(slices?|cloves?|pieces?|strips?|chunks?)\b/g, '') // Remove quantity words
-      .replace(/\s+/g, ' ') // Normalize whitespace
-      .trim();
+    return normalizeAccentedCharacters(
+      ingredient
+        .toLowerCase()
+        .replace(/[^\w\s]/g, ' ') // Remove punctuation
+        .replace(
+          /\b(fresh|dried|ground|whole|chopped|diced|sliced|minced|melted|softened|room temperature)\b/g,
+          ''
+        ) // Remove prep words
+        .replace(
+          /\b(cups?|cup|tbsp|tablespoons?|tsp|teaspoons?|oz|ounces?|lbs?|pounds?|grams?|g|ml|liters?)\b/g,
+          ''
+        ) // Remove measurements
+        .replace(/\b(large|medium|small|extra|about|approximately)\b/g, '') // Remove size descriptors
+        .replace(/\b(\d+(?:\.\d+)?)\b/g, '') // Remove numbers (including decimals)
+        .replace(/\b(slices?|cloves?|pieces?|strips?|chunks?)\b/g, '') // Remove quantity words
+        .replace(/\s+/g, ' ') // Normalize whitespace
+        .trim()
+    );
   }
 
   // Public helper to normalize from outside (e.g., hooks/components)

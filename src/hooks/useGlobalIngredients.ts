@@ -59,27 +59,29 @@ export function useGlobalIngredients(): UseGlobalIngredientsReturn {
     null
   );
 
-  // Initialize matcher when groceries change or immediately with empty groceries for new users
-  useEffect(() => {
-    const initializeMatcher = async () => {
-      // Always initialize matcher, even with empty groceries for new users
-      // This allows global ingredients to load for users who haven't set up groceries yet
-      const newMatcher = new EnhancedIngredientMatcher(groceries);
-      await newMatcher.initialize();
-      setMatcher(newMatcher);
-    };
-
-    initializeMatcher();
-  }, [groceries]);
-
-  // Load global ingredients when matcher is ready
-  useEffect(() => {
-    if (matcher) {
-      loadGlobalIngredients();
-      loadHidden();
+  // loadHidden loads user-specific hidden ingredients, so it requires user authentication.
+  const loadHidden = useCallback(async () => {
+    if (!user) return;
+    try {
+      const { supabase } = await import('@/lib/supabase');
+      const { data, error } = await supabase
+        .from('user_hidden_ingredients')
+        .select('normalized_name')
+        .eq('user_id', user.id);
+      if (error) throw error;
+      setHiddenNormalizedNames(
+        new Set(
+          (data || []).map(
+            (d: { normalized_name: string }) => d.normalized_name
+          )
+        )
+      );
+    } catch (err) {
+      console.error('Error loading hidden ingredients:', err);
     }
-  }, [matcher]);
+  }, [user]);
 
+  // loadGlobalIngredients loads global data and does not require authentication.
   const loadGlobalIngredients = useCallback(async () => {
     if (!matcher) return;
 
@@ -101,24 +103,26 @@ export function useGlobalIngredients(): UseGlobalIngredientsReturn {
     }
   }, [matcher]);
 
-  const loadHidden = useCallback(async () => {
-    try {
-      const { supabase } = await import('@/lib/supabase');
-      const { data, error } = await supabase
-        .from('user_hidden_ingredients')
-        .select('normalized_name');
-      if (error) throw error;
-      setHiddenNormalizedNames(
-        new Set(
-          (data || []).map(
-            (d: { normalized_name: string }) => d.normalized_name
-          )
-        )
-      );
-    } catch (err) {
-      console.error('Error loading hidden ingredients:', err);
+  // Initialize matcher when groceries change or immediately with empty groceries for new users
+  useEffect(() => {
+    const initializeMatcher = async () => {
+      // Always initialize matcher, even with empty groceries for new users
+      // This allows global ingredients to load for users who haven't set up groceries yet
+      const newMatcher = new EnhancedIngredientMatcher(groceries);
+      await newMatcher.initialize();
+      setMatcher(newMatcher);
+    };
+
+    initializeMatcher();
+  }, [groceries]);
+
+  // Load global ingredients when matcher is ready
+  useEffect(() => {
+    if (matcher) {
+      loadGlobalIngredients();
+      loadHidden();
     }
-  }, []);
+  }, [matcher, loadGlobalIngredients, loadHidden]);
 
   const saveIngredientToGlobal = useCallback(
     async (
@@ -226,14 +230,17 @@ export function useGlobalIngredients(): UseGlobalIngredientsReturn {
           .from('user_hidden_ingredients')
           .insert({ user_id: user.id, normalized_name: normalized });
         if (error) throw error;
+        // Update local state immediately for better UX
         setHiddenNormalizedNames((prev) => new Set(prev).add(normalized));
         return true;
       } catch (err) {
         console.error('Failed to hide ingredient:', err);
+        // Only reload from database on error to ensure consistency
+        await loadHidden();
         return false;
       }
     },
-    [matcher, user]
+    [matcher, user, loadHidden]
   );
 
   const unhideIngredient = useCallback(
@@ -247,6 +254,7 @@ export function useGlobalIngredients(): UseGlobalIngredientsReturn {
           .eq('user_id', user.id)
           .eq('normalized_name', normalized);
         if (error) throw error;
+        // Update local state immediately for better UX
         setHiddenNormalizedNames((prev) => {
           const next = new Set(prev);
           next.delete(normalized);
@@ -255,10 +263,12 @@ export function useGlobalIngredients(): UseGlobalIngredientsReturn {
         return true;
       } catch (err) {
         console.error('Failed to unhide ingredient:', err);
+        // Only reload from database on error to ensure consistency
+        await loadHidden();
         return false;
       }
     },
-    [matcher, user]
+    [matcher, user, loadHidden]
   );
 
   const refreshGlobalIngredients = useCallback(async () => {

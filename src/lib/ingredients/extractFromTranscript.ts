@@ -1,13 +1,10 @@
 // Deterministic extractor: scans transcript for known ingredient names and aliases
 // without calling the backend. Uses simple word-boundary matching with normalization.
 
+import { normalizeText } from '@/lib/utils/text-normalization';
+
 function normalize(input: string): string {
-  return input
-    .toLowerCase()
-    .normalize('NFKD')
-    .replace(/[^a-z0-9\s]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
+  return normalizeText(input);
 }
 
 function makeWordBoundaryRegex(term: string): RegExp {
