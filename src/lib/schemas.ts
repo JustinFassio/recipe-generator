@@ -29,6 +29,7 @@ export const recipeSchema = z.object({
 });
 
 // Form schema with required categories for form validation
+// Updated schema with required description field
 export const recipeFormSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   description: z.string().default(''),

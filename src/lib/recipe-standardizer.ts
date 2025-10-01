@@ -1,6 +1,7 @@
 // Standardized recipe format interface
 export interface StandardizedRecipe {
   title: string;
+  description: string;
   setup: string[];
   ingredients: string[];
   instructions: string[];
@@ -211,6 +212,7 @@ function parseStandardizedRecipe(text: string): StandardizedRecipe {
 
   return {
     title: title || 'Untitled Recipe',
+    description: '',
     setup,
     ingredients,
     instructions,
@@ -277,6 +279,7 @@ export function convertToParsedRecipe(standardized: StandardizedRecipe) {
 
   return {
     title: standardized.title,
+    description: standardized.description || '',
     ingredients: standardized.ingredients,
     instructions: standardized.instructions.join('\n\n'),
     notes:
