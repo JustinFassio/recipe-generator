@@ -3,6 +3,7 @@ import { MAX_CATEGORIES_PER_RECIPE, MAX_CATEGORY_LENGTH } from './constants';
 
 export const recipeSchema = z.object({
   title: z.string().min(1, 'Title is required'),
+  description: z.string().default(''),
   ingredients: z
     .array(z.string().min(1, 'Ingredient cannot be empty'))
     .min(1, 'At least one ingredient is required'),
@@ -30,6 +31,7 @@ export const recipeSchema = z.object({
 // Form schema with required categories for form validation
 export const recipeFormSchema = z.object({
   title: z.string().min(1, 'Title is required'),
+  description: z.string().default(''),
   ingredients: z
     .array(z.string().min(1, 'Ingredient cannot be empty'))
     .min(1, 'At least one ingredient is required'),

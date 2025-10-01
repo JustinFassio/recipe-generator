@@ -13,6 +13,7 @@ import { parseIngredientText } from './groceries/ingredient-parser';
 
 export interface ParsedRecipe {
   title: string;
+  description: string;
   ingredients: string[];
   instructions: string;
   notes: string;
@@ -110,6 +111,7 @@ function tryParseStructuredJSON(content: string): RecipeParseResult {
 
     const recipe: RecipeFormData = {
       title: String(parsed.title),
+      description: String(parsed.description || ''),
       ingredients: normalizeIngredients(parsed.ingredients),
       instructions: String(parsed.instructions),
       notes: String(parsed.notes || ''),
@@ -154,6 +156,7 @@ async function tryAIParsing(content: string): Promise<RecipeParseResult> {
 
     const recipe: RecipeFormData = {
       title: parsed.title,
+      description: parsed.description || '',
       ingredients: parsed.ingredients,
       instructions: parsed.instructions,
       notes: parsed.notes || '',
@@ -278,6 +281,7 @@ function tryPatternParsing(content: string): RecipeParseResult {
 
     const recipe: RecipeFormData = {
       title,
+      description: '',
       ingredients,
       instructions: instructions.join('\n'),
       notes: '',

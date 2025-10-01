@@ -144,6 +144,13 @@ export function RecipeCard({
               ? `${recipe.title.substring(0, RECIPE_TITLE_MAX_LENGTH).trim()}...`
               : recipe.title}
           </h3>
+
+          {/* Recipe Description */}
+          {recipe.description && (
+            <p className="mt-2 text-sm text-gray-600 line-clamp-2">
+              {recipe.description}
+            </p>
+          )}
         </div>
 
         {/* Action Buttons - Top Right */}

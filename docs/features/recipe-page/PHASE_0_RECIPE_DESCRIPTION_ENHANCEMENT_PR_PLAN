@@ -2,6 +2,16 @@
 
 Goal: ship the description feature in safe, reviewable increments (< 2,000 LOC each), keeping production stable after every PR.
 
+## 🔄 **UPDATED STATUS (Current State)**
+
+**✅ Database Schema Already Exists**: The `description` columns are already present in both `recipes` and `recipe_content_versions` tables. This significantly reduces implementation complexity and timeline.
+
+**Key Updates Made to This Plan**:
+- PR 3 scope updated (no database migration needed)
+- Implementation timeline reduced from 1-2 days to 1-2 weeks
+- Added current implementation status tracking
+- Updated completion criteria to reflect existing database schema
+
 ## PR 1 — Types, Schema, and Minimal UI (no persistence)
 
 - Scope
@@ -31,20 +41,19 @@ Goal: ship the description feature in safe, reviewable increments (< 2,000 LOC e
   - Unit: prompt templates contain description field and guidance.
   - No network calls.
 
-## PR 3 — Persistence: DB Migration + Read/Write
+## PR 3 — Persistence: API Integration + Read/Write
 
 - Scope
-  - Add nullable `description` columns to `recipes` and `recipe_content_versions` (non-destructive).
-  - API/client paths read/write description; UI continues to work if null.
+  - ✅ **COMPLETED**: Database schema already exists (`description` columns in both `recipes` and `recipe_content_versions` tables).
+  - Update API/client paths to read/write description; UI continues to work if null.
   - Versioning payloads carry description.
 - Files
-  - `supabase/migrations/*_add_recipe_descriptions*.sql`
   - `src/lib/api/**`, `src/components/recipes/versioned-recipe-card.tsx`
 - Tests
   - Integration: save/load with and without description.
-  - Migration lints; DB tests if available.
+  - Verify existing database schema supports description field.
 - Safety
-  - No backfill required; treat null and '' as empty.
+  - No migration needed; treat null and '' as empty.
 
 ## PR 4 — Versioning Integration
 
@@ -427,26 +436,15 @@ ${ENHANCED_SAVE_RECIPE_PROMPT}`,
 </div>
 ```
 
-### 5. Update Database Schema
+### 5. Database Schema Status
 
-**File**: `supabase/migrations/add_description_to_recipes.sql`
+**✅ COMPLETED**: Database schema already exists
 
-```sql
--- Add description column to recipes table
-ALTER TABLE recipes
-ADD COLUMN IF NOT EXISTS description TEXT;
+The `description` column already exists in both tables:
+- `recipes.description` (TEXT, nullable)
+- `recipe_content_versions.description` (TEXT, nullable)
 
--- Add description to recipe_content_versions table (current versioning system)
-ALTER TABLE recipe_content_versions
-ADD COLUMN IF NOT EXISTS description TEXT;
-
--- Add index for description search
-CREATE INDEX IF NOT EXISTS idx_recipes_description
-ON recipes USING GIN (to_tsvector('english', description));
-
--- Update RLS policies if needed
--- (existing policies should automatically include the new column)
-```
+**No migration needed** - the database is ready for description field implementation.
 
 ### 6. Enhanced AI Image Generation with Description
 
@@ -615,10 +613,26 @@ describe('AI Image Generation with Description', () => {
 - [ ] AI personas generate rich descriptions
 - [ ] Recipe form displays and edits descriptions
 - [ ] Recipe view prominently shows descriptions
-- [ ] Database schema supports descriptions
+- [x] **Database schema supports descriptions** (✅ Already completed)
 - [ ] Image generation uses descriptions as prompts
 - [ ] All tests pass
 - [ ] Backward compatibility maintained
+
+## 📊 Current Implementation Status
+
+### ✅ Completed
+- Database schema (`description` columns exist in both `recipes` and `recipe_content_versions`)
+
+### 🔄 In Progress
+- None currently
+
+### ⏳ Pending
+- TypeScript types and Zod schemas
+- UI components (forms and views)
+- AI persona updates
+- API integration
+- Versioning support
+- E2E testing
 
 ## 🚀 Integration with Existing Plan
 
@@ -632,8 +646,24 @@ This Phase 0 enhancement **perfectly complements** the existing AI image generat
 
 The description field acts as the **bridge** between user intent and AI image generation, making the entire system more intelligent and user-friendly.
 
+## 🎯 Updated Implementation Priority
+
+### **Immediate (Week 1)**
+1. **PR 1**: Update TypeScript types and Zod schemas
+2. **PR 1**: Add description field to recipe forms and views
+3. **PR 2**: Update AI personas to generate descriptions
+
+### **Next (Week 2)**
+4. **PR 3**: Update API integration (skip database migration)
+5. **PR 4**: Implement versioning support
+6. **PR 5**: Add E2E testing
+
+### **Future (After Description Foundation)**
+7. **PR 6**: Build AI image generation system
+8. **Integration**: Connect image generation to recipe creation flow
+
 ---
 
-**Estimated Time**: 1-2 days
+**Updated Estimated Time**: 1-2 weeks (reduced due to existing database schema)
 **Dependencies**: None (foundational enhancement)
 **Risk Level**: Low (additive feature, backward compatible)
