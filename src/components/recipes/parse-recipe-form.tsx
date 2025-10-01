@@ -18,7 +18,7 @@ import {
   type ParseRecipeFormData,
   type RecipeFormData,
 } from '@/lib/schemas';
-import type { ParsedRecipe } from '@/lib/types';
+import type { ParsedRecipe } from '@/lib/recipe-parser-unified';
 import { useParseRecipe } from '@/hooks/use-recipes';
 
 interface ParseRecipeFormProps {

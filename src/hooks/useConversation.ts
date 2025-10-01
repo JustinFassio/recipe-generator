@@ -515,6 +515,7 @@ I'll ensure all recommendations are safe for your dietary needs and tailored to 
       // Convert ParsedRecipe to the expected format
       const recipe = {
         title: parsedRecipe.title,
+        description: parsedRecipe.description || '',
         ingredients: parsedRecipe.ingredients,
         instructions: parsedRecipe.instructions,
         notes: parsedRecipe.notes || '',
@@ -645,6 +646,7 @@ I'll ensure all recommendations are safe for your dietary needs and tailored to 
           // Convert to RecipeFormData format
           const recipe: RecipeFormData = {
             title: recipeData.title || 'Untitled Recipe',
+            description: recipeData.description || '',
             ingredients: validateAndConvertIngredients(recipeData.ingredients),
             instructions: recipeData.instructions || '',
             notes: recipeData.notes || '',
@@ -696,6 +698,7 @@ Format as: {"title": "Recipe Name", "ingredients": ["ingredient 1", "ingredient 
             const recipeData = JSON.parse(jsonBlockMatch[1]);
             const recipe: RecipeFormData = {
               title: recipeData.title || 'Untitled Recipe',
+              description: recipeData.description || '',
               ingredients: validateAndConvertIngredients(
                 recipeData.ingredients
               ),
