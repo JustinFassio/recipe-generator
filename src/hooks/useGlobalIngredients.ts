@@ -59,26 +59,26 @@ export function useGlobalIngredients(): UseGlobalIngredientsReturn {
     null
   );
 
-  // Initialize matcher when groceries change or immediately with empty groceries for new users
-  useEffect(() => {
-    const initializeMatcher = async () => {
-      // Always initialize matcher, even with empty groceries for new users
-      // This allows global ingredients to load for users who haven't set up groceries yet
-      const newMatcher = new EnhancedIngredientMatcher(groceries);
-      await newMatcher.initialize();
-      setMatcher(newMatcher);
-    };
-
-    initializeMatcher();
-  }, [groceries]);
-
-  // Load global ingredients when matcher is ready
-  useEffect(() => {
-    if (matcher) {
-      loadGlobalIngredients();
-      loadHidden();
+  const loadHidden = useCallback(async () => {
+    if (!user) return;
+    try {
+      const { supabase } = await import('@/lib/supabase');
+      const { data, error } = await supabase
+        .from('user_hidden_ingredients')
+        .select('normalized_name')
+        .eq('user_id', user.id);
+      if (error) throw error;
+      setHiddenNormalizedNames(
+        new Set(
+          (data || []).map(
+            (d: { normalized_name: string }) => d.normalized_name
+          )
+        )
+      );
+    } catch (err) {
+      console.error('Error loading hidden ingredients:', err);
     }
-  }, [matcher]);
+  }, [user]);
 
   const loadGlobalIngredients = useCallback(async () => {
     if (!matcher) return;
@@ -101,24 +101,26 @@ export function useGlobalIngredients(): UseGlobalIngredientsReturn {
     }
   }, [matcher]);
 
-  const loadHidden = useCallback(async () => {
-    try {
-      const { supabase } = await import('@/lib/supabase');
-      const { data, error } = await supabase
-        .from('user_hidden_ingredients')
-        .select('normalized_name');
-      if (error) throw error;
-      setHiddenNormalizedNames(
-        new Set(
-          (data || []).map(
-            (d: { normalized_name: string }) => d.normalized_name
-          )
-        )
-      );
-    } catch (err) {
-      console.error('Error loading hidden ingredients:', err);
+  // Initialize matcher when groceries change or immediately with empty groceries for new users
+  useEffect(() => {
+    const initializeMatcher = async () => {
+      // Always initialize matcher, even with empty groceries for new users
+      // This allows global ingredients to load for users who haven't set up groceries yet
+      const newMatcher = new EnhancedIngredientMatcher(groceries);
+      await newMatcher.initialize();
+      setMatcher(newMatcher);
+    };
+
+    initializeMatcher();
+  }, [groceries]);
+
+  // Load global ingredients when matcher is ready
+  useEffect(() => {
+    if (matcher) {
+      loadGlobalIngredients();
+      loadHidden();
     }
-  }, []);
+  }, [matcher, loadGlobalIngredients, loadHidden]);
 
   const saveIngredientToGlobal = useCallback(
     async (
@@ -227,13 +229,15 @@ export function useGlobalIngredients(): UseGlobalIngredientsReturn {
           .insert({ user_id: user.id, normalized_name: normalized });
         if (error) throw error;
         setHiddenNormalizedNames((prev) => new Set(prev).add(normalized));
+        // Reload hidden ingredients to ensure consistency
+        await loadHidden();
         return true;
       } catch (err) {
         console.error('Failed to hide ingredient:', err);
         return false;
       }
     },
-    [matcher, user]
+    [matcher, user, loadHidden]
   );
 
   const unhideIngredient = useCallback(
@@ -252,13 +256,15 @@ export function useGlobalIngredients(): UseGlobalIngredientsReturn {
           next.delete(normalized);
           return next;
         });
+        // Reload hidden ingredients to ensure consistency
+        await loadHidden();
         return true;
       } catch (err) {
         console.error('Failed to unhide ingredient:', err);
         return false;
       }
     },
-    [matcher, user]
+    [matcher, user, loadHidden]
   );
 
   const refreshGlobalIngredients = useCallback(async () => {
