@@ -1,4 +1,4 @@
-import { CuisineStaplesData } from './cuisine-staples/types';
+import { CuisineStaplesData } from './types';
 import { mexican } from './latin-american/mexican';
 import { brazilian } from './latin-american/brazilian';
 import { peruvian } from './latin-american/peruvian';
