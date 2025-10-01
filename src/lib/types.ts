@@ -225,6 +225,7 @@ export interface IngredientItem {
 
 export type ParsedRecipe = {
   title: string;
+  description: string;
   setup: string[];
   ingredients: string[];
   instructions: string;
