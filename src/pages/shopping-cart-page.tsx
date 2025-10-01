@@ -8,6 +8,7 @@ import { IngredientCard } from '@/components/groceries/IngredientCard';
 import { Check, ShoppingCart, Brain } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { upsertSystemIngredient } from '@/lib/ingredients/upsertSystemIngredient';
+import { extractIngredientsFromTranscript } from '@/lib/ingredients/extractFromTranscript';
 
 // Shopping item component - commented out as unused
 /*
@@ -211,6 +212,17 @@ export default function ShoppingCartPage() {
     'incomplete' | 'completed' | 'all'
   >('incomplete');
 
+  // Session-only completion state (does not persist to backend)
+  const [sessionCompleted, setSessionCompleted] = useState<Set<string>>(
+    () => new Set()
+  );
+
+  // Assistant transcript and extracted ingredients (session only)
+  const [assistantTranscript, setAssistantTranscript] = useState('');
+  const [extractedIngredients, setExtractedIngredients] = useState<string[]>(
+    []
+  );
+
   // Kitchen inventory integration functions
   const handleAddToGroceriesAsUnavailable = async (
     category: string,
@@ -317,21 +329,31 @@ export default function ShoppingCartPage() {
     return 'fresh_produce';
   };
 
-  // Simple format shopping list items
-  const shoppingListItems = Object.entries(groceries.shoppingList);
-  const incompleteItems = shoppingListItems.filter(
+  // Simple format shopping list items with session overlay
+  const rawShoppingListItems = Object.entries(groceries.shoppingList);
+  const effectiveShoppingListItems = rawShoppingListItems.map(
+    ([ingredient, status]) => {
+      // Overlay session-only completion state; fall back to backend status when not overridden
+      const isCompletedSession = sessionCompleted.has(ingredient);
+      const effectiveStatus = isCompletedSession ? 'purchased' : status;
+      return [ingredient, effectiveStatus] as const;
+    }
+  );
+
+  const incompleteItems = effectiveShoppingListItems.filter(
     ([, status]) => status === 'pending'
   );
-  const completedItems = shoppingListItems.filter(
+  const completedItems = effectiveShoppingListItems.filter(
     ([, status]) => status === 'purchased'
   );
-  const allItems = shoppingListItems;
+  const allItems = effectiveShoppingListItems;
 
   // Debug logging
   if (import.meta.env.DEV) {
     console.log('ShoppingCartPage data:', {
       shoppingList: groceries.shoppingList,
-      shoppingListItems,
+      rawShoppingListItems,
+      effectiveShoppingListItems,
       incompleteItems,
       completedItems,
       allItems,
@@ -355,23 +377,18 @@ export default function ShoppingCartPage() {
     if (completedItems.length === 0) {
       toast({
         title: 'No Completed Items',
-        description: 'There are no completed items to clear.',
+        description: 'There are no completed items to clear for this session.',
         variant: 'default',
       });
       return;
     }
 
-    // Remove completed items from shopping list
-    const updatedShoppingList = { ...groceries.shoppingList } as Record<
-      string,
-      string
-    >;
-    completedItems.forEach(([ingredient]) => {
-      delete updatedShoppingList[ingredient];
+    // Clear session-only completed markers
+    setSessionCompleted(new Set());
+    toast({
+      title: 'Cleared Completed',
+      description: 'Completed items cleared for this shopping session.',
     });
-
-    // React Query will handle the update automatically
-    // No need to manually save
 
     if (activeTab === 'completed') {
       setActiveTab('incomplete');
@@ -381,14 +398,15 @@ export default function ShoppingCartPage() {
   const handleClearAll = async () => {
     if (
       confirm(
-        'Are you sure you want to clear all items from your shopping list?'
+        'Clear all session progress? This will reset your session completion marks.'
       )
     ) {
-      // Clear all shopping list items
-
-      // React Query will handle the update automatically
-      // No need to manually save
-
+      // Reset session-only completion state
+      setSessionCompleted(new Set());
+      toast({
+        title: 'Session Reset',
+        description: 'All session completion marks have been cleared.',
+      });
       setActiveTab('incomplete');
     }
   };
@@ -501,16 +519,16 @@ export default function ShoppingCartPage() {
                       <button
                         className={`btn btn-circle btn-sm ${status === 'purchased' ? 'btn-success' : 'btn-outline'}`}
                         onClick={() => {
-                          // Find the category for this ingredient
-                          const category =
-                            Object.keys(groceries.groceries).find((cat) =>
-                              (groceries.groceries as Record<string, string[]>)[
-                                cat
-                              ].includes(ingredient)
-                            ) || 'pantry_staples'; // fallback category
-
-                          // Toggle ingredient (React Query handles the database update)
-                          groceries.toggleIngredient(category, ingredient);
+                          // Session-only toggle: mark/unmark as completed in this session
+                          setSessionCompleted((prev) => {
+                            const next = new Set(prev);
+                            if (next.has(ingredient)) {
+                              next.delete(ingredient);
+                            } else {
+                              next.add(ingredient);
+                            }
+                            return next;
+                          });
                         }}
                       >
                         {status === 'purchased' ? (
@@ -538,184 +556,426 @@ export default function ShoppingCartPage() {
           </div>
         </div>
 
-        {/* AI Assistant - Right column (1/3 width) */}
+        {/* Right column placeholder container (reserved for future content) */}
         <div className="lg:col-span-1">
           <div className="card bg-base-100 shadow-sm sticky top-6">
             <div className="card-body">
-              {/* AI Assistant Header */}
-              <div className="flex items-center gap-2 mb-4">
-                <div className="p-2 bg-primary/10 rounded-full">
-                  <Brain className="w-6 h-6 text-primary" />
-                </div>
-                <div>
-                  <h3 className="font-semibold">Your Cooking Assistant</h3>
-                  <p className="text-sm text-base-content/70">
-                    Ask me what ingredients you need for any cuisine!
-                  </p>
-                </div>
-              </div>
-
-              {/* Chat Interface */}
-              <div className="h-96">
-                <ShoppingCartChat
-                  placeholder="What do I need for authentic Mexican cooking?"
-                  onChatResponse={getChatResponse}
-                  onAddAll={async () => {
-                    // Compute top recommendations from the best-matching cuisine and add them
-                    const allMissing = getAllMissingStaples();
-                    if (allMissing.length === 0) return;
-                    const focus = allMissing[0];
-                    const recs = getRecommendedAdditions(
-                      focus.cuisine.toLowerCase(),
-                      6
-                    ).map((s) => s.ingredient);
-                    await addStaplesToGroceriesAsUnavailable(recs);
-                  }}
-                  className="h-full"
-                />
-              </div>
-
-              {/* Quick suggestion buttons */}
-              <div className="mt-4 space-y-2">
-                <p className="text-sm font-medium text-base-content/80">
-                  Quick suggestions:
+              <h3 className="font-semibold">Reserved Panel</h3>
+              {extractedIngredients.length === 0 ? (
+                <p className="text-sm text-base-content/70">
+                  No extracted ingredients yet.
                 </p>
-                <div className="grid grid-cols-1 gap-2">
-                  <button
-                    className="btn btn-sm btn-outline text-left justify-start"
-                    onClick={() =>
-                      getChatResponse(
-                        'What do I need for authentic Mexican cooking?'
-                      )
-                    }
-                  >
-                    🌮 Mexican essentials
-                  </button>
-                  <button
-                    className="btn btn-sm btn-outline text-left justify-start"
-                    onClick={() =>
-                      getChatResponse(
-                        'What do I need for Italian pasta dishes?'
-                      )
-                    }
-                  >
-                    🍝 Italian basics
-                  </button>
-                  <button
-                    className="btn btn-sm btn-outline text-left justify-start"
-                    onClick={() =>
-                      getChatResponse('What Asian ingredients should I stock?')
-                    }
-                  >
-                    🥢 Asian staples
-                  </button>
-                </div>
+              ) : (
+                <>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-base-content/70">
+                      {extractedIngredients.length} found
+                    </span>
+                    <button
+                      className="btn btn-xs btn-outline"
+                      onClick={async () => {
+                        const unique = Array.from(
+                          new Set(extractedIngredients)
+                        );
+                        if (unique.length === 0) return;
+                        await addStaplesToGroceriesAsUnavailable(unique);
+                        toast({
+                          title: 'Added to Kitchen',
+                          description: `${unique.length} ingredients added as unavailable`,
+                        });
+                      }}
+                    >
+                      Add All
+                    </button>
+                  </div>
+                  <div className="space-y-2 max-h-80 overflow-y-auto">
+                    {extractedIngredients.map((name) => (
+                      <div
+                        key={name}
+                        className="flex items-center justify-between p-2 rounded bg-base-200"
+                      >
+                        <span className="text-sm">{name}</span>
+                        <div className="flex gap-2">
+                          <button
+                            className="btn btn-xs"
+                            onClick={() =>
+                              handleAddToGroceriesAsUnavailable(
+                                categorizeIngredient(name),
+                                name
+                              )
+                            }
+                          >
+                            Add
+                          </button>
+                          <button
+                            className="btn btn-xs btn-ghost"
+                            onClick={() =>
+                              setExtractedIngredients((prev) =>
+                                prev.filter((n) => n !== name)
+                              )
+                            }
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* AI Assistant - moved below the shopping list */}
+      <div className="mt-6">
+        <div className="card bg-base-100 shadow-sm">
+          <div className="card-body">
+            {/* AI Assistant Header */}
+            <div className="flex items-center gap-2 mb-4">
+              <div className="p-2 bg-primary/10 rounded-full">
+                <Brain className="w-6 h-6 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-semibold">Your Cooking Assistant</h3>
+                <p className="text-sm text-base-content/70">
+                  Ask me what ingredients you need for any cuisine!
+                </p>
+              </div>
+            </div>
+
+            {/* Chat Interface */}
+            <div className="h-96">
+              <ShoppingCartChat
+                placeholder="What do I need for authentic Mexican cooking?"
+                onChatResponse={getChatResponse}
+                onAddAll={async () => {
+                  const allMissing = getAllMissingStaples();
+                  if (allMissing.length === 0) return;
+                  const focus = allMissing[0];
+                  const recs = getRecommendedAdditions(
+                    focus.cuisine.toLowerCase(),
+                    6
+                  ).map((s) => s.ingredient);
+                  await addStaplesToGroceriesAsUnavailable(recs);
+                }}
+                onTranscriptChange={(t) => setAssistantTranscript(t)}
+                className="h-full"
+              />
+            </div>
+
+            {/* Quick suggestion buttons */}
+            <div className="mt-4 space-y-2">
+              <p className="text-sm font-medium text-base-content/80">
+                Quick suggestions:
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  className="btn btn-sm btn-accent"
+                  onClick={() => {
+                    const list =
+                      extractIngredientsFromTranscript(assistantTranscript);
+                    setExtractedIngredients(list);
+                    toast({
+                      title: 'Ingredients listed',
+                      description: `${list.length} found`,
+                    });
+                  }}
+                >
+                  List Ingredients
+                </button>
+                <button
+                  className="btn btn-sm btn-outline text-left justify-start"
+                  onClick={() =>
+                    getChatResponse(
+                      'What do I need for authentic Mexican cooking?'
+                    )
+                  }
+                >
+                  🌮 Mexican essentials
+                </button>
+                <button
+                  className="btn btn-sm btn-outline text-left justify-start"
+                  onClick={() =>
+                    getChatResponse('What do I need for Italian pasta dishes?')
+                  }
+                >
+                  🍝 Italian basics
+                </button>
+                <button
+                  className="btn btn-sm btn-outline text-left justify-start"
+                  onClick={() =>
+                    getChatResponse('What Asian ingredients should I stock?')
+                  }
+                >
+                  🥢 Asian staples
+                </button>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Cuisine Staples Display - Bottom Section */}
+      {/* Cuisine Staples Display - Bottom Section (Grouped by Region with Accordion) */}
       {(() => {
+        const regionForCuisine = (name: string): string => {
+          const n = name.toLowerCase();
+          // Broad family groups
+          if (
+            [
+              'asian',
+              'thai',
+              'chinese',
+              'japanese',
+              'korean',
+              'vietnamese',
+              'indian',
+              'indonesian',
+              'malaysian',
+              'singaporean',
+              'filipino',
+              'isaan',
+            ].some((k) => n.includes(k))
+          )
+            return 'Asian';
+          if (
+            [
+              'europe',
+              'italian',
+              'french',
+              'spanish',
+              'greek',
+              'german',
+              'portuguese',
+              'russian',
+              'polish',
+              'hungarian',
+              'austrian',
+              'swiss',
+              'dutch',
+              'belgian',
+              'swedish',
+            ].some((k) => n.includes(k))
+          )
+            return 'European';
+          if (
+            [
+              'american',
+              'cajun',
+              'creole',
+              'southern',
+              'new england',
+              'pacific northwest',
+              'mid-atlantic',
+              'southwest',
+              'lowcountry',
+              'hawaiian',
+              'appalachian',
+              'midwestern',
+              'tex-mex',
+              'texas',
+              'kansas city',
+              'california',
+            ].some((k) => n.includes(k))
+          )
+            return 'American';
+          if (
+            [
+              'latin',
+              'mexican',
+              'brazilian',
+              'peruvian',
+              'argentin',
+              'chilean',
+              'colombian',
+              'venezuelan',
+              'uruguayan',
+              'paraguayan',
+              'bolivian',
+              'ecuadorian',
+            ].some((k) => n.includes(k))
+          )
+            return 'Latin American';
+          if (
+            ['lebanese', 'turkish', 'middle eastern', 'persian'].some((k) =>
+              n.includes(k)
+            )
+          )
+            return 'Middle Eastern';
+          if (['jamaican', 'caribbean'].some((k) => n.includes(k)))
+            return 'Caribbean';
+          if (['ethiopian', 'moroccan', 'african'].some((k) => n.includes(k)))
+            return 'African';
+          if (
+            ['scandinavian', 'norwegian', 'danish'].some((k) => n.includes(k))
+          )
+            return 'Scandinavian';
+          if (
+            ['fusion', 'modern american', 'international'].some((k) =>
+              n.includes(k)
+            )
+          )
+            return 'Fusion & Modern';
+          if (
+            ['vegetarian', 'health', 'keto', 'vegan', 'paleo'].some((k) =>
+              n.includes(k)
+            )
+          )
+            return 'Diet & Health';
+          if (
+            ['specialty', 'technique', 'cooking method'].some((k) =>
+              n.includes(k)
+            )
+          )
+            return 'Specialty Methods';
+          return 'Other';
+        };
+
         const allMissingStaples = getAllMissingStaples();
+        if (allMissingStaples.length === 0) return null;
+
+        const grouped: Record<string, typeof allMissingStaples> = {};
+        for (const item of allMissingStaples) {
+          const group = regionForCuisine(item.cuisine);
+          if (!grouped[group]) grouped[group] = [];
+          grouped[group].push(item);
+        }
+
+        const regionOrder = [
+          'American',
+          'Latin American',
+          'Asian',
+          'European',
+          'Middle Eastern',
+          'Caribbean',
+          'African',
+          'Scandinavian',
+          'Fusion & Modern',
+          'Diet & Health',
+          'Specialty Methods',
+          'Other',
+        ];
+
         return (
-          allMissingStaples.length > 0 && (
-            <div className="mt-8">
-              <div className="card bg-base-100 shadow-sm border border-base-300">
-                <div className="card-body">
-                  <h3 className="card-title text-lg">
-                    <span className="text-primary">🌍</span> Cuisine Staples
-                  </h3>
-                  <p className="text-sm text-base-content/70 mb-4">
-                    Missing essential ingredients for authentic cooking
-                  </p>
-                  <div className="space-y-3">
-                    {allMissingStaples.map((cuisineData, index) => {
-                      // Get the complete list of staples for accurate coverage calculation
-                      const allStaples = getCuisineStaples(
-                        cuisineData.cuisine.toLowerCase()
-                      );
+          <div className="mt-8">
+            <div className="card bg-base-100 shadow-sm border border-base-300">
+              <div className="card-body">
+                <h3 className="card-title text-lg">
+                  <span className="text-primary">🌍</span> Cuisine Staples
+                </h3>
+                <p className="text-sm text-base-content/70 mb-4">
+                  Missing essential ingredients for authentic cooking, grouped
+                  by region
+                </p>
 
-                      // Calculate actual missing ingredients by checking each staple against user's kitchen
-                      const actuallyMissing = allStaples.filter(
-                        (staple) => !isInCart(staple.ingredient)
-                      );
-                      const actualCoverage =
-                        allStaples.length > 0
-                          ? Math.round(
-                              ((allStaples.length - actuallyMissing.length) /
-                                allStaples.length) *
-                                100
-                            )
-                          : 0;
+                <div className="join join-vertical w-full">
+                  {regionOrder
+                    .filter((r) => grouped[r] && grouped[r].length > 0)
+                    .map((region) => (
+                      <div
+                        key={region}
+                        className="collapse collapse-arrow join-item border border-base-300 bg-base-200"
+                      >
+                        <input
+                          type="checkbox"
+                          defaultChecked={region === 'American'}
+                        />
+                        <div className="collapse-title text-md font-semibold">
+                          {region}{' '}
+                          <span className="badge badge-outline ml-2">
+                            {grouped[region].length}
+                          </span>
+                        </div>
+                        <div className="collapse-content">
+                          <div className="space-y-3">
+                            {grouped[region].map((cuisineData, index) => {
+                              const allStaples = getCuisineStaples(
+                                cuisineData.cuisine.toLowerCase()
+                              );
+                              const actuallyMissing = allStaples.filter(
+                                (staple) => !isInCart(staple.ingredient)
+                              );
+                              const actualCoverage =
+                                allStaples.length > 0
+                                  ? Math.round(
+                                      ((allStaples.length -
+                                        actuallyMissing.length) /
+                                        allStaples.length) *
+                                        100
+                                    )
+                                  : 0;
 
-                      return (
-                        <div
-                          key={index}
-                          className="flex items-center justify-between p-3 bg-base-200 rounded-lg"
-                        >
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-2">
-                              <span className="font-semibold">
-                                {cuisineData.cuisine}
-                              </span>
-                              <div className="badge badge-outline">
-                                {actualCoverage}% coverage
-                              </div>
-                              <div className="badge badge-warning">
-                                {actuallyMissing.length} missing
-                              </div>
-                              <div className="badge badge-info">
-                                {allStaples.length} total staples
-                              </div>
-                            </div>
-                            <div className="text-sm text-base-content/60">
-                              Missing:{' '}
-                              {actuallyMissing
-                                .slice(0, 3)
-                                .map((s) => s.ingredient)
-                                .join(', ')}
-                              {actuallyMissing.length > 3 &&
-                                ` +${actuallyMissing.length - 3} more`}
-                            </div>
-                          </div>
-                          <div className="flex gap-2">
-                            <button
-                              className="btn btn-sm btn-outline"
-                              onClick={() => {
-                                setSelectedCuisine(cuisineData.cuisine);
-                                setIsModalOpen(true);
-                              }}
-                            >
-                              View All ({allStaples.length})
-                            </button>
-                            <button
-                              className="btn btn-sm btn-primary"
-                              onClick={async () => {
-                                const recommendations = getRecommendedAdditions(
-                                  cuisineData.cuisine.toLowerCase(),
-                                  3
-                                );
-                                const ingredients = recommendations.map(
-                                  (s) => s.ingredient
-                                );
-                                await addStaplesToGroceriesAsUnavailable(
-                                  ingredients
-                                );
-                              }}
-                            >
-                              Add Essentials
-                            </button>
+                              return (
+                                <div
+                                  key={`${region}-${index}`}
+                                  className="flex items-center justify-between p-3 bg-base-100 rounded-lg border border-base-300"
+                                >
+                                  <div className="flex-1">
+                                    <div className="flex items-center gap-2 mb-2">
+                                      <span className="font-semibold">
+                                        {cuisineData.cuisine}
+                                      </span>
+                                      <div className="badge badge-outline">
+                                        {actualCoverage}% coverage
+                                      </div>
+                                      <div className="badge badge-warning">
+                                        {actuallyMissing.length} missing
+                                      </div>
+                                      <div className="badge badge-info">
+                                        {allStaples.length} total staples
+                                      </div>
+                                    </div>
+                                    <div className="text-sm text-base-content/60">
+                                      Missing:{' '}
+                                      {actuallyMissing
+                                        .slice(0, 3)
+                                        .map((s) => s.ingredient)
+                                        .join(', ')}
+                                      {actuallyMissing.length > 3 &&
+                                        ` +${actuallyMissing.length - 3} more`}
+                                    </div>
+                                  </div>
+                                  <div className="flex gap-2">
+                                    <button
+                                      className="btn btn-sm btn-outline"
+                                      onClick={() => {
+                                        setSelectedCuisine(cuisineData.cuisine);
+                                        setIsModalOpen(true);
+                                      }}
+                                    >
+                                      View All ({allStaples.length})
+                                    </button>
+                                    <button
+                                      className="btn btn-sm btn-primary"
+                                      onClick={async () => {
+                                        const recommendations =
+                                          getRecommendedAdditions(
+                                            cuisineData.cuisine.toLowerCase(),
+                                            3
+                                          );
+                                        const ingredients = recommendations.map(
+                                          (s) => s.ingredient
+                                        );
+                                        await addStaplesToGroceriesAsUnavailable(
+                                          ingredients
+                                        );
+                                      }}
+                                    >
+                                      Add Essentials
+                                    </button>
+                                  </div>
+                                </div>
+                              );
+                            })}
                           </div>
                         </div>
-                      );
-                    })}
-                  </div>
+                      </div>
+                    ))}
                 </div>
               </div>
             </div>
-          )
+          </div>
         );
       })()}
 

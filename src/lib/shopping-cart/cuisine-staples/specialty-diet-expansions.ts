@@ -1,4 +1,4 @@
-import { CuisineStaplesData } from '../cuisine-staples';
+import { CuisineStaplesData } from '../cuisine-staples/types';
 
 export const specialtyDietExpansions: Record<string, CuisineStaplesData> = {
   intermittent_fasting: {

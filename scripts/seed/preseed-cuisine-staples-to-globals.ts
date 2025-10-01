@@ -6,7 +6,7 @@
 */
 import 'dotenv/config';
 import { createClient } from '@supabase/supabase-js';
-import { CuisineStaplesManager } from '@/lib/shopping-cart/cuisine-staples';
+import { CuisineStaplesManager } from '@/lib/shopping-cart/cuisine-staples/manager';
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY =

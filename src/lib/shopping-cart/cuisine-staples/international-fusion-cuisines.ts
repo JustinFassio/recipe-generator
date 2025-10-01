@@ -1,4 +1,4 @@
-import { CuisineStaplesData } from '../cuisine-staples';
+import { CuisineStaplesData } from '../cuisine-staples/types';
 
 export const internationalFusionCuisines: Record<string, CuisineStaplesData> = {
   korean_mexican: {

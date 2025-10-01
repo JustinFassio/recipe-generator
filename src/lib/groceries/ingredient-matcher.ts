@@ -40,6 +40,15 @@ export class IngredientMatcher {
   }
 
   /**
+   * Check if the user's groceries effectively contain an ingredient by name,
+   * using the same matching strategy as matchIngredient.
+   */
+  public hasIngredient(ingredientName: string): boolean {
+    const match = this.matchIngredient(ingredientName);
+    return match.matchType !== 'none';
+  }
+
+  /**
    * Match a single recipe ingredient against user groceries
    */
   matchIngredient(recipeIngredient: string): IngredientMatch {

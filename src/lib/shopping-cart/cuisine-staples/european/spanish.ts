@@ -1,0 +1,93 @@
+import { CuisineStaplesData } from '../types';
+
+export const spanish: CuisineStaplesData = {
+  cuisine: 'Spanish',
+  description: 'Key Spanish ingredients for tapas, paella, and stews',
+  subStyles: ['Andalusian', 'Catalan', 'Basque', 'Valencian', 'Castilian'],
+  staples: [
+    {
+      ingredient: 'olive oil',
+      category: 'flavor_builders',
+      priority: 'essential',
+      reason: 'Primary fat',
+      usage: 'Sofrito, frying, finishing',
+    },
+    {
+      ingredient: 'garlic',
+      category: 'fresh_produce',
+      priority: 'essential',
+      reason: 'Aromatic base',
+      usage: 'Sofrito, marinades',
+    },
+    {
+      ingredient: 'onion',
+      category: 'fresh_produce',
+      priority: 'essential',
+      reason: 'Aromatic base',
+      usage: 'Sofrito, stews',
+    },
+    {
+      ingredient: 'tomatoes',
+      category: 'fresh_produce',
+      priority: 'essential',
+      reason: 'Sofrito base',
+      usage: 'Sauces, stews',
+    },
+    {
+      ingredient: 'smoked paprika',
+      category: 'flavor_builders',
+      priority: 'essential',
+      reason: 'Signature spice',
+      usage: 'Paella, stews, rubs',
+    },
+    {
+      ingredient: 'saffron',
+      category: 'flavor_builders',
+      priority: 'recommended',
+      reason: 'Aroma and color',
+      usage: 'Paella, rice dishes',
+    },
+    {
+      ingredient: 'sherry vinegar',
+      category: 'flavor_builders',
+      priority: 'recommended',
+      reason: 'Acidity',
+      usage: 'Dressings, sauces',
+    },
+    {
+      ingredient: 'chorizo',
+      category: 'proteins',
+      priority: 'recommended',
+      reason: 'Smoky depth',
+      usage: 'Stews, tapas',
+    },
+    {
+      ingredient: 'rice',
+      category: 'pantry_staples',
+      priority: 'essential',
+      reason: 'Paella base',
+      usage: 'Paella, arroz dishes',
+    },
+    {
+      ingredient: 'bread',
+      category: 'pantry_staples',
+      priority: 'recommended',
+      reason: 'Common staple',
+      usage: 'Tapas, sides',
+    },
+    {
+      ingredient: 'parsley',
+      category: 'fresh_produce',
+      priority: 'recommended',
+      reason: 'Freshness',
+      usage: 'Garnish, sauces',
+    },
+    {
+      ingredient: 'anchovies',
+      category: 'flavor_builders',
+      priority: 'optional',
+      reason: 'Umami',
+      usage: 'Sauces, tapas',
+    },
+  ],
+};
