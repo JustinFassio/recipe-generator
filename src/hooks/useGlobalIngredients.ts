@@ -59,6 +59,7 @@ export function useGlobalIngredients(): UseGlobalIngredientsReturn {
     null
   );
 
+  // loadHidden loads user-specific hidden ingredients, so it requires user authentication.
   const loadHidden = useCallback(async () => {
     if (!user) return;
     try {
@@ -80,6 +81,7 @@ export function useGlobalIngredients(): UseGlobalIngredientsReturn {
     }
   }, [user]);
 
+  // loadGlobalIngredients loads global data and does not require authentication.
   const loadGlobalIngredients = useCallback(async () => {
     if (!matcher) return;
 
@@ -228,12 +230,13 @@ export function useGlobalIngredients(): UseGlobalIngredientsReturn {
           .from('user_hidden_ingredients')
           .insert({ user_id: user.id, normalized_name: normalized });
         if (error) throw error;
+        // Update local state immediately for better UX
         setHiddenNormalizedNames((prev) => new Set(prev).add(normalized));
-        // Reload hidden ingredients to ensure consistency
-        await loadHidden();
         return true;
       } catch (err) {
         console.error('Failed to hide ingredient:', err);
+        // Only reload from database on error to ensure consistency
+        await loadHidden();
         return false;
       }
     },
@@ -251,16 +254,17 @@ export function useGlobalIngredients(): UseGlobalIngredientsReturn {
           .eq('user_id', user.id)
           .eq('normalized_name', normalized);
         if (error) throw error;
+        // Update local state immediately for better UX
         setHiddenNormalizedNames((prev) => {
           const next = new Set(prev);
           next.delete(normalized);
           return next;
         });
-        // Reload hidden ingredients to ensure consistency
-        await loadHidden();
         return true;
       } catch (err) {
         console.error('Failed to unhide ingredient:', err);
+        // Only reload from database on error to ensure consistency
+        await loadHidden();
         return false;
       }
     },

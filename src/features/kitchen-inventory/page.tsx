@@ -182,8 +182,7 @@ export function KitchenInventoryPage() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search ingredients..."
-                className="border border-gray-300 rounded-md px-3 py-1.5 pl-8 text-sm w-full sm:w-64 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                style={{ backgroundColor: 'white', color: 'black' }}
+                className="border border-gray-300 rounded-md px-3 py-1.5 pl-8 text-sm w-full sm:w-64 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-black"
               />
             </div>
             <div className="flex items-center gap-2">
