@@ -197,6 +197,8 @@ export class IngredientMatcher {
   protected normalizeIngredient(ingredient: string): string {
     return ingredient
       .toLowerCase()
+      .normalize('NFKD') // Decompose accented characters
+      .replace(/[\u0300-\u036f]/g, '') // Remove diacritical marks
       .replace(/[^\w\s]/g, ' ') // Remove punctuation
       .replace(
         /\b(fresh|dried|ground|whole|chopped|diced|sliced|minced|melted|softened|room temperature)\b/g,

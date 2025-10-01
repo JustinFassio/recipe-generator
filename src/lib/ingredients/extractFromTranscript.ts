@@ -4,9 +4,10 @@
 function normalize(input: string): string {
   return input
     .toLowerCase()
-    .normalize('NFKD')
-    .replace(/[^a-z0-9\s]/g, ' ')
-    .replace(/\s+/g, ' ')
+    .normalize('NFKD') // Decompose accented characters
+    .replace(/[\u0300-\u036f]/g, '') // Remove diacritical marks
+    .replace(/[^a-z0-9\s]/g, ' ') // Replace non-alphanumeric with spaces
+    .replace(/\s+/g, ' ') // Collapse multiple spaces
     .trim();
 }
 
