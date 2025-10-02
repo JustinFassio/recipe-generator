@@ -32,7 +32,7 @@ export const recipeSchema = z.object({
 // Updated schema with required description field
 export const recipeFormSchema = z.object({
   title: z.string().min(1, 'Title is required'),
-  description: z.string().default(''),
+  description: z.string().min(1, 'Description is required'),
   ingredients: z
     .array(z.string().min(1, 'Ingredient cannot be empty'))
     .min(1, 'At least one ingredient is required'),

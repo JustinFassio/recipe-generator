@@ -94,8 +94,7 @@ export function RecipeForm({
     setValue,
     watch,
   } = useForm<RecipeFormData>({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolver: zodResolver(recipeFormSchema) as any,
+    resolver: zodResolver(recipeFormSchema),
     defaultValues: editRecipe
       ? {
           title: editRecipe.title,
@@ -126,8 +125,7 @@ export function RecipeForm({
     append: appendIngredient,
     remove: removeIngredient,
   } = useFieldArray<RecipeFormData, FieldArrayPath<RecipeFormData>>({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    control: control as any,
+    control: control,
     name: 'ingredients' as FieldArrayPath<RecipeFormData>,
   });
 
@@ -136,8 +134,7 @@ export function RecipeForm({
     append: appendSetup,
     remove: removeSetup,
   } = useFieldArray<RecipeFormData, FieldArrayPath<RecipeFormData>>({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    control: control as any,
+    control: control,
     name: 'setup' as FieldArrayPath<RecipeFormData>,
   });
 
@@ -302,8 +299,7 @@ export function RecipeForm({
   };
 
   return (
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    <form onSubmit={handleSubmit(onSubmit as any)} className="space-y-6">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div className={createDaisyUICardClasses('bordered')}>
         <div className="card-body">
           <h3 className={createDaisyUICardTitleClasses()}>Recipe Details</h3>
@@ -616,8 +612,7 @@ export function RecipeForm({
                   setLastError(null);
                   setRetryCount((prev) => prev + 1);
                   // Retry the last submission
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  handleSubmit(onSubmit as any)();
+                  handleSubmit(onSubmit)();
                 }}
                 className="text-red-700 border-red-300 hover:bg-red-100"
               >
