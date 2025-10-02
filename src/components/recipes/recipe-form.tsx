@@ -58,12 +58,24 @@ export function RecipeForm({
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const isMountedRef = useRef(true);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isOnline, setIsOnline] = useState(
     typeof navigator !== 'undefined' ? navigator.onLine : true
   );
   const [isMobile, setIsMobile] = useState(false);
   const [lastError, setLastError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
+
+  // Cleanup effect to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   // Mobile detection and network status monitoring
   useEffect(() => {
@@ -275,13 +287,20 @@ export function RecipeForm({
         });
 
         // Use setTimeout to ensure navigation completes first
-        setTimeout(async () => {
+        timeoutRef.current = setTimeout(async () => {
+          let progressInterval: ReturnType<typeof setInterval> | null = null;
+
           try {
             if (isMobile)
               console.log('Auto-generating image for new recipe...');
 
             // Simulate progress updates
-            const progressInterval = setInterval(() => {
+            progressInterval = setInterval(() => {
+              if (!isMountedRef.current) {
+                if (progressInterval) clearInterval(progressInterval);
+                return;
+              }
+
               const currentProgress =
                 imageGenerationContext.generationState.progress;
               if (currentProgress < 90) {
@@ -294,7 +313,10 @@ export function RecipeForm({
             const generationResult =
               await autoImageGeneration.generateForRecipe(data);
 
-            clearInterval(progressInterval);
+            if (progressInterval) clearInterval(progressInterval);
+
+            // Only proceed if component is still mounted
+            if (!isMountedRef.current) return;
 
             if (
               generationResult.success &&
@@ -327,13 +349,19 @@ export function RecipeForm({
               );
             }
           } catch (autoGenError) {
+            if (progressInterval) clearInterval(progressInterval);
+
             console.warn('Auto image generation failed:', autoGenError);
-            imageGenerationContext.completeGeneration(
-              undefined,
-              autoGenError instanceof Error
-                ? autoGenError.message
-                : 'Generation failed'
-            );
+
+            // Only update context if component is still mounted
+            if (isMountedRef.current) {
+              imageGenerationContext.completeGeneration(
+                undefined,
+                autoGenError instanceof Error
+                  ? autoGenError.message
+                  : 'Generation failed'
+              );
+            }
             // Don't fail the entire recipe save if auto-generation fails
           }
         }, 100); // Small delay to ensure navigation completes
