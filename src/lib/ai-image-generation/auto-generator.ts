@@ -1,5 +1,7 @@
 import { RecipeFormData } from '@/lib/schemas';
 import { generateEnhancedPrompt, optimizePromptForDALLE } from './enhanced-prompt-generator';
+import { trackImageGenerationCost, calculateImageCost } from './cost-tracker';
+import { canGenerateImage } from './budget-manager';
 
 export interface AutoGenerationOptions {
   enabled: boolean;
@@ -17,6 +19,7 @@ export interface GenerationResult {
   error?: string;
   usedFallback?: boolean;
   cost?: number;
+  costTrackingId?: string;
 }
 
 /**
@@ -33,6 +36,15 @@ export async function generateImageForRecipe(
 ): Promise<GenerationResult> {
   if (!options.enabled) {
     return { success: false, error: 'Auto-generation disabled' };
+  }
+
+  // Calculate expected cost
+  const expectedCost = calculateImageCost(options.size, options.quality);
+
+  // Check budget limits
+  const budgetCheck = await canGenerateImage(expectedCost);
+  if (!budgetCheck.allowed) {
+    return { success: false, error: budgetCheck.reason || 'Budget limit exceeded' };
   }
 
   try {
@@ -71,16 +83,56 @@ export async function generateImageForRecipe(
     const data = await response.json();
 
     if (data.success && data.imageUrl) {
-      return {
-        success: true,
-        imageUrl: data.imageUrl,
-        usedFallback: data.usedFallback || false,
-        cost: data.usage?.totalCost || 0,
-      };
+      // Track successful generation cost
+      try {
+        const costRecord = await trackImageGenerationCost({
+          user_id: '', // Will be filled by the function
+          prompt: prompt,
+          size: options.size,
+          quality: options.quality,
+          cost: data.usage?.totalCost || expectedCost,
+          success: true,
+          image_url: data.imageUrl,
+          generation_time_ms: data.usage?.generationTimeMs,
+        });
+
+        return {
+          success: true,
+          imageUrl: data.imageUrl,
+          usedFallback: data.usedFallback || false,
+          cost: data.usage?.totalCost || expectedCost,
+          costTrackingId: costRecord.id,
+        };
+      } catch (trackingError) {
+        console.warn('Failed to track generation cost:', trackingError);
+        // Still return success even if tracking fails
+        return {
+          success: true,
+          imageUrl: data.imageUrl,
+          usedFallback: data.usedFallback || false,
+          cost: data.usage?.totalCost || expectedCost,
+        };
+      }
     } else {
+      // Track failed generation cost (for API calls that still cost money)
+      try {
+        await trackImageGenerationCost({
+          user_id: '', // Will be filled by the function
+          prompt: prompt,
+          size: options.size,
+          quality: options.quality,
+          cost: 0, // Failed generations don't cost money
+          success: false,
+          error_message: data.error || 'No image URL returned',
+        });
+      } catch (trackingError) {
+        console.warn('Failed to track failed generation:', trackingError);
+      }
+
       return {
         success: false,
         error: data.error || 'No image URL returned',
+        cost: 0,
       };
     }
   } catch (error) {
