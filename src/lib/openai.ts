@@ -9,6 +9,7 @@ CRITICAL: When providing a complete recipe, ALWAYS format it as structured JSON 
 \`\`\`json
 {
   "title": "Recipe Name",
+  "description": "A rich, appetizing description of the dish - flavors, textures, visual appeal, what makes it special",
   "ingredients": [
     {
       "item": "ingredient name",
@@ -87,6 +88,7 @@ ${CONTEXT_USAGE_DIRECTIVE}
 When generating a complete recipe, structure it as a JSON object with:
 {
   "title": "Recipe Name",
+  "description": "A rich, appetizing description of the dish - flavors, textures, visual appeal, what makes it special",
   "ingredients": [
     {
       "item": "ingredient name",
@@ -128,6 +130,7 @@ ${CONTEXT_USAGE_DIRECTIVE}
 When generating a complete recipe, structure it as a JSON object with:
 {
   "title": "Recipe Name",
+  "description": "A rich, appetizing description of the dish - flavors, textures, visual appeal, what makes it special",
   "ingredients": [
     {
       "item": "ingredient name",
@@ -169,6 +172,7 @@ ${CONTEXT_USAGE_DIRECTIVE}
 When generating a complete recipe, structure it as a JSON object with:
 {
   "title": "Recipe Name",
+  "description": "A rich, appetizing description of the dish - flavors, textures, visual appeal, what makes it special",
   "ingredients": [
     {
       "item": "ingredient name",
@@ -215,6 +219,7 @@ ${CONTEXT_USAGE_DIRECTIVE}
 When generating a complete recipe, structure it as a JSON object with:
 {
   "title": "Recipe Name",
+  "description": "A rich, appetizing description of the dish - flavors, textures, visual appeal, what makes it special",
   "ingredients": [
     {
       "item": "ingredient name",
@@ -263,6 +268,7 @@ ${CONTEXT_USAGE_DIRECTIVE}
 When generating a complete recipe, structure it as a JSON object with:
 {
   "title": "Recipe Name",
+  "description": "A rich, appetizing description of the dish - flavors, textures, visual appeal, what makes it special",
   "ingredients": [
     {
       "item": "ingredient name",
