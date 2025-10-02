@@ -287,12 +287,6 @@ export function RecipeCard({
               </div>
             )}
 
-            {recipe.instructions && (
-              <p className="line-clamp-3 text-sm text-gray-600">
-                {recipe.instructions}
-              </p>
-            )}
-
             {recipe.notes && (
               <div className="border-t pt-2">
                 <p className="line-clamp-2 text-xs text-gray-500 italic">

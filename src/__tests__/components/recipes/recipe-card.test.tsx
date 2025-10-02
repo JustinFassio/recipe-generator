@@ -100,7 +100,7 @@ describe('RecipeCard', () => {
     ).toBeInTheDocument();
     expect(screen.getByText('3 ingredients')).toBeInTheDocument();
     expect(
-      screen.getByText('Test cooking instructions for the recipe.')
+      screen.getByText('A delicious test recipe for testing purposes.')
     ).toBeInTheDocument();
     expect(
       screen.getByText('Test notes and tips for the recipe.')

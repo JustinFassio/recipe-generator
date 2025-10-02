@@ -229,10 +229,10 @@ export function VersionedRecipeCard({
               </div>
             )}
 
-            {/* Instructions Preview */}
-            {recipe.instructions && (
+            {/* Description Preview */}
+            {recipe.description && (
               <p className="line-clamp-2 text-sm text-gray-600">
-                {recipe.instructions}
+                {recipe.description}
               </p>
             )}
           </div>
