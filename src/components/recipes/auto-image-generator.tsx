@@ -4,7 +4,14 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { useAutoImageGeneration } from '@/hooks/useAutoImageGeneration';
 import { RecipeFormData } from '@/lib/schemas';
-import { Wand2, RefreshCw, AlertCircle, CheckCircle2, Settings, X } from 'lucide-react';
+import {
+  Wand2,
+  RefreshCw,
+  AlertCircle,
+  CheckCircle2,
+  Settings,
+  X,
+} from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 interface AutoImageGeneratorProps {
@@ -26,13 +33,13 @@ export function AutoImageGenerator({
   const [autoGenerateEnabled, setAutoGenerateEnabled] = useState(true);
   const [shouldGenerate, setShouldGenerate] = useState(false);
 
-  const { 
-    generateForRecipe, 
-    checkShouldGenerate, 
-    isGenerating, 
-    generationProgress, 
+  const {
+    generateForRecipe,
+    checkShouldGenerate,
+    isGenerating,
+    generationProgress,
     error,
-    result 
+    result,
   } = useAutoImageGeneration({
     onSuccess: (imageUrl) => {
       onImageGenerated(imageUrl);
@@ -83,14 +90,33 @@ export function AutoImageGenerator({
   const getStatusBadge = () => {
     switch (status) {
       case 'generating':
-        return <Badge variant="default"><RefreshCw className="mr-1 h-3 w-3 animate-spin" />Generating</Badge>;
+        return (
+          <Badge variant="default">
+            <RefreshCw className="mr-1 h-3 w-3 animate-spin" />
+            Generating
+          </Badge>
+        );
       case 'success':
-        return <Badge variant="default" className="bg-green-600"><CheckCircle2 className="mr-1 h-3 w-3" />Generated</Badge>;
+        return (
+          <Badge variant="default" className="bg-green-600">
+            <CheckCircle2 className="mr-1 h-3 w-3" />
+            Generated
+          </Badge>
+        );
       case 'error':
       case 'failed':
-        return <Badge variant="destructive"><AlertCircle className="mr-1 h-3 w-3" />Failed</Badge>;
+        return (
+          <Badge variant="destructive">
+            <AlertCircle className="mr-1 h-3 w-3" />
+            Failed
+          </Badge>
+        );
       case 'ready':
-        return <Badge variant="outline" className="border-blue-600 text-blue-600">Ready</Badge>;
+        return (
+          <Badge variant="outline" className="border-blue-600 text-blue-600">
+            Ready
+          </Badge>
+        );
       case 'disabled':
         return <Badge variant="secondary">Disabled</Badge>;
       default:
@@ -110,9 +136,12 @@ export function AutoImageGenerator({
           <div className="flex items-center space-x-3">
             <Wand2 className="h-5 w-5 text-blue-600" />
             <div>
-              <h4 className="font-medium text-blue-900">Auto Image Generation</h4>
+              <h4 className="font-medium text-blue-900">
+                Auto Image Generation
+              </h4>
               <p className="text-sm text-blue-700">
-                {status === 'ready' && 'This recipe will get an AI-generated image when saved'}
+                {status === 'ready' &&
+                  'This recipe will get an AI-generated image when saved'}
                 {status === 'generating' && 'Generating image automatically...'}
                 {status === 'success' && 'Image generated successfully!'}
                 {status === 'error' && 'Auto-generation failed'}
@@ -149,7 +178,9 @@ export function AutoImageGenerator({
       {showDetails && (
         <div className="rounded-lg border bg-gray-50 p-4 space-y-4">
           <div className="flex items-center justify-between">
-            <h4 className="font-medium text-gray-900">Auto-Generation Settings</h4>
+            <h4 className="font-medium text-gray-900">
+              Auto-Generation Settings
+            </h4>
             <Button
               type="button"
               variant="ghost"
@@ -180,7 +211,9 @@ export function AutoImageGenerator({
 
           {/* Generation Criteria */}
           <div>
-            <p className="font-medium text-gray-700 mb-2">Generation Criteria</p>
+            <p className="font-medium text-gray-700 mb-2">
+              Generation Criteria
+            </p>
             <div className="space-y-2 text-sm text-gray-600">
               <div className="flex items-center space-x-2">
                 {recipe.title ? (

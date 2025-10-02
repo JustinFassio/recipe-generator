@@ -1,7 +1,13 @@
 import { RecipeFormData } from '@/lib/schemas';
-import { generateEnhancedPrompt, optimizePromptForDALLE } from './enhanced-prompt-generator';
+import {
+  generateEnhancedPrompt,
+  optimizePromptForDALLE,
+} from './enhanced-prompt-generator';
 import { trackImageGenerationCost, calculateImageCost } from './cost-tracker';
-import { canGenerateImage } from './budget-manager';
+import {
+  canGenerateImage,
+  updateBudgetAfterGeneration,
+} from './budget-manager';
 
 export interface AutoGenerationOptions {
   enabled: boolean;
@@ -44,7 +50,10 @@ export async function generateImageForRecipe(
   // Check budget limits
   const budgetCheck = await canGenerateImage(expectedCost);
   if (!budgetCheck.allowed) {
-    return { success: false, error: budgetCheck.reason || 'Budget limit exceeded' };
+    return {
+      success: false,
+      error: budgetCheck.reason || 'Budget limit exceeded',
+    };
   }
 
   try {
@@ -55,7 +64,7 @@ export async function generateImageForRecipe(
       focus: options.promptFocus || 'dish',
       quality: options.quality,
     });
-    
+
     const prompt = optimizePromptForDALLE(enhancedPrompt.primaryPrompt);
 
     // Call image generation API
@@ -85,16 +94,22 @@ export async function generateImageForRecipe(
     if (data.success && data.imageUrl) {
       // Track successful generation cost
       try {
+        const actualCost = data.usage?.totalCost || expectedCost;
+
+        // Track cost in database
         const costRecord = await trackImageGenerationCost({
           user_id: '', // Will be filled by the function
           prompt: prompt,
           size: options.size,
           quality: options.quality,
-          cost: data.usage?.totalCost || expectedCost,
+          cost: actualCost,
           success: true,
           image_url: data.imageUrl,
           generation_time_ms: data.usage?.generationTimeMs,
         });
+
+        // Update user budget
+        await updateBudgetAfterGeneration(actualCost);
 
         return {
           success: true,

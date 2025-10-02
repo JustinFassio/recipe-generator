@@ -143,22 +143,33 @@ export async function getUserCostSummary(
     throw error;
   }
 
-  const totalCost = costs.reduce((sum: number, cost: any) => sum + cost.cost, 0);
+  const totalCost = costs.reduce(
+    (sum: number, cost: { cost: number }) => sum + cost.cost,
+    0
+  );
   const totalGenerations = costs.length;
-  const successfulGenerations = costs.filter((c: any) => c.success).length;
+  const successfulGenerations = costs.filter(
+    (c: { success: boolean }) => c.success
+  ).length;
   const failedGenerations = totalGenerations - successfulGenerations;
 
   const costByQuality = costs.reduce(
-    (acc: any, cost: any) => {
-      acc[cost.quality] += cost.cost;
+    (
+      acc: { standard: number; hd: number },
+      cost: { quality: string; cost: number }
+    ) => {
+      acc[cost.quality as keyof typeof acc] += cost.cost;
       return acc;
     },
     { standard: 0, hd: 0 }
   );
 
   const costBySize = costs.reduce(
-    (acc: any, cost: any) => {
-      acc[cost.size] += cost.cost;
+    (
+      acc: { '1024x1024': number; '1792x1024': number; '1024x1792': number },
+      cost: { size: string; cost: number }
+    ) => {
+      acc[cost.size as keyof typeof acc] += cost.cost;
       return acc;
     },
     { '1024x1024': 0, '1024x1792': 0, '1792x1024': 0 }
@@ -171,23 +182,28 @@ export async function getUserCostSummary(
   const monthlyStart = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
   const dailyCost = costs
-    .filter((c: any) => new Date(c.created_at) >= dailyStart)
-    .reduce((sum: number, c: any) => sum + c.cost, 0);
+    .filter((c: { created_at: string }) => new Date(c.created_at) >= dailyStart)
+    .reduce((sum: number, c: { cost: number }) => sum + c.cost, 0);
 
   const weeklyCost = costs
-    .filter((c: any) => new Date(c.created_at) >= weeklyStart)
-    .reduce((sum: number, c: any) => sum + c.cost, 0);
+    .filter(
+      (c: { created_at: string }) => new Date(c.created_at) >= weeklyStart
+    )
+    .reduce((sum: number, c: { cost: number }) => sum + c.cost, 0);
 
   const monthlyCost = costs
-    .filter((c: any) => new Date(c.created_at) >= monthlyStart)
-    .reduce((sum: number, c: any) => sum + c.cost, 0);
+    .filter(
+      (c: { created_at: string }) => new Date(c.created_at) >= monthlyStart
+    )
+    .reduce((sum: number, c: { cost: number }) => sum + c.cost, 0);
 
   return {
     total_cost: totalCost,
     total_generations: totalGenerations,
     successful_generations: successfulGenerations,
     failed_generations: failedGenerations,
-    average_cost_per_generation: totalGenerations > 0 ? totalCost / totalGenerations : 0,
+    average_cost_per_generation:
+      totalGenerations > 0 ? totalCost / totalGenerations : 0,
     cost_by_quality: costByQuality,
     cost_by_size: costBySize,
     daily_cost: dailyCost,
@@ -212,7 +228,7 @@ export async function getCostAnalytics(
 
   const now = new Date();
   let startDate: Date;
-  let endDate = now;
+  const endDate = now;
 
   switch (period) {
     case 'day':
@@ -241,51 +257,82 @@ export async function getCostAnalytics(
     throw error;
   }
 
-  const totalCost = costs.reduce((sum: number, cost: any) => sum + cost.cost, 0);
+  const totalCost = costs.reduce(
+    (sum: number, cost: { cost: number }) => sum + cost.cost,
+    0
+  );
   const generationCount = costs.length;
-  const successfulCount = costs.filter((c: any) => c.success).length;
-  const successRate = generationCount > 0 ? successfulCount / generationCount : 0;
+  const successfulCount = costs.filter(
+    (c: { success: boolean }) => c.success
+  ).length;
+  const successRate =
+    generationCount > 0 ? successfulCount / generationCount : 0;
 
-  const averageGenerationTime = costs
-    .filter((c: any) => c.generation_time_ms)
-    .reduce((sum: number, c: any) => sum + (c.generation_time_ms || 0), 0) / 
-    costs.filter((c: any) => c.generation_time_ms).length || 0;
+  const averageGenerationTime =
+    costs
+      .filter((c: { generation_time_ms?: number }) => c.generation_time_ms)
+      .reduce(
+        (sum: number, c: { generation_time_ms?: number }) =>
+          sum + (c.generation_time_ms || 0),
+        0
+      ) /
+      costs.filter((c: { generation_time_ms?: number }) => c.generation_time_ms)
+        .length || 0;
 
   // Calculate cost trend (simplified - compare first half vs second half)
   const midPoint = Math.floor(costs.length / 2);
-  const firstHalfCost = costs.slice(0, midPoint).reduce((sum: number, c: any) => sum + c.cost, 0);
-  const secondHalfCost = costs.slice(midPoint).reduce((sum: number, c: any) => sum + c.cost, 0);
-  
+  const firstHalfCost = costs
+    .slice(0, midPoint)
+    .reduce((sum: number, c: { cost: number }) => sum + c.cost, 0);
+  const secondHalfCost = costs
+    .slice(midPoint)
+    .reduce((sum: number, c: { cost: number }) => sum + c.cost, 0);
+
   let costTrend: 'increasing' | 'decreasing' | 'stable' = 'stable';
   if (secondHalfCost > firstHalfCost * 1.1) costTrend = 'increasing';
   else if (secondHalfCost < firstHalfCost * 0.9) costTrend = 'decreasing';
 
   // Find peak usage hour
-  const hourCounts = costs.reduce((acc: any, cost: any) => {
-    const hour = new Date(cost.created_at).getHours();
-    acc[hour] = (acc[hour] || 0) + 1;
-    return acc;
-  }, {} as Record<number, number>);
+  const hourCounts = costs.reduce(
+    (acc: Record<number, number>, cost: { created_at: string }) => {
+      const hour = new Date(cost.created_at).getHours();
+      acc[hour] = (acc[hour] || 0) + 1;
+      return acc;
+    },
+    {} as Record<number, number>
+  );
 
-  const peakUsageHour = Object.entries(hourCounts)
-    .sort(([, a], [, b]) => (b as number) - (a as number))[0]?.[0] || 0;
+  const peakUsageHour =
+    Object.entries(hourCounts).sort(
+      ([, a], [, b]) => (b as number) - (a as number)
+    )[0]?.[0] || 0;
 
   // Find most used quality and size
-  const qualityCounts = costs.reduce((acc: any, cost: any) => {
-    acc[cost.quality] = (acc[cost.quality] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
+  const qualityCounts = costs.reduce(
+    (acc: Record<string, number>, cost: { quality: string }) => {
+      acc[cost.quality] = (acc[cost.quality] || 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>
+  );
 
-  const sizeCounts = costs.reduce((acc: any, cost: any) => {
-    acc[cost.size] = (acc[cost.size] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
+  const sizeCounts = costs.reduce(
+    (acc: Record<string, number>, cost: { size: string }) => {
+      acc[cost.size] = (acc[cost.size] || 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>
+  );
 
-  const mostUsedQuality = Object.entries(qualityCounts)
-    .sort(([, a], [, b]) => (b as number) - (a as number))[0]?.[0] as 'standard' | 'hd' || 'standard';
+  const mostUsedQuality =
+    (Object.entries(qualityCounts).sort(
+      ([, a], [, b]) => (b as number) - (a as number)
+    )[0]?.[0] as 'standard' | 'hd') || 'standard';
 
-  const mostUsedSize = Object.entries(sizeCounts)
-    .sort(([, a], [, b]) => (b as number) - (a as number))[0]?.[0] as '1024x1024' | '1024x1792' | '1792x1024' || '1024x1024';
+  const mostUsedSize =
+    (Object.entries(sizeCounts).sort(
+      ([, a], [, b]) => (b as number) - (a as number)
+    )[0]?.[0] as '1024x1024' | '1024x1792' | '1792x1024') || '1024x1024';
 
   return {
     user_id: targetUserId,
@@ -332,27 +379,40 @@ export async function getCostOptimizationSuggestions(
 
   // High HD usage suggestion
   if (summary.cost_by_quality.hd > summary.cost_by_quality.standard) {
-    suggestions.push('Consider using Standard quality instead of HD for routine images to reduce costs by 50%');
+    suggestions.push(
+      'Consider using Standard quality instead of HD for routine images to reduce costs by 50%'
+    );
   }
 
   // Large size usage suggestion
-  if (summary.cost_by_size['1024x1792'] + summary.cost_by_size['1792x1024'] > summary.cost_by_size['1024x1024']) {
-    suggestions.push('Using Square (1024x1024) size for most images can reduce costs by 50% compared to Portrait/Landscape');
+  if (
+    summary.cost_by_size['1024x1792'] + summary.cost_by_size['1792x1024'] >
+    summary.cost_by_size['1024x1024']
+  ) {
+    suggestions.push(
+      'Using Square (1024x1024) size for most images can reduce costs by 50% compared to Portrait/Landscape'
+    );
   }
 
   // High failure rate suggestion
   if (analytics.success_rate < 0.8) {
-    suggestions.push('High failure rate detected. Check your prompts for content policy violations or try simplified prompts');
+    suggestions.push(
+      'High failure rate detected. Check your prompts for content policy violations or try simplified prompts'
+    );
   }
 
   // High usage suggestion
   if (summary.monthly_cost > 5) {
-    suggestions.push('Consider reducing image generation frequency or using lower quality settings to manage costs');
+    suggestions.push(
+      'Consider reducing image generation frequency or using lower quality settings to manage costs'
+    );
   }
 
   // Peak usage suggestion
   if (analytics.peak_usage_hour >= 9 && analytics.peak_usage_hour <= 17) {
-    suggestions.push('Peak usage during business hours. Consider generating images during off-peak times for better performance');
+    suggestions.push(
+      'Peak usage during business hours. Consider generating images during off-peak times for better performance'
+    );
   }
 
   return suggestions;

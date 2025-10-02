@@ -1,37 +1,52 @@
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+// import { Progress } from '@/components/ui/progress'; // Removed as no longer used with simplified budget
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { 
-  DollarSign, 
-  TrendingUp, 
-  TrendingDown, 
-  AlertTriangle, 
-  CheckCircle, 
+import {
+  DollarSign,
+  TrendingUp,
+  TrendingDown,
+  AlertTriangle,
+  CheckCircle,
   Target,
   PieChart,
   BarChart3,
-  Settings
+  Settings,
 } from 'lucide-react';
-import { 
-  getUserCostSummary, 
-  getCostAnalytics, 
+import {
+  getUserCostSummary,
+  getCostAnalytics,
   getCostOptimizationSuggestions,
   type UserCostSummary,
-  type CostAnalytics 
+  type CostAnalytics,
 } from '@/lib/ai-image-generation/cost-tracker';
-import { getBudgetStatus, type BudgetStatus } from '@/lib/ai-image-generation/budget-manager';
+import {
+  getUserBudget,
+  type UserBudget,
+} from '@/lib/ai-image-generation/budget-manager';
 // Removed unused OptimizationRecommendation import
 import { toast } from '@/hooks/use-toast';
 
 export function CostDashboard() {
   const [costSummary, setCostSummary] = useState<UserCostSummary | null>(null);
-  const [costAnalytics, setCostAnalytics] = useState<CostAnalytics | null>(null);
-  const [budgetStatus, setBudgetStatus] = useState<BudgetStatus | null>(null);
-  const [optimizationSuggestions, setOptimizationSuggestions] = useState<string[]>([]);
+  const [costAnalytics, setCostAnalytics] = useState<CostAnalytics | null>(
+    null
+  );
+  const [budgetStatus, setBudgetStatus] = useState<UserBudget | null>(null);
+  const [optimizationSuggestions, setOptimizationSuggestions] = useState<
+    string[]
+  >([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedPeriod, setSelectedPeriod] = useState<'day' | 'week' | 'month'>('month');
+  const [selectedPeriod, setSelectedPeriod] = useState<
+    'day' | 'week' | 'month'
+  >('month');
 
   useEffect(() => {
     loadDashboardData();
@@ -40,11 +55,11 @@ export function CostDashboard() {
   const loadDashboardData = async () => {
     try {
       setIsLoading(true);
-      
+
       const [summary, analytics, status, suggestions] = await Promise.all([
         getUserCostSummary(undefined, selectedPeriod),
         getCostAnalytics(undefined, selectedPeriod),
-        getBudgetStatus(),
+        getUserBudget(),
         getCostOptimizationSuggestions(),
       ]);
 
@@ -127,7 +142,9 @@ export function CostDashboard() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(costSummary?.total_cost || 0)}</div>
+            <div className="text-2xl font-bold">
+              {formatCurrency(costSummary?.total_cost || 0)}
+            </div>
             <p className="text-xs text-muted-foreground">
               {costSummary?.total_generations || 0} generations
             </p>
@@ -158,9 +175,7 @@ export function CostDashboard() {
             <div className="text-2xl font-bold">
               {formatCurrency(costSummary?.average_cost_per_generation || 0)}
             </div>
-            <p className="text-xs text-muted-foreground">
-              per generation
-            </p>
+            <p className="text-xs text-muted-foreground">per generation</p>
           </CardContent>
         </Card>
 
@@ -173,101 +188,13 @@ export function CostDashboard() {
             <div className="text-2xl font-bold capitalize">
               {costAnalytics?.cost_trend || 'stable'}
             </div>
-            <p className="text-xs text-muted-foreground">
-              vs previous period
-            </p>
+            <p className="text-xs text-muted-foreground">vs previous period</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Budget Status */}
-      {budgetStatus && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Daily Budget</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-sm">Used</span>
-                <span className="text-sm font-medium">
-                  {formatCurrency(budgetStatus.daily.used)} / {formatCurrency(budgetStatus.daily.limit)}
-                </span>
-              </div>
-              <Progress 
-                value={budgetStatus.daily.percentage} 
-                className="h-2"
-              />
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-muted-foreground">
-                  {formatPercentage(budgetStatus.daily.percentage)}
-                </span>
-                <Badge 
-                  variant={budgetStatus.daily.percentage >= 90 ? 'destructive' : 'default'}
-                >
-                  {budgetStatus.daily.remaining > 0 ? formatCurrency(budgetStatus.daily.remaining) : 'Limit reached'}
-                </Badge>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Weekly Budget</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-sm">Used</span>
-                <span className="text-sm font-medium">
-                  {formatCurrency(budgetStatus.weekly.used)} / {formatCurrency(budgetStatus.weekly.limit)}
-                </span>
-              </div>
-              <Progress 
-                value={budgetStatus.weekly.percentage} 
-                className="h-2"
-              />
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-muted-foreground">
-                  {formatPercentage(budgetStatus.weekly.percentage)}
-                </span>
-                <Badge 
-                  variant={budgetStatus.weekly.percentage >= 90 ? 'destructive' : 'default'}
-                >
-                  {budgetStatus.weekly.remaining > 0 ? formatCurrency(budgetStatus.weekly.remaining) : 'Limit reached'}
-                </Badge>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Monthly Budget</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-sm">Used</span>
-                <span className="text-sm font-medium">
-                  {formatCurrency(budgetStatus.monthly.used)} / {formatCurrency(budgetStatus.monthly.limit)}
-                </span>
-              </div>
-              <Progress 
-                value={budgetStatus.monthly.percentage} 
-                className="h-2"
-              />
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-muted-foreground">
-                  {formatPercentage(budgetStatus.monthly.percentage)}
-                </span>
-                <Badge 
-                  variant={budgetStatus.monthly.percentage >= 90 ? 'destructive' : 'default'}
-                >
-                  {budgetStatus.monthly.remaining > 0 ? formatCurrency(budgetStatus.monthly.remaining) : 'Limit reached'}
-                </Badge>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
+      {/* Budget Status - Temporarily disabled due to simplified budget structure */}
+      {/* TODO: Re-implement budget status display with simplified UserBudget interface */}
 
       {/* Usage Analytics */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -385,7 +312,10 @@ export function CostDashboard() {
           <CardContent>
             <div className="space-y-3">
               {optimizationSuggestions.map((suggestion, index) => (
-                <div key={index} className="flex items-start space-x-3 p-3 rounded-lg bg-blue-50 border border-blue-200">
+                <div
+                  key={index}
+                  className="flex items-start space-x-3 p-3 rounded-lg bg-blue-50 border border-blue-200"
+                >
                   <AlertTriangle className="h-5 w-5 text-blue-600 mt-0.5" />
                   <p className="text-sm text-blue-800">{suggestion}</p>
                 </div>
@@ -396,25 +326,29 @@ export function CostDashboard() {
       )}
 
       {/* Budget Status Alert */}
-      {budgetStatus && budgetStatus.is_paused && (
-        <Card className="border-red-200 bg-red-50">
-          <CardHeader>
-            <CardTitle className="text-lg text-red-800 flex items-center">
-              <AlertTriangle className="h-5 w-5 mr-2" />
-              Budget Limit Reached
-            </CardTitle>
-            <CardDescription className="text-red-700">
-              Image generation is currently paused due to budget limits
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button variant="outline" className="border-red-300 text-red-700 hover:bg-red-100">
-              <Settings className="h-4 w-4 mr-2" />
-              Adjust Budget Settings
-            </Button>
-          </CardContent>
-        </Card>
-      )}
+      {budgetStatus &&
+        budgetStatus.used_monthly >= budgetStatus.monthly_budget && (
+          <Card className="border-red-200 bg-red-50">
+            <CardHeader>
+              <CardTitle className="text-lg text-red-800 flex items-center">
+                <AlertTriangle className="h-5 w-5 mr-2" />
+                Budget Limit Reached
+              </CardTitle>
+              <CardDescription className="text-red-700">
+                Image generation is currently paused due to budget limits
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button
+                variant="outline"
+                className="border-red-300 text-red-700 hover:bg-red-100"
+              >
+                <Settings className="h-4 w-4 mr-2" />
+                Adjust Budget Settings
+              </Button>
+            </CardContent>
+          </Card>
+        )}
     </div>
   );
 }

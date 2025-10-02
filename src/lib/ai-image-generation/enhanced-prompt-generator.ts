@@ -34,7 +34,7 @@ export function generateEnhancedPrompt(
   }
 ): GeneratedPrompt {
   const context = analyzeRecipeContext(recipe);
-  
+
   return {
     primaryPrompt: generatePrimaryPrompt(recipe, context, options),
     secondaryPrompt: generateSecondaryPrompt(recipe, context, options),
@@ -42,8 +42,8 @@ export function generateEnhancedPrompt(
     metadata: {
       cuisine: context.cuisine?.name || null,
       complexity: context.complexity,
-      cookingMethods: context.cookingMethods.map(m => m.method),
-      mainIngredients: context.mainIngredients.map(i => i.name),
+      cookingMethods: context.cookingMethods.map((m) => m.method),
+      mainIngredients: context.mainIngredients.map((i) => i.name),
       visualStyle: context.visualStyle?.style || 'traditional',
     },
   };
@@ -61,7 +61,7 @@ function generatePrimaryPrompt(
 
   // Start with dish title (always include title for consistency)
   parts.push(`A delicious ${recipe.title.toLowerCase()}`);
-  
+
   // Add description if available and rich
   if (recipe.description && recipe.description.trim().length > 30) {
     parts.push(recipe.description.trim());
@@ -78,9 +78,9 @@ function generatePrimaryPrompt(
   // Add main ingredients with visual importance
   if (context.mainIngredients.length > 0) {
     const primaryIngredients = context.mainIngredients
-      .filter(ing => ing.visualImportance === 'primary')
-      .map(ing => ing.name);
-    
+      .filter((ing) => ing.visualImportance === 'primary')
+      .map((ing) => ing.name);
+
     if (primaryIngredients.length > 0) {
       parts.push(`featuring ${primaryIngredients.join(' and ')}`);
     }
@@ -178,17 +178,17 @@ function generateFallbackPrompt(
  */
 function getStyleDescription(style: string, mood: string): string {
   const styleMap: Record<string, string> = {
-    'photographic': 'professional food photography',
-    'artistic': 'artistic food presentation',
-    'minimalist': 'clean, minimalist presentation',
-    'luxury': 'luxury food styling',
+    photographic: 'professional food photography',
+    artistic: 'artistic food presentation',
+    minimalist: 'clean, minimalist presentation',
+    luxury: 'luxury food styling',
   };
 
   const moodMap: Record<string, string> = {
-    'appetizing': 'appetizing and inviting',
-    'elegant': 'elegant and sophisticated',
-    'rustic': 'rustic and hearty',
-    'modern': 'modern and contemporary',
+    appetizing: 'appetizing and inviting',
+    elegant: 'elegant and sophisticated',
+    rustic: 'rustic and hearty',
+    modern: 'modern and contemporary',
   };
 
   return `${styleMap[style]}, ${moodMap[mood]}`;
@@ -199,15 +199,15 @@ function getStyleDescription(style: string, mood: string): string {
  */
 function getQualityDescription(quality: string, complexity: string): string {
   const qualityMap: Record<string, string> = {
-    'standard': 'high quality',
-    'hd': 'ultra high resolution',
+    standard: 'high quality',
+    hd: 'ultra high resolution',
   };
 
   const complexityMap: Record<string, string> = {
-    'simple': 'clean presentation',
-    'moderate': 'well-composed',
-    'complex': 'detailed composition',
-    'elaborate': 'intricate presentation',
+    simple: 'clean presentation',
+    moderate: 'well-composed',
+    complex: 'detailed composition',
+    elaborate: 'intricate presentation',
   };
 
   return `${qualityMap[quality]}, ${complexityMap[complexity]}`;
@@ -226,19 +226,31 @@ export function generatePromptVariations(
   variations.push(generateEnhancedPrompt(recipe, baseOptions));
 
   // Different style variations
-  const styles: Array<PromptGenerationOptions['style']> = ['photographic', 'artistic', 'minimalist', 'luxury'];
-  const moods: Array<PromptGenerationOptions['mood']> = ['appetizing', 'elegant', 'rustic', 'modern'];
+  const styles: Array<PromptGenerationOptions['style']> = [
+    'photographic',
+    'artistic',
+    'minimalist',
+    'luxury',
+  ];
+  const moods: Array<PromptGenerationOptions['mood']> = [
+    'appetizing',
+    'elegant',
+    'rustic',
+    'modern',
+  ];
 
   // Generate 2-3 variations
   for (let i = 0; i < 2; i++) {
     const style = styles[Math.floor(Math.random() * styles.length)];
     const mood = moods[Math.floor(Math.random() * moods.length)];
-    
-    variations.push(generateEnhancedPrompt(recipe, {
-      ...baseOptions,
-      style,
-      mood,
-    }));
+
+    variations.push(
+      generateEnhancedPrompt(recipe, {
+        ...baseOptions,
+        style,
+        mood,
+      })
+    );
   }
 
   return variations;
@@ -256,8 +268,9 @@ export function optimizePromptForDALLE(prompt: string): string {
   // Truncate intelligently at word boundaries
   const truncated = prompt.substring(0, 997); // Leave room for "..."
   const lastSpace = truncated.lastIndexOf(' ');
-  
-  if (lastSpace > 800) { // Only truncate if we have enough content
+
+  if (lastSpace > 800) {
+    // Only truncate if we have enough content
     return truncated.substring(0, lastSpace) + '...';
   }
 
@@ -267,7 +280,10 @@ export function optimizePromptForDALLE(prompt: string): string {
 /**
  * Add cultural and regional context to prompts
  */
-export function addCulturalContext(prompt: string, context: RecipeContext): string {
+export function addCulturalContext(
+  prompt: string,
+  context: RecipeContext
+): string {
   if (!context.culturalContext) return prompt;
 
   const culturalElements: string[] = [];
@@ -297,7 +313,10 @@ export function addCulturalContext(prompt: string, context: RecipeContext): stri
 /**
  * Add seasonal context to prompts
  */
-export function addSeasonalContext(prompt: string, context: RecipeContext): string {
+export function addSeasonalContext(
+  prompt: string,
+  context: RecipeContext
+): string {
   if (!context.seasonalContext) return prompt;
 
   const seasonalElements: string[] = [];
@@ -307,7 +326,9 @@ export function addSeasonalContext(prompt: string, context: RecipeContext): stri
 
   // Add seasonal ingredients
   if (context.seasonalContext.elements.length > 0) {
-    seasonalElements.push(`featuring ${context.seasonalContext.elements.join(' and ')}`);
+    seasonalElements.push(
+      `featuring ${context.seasonalContext.elements.join(' and ')}`
+    );
   }
 
   return `${prompt}, ${seasonalElements.join(', ')}`;

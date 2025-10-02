@@ -4,8 +4,8 @@
 
 /**
  * Generates an optimized image URL with selective cache-busting
- * Only adds cache-busting parameters for recently updated content
- * to balance fresh content with effective caching
+ * Only adds cache-busting parameters for Supabase storage URLs and recently updated content
+ * External URLs (like DALL-E) are returned as-is to avoid 403 errors
  */
 export function getOptimizedImageUrl(
   imageUrl: string,
@@ -13,6 +13,12 @@ export function getOptimizedImageUrl(
   createdAt: string,
   cacheBustWindowHours: number = 24
 ): string {
+  // Don't apply cache-busting to external URLs (DALL-E, etc.)
+  // These URLs don't support query parameters and will return 403
+  if (!isSupabaseStorageUrl(imageUrl)) {
+    return imageUrl;
+  }
+
   const lastModified = new Date(updatedAt || createdAt);
   const now = new Date();
   const hoursSinceUpdate =
@@ -22,6 +28,23 @@ export function getOptimizedImageUrl(
   return hoursSinceUpdate < cacheBustWindowHours
     ? `${imageUrl}?v=${lastModified.getTime()}`
     : imageUrl;
+}
+
+/**
+ * Check if the URL is a Supabase storage URL that supports cache-busting
+ */
+function isSupabaseStorageUrl(url: string): boolean {
+  try {
+    const urlObj = new URL(url);
+    // Check if it's a Supabase storage URL (contains supabase domain and storage path)
+    return (
+      urlObj.hostname.includes('supabase') ||
+      urlObj.pathname.includes('/storage/v1/object/public/') ||
+      urlObj.pathname.includes('/storage/v1/object/sign/')
+    );
+  } catch {
+    return false;
+  }
 }
 
 /**

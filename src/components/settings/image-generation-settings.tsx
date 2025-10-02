@@ -2,7 +2,13 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Wand2, Settings, Info } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
@@ -30,7 +36,8 @@ const defaultSettings: ImageGenerationSettings = {
 };
 
 export function ImageGenerationSettings() {
-  const [settings, setSettings] = useState<ImageGenerationSettings>(defaultSettings);
+  const [settings, setSettings] =
+    useState<ImageGenerationSettings>(defaultSettings);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -79,7 +86,7 @@ export function ImageGenerationSettings() {
     key: K,
     value: ImageGenerationSettings[K]
   ) => {
-    setSettings(prev => ({ ...prev, [key]: value }));
+    setSettings((prev) => ({ ...prev, [key]: value }));
   };
 
   const getCostEstimate = (): number => {
@@ -135,7 +142,9 @@ export function ImageGenerationSettings() {
           <Switch
             id="auto-generation"
             checked={settings.autoGenerationEnabled}
-            onCheckedChange={(checked) => updateSetting('autoGenerationEnabled', checked)}
+            onCheckedChange={(checked) =>
+              updateSetting('autoGenerationEnabled', checked)
+            }
           />
         </div>
 
@@ -145,7 +154,9 @@ export function ImageGenerationSettings() {
           <div className="flex space-x-2">
             <Button
               type="button"
-              variant={settings.defaultQuality === 'standard' ? 'default' : 'outline'}
+              variant={
+                settings.defaultQuality === 'standard' ? 'default' : 'outline'
+              }
               size="sm"
               onClick={() => updateSetting('defaultQuality', 'standard')}
             >
@@ -171,7 +182,9 @@ export function ImageGenerationSettings() {
           <div className="flex space-x-2">
             <Button
               type="button"
-              variant={settings.defaultSize === '1024x1024' ? 'default' : 'outline'}
+              variant={
+                settings.defaultSize === '1024x1024' ? 'default' : 'outline'
+              }
               size="sm"
               onClick={() => updateSetting('defaultSize', '1024x1024')}
             >
@@ -179,7 +192,9 @@ export function ImageGenerationSettings() {
             </Button>
             <Button
               type="button"
-              variant={settings.defaultSize === '1024x1792' ? 'default' : 'outline'}
+              variant={
+                settings.defaultSize === '1024x1792' ? 'default' : 'outline'
+              }
               size="sm"
               onClick={() => updateSetting('defaultSize', '1024x1792')}
             >
@@ -187,7 +202,9 @@ export function ImageGenerationSettings() {
             </Button>
             <Button
               type="button"
-              variant={settings.defaultSize === '1792x1024' ? 'default' : 'outline'}
+              variant={
+                settings.defaultSize === '1792x1024' ? 'default' : 'outline'
+              }
               size="sm"
               onClick={() => updateSetting('defaultSize', '1792x1024')}
             >
@@ -209,7 +226,9 @@ export function ImageGenerationSettings() {
           <Switch
             id="fallback-error"
             checked={settings.fallbackOnError}
-            onCheckedChange={(checked) => updateSetting('fallbackOnError', checked)}
+            onCheckedChange={(checked) =>
+              updateSetting('fallbackOnError', checked)
+            }
           />
         </div>
 
@@ -226,7 +245,9 @@ export function ImageGenerationSettings() {
           <Switch
             id="generation-hints"
             checked={settings.showGenerationHints}
-            onCheckedChange={(checked) => updateSetting('showGenerationHints', checked)}
+            onCheckedChange={(checked) =>
+              updateSetting('showGenerationHints', checked)
+            }
           />
         </div>
 
@@ -236,7 +257,9 @@ export function ImageGenerationSettings() {
           <div className="flex space-x-2">
             <Button
               type="button"
-              variant={settings.promptStyle === 'photographic' ? 'default' : 'outline'}
+              variant={
+                settings.promptStyle === 'photographic' ? 'default' : 'outline'
+              }
               size="sm"
               onClick={() => updateSetting('promptStyle', 'photographic')}
             >
@@ -244,7 +267,9 @@ export function ImageGenerationSettings() {
             </Button>
             <Button
               type="button"
-              variant={settings.promptStyle === 'artistic' ? 'default' : 'outline'}
+              variant={
+                settings.promptStyle === 'artistic' ? 'default' : 'outline'
+              }
               size="sm"
               onClick={() => updateSetting('promptStyle', 'artistic')}
             >
@@ -252,7 +277,9 @@ export function ImageGenerationSettings() {
             </Button>
             <Button
               type="button"
-              variant={settings.promptStyle === 'minimalist' ? 'default' : 'outline'}
+              variant={
+                settings.promptStyle === 'minimalist' ? 'default' : 'outline'
+              }
               size="sm"
               onClick={() => updateSetting('promptStyle', 'minimalist')}
             >
@@ -260,7 +287,9 @@ export function ImageGenerationSettings() {
             </Button>
             <Button
               type="button"
-              variant={settings.promptStyle === 'luxury' ? 'default' : 'outline'}
+              variant={
+                settings.promptStyle === 'luxury' ? 'default' : 'outline'
+              }
               size="sm"
               onClick={() => updateSetting('promptStyle', 'luxury')}
             >
@@ -278,7 +307,9 @@ export function ImageGenerationSettings() {
           <div className="flex space-x-2">
             <Button
               type="button"
-              variant={settings.promptMood === 'appetizing' ? 'default' : 'outline'}
+              variant={
+                settings.promptMood === 'appetizing' ? 'default' : 'outline'
+              }
               size="sm"
               onClick={() => updateSetting('promptMood', 'appetizing')}
             >
@@ -286,7 +317,9 @@ export function ImageGenerationSettings() {
             </Button>
             <Button
               type="button"
-              variant={settings.promptMood === 'elegant' ? 'default' : 'outline'}
+              variant={
+                settings.promptMood === 'elegant' ? 'default' : 'outline'
+              }
               size="sm"
               onClick={() => updateSetting('promptMood', 'elegant')}
             >
@@ -328,7 +361,9 @@ export function ImageGenerationSettings() {
                 per image.
               </p>
               <div className="text-xs text-blue-700">
-                <p>• Standard quality: $0.04 (square), $0.08 (portrait/landscape)</p>
+                <p>
+                  • Standard quality: $0.04 (square), $0.08 (portrait/landscape)
+                </p>
                 <p>• HD quality: $0.08 (square), $0.12 (portrait/landscape)</p>
               </div>
             </div>

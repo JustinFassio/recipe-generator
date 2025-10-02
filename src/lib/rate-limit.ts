@@ -1,7 +1,7 @@
 interface RateLimitOptions {
   windowMs: number;
   max: number;
-  keyGenerator: (req: any) => string;
+  keyGenerator: (req: { headers: Record<string, string> }) => string;
 }
 
 interface RateLimitStore {
@@ -14,8 +14,16 @@ interface RateLimitStore {
 const store: RateLimitStore = {};
 
 export function rateLimit(options: RateLimitOptions) {
-  return (handler: (req: any, res: any) => Promise<void>) => {
-    return async (req: any, res: any) => {
+  return (
+    handler: (
+      req: { headers: Record<string, string> },
+      res: { status: (code: number) => { json: (data: unknown) => void } }
+    ) => Promise<void>
+  ) => {
+    return async (
+      req: { headers: Record<string, string> },
+      res: { status: (code: number) => { json: (data: unknown) => void } }
+    ) => {
       const key = options.keyGenerator(req);
       const now = Date.now();
       const windowStart = now - options.windowMs;
@@ -63,8 +71,8 @@ export function createImageGenerationRateLimit() {
     keyGenerator: (req) => {
       // Use user ID if available, otherwise IP
       return (
-        (req.headers.get('x-user-id') as string) ||
-        (req.headers.get('x-forwarded-for') as string) ||
+        req.headers['x-user-id'] ||
+        req.headers['x-forwarded-for'] ||
         'anonymous'
       );
     },

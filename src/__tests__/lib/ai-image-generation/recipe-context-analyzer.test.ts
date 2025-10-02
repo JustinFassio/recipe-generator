@@ -5,9 +5,17 @@ describe('Recipe Context Analyzer', () => {
   it('should analyze Italian cuisine context', () => {
     const recipe: RecipeFormData = {
       title: 'Spaghetti Carbonara',
-      description: 'A classic Italian pasta dish with eggs, cheese, and pancetta',
-      ingredients: ['spaghetti', 'eggs', 'pancetta', 'pecorino cheese', 'black pepper'],
-      instructions: 'Cook pasta according to package directions. While pasta is cooking, fry pancetta until crispy...',
+      description:
+        'A classic Italian pasta dish with eggs, cheese, and pancetta',
+      ingredients: [
+        'spaghetti',
+        'eggs',
+        'pancetta',
+        'pecorino cheese',
+        'black pepper',
+      ],
+      instructions:
+        'Cook pasta according to package directions. While pasta is cooking, fry pancetta until crispy...',
       notes: '',
       categories: ['Cuisine: Italian', 'Course: Main'],
       setup: [],
@@ -28,7 +36,8 @@ describe('Recipe Context Analyzer', () => {
       title: 'Grilled Chicken',
       description: 'Delicious grilled chicken breast',
       ingredients: ['chicken breast', 'olive oil', 'salt', 'pepper'],
-      instructions: 'Preheat grill to medium-high heat. Season chicken and grill for 6-7 minutes per side until cooked through.',
+      instructions:
+        'Preheat grill to medium-high heat. Season chicken and grill for 6-7 minutes per side until cooked through.',
       notes: '',
       categories: [],
       setup: [],
@@ -48,7 +57,11 @@ describe('Recipe Context Analyzer', () => {
     const recipe: RecipeFormData = {
       title: 'Tomato Salad',
       description: 'Fresh tomato salad with herbs',
-      ingredients: ['2 cups cherry tomatoes', '1/4 cup fresh basil', 'olive oil'],
+      ingredients: [
+        '2 cups cherry tomatoes',
+        '1/4 cup fresh basil',
+        'olive oil',
+      ],
       instructions: 'Cut tomatoes in half and mix with basil and olive oil.',
       notes: '',
       categories: [],
@@ -100,9 +113,23 @@ describe('Recipe Context Analyzer', () => {
 
     const complexRecipe: RecipeFormData = {
       title: 'Complex Stew',
-      description: 'A complex multi-ingredient stew with many steps and preparation requirements',
-      ingredients: ['beef', 'carrots', 'onions', 'potatoes', 'celery', 'tomatoes', 'herbs', 'spices', 'wine', 'stock', 'flour'],
-      instructions: 'First, prepare all ingredients by chopping vegetables into small pieces. Then, season the beef with salt and pepper. Heat oil in a large pot and brown the beef on all sides. Remove beef and add vegetables, cooking until softened. Return beef to pot and add wine, stock, and herbs. Bring to boil, then simmer for 2 hours until meat is tender. Finally, thicken with flour and serve hot.',
+      description:
+        'A complex multi-ingredient stew with many steps and preparation requirements',
+      ingredients: [
+        'beef',
+        'carrots',
+        'onions',
+        'potatoes',
+        'celery',
+        'tomatoes',
+        'herbs',
+        'spices',
+        'wine',
+        'stock',
+        'flour',
+      ],
+      instructions:
+        'First, prepare all ingredients by chopping vegetables into small pieces. Then, season the beef with salt and pepper. Heat oil in a large pot and brown the beef on all sides. Remove beef and add vegetables, cooking until softened. Return beef to pot and add wine, stock, and herbs. Bring to boil, then simmer for 2 hours until meat is tender. Finally, thicken with flour and serve hot.',
       notes: 'Requires advance preparation',
       categories: ['Course: Main'],
       setup: ['chop vegetables', 'marinate beef'],

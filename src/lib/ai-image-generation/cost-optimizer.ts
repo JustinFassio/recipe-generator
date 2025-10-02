@@ -91,8 +91,14 @@ export function getOptimizationRecommendations(
 
   // Size optimization recommendations
   if (currentSettings.size !== '1024x1024') {
-    const currentCost = calculateImageCost(currentSettings.size, currentSettings.quality);
-    const optimizedCost = calculateImageCost('1024x1024', currentSettings.quality);
+    const currentCost = calculateImageCost(
+      currentSettings.size,
+      currentSettings.quality
+    );
+    const optimizedCost = calculateImageCost(
+      '1024x1024',
+      currentSettings.quality
+    );
     const savings = currentCost - optimizedCost;
 
     recommendations.push({
@@ -103,7 +109,8 @@ export function getOptimizationRecommendations(
         quality: currentSettings.quality,
       },
       costSavings: savings,
-      reasoning: 'Square size is optimal for most recipe images and costs 50% less than portrait/landscape sizes.',
+      reasoning:
+        'Square size is optimal for most recipe images and costs 50% less than portrait/landscape sizes.',
     });
   }
 
@@ -123,7 +130,8 @@ export function getOptimizationRecommendations(
           quality: 'standard',
         },
         costSavings: savings,
-        reasoning: 'Standard quality is sufficient for most recipes and provides significant cost savings with minimal quality impact.',
+        reasoning:
+          'Standard quality is sufficient for most recipes and provides significant cost savings with minimal quality impact.',
       });
     }
   }
@@ -131,8 +139,14 @@ export function getOptimizationRecommendations(
   // Smart size selection based on recipe type
   const optimalSize = getOptimalSizeForRecipe(context);
   if (optimalSize && optimalSize !== currentSettings.size) {
-    const currentCost = calculateImageCost(currentSettings.size, currentSettings.quality);
-    const optimizedCost = calculateImageCost(optimalSize, currentSettings.quality);
+    const currentCost = calculateImageCost(
+      currentSettings.size,
+      currentSettings.quality
+    );
+    const optimizedCost = calculateImageCost(
+      optimalSize,
+      currentSettings.quality
+    );
     const savings = currentCost - optimizedCost;
 
     recommendations.push({
@@ -153,14 +167,23 @@ export function getOptimizationRecommendations(
 /**
  * Get optimal size for a recipe based on context
  */
-function getOptimalSizeForRecipe(_context: any): '1024x1024' | '1024x1792' | '1792x1024' | null {
+function getOptimalSizeForRecipe(_context: {
+  dishType?: { type: string } | null;
+  complexity?: string;
+}): '1024x1024' | '1024x1792' | '1792x1024' | null {
   // Portrait for tall dishes like drinks, layered desserts
-  if (_context.dishType?.type === 'dessert' && _context.complexity === 'elaborate') {
+  if (
+    _context.dishType?.type === 'dessert' &&
+    _context.complexity === 'elaborate'
+  ) {
     return '1024x1792';
   }
 
   // Landscape for wide dishes like platters, family-style meals
-  if (_context.dishType?.type === 'main course' && _context.complexity === 'elaborate') {
+  if (
+    _context.dishType?.type === 'main course' &&
+    _context.complexity === 'elaborate'
+  ) {
     return '1792x1024';
   }
 
@@ -171,7 +194,10 @@ function getOptimalSizeForRecipe(_context: any): '1024x1024' | '1024x1792' | '17
 /**
  * Get reasoning for size selection
  */
-function getSizeReasoning(_context: any, size: string): string {
+function getSizeReasoning(
+  _context: { dishType?: { type: string } | null; complexity?: string },
+  size: string
+): string {
   switch (size) {
     case '1024x1792':
       return 'Portrait size is ideal for tall dishes and layered presentations.';
@@ -197,7 +223,7 @@ export function getSmartGenerationSettings(
   }
 ): SmartGenerationSettings {
   const _context = analyzeRecipeContext(recipe);
-  
+
   // Default settings
   let size: '1024x1024' | '1024x1792' | '1792x1024' = '1024x1024';
   let quality: 'standard' | 'hd' = 'standard';
@@ -265,8 +291,8 @@ export function estimateGenerationCosts(
   size: '1024x1024' | '1024x1792' | '1792x1024';
 }> {
   const baselineCost = calculateImageCost('1024x1024', 'standard');
-  
-  return scenarios.map(scenario => ({
+
+  return scenarios.map((scenario) => ({
     scenario: `${scenario.size} ${scenario.quality}`,
     cost: calculateImageCost(scenario.size, scenario.quality),
     savings: baselineCost - calculateImageCost(scenario.size, scenario.quality),
@@ -283,37 +309,37 @@ export function getCostEffectivePrompt(
   maxLength: number = 500
 ): string {
   const context = analyzeRecipeContext(_recipe);
-  
+
   // Build a cost-effective prompt
   const parts: string[] = [];
-  
+
   // Essential elements only
   parts.push(`A ${_recipe.title.toLowerCase()}`);
-  
+
   if (context.cuisine) {
     parts.push(`${context.cuisine.name} style`);
   }
-  
+
   if (context.mainIngredients.length > 0) {
     const mainIngredient = context.mainIngredients[0];
     parts.push(`with ${mainIngredient.name}`);
   }
-  
+
   // Add cooking method if simple
   if (context.cookingMethods.length > 0 && context.complexity === 'simple') {
     parts.push(context.cookingMethods[0].method);
   }
-  
+
   // Essential quality descriptors
   parts.push('professional food photography, appetizing');
-  
+
   let prompt = parts.join(', ');
-  
+
   // Truncate if too long
   if (prompt.length > maxLength) {
     prompt = prompt.substring(0, maxLength - 3) + '...';
   }
-  
+
   return prompt;
 }
 
@@ -336,16 +362,21 @@ export function calculateMonthlySavings(
   yearlySavings: number;
   percentageReduction: number;
 } {
-  const currentCost = currentUsage.monthlyGenerations * 
+  const currentCost =
+    currentUsage.monthlyGenerations *
     calculateImageCost(currentUsage.averageSize, currentUsage.averageQuality);
-  
-  const optimizedCost = optimizedUsage.monthlyGenerations * 
-    calculateImageCost(optimizedUsage.averageSize, optimizedUsage.averageQuality);
-  
+
+  const optimizedCost =
+    optimizedUsage.monthlyGenerations *
+    calculateImageCost(
+      optimizedUsage.averageSize,
+      optimizedUsage.averageQuality
+    );
+
   const monthlySavings = currentCost - optimizedCost;
   const yearlySavings = monthlySavings * 12;
   const percentageReduction = (monthlySavings / currentCost) * 100;
-  
+
   return {
     monthlySavings,
     yearlySavings,

@@ -1,12 +1,24 @@
-import { generateEnhancedPrompt, optimizePromptForDALLE, generatePromptVariations } from '@/lib/ai-image-generation/enhanced-prompt-generator';
+import {
+  generateEnhancedPrompt,
+  optimizePromptForDALLE,
+  generatePromptVariations,
+} from '@/lib/ai-image-generation/enhanced-prompt-generator';
 import { RecipeFormData } from '@/lib/schemas';
 
 describe('Enhanced Prompt Generator', () => {
   const mockRecipe: RecipeFormData = {
     title: 'Spaghetti Carbonara',
-    description: 'A classic Italian pasta dish with eggs, cheese, and pancetta, traditionally served hot and creamy',
-    ingredients: ['spaghetti', 'eggs', 'pancetta', 'pecorino cheese', 'black pepper'],
-    instructions: 'Cook pasta according to package directions. While pasta is cooking, fry pancetta until crispy. Beat eggs with cheese and pepper. Drain pasta and immediately toss with pancetta and egg mixture until creamy.',
+    description:
+      'A classic Italian pasta dish with eggs, cheese, and pancetta, traditionally served hot and creamy',
+    ingredients: [
+      'spaghetti',
+      'eggs',
+      'pancetta',
+      'pecorino cheese',
+      'black pepper',
+    ],
+    instructions:
+      'Cook pasta according to package directions. While pasta is cooking, fry pancetta until crispy. Beat eggs with cheese and pepper. Drain pasta and immediately toss with pancetta and egg mixture until creamy.',
     notes: 'Serve immediately while hot',
     categories: ['Cuisine: Italian', 'Course: Main'],
     setup: ['bring large pot of water to boil'],
@@ -42,8 +54,12 @@ describe('Enhanced Prompt Generator', () => {
       quality: 'hd',
     });
 
-    expect(photographicResult.primaryPrompt).toContain('professional food photography');
-    expect(artisticResult.primaryPrompt).toContain('artistic food presentation');
+    expect(photographicResult.primaryPrompt).toContain(
+      'professional food photography'
+    );
+    expect(artisticResult.primaryPrompt).toContain(
+      'artistic food presentation'
+    );
     expect(artisticResult.primaryPrompt).toContain('elegant and sophisticated');
   });
 
@@ -54,7 +70,9 @@ describe('Enhanced Prompt Generator', () => {
     expect(result.secondaryPrompt).toContain('in Italian style');
     expect(result.secondaryPrompt).toContain('with spaghetti');
     expect(result.secondaryPrompt).toContain('professional food photography');
-    expect(result.secondaryPrompt.length).toBeLessThan(result.primaryPrompt.length);
+    expect(result.secondaryPrompt.length).toBeLessThan(
+      result.primaryPrompt.length
+    );
   });
 
   it('should generate fallback prompt with minimal context', () => {
@@ -64,7 +82,9 @@ describe('Enhanced Prompt Generator', () => {
     expect(result.fallbackPrompt).toContain('Italian style');
     expect(result.fallbackPrompt).toContain('appetizing');
     expect(result.fallbackPrompt).toContain('well-lit');
-    expect(result.fallbackPrompt.length).toBeLessThan(result.secondaryPrompt.length);
+    expect(result.fallbackPrompt.length).toBeLessThan(
+      result.secondaryPrompt.length
+    );
   });
 
   it('should optimize prompt for DALL-E character limit', () => {
@@ -91,11 +111,13 @@ describe('Enhanced Prompt Generator', () => {
     });
 
     expect(variations).toHaveLength(3);
-    expect(variations[0].primaryPrompt).toContain('professional food photography');
-    
+    expect(variations[0].primaryPrompt).toContain(
+      'professional food photography'
+    );
+
     // Should have different styles and moods in variations
-    const hasDifferentStyles = variations.some(v => 
-      !v.primaryPrompt.includes('professional food photography')
+    const hasDifferentStyles = variations.some(
+      (v) => !v.primaryPrompt.includes('professional food photography')
     );
     expect(hasDifferentStyles).toBe(true);
   });

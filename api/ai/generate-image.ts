@@ -1,5 +1,4 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
-import { createImageGenerationRateLimit } from '../../src/lib/rate-limit';
 
 interface GenerateImageRequest {
   prompt: string;
@@ -25,6 +24,53 @@ interface GenerateImageResponse {
   };
 }
 
+// Lightweight in-file rate limiter to avoid cross-env import issues
+type RateEntry = { count: number; resetTime: number };
+const imageRateStore: Record<string, RateEntry> = {};
+
+function createImageGenerationRateLimit() {
+  const windowMs = 60 * 1000; // 1 min
+  const max = 5; // 5 req/min per key
+
+  function getKey(req: VercelRequest): string {
+    const userId = (req.headers['x-user-id'] as string) || '';
+    const forwarded = (req.headers['x-forwarded-for'] as string) || '';
+    const ip =
+      forwarded.split(',')[0]?.trim() ||
+      (req.socket as { remoteAddress?: string })?.remoteAddress ||
+      'anonymous';
+    return userId || ip;
+  }
+
+  return (
+    handler: (req: VercelRequest, res: VercelResponse) => Promise<void> | void
+  ) => {
+    return async (req: VercelRequest, res: VercelResponse) => {
+      const key = getKey(req);
+      const now = Date.now();
+      const entry = imageRateStore[key];
+
+      if (!entry || entry.resetTime < now) {
+        imageRateStore[key] = { count: 0, resetTime: now + windowMs };
+      }
+
+      if (imageRateStore[key].count >= max) {
+        const retryAfter = Math.ceil(
+          (imageRateStore[key].resetTime - now) / 1000
+        );
+        res.status(429).json({
+          error: 'Rate limit exceeded. Please try again later.',
+          retryAfter,
+        });
+        return;
+      }
+
+      imageRateStore[key].count++;
+      return handler(req, res);
+    };
+  };
+}
+
 const handler = async (
   req: VercelRequest,
   res: VercelResponse
@@ -41,10 +87,14 @@ const handler = async (
       prompt,
       recipeTitle,
       categories,
-      size = '1024x1024',
+      // ignore incoming size; enforce landscape for consistency with UI frame
+      // size,
       quality = 'standard',
       fallbackOnError = true,
     }: GenerateImageRequest = req.body;
+
+    // Force landscape size on backend regardless of client input
+    const size = '1792x1024' as const;
 
     if (!prompt || typeof prompt !== 'string') {
       res.status(400).json({

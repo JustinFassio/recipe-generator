@@ -1,15 +1,23 @@
-import { calculateImageCost, getUserCostSummary, getCostAnalytics } from '@/lib/ai-image-generation/cost-tracker';
+import {
+  calculateImageCost,
+  getUserCostSummary,
+  getCostAnalytics,
+} from '@/lib/ai-image-generation/cost-tracker';
 
 // Mock Supabase
 vi.mock('@/lib/supabase', () => ({
   supabase: {
     auth: {
-      getUser: vi.fn(() => Promise.resolve({ data: { user: { id: 'test-user-id' } } })),
+      getUser: vi.fn(() =>
+        Promise.resolve({ data: { user: { id: 'test-user-id' } } })
+      ),
     },
     from: vi.fn(() => ({
       insert: vi.fn(() => ({
         select: vi.fn(() => ({
-          single: vi.fn(() => Promise.resolve({ data: { id: 'cost-123' }, error: null })),
+          single: vi.fn(() =>
+            Promise.resolve({ data: { id: 'cost-123' }, error: null })
+          ),
         })),
       })),
       select: vi.fn(() => ({
@@ -56,18 +64,27 @@ vi.mock('@/lib/supabase', () => ({
           ];
 
           // Build a thenable object that also supports chaining .lte()
-          const gteObj: any = {
+          const gteObj: {
+            lte: () => Promise<{ data: unknown; error: null }>;
+            then: (
+              resolve: (value: { data: unknown; error: null }) => void
+            ) => void;
+          } = {
             // If caller chains .lte(), return analytics data
-            lte: vi.fn(() => Promise.resolve({ data: analyticsData, error: null })),
+            lte: vi.fn(() =>
+              Promise.resolve({ data: analyticsData, error: null })
+            ),
             // If caller awaits the result of gte() directly, resolve to summary data
-            then: (resolve: any) => resolve({ data: summaryData, error: null }),
+            then: (resolve: (value: { data: unknown; error: null }) => void) =>
+              resolve({ data: summaryData, error: null }),
           };
 
           return {
             // Caller: .gte('created_at', ...). Optionally followed by .lte(...)
             gte: vi.fn(() => gteObj),
             // If caller awaits eq() without calling gte, act as a thenable (not used in our code but safe)
-            then: (resolve: any) => resolve({ data: summaryData, error: null }),
+            then: (resolve: (value: { data: unknown; error: null }) => void) =>
+              resolve({ data: summaryData, error: null }),
           };
         }),
       })),
@@ -90,7 +107,7 @@ describe('Cost Tracker', () => {
     it('should calculate correct cost for portrait size images', () => {
       const standardCost = calculateImageCost('1024x1792', 'standard');
       const hdCost = calculateImageCost('1024x1792', 'hd');
-      
+
       expect(standardCost).toBe(0.08);
       expect(hdCost).toBe(0.12);
     });
@@ -98,7 +115,7 @@ describe('Cost Tracker', () => {
     it('should calculate correct cost for landscape size images', () => {
       const standardCost = calculateImageCost('1792x1024', 'standard');
       const hdCost = calculateImageCost('1792x1024', 'hd');
-      
+
       expect(standardCost).toBe(0.08);
       expect(hdCost).toBe(0.12);
     });

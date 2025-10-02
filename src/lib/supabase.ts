@@ -20,7 +20,7 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 if (supabaseUrl && !/^https?:\/\//i.test(supabaseUrl)) {
   const trimmed = String(supabaseUrl).trim();
   // If it looks like host:port or 127.0.0.1:port, default to http
-  if (/^(([\w.-]+)|((\d{1,3}\.){3}\d{1,3}))(\:\d+)?(\/.+)?$/.test(trimmed)) {
+  if (/^(([\w.-]+)|((\d{1,3}\.){3}\d{1,3}))(:\d+)?(\/.+)?$/.test(trimmed)) {
     supabaseUrl = `http://${trimmed}`;
   }
 }

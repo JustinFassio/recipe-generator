@@ -4,7 +4,10 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { useImageGeneration } from '@/hooks/useImageGeneration';
 import { RecipeFormData } from '@/lib/schemas';
-import { generateEnhancedPrompt, optimizePromptForDALLE } from '@/lib/ai-image-generation/enhanced-prompt-generator';
+import {
+  generateEnhancedPrompt,
+  optimizePromptForDALLE,
+} from '@/lib/ai-image-generation/enhanced-prompt-generator';
 import { Wand2, RefreshCw, AlertCircle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
@@ -24,36 +27,43 @@ export function AIImageGenerator({
   const [showOptions, setShowOptions] = useState(false);
   const [generationOptions, setGenerationOptions] = useState({
     quality: 'standard' as 'standard' | 'hd',
-    size: '1024x1024' as '1024x1024' | '1024x1792' | '1792x1024',
-    promptStyle: 'photographic' as 'photographic' | 'artistic' | 'minimalist' | 'luxury',
+    // Force landscape to match recipe-view frame
+    size: '1792x1024' as '1024x1024' | '1024x1792' | '1792x1024',
+    promptStyle: 'photographic' as
+      | 'photographic'
+      | 'artistic'
+      | 'minimalist'
+      | 'luxury',
     promptMood: 'appetizing' as 'appetizing' | 'elegant' | 'rustic' | 'modern',
     promptFocus: 'dish' as 'dish' | 'ingredients' | 'process' | 'presentation',
   });
 
-  const { generateImage, isGenerating, generationProgress, error } = useImageGeneration({
-    onSuccess: (imageUrl) => {
-      onImageGenerated(imageUrl);
-      toast({
-        title: 'Image Generated!',
-        description: 'Your AI-generated recipe image is ready.',
-        variant: 'default',
-      });
-    },
-    onError: (errorMessage) => {
-      onError?.(errorMessage);
-      toast({
-        title: 'Generation Failed',
-        description: errorMessage,
-        variant: 'destructive',
-      });
-    },
-  });
+  const { generateImage, isGenerating, generationProgress, error } =
+    useImageGeneration({
+      onSuccess: (imageUrl) => {
+        onImageGenerated(imageUrl);
+        toast({
+          title: 'Image Generated!',
+          description: 'Your AI-generated recipe image is ready.',
+          variant: 'default',
+        });
+      },
+      onError: (errorMessage) => {
+        onError?.(errorMessage);
+        toast({
+          title: 'Generation Failed',
+          description: errorMessage,
+          variant: 'destructive',
+        });
+      },
+    });
 
   const handleGenerateImage = async () => {
     if (!recipe.title || !recipe.description) {
       toast({
         title: 'Missing Information',
-        description: 'Recipe title and description are required for image generation.',
+        description:
+          'Recipe title and description are required for image generation.',
         variant: 'destructive',
       });
       return;
@@ -66,9 +76,9 @@ export function AIImageGenerator({
       focus: generationOptions.promptFocus,
       quality: generationOptions.quality,
     });
-    
+
     const prompt = optimizePromptForDALLE(enhancedPrompt.primaryPrompt);
-    
+
     try {
       await generateImage({
         prompt,
@@ -96,7 +106,8 @@ export function AIImageGenerator({
     return costs[generationOptions.size]?.[generationOptions.quality] || 0.04;
   };
 
-  const canGenerate = recipe.title && recipe.description && recipe.ingredients?.length > 0;
+  const canGenerate =
+    recipe.title && recipe.description && recipe.ingredients?.length > 0;
 
   return (
     <div className={`space-y-4 ${className}`}>
@@ -148,7 +159,7 @@ export function AIImageGenerator({
       {showOptions && (
         <div className="rounded-lg border bg-gray-50 p-4 space-y-4">
           <h4 className="font-medium text-gray-900">Generation Options</h4>
-          
+
           {/* Quality Selection */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -157,51 +168,43 @@ export function AIImageGenerator({
             <div className="flex space-x-2">
               <Button
                 type="button"
-                variant={generationOptions.quality === 'standard' ? 'default' : 'outline'}
+                variant={
+                  generationOptions.quality === 'standard'
+                    ? 'default'
+                    : 'outline'
+                }
                 size="sm"
-                onClick={() => setGenerationOptions(prev => ({ ...prev, quality: 'standard' }))}
+                onClick={() =>
+                  setGenerationOptions((prev) => ({
+                    ...prev,
+                    quality: 'standard',
+                  }))
+                }
               >
                 Standard
               </Button>
               <Button
                 type="button"
-                variant={generationOptions.quality === 'hd' ? 'default' : 'outline'}
+                variant={
+                  generationOptions.quality === 'hd' ? 'default' : 'outline'
+                }
                 size="sm"
-                onClick={() => setGenerationOptions(prev => ({ ...prev, quality: 'hd' }))}
+                onClick={() =>
+                  setGenerationOptions((prev) => ({ ...prev, quality: 'hd' }))
+                }
               >
                 HD
               </Button>
             </div>
           </div>
 
-          {/* Size Selection */}
+          {/* Fixed Size: Landscape */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Size
             </label>
             <div className="flex space-x-2">
-              <Button
-                type="button"
-                variant={generationOptions.size === '1024x1024' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setGenerationOptions(prev => ({ ...prev, size: '1024x1024' }))}
-              >
-                Square
-              </Button>
-              <Button
-                type="button"
-                variant={generationOptions.size === '1024x1792' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setGenerationOptions(prev => ({ ...prev, size: '1024x1792' }))}
-              >
-                Portrait
-              </Button>
-              <Button
-                type="button"
-                variant={generationOptions.size === '1792x1024' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setGenerationOptions(prev => ({ ...prev, size: '1792x1024' }))}
-              >
+              <Button type="button" variant="default" size="sm" disabled>
                 Landscape
               </Button>
             </div>
@@ -215,33 +218,69 @@ export function AIImageGenerator({
             <div className="flex space-x-2">
               <Button
                 type="button"
-                variant={generationOptions.promptStyle === 'photographic' ? 'default' : 'outline'}
+                variant={
+                  generationOptions.promptStyle === 'photographic'
+                    ? 'default'
+                    : 'outline'
+                }
                 size="sm"
-                onClick={() => setGenerationOptions(prev => ({ ...prev, promptStyle: 'photographic' }))}
+                onClick={() =>
+                  setGenerationOptions((prev) => ({
+                    ...prev,
+                    promptStyle: 'photographic',
+                  }))
+                }
               >
                 Photo
               </Button>
               <Button
                 type="button"
-                variant={generationOptions.promptStyle === 'artistic' ? 'default' : 'outline'}
+                variant={
+                  generationOptions.promptStyle === 'artistic'
+                    ? 'default'
+                    : 'outline'
+                }
                 size="sm"
-                onClick={() => setGenerationOptions(prev => ({ ...prev, promptStyle: 'artistic' }))}
+                onClick={() =>
+                  setGenerationOptions((prev) => ({
+                    ...prev,
+                    promptStyle: 'artistic',
+                  }))
+                }
               >
                 Artistic
               </Button>
               <Button
                 type="button"
-                variant={generationOptions.promptStyle === 'minimalist' ? 'default' : 'outline'}
+                variant={
+                  generationOptions.promptStyle === 'minimalist'
+                    ? 'default'
+                    : 'outline'
+                }
                 size="sm"
-                onClick={() => setGenerationOptions(prev => ({ ...prev, promptStyle: 'minimalist' }))}
+                onClick={() =>
+                  setGenerationOptions((prev) => ({
+                    ...prev,
+                    promptStyle: 'minimalist',
+                  }))
+                }
               >
                 Minimal
               </Button>
               <Button
                 type="button"
-                variant={generationOptions.promptStyle === 'luxury' ? 'default' : 'outline'}
+                variant={
+                  generationOptions.promptStyle === 'luxury'
+                    ? 'default'
+                    : 'outline'
+                }
                 size="sm"
-                onClick={() => setGenerationOptions(prev => ({ ...prev, promptStyle: 'luxury' }))}
+                onClick={() =>
+                  setGenerationOptions((prev) => ({
+                    ...prev,
+                    promptStyle: 'luxury',
+                  }))
+                }
               >
                 Luxury
               </Button>
@@ -256,33 +295,69 @@ export function AIImageGenerator({
             <div className="flex space-x-2">
               <Button
                 type="button"
-                variant={generationOptions.promptMood === 'appetizing' ? 'default' : 'outline'}
+                variant={
+                  generationOptions.promptMood === 'appetizing'
+                    ? 'default'
+                    : 'outline'
+                }
                 size="sm"
-                onClick={() => setGenerationOptions(prev => ({ ...prev, promptMood: 'appetizing' }))}
+                onClick={() =>
+                  setGenerationOptions((prev) => ({
+                    ...prev,
+                    promptMood: 'appetizing',
+                  }))
+                }
               >
                 Appetizing
               </Button>
               <Button
                 type="button"
-                variant={generationOptions.promptMood === 'elegant' ? 'default' : 'outline'}
+                variant={
+                  generationOptions.promptMood === 'elegant'
+                    ? 'default'
+                    : 'outline'
+                }
                 size="sm"
-                onClick={() => setGenerationOptions(prev => ({ ...prev, promptMood: 'elegant' }))}
+                onClick={() =>
+                  setGenerationOptions((prev) => ({
+                    ...prev,
+                    promptMood: 'elegant',
+                  }))
+                }
               >
                 Elegant
               </Button>
               <Button
                 type="button"
-                variant={generationOptions.promptMood === 'rustic' ? 'default' : 'outline'}
+                variant={
+                  generationOptions.promptMood === 'rustic'
+                    ? 'default'
+                    : 'outline'
+                }
                 size="sm"
-                onClick={() => setGenerationOptions(prev => ({ ...prev, promptMood: 'rustic' }))}
+                onClick={() =>
+                  setGenerationOptions((prev) => ({
+                    ...prev,
+                    promptMood: 'rustic',
+                  }))
+                }
               >
                 Rustic
               </Button>
               <Button
                 type="button"
-                variant={generationOptions.promptMood === 'modern' ? 'default' : 'outline'}
+                variant={
+                  generationOptions.promptMood === 'modern'
+                    ? 'default'
+                    : 'outline'
+                }
                 size="sm"
-                onClick={() => setGenerationOptions(prev => ({ ...prev, promptMood: 'modern' }))}
+                onClick={() =>
+                  setGenerationOptions((prev) => ({
+                    ...prev,
+                    promptMood: 'modern',
+                  }))
+                }
               >
                 Modern
               </Button>
@@ -307,7 +382,9 @@ export function AIImageGenerator({
               <ul className="mt-1 space-y-1">
                 {!recipe.title && <li>• Recipe title</li>}
                 {!recipe.description && <li>• Recipe description</li>}
-                {(!recipe.ingredients || recipe.ingredients.length === 0) && <li>• At least one ingredient</li>}
+                {(!recipe.ingredients || recipe.ingredients.length === 0) && (
+                  <li>• At least one ingredient</li>
+                )}
               </ul>
             </div>
           </div>
