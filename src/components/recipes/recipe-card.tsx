@@ -22,7 +22,7 @@ import { useDeleteRecipe } from '@/hooks/use-recipes';
 import { useState } from 'react';
 import { recipeApi } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthProvider';
-import { useImageGenerationContext } from '@/contexts/ImageGenerationContext';
+import { useImageGenerationContext } from '@/hooks/useImageGenerationContext';
 import { Progress } from '@/components/ui/progress';
 import {
   AlertDialog,
@@ -63,6 +63,7 @@ export function RecipeCard({
   const deleteRecipe = useDeleteRecipe();
   const { user } = useAuth();
   const ingredientMatching = useIngredientMatching();
+  // Safely get image generation context (may not be available in tests)
   const imageGenerationContext = useImageGenerationContext();
 
   // Calculate compatibility
