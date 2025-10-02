@@ -91,10 +91,11 @@ export async function parseRecipeFromText(text: string): Promise<ParsedRecipe> {
     const standardized = await standardizeRecipeWithAI(cleanedText);
     const parsedRecipe = convertToParsedRecipe(standardized);
 
-    // Add setup field from standardized recipe
+    // Add setup and description fields from standardized recipe
     return {
       ...parsedRecipe,
       setup: standardized.setup,
+      description: standardized.description || '',
     };
   } catch (error) {
     console.error(
@@ -134,8 +135,18 @@ function parseJsonRecipe(parsed: Record<string, unknown>): ParsedRecipe {
   const notes = parseNotes(parsed);
   const categories = parseCategories(parsed);
   const setup = parseSetup(parsed);
+  const description =
+    typeof parsed.description === 'string' ? parsed.description : '';
 
-  return { title, ingredients, instructions, notes, categories, setup };
+  return {
+    title,
+    description,
+    ingredients,
+    instructions,
+    notes,
+    categories,
+    setup,
+  };
 }
 
 function parseIngredients(ingredients: unknown): string[] {
@@ -723,6 +734,7 @@ function parseFlexibleRecipe(text: string): ParsedRecipe {
 
   return {
     title,
+    description: '',
     ingredients,
     instructions: instructions.join('\n'),
     notes: notes.join('\n'),
@@ -787,6 +799,7 @@ function extractFromUnstructuredText(text: string): ParsedRecipe {
 
   return {
     title: 'Recipe from Text',
+    description: '',
     ingredients,
     instructions: instructions.join('\n'),
     notes: '',

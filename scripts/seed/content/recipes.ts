@@ -18,6 +18,8 @@ export const seedRecipesData: SeedRecipe[] = [
   {
     id: '11111111-1111-1111-1111-111111111111',
     title: 'Avocado Toast',
+    description:
+      'Creamy, perfectly ripe avocado spread on golden sourdough toast, finished with a sprinkle of chili flakes for a gentle kick. This simple yet satisfying breakfast combines rich, buttery avocado with the tangy crunch of sourdough, creating a nutritious start to your day that takes just minutes to prepare.',
     ingredients: [
       '2 slices sourdough',
       '1 ripe avocado',
@@ -43,6 +45,8 @@ export const seedRecipesData: SeedRecipe[] = [
   {
     id: '11111111-1111-1111-1111-111111111112',
     title: 'Caprese Salad',
+    description:
+      'A classic Italian masterpiece featuring the perfect trinity of fresh mozzarella, ripe tomatoes, and fragrant basil leaves. Drizzled with aged balsamic glaze and extra virgin olive oil, this elegant salad celebrates the simplicity of quality ingredients. The creamy mozzarella melts in your mouth while the sweet tomatoes and aromatic basil create a refreshing harmony of flavors.',
     ingredients: [
       'fresh mozzarella',
       'tomatoes',
@@ -68,6 +72,8 @@ export const seedRecipesData: SeedRecipe[] = [
   {
     id: '11111111-1111-1111-1111-111111111113',
     title: 'Quick Pasta',
+    description:
+      'A vibrant and aromatic pasta dish that comes together in just 15 minutes, perfect for busy weeknights. Sweet cherry tomatoes burst with flavor as they cook down with fragrant garlic and olive oil, creating a light yet satisfying sauce that clings beautifully to al dente spaghetti. Finished with fresh basil, this dish delivers restaurant-quality taste with minimal effort.',
     ingredients: [
       'spaghetti',
       'garlic',
@@ -93,6 +99,8 @@ export const seedRecipesData: SeedRecipe[] = [
   {
     id: '11111111-1111-1111-1111-111111111114',
     title: 'Veggie Stir Fry',
+    description:
+      'A colorful and nutritious medley of crisp vegetables cooked to perfection in a savory Asian-inspired sauce. Crunchy broccoli, sweet bell peppers, and tender carrots are quickly stir-fried with aromatic ginger and garlic, then finished with a splash of soy sauce. This vibrant dish delivers a rainbow of nutrients while maintaining the satisfying crunch and fresh flavors that make stir-fries so irresistible.',
     ingredients: [
       'broccoli',
       'carrots',
@@ -121,6 +129,8 @@ export const seedRecipesData: SeedRecipe[] = [
   {
     id: '22222222-2222-2222-2222-222222222221',
     title: 'Classic Caesar Salad',
+    description:
+      'The timeless Caesar salad that never goes out of style, featuring crisp romaine lettuce tossed in rich, creamy dressing and topped with golden croutons and shaved parmesan. The tangy lemon finish cuts through the richness perfectly, creating a harmonious balance of flavors. This elegant salad is sophisticated enough for dinner parties yet simple enough for everyday dining.',
     ingredients: [
       'romaine lettuce',
       'parmesan',
@@ -148,6 +158,8 @@ export const seedRecipesData: SeedRecipe[] = [
   {
     id: '22222222-2222-2222-2222-222222222222',
     title: 'Grilled Chicken Breast',
+    description:
+      'Perfectly grilled chicken breast with a golden, slightly charred exterior and tender, juicy interior. Seasoned simply with salt, pepper, and garlic powder, this lean protein showcases the natural flavors of quality chicken. The grill marks add visual appeal and a subtle smoky flavor, making this a versatile centerpiece for any meal that pairs beautifully with vegetables, salads, or grains.',
     ingredients: [
       'chicken breast',
       'olive oil',
@@ -173,6 +185,8 @@ export const seedRecipesData: SeedRecipe[] = [
   {
     id: '22222222-2222-2222-2222-222222222223',
     title: 'BBQ Ribs',
+    description:
+      "Fall-off-the-bone tender pork ribs with a perfect balance of sweet and smoky flavors. These ribs are seasoned with a blend of brown sugar, paprika, and garlic powder, then slow-smoked for hours until the meat is incredibly tender. Finished with a generous glaze of tangy BBQ sauce, these ribs deliver the ultimate comfort food experience that's worth the wait.",
     ingredients: [
       'pork ribs',
       'bbq sauce',
@@ -200,6 +214,8 @@ export const seedRecipesData: SeedRecipe[] = [
   {
     id: '33333333-3333-3333-3333-333333333331',
     title: 'Spanish Paella',
+    description:
+      'An authentic Spanish masterpiece that brings the flavors of Valencia to your table. This vibrant rice dish features tender chicken thighs, succulent shrimp, and aromatic saffron that infuses every grain with its distinctive golden color and delicate flavor. The combination of sweet bell peppers, savory onions, and perfectly cooked rice creates a symphony of textures and tastes that captures the essence of Spanish cuisine.',
     ingredients: [
       'rice',
       'chicken thighs',
@@ -226,6 +242,8 @@ export const seedRecipesData: SeedRecipe[] = [
   {
     id: '33333333-3333-3333-3333-333333333332',
     title: 'Thai Green Curry',
+    description:
+      'A fragrant and aromatic Thai curry that balances heat, sweetness, and creaminess in perfect harmony. Rich coconut milk forms the base for this vibrant green curry paste, creating a luxurious sauce that coats tender chicken and crisp bell peppers. The addition of fresh basil and fish sauce adds authentic Thai flavors, while the spice level can be adjusted to your preference for a truly customizable dining experience.',
     ingredients: [
       'coconut milk',
       'green curry paste',
@@ -254,6 +272,8 @@ export const seedRecipesData: SeedRecipe[] = [
   {
     id: '44444444-4444-4444-4444-444444444441',
     title: 'French Macarons',
+    description:
+      'Delicate and elegant French macarons with their signature smooth, domed tops and ruffled "feet" that are the hallmark of perfect technique. These light-as-air cookies feature a crisp exterior that gives way to a chewy, slightly sweet interior. Made with almond flour and egg whites, these sophisticated treats can be colored and flavored to create beautiful, Instagram-worthy desserts that are perfect for special occasions.',
     ingredients: [
       'almond flour',
       'powdered sugar',
@@ -279,6 +299,8 @@ export const seedRecipesData: SeedRecipe[] = [
   {
     id: '44444444-4444-4444-4444-444444444442',
     title: 'Gluten-Free Bread',
+    description:
+      "A soft, tender gluten-free bread that rivals traditional wheat bread in texture and flavor. Made with a carefully balanced blend of gluten-free flour and xanthan gum, this bread rises beautifully and develops a golden, crusty exterior while maintaining a soft, chewy interior. Perfect for sandwiches, toast, or simply enjoyed with butter, this homemade bread proves that gluten-free doesn't mean flavor-free.",
     ingredients: [
       'gluten-free flour',
       'xanthan gum',
@@ -307,6 +329,8 @@ export const seedRecipesData: SeedRecipe[] = [
   {
     id: '55555555-5555-5555-5555-555555555551',
     title: 'Greek Yogurt Bowl',
+    description:
+      'A nutritious and visually stunning breakfast bowl that combines creamy Greek yogurt with a colorful array of fresh berries, crunchy granola, and nutrient-dense chia seeds. Drizzled with golden honey, this bowl delivers a perfect balance of protein, fiber, and natural sweetness. The contrasting textures and vibrant colors make this not just a healthy choice, but a beautiful and satisfying way to start your day.',
     ingredients: ['greek yogurt', 'berries', 'honey', 'granola', 'chia seeds'],
     instructions:
       'Scoop yogurt into bowl. Top with berries, granola, and chia seeds. Drizzle with honey.',
@@ -326,6 +350,8 @@ export const seedRecipesData: SeedRecipe[] = [
   {
     id: '55555555-5555-5555-5555-555555555552',
     title: 'Air Fryer Salmon',
+    description:
+      'Perfectly cooked salmon with a crispy exterior and tender, flaky interior, all achieved in minutes using the air fryer. Seasoned simply with salt, pepper, and fresh dill, this salmon showcases the natural flavors of the fish while the air fryer creates a beautiful golden crust. Finished with a squeeze of lemon, this dish delivers restaurant-quality results with minimal effort and maximum nutrition.',
     ingredients: [
       'salmon fillets',
       'olive oil',
@@ -354,6 +380,8 @@ export const seedRecipesData: SeedRecipe[] = [
   {
     id: '66666666-6666-6666-6666-666666666661',
     title: 'Spicy Tacos',
+    description:
+      'Bold and fiery tacos that pack a serious punch of flavor and heat. Seasoned ground beef is perfectly browned with onions and taco seasoning, then served in warm tortillas and topped with fresh jalapeños, cilantro, and a squeeze of lime. These tacos deliver the authentic street food experience with layers of spice, freshness, and texture that will satisfy any craving for bold Mexican flavors.',
     ingredients: [
       'ground beef',
       'taco seasoning',
@@ -380,6 +408,8 @@ export const seedRecipesData: SeedRecipe[] = [
   {
     id: '66666666-6666-6666-6666-666666666662',
     title: 'Korean BBQ',
+    description:
+      "Succulent beef short ribs marinated in a perfect balance of soy sauce, brown sugar, garlic, ginger, and sesame oil, then grilled to caramelized perfection. The marinade creates a complex umami flavor profile that's both sweet and savory, while the high heat of the grill develops a beautiful char and caramelization. Served with rice and kimchi, this dish captures the essence of Korean barbecue culture.",
     ingredients: [
       'beef short ribs',
       'soy sauce',
@@ -459,6 +489,7 @@ export async function seedAllRecipes() {
       {
         id: recipe.id,
         title: recipe.title,
+        description: recipe.description || null,
         ingredients: recipe.ingredients,
         instructions: recipe.instructions,
         notes: recipe.notes,
@@ -485,6 +516,7 @@ export async function seedAllRecipes() {
           version_name: 'Original Recipe',
           changelog: 'Initial recipe version',
           title: recipe.title,
+          description: recipe.description || null,
           ingredients: recipe.ingredients,
           instructions: recipe.instructions,
           notes: recipe.notes,

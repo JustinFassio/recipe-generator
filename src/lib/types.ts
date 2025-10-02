@@ -4,6 +4,7 @@
 export type Recipe = {
   id: string;
   title: string;
+  description: string | null;
   ingredients: string[];
   instructions: string;
   notes: string | null;
@@ -34,6 +35,7 @@ export type RecipeVersion = {
   changelog: string | null;
   // Full content snapshot
   title: string;
+  description: string | null;
   ingredients: string[];
   instructions: string;
   notes: string | null;
@@ -223,6 +225,7 @@ export interface IngredientItem {
 
 export type ParsedRecipe = {
   title: string;
+  description: string;
   setup: string[];
   ingredients: string[];
   instructions: string;

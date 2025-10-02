@@ -51,6 +51,7 @@ export const versioningApi = {
       name: string;
       changelog: string;
       title?: string;
+      description?: string;
       ingredients?: string[];
       instructions?: string;
       notes?: string;
@@ -106,6 +107,7 @@ export const versioningApi = {
           version_name: 'Original Recipe',
           changelog: 'Initial recipe version',
           title: currentRecipe.title,
+          description: currentRecipe.description,
           ingredients: currentRecipe.ingredients,
           instructions: currentRecipe.instructions,
           notes: currentRecipe.notes,
@@ -143,6 +145,10 @@ export const versioningApi = {
           versionData.title !== undefined
             ? versionData.title
             : currentRecipe.title,
+        description:
+          versionData.description !== undefined
+            ? versionData.description
+            : currentRecipe.description,
         ingredients:
           versionData.ingredients !== undefined
             ? versionData.ingredients
@@ -206,6 +212,7 @@ export const versioningApi = {
       .from('recipes')
       .update({
         title: version.title,
+        description: version.description,
         ingredients: version.ingredients,
         instructions: version.instructions,
         notes: version.notes,
@@ -257,6 +264,7 @@ export const versioningApi = {
     return {
       id: recipeId,
       title: version.title,
+      description: version.description,
       ingredients: version.ingredients,
       instructions: version.instructions,
       notes: version.notes,

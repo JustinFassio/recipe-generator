@@ -98,6 +98,7 @@ export function RecipeForm({
     defaultValues: editRecipe
       ? {
           title: editRecipe.title,
+          description: editRecipe.description || '',
           ingredients: editRecipe.ingredients,
           instructions: editRecipe.instructions,
           notes: editRecipe.notes || '',
@@ -108,6 +109,7 @@ export function RecipeForm({
         }
       : {
           title: '',
+          description: '',
           ingredients: [''],
           instructions: '',
           notes: '',
@@ -123,7 +125,7 @@ export function RecipeForm({
     append: appendIngredient,
     remove: removeIngredient,
   } = useFieldArray<RecipeFormData, FieldArrayPath<RecipeFormData>>({
-    control,
+    control: control,
     name: 'ingredients' as FieldArrayPath<RecipeFormData>,
   });
 
@@ -132,7 +134,7 @@ export function RecipeForm({
     append: appendSetup,
     remove: removeSetup,
   } = useFieldArray<RecipeFormData, FieldArrayPath<RecipeFormData>>({
-    control,
+    control: control,
     name: 'setup' as FieldArrayPath<RecipeFormData>,
   });
 
@@ -140,6 +142,7 @@ export function RecipeForm({
     if (initialData) {
       reset({
         title: initialData.title || '',
+        description: initialData.description || '',
         ingredients: initialData.ingredients?.length
           ? initialData.ingredients
           : [''],
@@ -315,6 +318,34 @@ export function RecipeForm({
               {errors.title && (
                 <p className="mt-1 text-sm text-red-500">
                   {errors.title.message}
+                </p>
+              )}
+            </div>
+
+            {/* Recipe Description Field */}
+            <div>
+              <label
+                htmlFor="description"
+                className={createDaisyUILabelClasses()}
+              >
+                Recipe Description
+              </label>
+              <Textarea
+                id="description"
+                {...register('description')}
+                placeholder="Describe your dish - flavors, textures, visual appeal, what makes it special..."
+                rows={3}
+                variant="default"
+                size="md"
+                className="w-full resize-none mt-1"
+              />
+              <p className="mt-1 text-sm text-gray-500">
+                A rich description helps others discover your recipe and
+                improves AI image generation.
+              </p>
+              {errors.description && (
+                <p className="mt-1 text-sm text-red-500">
+                  {errors.description.message}
                 </p>
               )}
             </div>
@@ -610,6 +641,7 @@ export function RecipeForm({
             const formData = watch();
             return {
               title: formData.title,
+              description: formData.description || '',
               ingredients: formData.ingredients,
               instructions: formData.instructions,
               notes: formData.notes,

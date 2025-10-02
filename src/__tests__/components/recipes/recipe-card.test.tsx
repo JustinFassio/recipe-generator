@@ -21,6 +21,7 @@ const mockUseAuth = vi.mocked(useAuth);
 const mockRecipe: Recipe = {
   id: '1',
   title: 'Test Recipe',
+  description: 'A delicious test recipe for testing purposes.',
   ingredients: ['ingredient1', 'ingredient2', 'ingredient3'],
   instructions: 'Test cooking instructions for the recipe.',
   notes: 'Test notes and tips for the recipe.',
@@ -99,7 +100,7 @@ describe('RecipeCard', () => {
     ).toBeInTheDocument();
     expect(screen.getByText('3 ingredients')).toBeInTheDocument();
     expect(
-      screen.getByText('Test cooking instructions for the recipe.')
+      screen.getByText('A delicious test recipe for testing purposes.')
     ).toBeInTheDocument();
     expect(
       screen.getByText('Test notes and tips for the recipe.')

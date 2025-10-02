@@ -18,7 +18,7 @@ import {
   type ParseRecipeFormData,
   type RecipeFormData,
 } from '@/lib/schemas';
-import type { ParsedRecipe } from '@/lib/types';
+import type { ParsedRecipe } from '@/lib/recipe-parser-unified';
 import { useParseRecipe } from '@/hooks/use-recipes';
 
 interface ParseRecipeFormProps {
@@ -46,6 +46,7 @@ export function ParseRecipeForm({ onParsed }: ParseRecipeFormProps) {
       // Convert ParsedRecipe to RecipeFormData
       const recipeFormData: RecipeFormData = {
         title: parsed.title,
+        description: parsed.description || '',
         ingredients: parsed.ingredients,
         instructions: parsed.instructions,
         notes: parsed.notes || '',

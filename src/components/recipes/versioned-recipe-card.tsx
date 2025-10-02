@@ -89,6 +89,7 @@ export function VersionedRecipeCard({
     const versionAsRecipe: PublicRecipe = {
       id: version.recipe_id,
       title: version.title,
+      description: version.description || null,
       ingredients: version.ingredients,
       instructions: version.instructions,
       notes: version.notes || null,
@@ -228,10 +229,10 @@ export function VersionedRecipeCard({
               </div>
             )}
 
-            {/* Instructions Preview */}
-            {recipe.instructions && (
+            {/* Description Preview */}
+            {recipe.description && (
               <p className="line-clamp-2 text-sm text-gray-600">
-                {recipe.instructions}
+                {recipe.description}
               </p>
             )}
           </div>
