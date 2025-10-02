@@ -1,10 +1,14 @@
 import { RecipeFormData } from '@/lib/schemas';
+import { generateEnhancedPrompt, optimizePromptForDALLE } from './enhanced-prompt-generator';
 
 export interface AutoGenerationOptions {
   enabled: boolean;
   quality: 'standard' | 'hd';
   size: '1024x1024' | '1024x1792' | '1792x1024';
   fallbackOnError: boolean;
+  promptStyle?: 'photographic' | 'artistic' | 'minimalist' | 'luxury';
+  promptMood?: 'appetizing' | 'elegant' | 'rustic' | 'modern';
+  promptFocus?: 'dish' | 'ingredients' | 'process' | 'presentation';
 }
 
 export interface GenerationResult {
@@ -32,8 +36,15 @@ export async function generateImageForRecipe(
   }
 
   try {
-    // Generate intelligent prompt from recipe context
-    const prompt = generateIntelligentPrompt(recipe);
+    // Generate enhanced prompt from recipe context
+    const enhancedPrompt = generateEnhancedPrompt(recipe, {
+      style: options.promptStyle || 'photographic',
+      mood: options.promptMood || 'appetizing',
+      focus: options.promptFocus || 'dish',
+      quality: options.quality,
+    });
+    
+    const prompt = optimizePromptForDALLE(enhancedPrompt.primaryPrompt);
 
     // Call image generation API
     const response = await fetch('/api/ai/generate-image', {
@@ -81,84 +92,7 @@ export async function generateImageForRecipe(
   }
 }
 
-/**
- * Generate intelligent prompt from recipe context
- */
-function generateIntelligentPrompt(recipe: RecipeFormData): string {
-  // Priority 1: Use description if available and rich
-  if (recipe.description && recipe.description.trim().length > 50) {
-    return recipe.description.trim();
-  }
-
-  // Priority 2: Generate from title and context
-  let prompt = `A delicious ${recipe.title.toLowerCase()}`;
-
-  // Add cuisine context from categories
-  if (recipe.categories) {
-    const cuisine = recipe.categories
-      .find((cat) => cat.includes('Cuisine:'))
-      ?.split(':')[1]
-      ?.trim();
-
-    if (cuisine) {
-      prompt += `, ${cuisine} style`;
-    }
-  }
-
-  // Add main ingredients context
-  if (recipe.ingredients && recipe.ingredients.length > 0) {
-    const mainIngredients = recipe.ingredients
-      .slice(0, 3)
-      .map((ing) => {
-        // Extract main ingredient name (remove measurements)
-        const cleaned = ing
-          .replace(/\d+\s*(cups?|tbsp?|tsp?|oz|lb|g|kg|ml|l)\s*/gi, '')
-          .trim();
-        return cleaned.split(',')[0].trim(); // Take first part if comma-separated
-      })
-      .filter(Boolean);
-
-    if (mainIngredients.length > 0) {
-      prompt += `, featuring ${mainIngredients.join(' and ')}`;
-    }
-  }
-
-  // Add cooking method context from instructions
-  const cookingMethod = inferCookingMethod(recipe.instructions);
-  if (cookingMethod) {
-    prompt += `, ${cookingMethod}`;
-  }
-
-  // Add quality descriptors
-  prompt += ', professional food photography, appetizing, well-lit';
-
-  return prompt;
-}
-
-/**
- * Infer cooking method from instructions
- */
-function inferCookingMethod(instructions: string): string | null {
-  const instructionsLower = instructions.toLowerCase();
-
-  const methods = {
-    baked: ['bake', 'oven', 'baking', 'roast', 'roasting'],
-    grilled: ['grill', 'grilling', 'bbq', 'barbecue'],
-    fried: ['fry', 'frying', 'deep fry', 'pan fry'],
-    boiled: ['boil', 'boiling', 'simmer', 'simmering'],
-    raw: ['raw', 'fresh', 'uncooked', 'salad'],
-    steamed: ['steam', 'steaming'],
-    sautéed: ['sauté', 'sautéed', 'sautéing', 'sautée'],
-  };
-
-  for (const [method, keywords] of Object.entries(methods)) {
-    if (keywords.some((keyword) => instructionsLower.includes(keyword))) {
-      return method;
-    }
-  }
-
-  return null;
-}
+// Enhanced prompt generation is now handled by the enhanced-prompt-generator module
 
 /**
  * Check if recipe should have auto-generation
@@ -201,11 +135,32 @@ export function shouldAutoGenerateImage(
  */
 export async function getUserImagePreferences(): Promise<AutoGenerationOptions> {
   // For now, return default preferences
-  // In the future, this could fetch from user profile
+  // In the future, this could fetch from user profile or localStorage
+  try {
+    const savedSettings = localStorage.getItem('imageGenerationSettings');
+    if (savedSettings) {
+      const settings = JSON.parse(savedSettings);
+      return {
+        enabled: settings.autoGenerationEnabled ?? true,
+        quality: settings.defaultQuality || 'standard',
+        size: settings.defaultSize || '1024x1024',
+        fallbackOnError: settings.fallbackOnError ?? true,
+        promptStyle: settings.promptStyle || 'photographic',
+        promptMood: settings.promptMood || 'appetizing',
+        promptFocus: settings.promptFocus || 'dish',
+      };
+    }
+  } catch (error) {
+    console.warn('Failed to load user image preferences:', error);
+  }
+
   return {
     enabled: true,
     quality: 'standard',
     size: '1024x1024',
     fallbackOnError: true,
+    promptStyle: 'photographic',
+    promptMood: 'appetizing',
+    promptFocus: 'dish',
   };
 }

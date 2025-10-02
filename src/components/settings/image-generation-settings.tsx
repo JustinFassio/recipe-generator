@@ -13,6 +13,9 @@ interface ImageGenerationSettings {
   defaultSize: '1024x1024' | '1024x1792' | '1792x1024';
   fallbackOnError: boolean;
   showGenerationHints: boolean;
+  promptStyle: 'photographic' | 'artistic' | 'minimalist' | 'luxury';
+  promptMood: 'appetizing' | 'elegant' | 'rustic' | 'modern';
+  promptFocus: 'dish' | 'ingredients' | 'process' | 'presentation';
 }
 
 const defaultSettings: ImageGenerationSettings = {
@@ -21,6 +24,9 @@ const defaultSettings: ImageGenerationSettings = {
   defaultSize: '1024x1024',
   fallbackOnError: true,
   showGenerationHints: true,
+  promptStyle: 'photographic',
+  promptMood: 'appetizing',
+  promptFocus: 'dish',
 };
 
 export function ImageGenerationSettings() {
@@ -222,6 +228,90 @@ export function ImageGenerationSettings() {
             checked={settings.showGenerationHints}
             onCheckedChange={(checked) => updateSetting('showGenerationHints', checked)}
           />
+        </div>
+
+        {/* Prompt Style */}
+        <div className="space-y-3">
+          <Label className="text-base font-medium">Default Prompt Style</Label>
+          <div className="flex space-x-2">
+            <Button
+              type="button"
+              variant={settings.promptStyle === 'photographic' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => updateSetting('promptStyle', 'photographic')}
+            >
+              Photographic
+            </Button>
+            <Button
+              type="button"
+              variant={settings.promptStyle === 'artistic' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => updateSetting('promptStyle', 'artistic')}
+            >
+              Artistic
+            </Button>
+            <Button
+              type="button"
+              variant={settings.promptStyle === 'minimalist' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => updateSetting('promptStyle', 'minimalist')}
+            >
+              Minimalist
+            </Button>
+            <Button
+              type="button"
+              variant={settings.promptStyle === 'luxury' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => updateSetting('promptStyle', 'luxury')}
+            >
+              Luxury
+            </Button>
+          </div>
+          <p className="text-sm text-gray-600">
+            The visual style used for generated images
+          </p>
+        </div>
+
+        {/* Prompt Mood */}
+        <div className="space-y-3">
+          <Label className="text-base font-medium">Default Prompt Mood</Label>
+          <div className="flex space-x-2">
+            <Button
+              type="button"
+              variant={settings.promptMood === 'appetizing' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => updateSetting('promptMood', 'appetizing')}
+            >
+              Appetizing
+            </Button>
+            <Button
+              type="button"
+              variant={settings.promptMood === 'elegant' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => updateSetting('promptMood', 'elegant')}
+            >
+              Elegant
+            </Button>
+            <Button
+              type="button"
+              variant={settings.promptMood === 'rustic' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => updateSetting('promptMood', 'rustic')}
+            >
+              Rustic
+            </Button>
+            <Button
+              type="button"
+              variant={settings.promptMood === 'modern' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => updateSetting('promptMood', 'modern')}
+            >
+              Modern
+            </Button>
+          </div>
+          <p className="text-sm text-gray-600">
+            The emotional tone and mood of generated images
+          </p>
         </div>
 
         {/* Cost Information */}

@@ -4,6 +4,7 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { useImageGeneration } from '@/hooks/useImageGeneration';
 import { RecipeFormData } from '@/lib/schemas';
+import { generateEnhancedPrompt, optimizePromptForDALLE } from '@/lib/ai-image-generation/enhanced-prompt-generator';
 import { Wand2, RefreshCw, AlertCircle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
@@ -24,6 +25,9 @@ export function AIImageGenerator({
   const [generationOptions, setGenerationOptions] = useState({
     quality: 'standard' as 'standard' | 'hd',
     size: '1024x1024' as '1024x1024' | '1024x1792' | '1792x1024',
+    promptStyle: 'photographic' as 'photographic' | 'artistic' | 'minimalist' | 'luxury',
+    promptMood: 'appetizing' as 'appetizing' | 'elegant' | 'rustic' | 'modern',
+    promptFocus: 'dish' as 'dish' | 'ingredients' | 'process' | 'presentation',
   });
 
   const { generateImage, isGenerating, generationProgress, error } = useImageGeneration({
@@ -55,7 +59,15 @@ export function AIImageGenerator({
       return;
     }
 
-    const prompt = generatePrompt(recipe);
+    // Generate enhanced prompt using recipe context analysis
+    const enhancedPrompt = generateEnhancedPrompt(recipe, {
+      style: generationOptions.promptStyle,
+      mood: generationOptions.promptMood,
+      focus: generationOptions.promptFocus,
+      quality: generationOptions.quality,
+    });
+    
+    const prompt = optimizePromptForDALLE(enhancedPrompt.primaryPrompt);
     
     try {
       await generateImage({
@@ -72,78 +84,7 @@ export function AIImageGenerator({
     }
   };
 
-  const generatePrompt = (recipe: RecipeFormData): string => {
-    // Use description if available and rich
-    if (recipe.description && recipe.description.trim().length > 50) {
-      return recipe.description.trim();
-    }
-
-    // Generate from title and context
-    let prompt = `A delicious ${recipe.title.toLowerCase()}`;
-
-    // Add cuisine context from categories
-    if (recipe.categories) {
-      const cuisine = recipe.categories
-        .find((cat) => cat.includes('Cuisine:'))
-        ?.split(':')[1]
-        ?.trim();
-
-      if (cuisine) {
-        prompt += `, ${cuisine} style`;
-      }
-    }
-
-    // Add main ingredients context
-    if (recipe.ingredients && recipe.ingredients.length > 0) {
-      const mainIngredients = recipe.ingredients
-        .slice(0, 3)
-        .map((ing) => {
-          const cleaned = ing
-            .replace(/\d+\s*(cups?|tbsp?|tsp?|oz|lb|g|kg|ml|l)\s*/gi, '')
-            .trim();
-          return cleaned.split(',')[0].trim();
-        })
-        .filter(Boolean);
-
-      if (mainIngredients.length > 0) {
-        prompt += `, featuring ${mainIngredients.join(' and ')}`;
-      }
-    }
-
-    // Add cooking method context
-    const cookingMethod = inferCookingMethod(recipe.instructions);
-    if (cookingMethod) {
-      prompt += `, ${cookingMethod}`;
-    }
-
-    // Add quality descriptors
-    prompt += ', professional food photography, appetizing, well-lit';
-
-    return prompt;
-  };
-
-  const inferCookingMethod = (instructions: string): string | null => {
-    if (!instructions) return null;
-    
-    const instructionsLower = instructions.toLowerCase();
-    const methods = {
-      baked: ['bake', 'oven', 'baking', 'roast', 'roasting'],
-      grilled: ['grill', 'grilling', 'bbq', 'barbecue'],
-      fried: ['fry', 'frying', 'deep fry', 'pan fry'],
-      boiled: ['boil', 'boiling', 'simmer', 'simmering'],
-      raw: ['raw', 'fresh', 'uncooked', 'salad'],
-      steamed: ['steam', 'steaming'],
-      sautéed: ['sauté', 'sautéed', 'sautéing', 'sautée'],
-    };
-
-    for (const [method, keywords] of Object.entries(methods)) {
-      if (keywords.some((keyword) => instructionsLower.includes(keyword))) {
-        return method;
-      }
-    }
-
-    return null;
-  };
+  // Enhanced prompt generation is now handled by the enhanced-prompt-generator module
 
   const getCostEstimate = (): number => {
     const costs = {
@@ -262,6 +203,88 @@ export function AIImageGenerator({
                 onClick={() => setGenerationOptions(prev => ({ ...prev, size: '1792x1024' }))}
               >
                 Landscape
+              </Button>
+            </div>
+          </div>
+
+          {/* Prompt Style Selection */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Style
+            </label>
+            <div className="flex space-x-2">
+              <Button
+                type="button"
+                variant={generationOptions.promptStyle === 'photographic' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setGenerationOptions(prev => ({ ...prev, promptStyle: 'photographic' }))}
+              >
+                Photo
+              </Button>
+              <Button
+                type="button"
+                variant={generationOptions.promptStyle === 'artistic' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setGenerationOptions(prev => ({ ...prev, promptStyle: 'artistic' }))}
+              >
+                Artistic
+              </Button>
+              <Button
+                type="button"
+                variant={generationOptions.promptStyle === 'minimalist' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setGenerationOptions(prev => ({ ...prev, promptStyle: 'minimalist' }))}
+              >
+                Minimal
+              </Button>
+              <Button
+                type="button"
+                variant={generationOptions.promptStyle === 'luxury' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setGenerationOptions(prev => ({ ...prev, promptStyle: 'luxury' }))}
+              >
+                Luxury
+              </Button>
+            </div>
+          </div>
+
+          {/* Prompt Mood Selection */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Mood
+            </label>
+            <div className="flex space-x-2">
+              <Button
+                type="button"
+                variant={generationOptions.promptMood === 'appetizing' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setGenerationOptions(prev => ({ ...prev, promptMood: 'appetizing' }))}
+              >
+                Appetizing
+              </Button>
+              <Button
+                type="button"
+                variant={generationOptions.promptMood === 'elegant' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setGenerationOptions(prev => ({ ...prev, promptMood: 'elegant' }))}
+              >
+                Elegant
+              </Button>
+              <Button
+                type="button"
+                variant={generationOptions.promptMood === 'rustic' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setGenerationOptions(prev => ({ ...prev, promptMood: 'rustic' }))}
+              >
+                Rustic
+              </Button>
+              <Button
+                type="button"
+                variant={generationOptions.promptMood === 'modern' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setGenerationOptions(prev => ({ ...prev, promptMood: 'modern' }))}
+              >
+                Modern
               </Button>
             </div>
           </div>
