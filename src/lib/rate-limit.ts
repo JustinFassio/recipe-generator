@@ -1,7 +1,7 @@
 interface RateLimitOptions {
   windowMs: number;
   max: number;
-  keyGenerator: (req: Request) => string;
+  keyGenerator: (req: any) => string;
 }
 
 interface RateLimitStore {
@@ -14,8 +14,8 @@ interface RateLimitStore {
 const store: RateLimitStore = {};
 
 export function rateLimit(options: RateLimitOptions) {
-  return (handler: (req: Request, res: Response) => Promise<void>) => {
-    return async (req: Request, res: Response) => {
+  return (handler: (req: any, res: any) => Promise<void>) => {
+    return async (req: any, res: any) => {
       const key = options.keyGenerator(req);
       const now = Date.now();
       const windowStart = now - options.windowMs;
@@ -37,9 +37,10 @@ export function rateLimit(options: RateLimitOptions) {
 
       // Check if limit exceeded
       if (store[key].count >= options.max) {
+        const retryAfter = Math.ceil((store[key].resetTime - now) / 1000);
         return res.status(429).json({
           error: 'Rate limit exceeded. Please try again later.',
-          retryAfter: Math.ceil((store[key].resetTime - now) / 1000),
+          retryAfter,
         });
       }
 

@@ -16,6 +16,9 @@ import {
 } from '@/hooks/use-recipes';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { X, Upload, Plus } from 'lucide-react';
+import { AIImageGenerator } from './ai-image-generator';
+import { AutoImageGenerator } from './auto-image-generator';
+import { useAutoImageGeneration } from '@/hooks/useAutoImageGeneration';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import CategoryInput from '@/components/ui/CategoryInput';
@@ -48,6 +51,7 @@ export function RecipeForm({
   const createRecipe = useCreateRecipe();
   const updateRecipe = useUpdateRecipe();
   const uploadImage = useUploadImage();
+  const autoImageGeneration = useAutoImageGeneration();
 
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>('');
@@ -219,6 +223,8 @@ export function RecipeForm({
         console.log('User authenticated:', !!userData?.user);
       }
 
+      let createdRecipe = null;
+
       if (existingRecipe) {
         if (isMobile) console.log('Updating existing recipe...');
         await updateRecipe.mutateAsync({
@@ -227,7 +233,7 @@ export function RecipeForm({
         });
       } else {
         if (isMobile) console.log('Creating new recipe...');
-        await createRecipe.mutateAsync({
+        createdRecipe = await createRecipe.mutateAsync({
           ...recipeData,
           is_public: false,
           creator_rating: recipeData.creator_rating || null,
@@ -235,6 +241,27 @@ export function RecipeForm({
           difficulty: null,
           current_version_id: null,
         });
+      }
+
+      // Auto-generate image for new recipes without images
+      if (!existingRecipe && !imageUrl && autoImageGeneration.checkShouldGenerate(data, initialData)) {
+        try {
+          if (isMobile) console.log('Auto-generating image for new recipe...');
+          const generationResult = await autoImageGeneration.generateForRecipe(data);
+          
+          if (generationResult.success && generationResult.imageUrl && createdRecipe) {
+            // Update the recipe with the generated image
+            await updateRecipe.mutateAsync({
+              id: createdRecipe.id,
+              updates: { image_url: generationResult.imageUrl },
+            });
+            
+            if (isMobile) console.log('Auto-generated image added to recipe');
+          }
+        } catch (autoGenError) {
+          console.warn('Auto image generation failed:', autoGenError);
+          // Don't fail the entire recipe save if auto-generation fails
+        }
       }
 
       if (isMobile) console.log('Recipe operation completed successfully');
@@ -395,6 +422,49 @@ export function RecipeForm({
                     <Upload className="mr-2 h-4 w-4" />
                     Upload Image
                   </Button>
+                </div>
+
+                {/* AI Image Generation */}
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  <h4 className="font-medium text-gray-900 mb-3">AI Image Generation</h4>
+                  
+                  {/* Manual AI Generation */}
+                  <AIImageGenerator
+                    recipe={watch()}
+                    onImageGenerated={(imageUrl) => {
+                      setImagePreview(imageUrl);
+                      setValue('image_url', imageUrl);
+                      toast({
+                        title: 'Image Generated!',
+                        description: 'AI-generated image has been added to your recipe.',
+                        variant: 'default',
+                      });
+                    }}
+                    onError={(error) => {
+                      toast({
+                        title: 'Generation Failed',
+                        description: error,
+                        variant: 'destructive',
+                      });
+                    }}
+                  />
+
+                  {/* Auto-Generation for New Recipes */}
+                  {!editRecipe && (
+                    <div className="mt-4">
+                      <AutoImageGenerator
+                        recipe={watch()}
+                        initialData={initialData}
+                        onImageGenerated={(imageUrl) => {
+                          setImagePreview(imageUrl);
+                          setValue('image_url', imageUrl);
+                        }}
+                        onError={(error) => {
+                          console.error('Auto-generation error:', error);
+                        }}
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
