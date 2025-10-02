@@ -13,8 +13,17 @@ import type {
 // Environment variable validation
 // Note: VITE_SUPABASE_ANON_KEY is intentionally public and safe to expose
 // This is the anonymous key designed for client-side use with RLS policies
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+let supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+// Normalize URL for local/dev: auto-prepend protocol if missing
+if (supabaseUrl && !/^https?:\/\//i.test(supabaseUrl)) {
+  const trimmed = String(supabaseUrl).trim();
+  // If it looks like host:port or 127.0.0.1:port, default to http
+  if (/^(([\w.-]+)|((\d{1,3}\.){3}\d{1,3}))(\:\d+)?(\/.+)?$/.test(trimmed)) {
+    supabaseUrl = `http://${trimmed}`;
+  }
+}
 
 if (!supabaseUrl || !supabaseAnonKey) {
   console.error('❌ Missing Supabase environment variables:');

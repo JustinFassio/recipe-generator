@@ -1,5 +1,5 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
-import { createImageGenerationRateLimit } from '@/lib/rate-limit';
+import { createImageGenerationRateLimit } from '../../src/lib/rate-limit';
 
 interface GenerateImageRequest {
   prompt: string;
@@ -31,7 +31,8 @@ const handler = async (
 ): Promise<void> => {
   // Only allow POST requests
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+    res.status(405).json({ error: 'Method not allowed' });
+    return;
   }
 
   try {
@@ -46,20 +47,22 @@ const handler = async (
     }: GenerateImageRequest = req.body;
 
     if (!prompt || typeof prompt !== 'string') {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         error: 'Prompt is required and must be a string',
       });
+      return;
     }
 
     // Check API key
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
       console.error('OpenAI API key not configured');
-      return res.status(500).json({
+      res.status(500).json({
         success: false,
         error: 'Image generation service not configured',
       });
+      return;
     }
 
     // Generate enhanced prompt for recipe context
@@ -123,7 +126,7 @@ const handler = async (
 
           if (fallbackResponse.ok) {
             const fallbackData = await fallbackResponse.json();
-            return res.status(200).json({
+            res.status(200).json({
               success: true,
               imageUrl: fallbackData.data[0]?.url,
               usedFallback: true,
@@ -133,24 +136,27 @@ const handler = async (
                 totalCost: calculateImageCost(size, quality),
               },
             });
+            return;
           }
         }
       }
 
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         error: `Image generation failed: ${errorData.error?.message || 'Unknown error'}`,
       });
+      return;
     }
 
     const imageData = await imageResponse.json();
     const generatedImageUrl = imageData.data[0]?.url;
 
     if (!generatedImageUrl) {
-      return res.status(500).json({
+      res.status(500).json({
         success: false,
         error: 'No image URL returned from generation service',
       });
+      return;
     }
 
     const response: GenerateImageResponse = {
@@ -163,12 +169,14 @@ const handler = async (
     };
 
     res.status(200).json(response);
+    return;
   } catch (error) {
     console.error('Image generation error:', error);
     res.status(500).json({
       success: false,
       error: 'Internal server error during image generation',
     });
+    return;
   }
 };
 

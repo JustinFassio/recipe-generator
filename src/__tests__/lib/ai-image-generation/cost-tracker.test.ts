@@ -13,47 +13,63 @@ vi.mock('@/lib/supabase', () => ({
         })),
       })),
       select: vi.fn(() => ({
-        eq: vi.fn(() => ({
-          apply: vi.fn(() => Promise.resolve({ 
-            data: [
-              {
-                id: '1',
-                cost: 0.04,
-                size: '1024x1024',
-                quality: 'standard',
-                success: true,
-                created_at: new Date().toISOString(),
-              },
-              {
-                id: '2',
-                cost: 0.08,
-                size: '1024x1024',
-                quality: 'hd',
-                success: true,
-                created_at: new Date().toISOString(),
-              },
-            ],
-            error: null 
-          })),
-        })),
-        gte: vi.fn(() => ({
-          lte: vi.fn(() => ({
-            order: vi.fn(() => Promise.resolve({ 
-              data: [
-                {
-                  id: '1',
-                  cost: 0.04,
-                  size: '1024x1024',
-                  quality: 'standard',
-                  success: true,
-                  created_at: new Date().toISOString(),
-                  generation_time_ms: 2000,
-                },
-              ],
-              error: null 
-            })),
-          })),
-        })),
+        eq: vi.fn(() => {
+          const summaryData = [
+            {
+              id: '1',
+              cost: 0.04,
+              size: '1024x1024',
+              quality: 'standard',
+              success: true,
+              created_at: new Date().toISOString(),
+            },
+            {
+              id: '2',
+              cost: 0.08,
+              size: '1024x1024',
+              quality: 'hd',
+              success: true,
+              created_at: new Date().toISOString(),
+            },
+          ];
+
+          // Use two entries with equal split to yield 'stable' trend
+          const analyticsData = [
+            {
+              id: '1',
+              cost: 0.02,
+              size: '1024x1024',
+              quality: 'standard',
+              success: true,
+              created_at: new Date().toISOString(),
+              generation_time_ms: 2000,
+            },
+            {
+              id: '2',
+              cost: 0.02,
+              size: '1024x1024',
+              quality: 'standard',
+              success: true,
+              created_at: new Date().toISOString(),
+              generation_time_ms: 2000,
+            },
+          ];
+
+          // Build a thenable object that also supports chaining .lte()
+          const gteObj: any = {
+            // If caller chains .lte(), return analytics data
+            lte: vi.fn(() => Promise.resolve({ data: analyticsData, error: null })),
+            // If caller awaits the result of gte() directly, resolve to summary data
+            then: (resolve: any) => resolve({ data: summaryData, error: null }),
+          };
+
+          return {
+            // Caller: .gte('created_at', ...). Optionally followed by .lte(...)
+            gte: vi.fn(() => gteObj),
+            // If caller awaits eq() without calling gte, act as a thenable (not used in our code but safe)
+            then: (resolve: any) => resolve({ data: summaryData, error: null }),
+          };
+        }),
       })),
     })),
   },
@@ -119,7 +135,7 @@ describe('Cost Tracker', () => {
 
       expect(analytics.user_id).toBe('test-user-id');
       expect(analytics.total_cost).toBe(0.04);
-      expect(analytics.generation_count).toBe(1);
+      expect(analytics.generation_count).toBe(2);
       expect(analytics.success_rate).toBe(1);
       expect(analytics.average_generation_time).toBe(2000);
       expect(analytics.cost_trend).toBe('stable');
