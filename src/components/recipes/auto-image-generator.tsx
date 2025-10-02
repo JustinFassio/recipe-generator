@@ -65,8 +65,6 @@ export function AutoImageGenerator({
     setShouldGenerate(shouldAutoGenerate);
   }, [recipe, initialData, checkShouldGenerate]);
 
-  // Removed unused handleAutoGenerate function
-
   const handleManualGenerate = async () => {
     try {
       await generateForRecipe(recipe);

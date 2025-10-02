@@ -71,6 +71,13 @@ function createImageGenerationRateLimit() {
   };
 }
 
+/**
+ * AI Image Generation API Endpoint
+ * Generates images using DALL-E 3 with enhanced prompting and fallback strategies
+ *
+ * NOTE: This endpoint enforces landscape orientation (1792x1024) for all generated images
+ * regardless of the size parameter in the request. This ensures consistency with the UI frame.
+ */
 const handler = async (
   req: VercelRequest,
   res: VercelResponse
@@ -87,8 +94,6 @@ const handler = async (
       prompt,
       recipeTitle,
       categories,
-      // ignore incoming size; enforce landscape for consistency with UI frame
-      // size,
       quality = 'standard',
       fallbackOnError = true,
     }: GenerateImageRequest = req.body;

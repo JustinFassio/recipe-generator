@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-// import { Badge } from '@/components/ui/badge'; // Removed as no longer used with simplified budget
+// TODO: If the Badge component is needed in the future (e.g., for budget status indicators), uncomment this import
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { DollarSign, AlertTriangle, Save, Info } from 'lucide-react';
 import {
