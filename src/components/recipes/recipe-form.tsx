@@ -1,4 +1,3 @@
-console.log('🔧 RECIPE-FORM.TSX LOADED - Version 2025-10-03-19:54');
 import { useState, useEffect, useRef } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import type { FieldArrayPath } from 'react-hook-form';
