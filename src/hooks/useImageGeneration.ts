@@ -1,14 +1,18 @@
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
+// Image storage now handled by backend API
 
 interface GenerateImageRequest {
-  prompt: string;
-  recipeTitle?: string;
-  categories?: string[];
-  ingredients?: string[];
-  instructions?: string;
+  recipeTitle: string;
+  description?: string;
+  ingredients: string[];
+  instructions: string;
+  categories: string[];
   size?: '1024x1024' | '1024x1792' | '1792x1024';
   quality?: 'standard' | 'hd';
+  style?: 'photographic' | 'artistic' | 'minimalist' | 'luxury';
+  mood?: 'appetizing' | 'elegant' | 'rustic' | 'modern';
+  focus?: 'dish' | 'ingredients' | 'process' | 'presentation';
 }
 
 interface GenerateImageResponse {
@@ -17,6 +21,7 @@ interface GenerateImageResponse {
   error?: string;
   usedFallback?: boolean;
   fallbackStrategy?: string;
+  promptUsed?: string;
   usage?: {
     promptTokens: number;
     totalCost: number;
@@ -72,6 +77,9 @@ export function useImageGeneration(options?: UseImageGenerationOptions) {
         }
 
         setGenerationProgress(100);
+
+        // Image storage is now handled by the backend API
+        // The imageUrl returned is already a permanent Supabase URL
         return data.imageUrl;
       } catch (error) {
         setGenerationProgress(0);

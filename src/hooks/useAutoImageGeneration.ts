@@ -12,6 +12,7 @@ interface UseAutoImageGenerationOptions {
   onSuccess?: (imageUrl: string) => void;
   onError?: (error: string) => void;
   onComplete?: (result: GenerationResult) => void;
+  onProgressUpdate?: (progress: number) => void;
 }
 
 export function useAutoImageGeneration(
@@ -24,6 +25,7 @@ export function useAutoImageGeneration(
     mutationFn: async (recipe: RecipeFormData): Promise<GenerationResult> => {
       setIsGenerating(true);
       setGenerationProgress(10);
+      options?.onProgressUpdate?.(10);
 
       try {
         // Check if image should be generated
@@ -35,24 +37,31 @@ export function useAutoImageGeneration(
         }
 
         setGenerationProgress(20);
+        options?.onProgressUpdate?.(20);
 
         // Get user preferences
         const userPreferences = await getUserImagePreferences();
 
         setGenerationProgress(30);
+        options?.onProgressUpdate?.(30);
 
         // Generate image
         const result = await generateImageForRecipe(recipe, userPreferences);
 
         setGenerationProgress(100);
+        options?.onProgressUpdate?.(100);
 
         return result;
       } catch (error) {
         setGenerationProgress(0);
+        options?.onProgressUpdate?.(0);
         throw error;
       } finally {
         setIsGenerating(false);
-        setTimeout(() => setGenerationProgress(0), 1000);
+        setTimeout(() => {
+          setGenerationProgress(0);
+          options?.onProgressUpdate?.(0);
+        }, 1000);
       }
     },
     onSuccess: (result) => {

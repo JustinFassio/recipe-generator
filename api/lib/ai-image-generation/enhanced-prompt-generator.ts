@@ -1,4 +1,4 @@
-import { RecipeFormData } from '@/lib/schemas';
+import { RecipeFormData } from '../../../src/lib/schemas';
 import { analyzeRecipeContext, RecipeContext } from './recipe-context-analyzer';
 
 export interface PromptGenerationOptions {

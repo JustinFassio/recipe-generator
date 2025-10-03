@@ -188,30 +188,43 @@ function tryPatternParsing(content: string): RecipeParseResult {
       .filter((line) => line.length > 0);
 
     let title = 'Recipe from Text';
+    let description = '';
     const ingredients: string[] = [];
     const instructions: string[] = [];
     const categories: string[] = [];
 
     let inIngredientsSection = false;
     let inInstructionsSection = false;
+    let inDescriptionSection = false;
 
     for (const line of lines) {
       const lowerLine = line.toLowerCase();
 
       // Detect sections
+      if (lowerLine.includes('description') || lowerLine.includes('about')) {
+        inDescriptionSection = true;
+        inIngredientsSection = false;
+        inInstructionsSection = false;
+        continue;
+      }
+
       if (lowerLine.includes('ingredient')) {
         inIngredientsSection = true;
         inInstructionsSection = false;
+        inDescriptionSection = false;
         continue;
       }
 
       if (
         lowerLine.includes('instruction') ||
         lowerLine.includes('step') ||
-        lowerLine.includes('method')
+        lowerLine.includes('method') ||
+        lowerLine.includes('cooking') ||
+        lowerLine.includes('directions')
       ) {
         inIngredientsSection = false;
         inInstructionsSection = true;
+        inDescriptionSection = false;
         continue;
       }
 
@@ -219,7 +232,8 @@ function tryPatternParsing(content: string): RecipeParseResult {
       if (
         title === 'Recipe from Text' &&
         !inIngredientsSection &&
-        !inInstructionsSection
+        !inInstructionsSection &&
+        !inDescriptionSection
       ) {
         if (lowerLine.includes('recipe:') || lowerLine.includes('title:')) {
           title = line.replace(/^(recipe|title):\s*/i, '');
@@ -229,6 +243,45 @@ function tryPatternParsing(content: string): RecipeParseResult {
           !line.includes(':')
         ) {
           title = line;
+        }
+      }
+
+      // Extract description
+      if (inDescriptionSection && line.length > 10) {
+        if (description) {
+          description += ' ' + line;
+        } else {
+          description = line;
+        }
+      }
+
+      // Also capture description-like content before ingredients (common in conversational recipes)
+      if (
+        !inIngredientsSection &&
+        !inInstructionsSection &&
+        !inDescriptionSection &&
+        title !== 'Recipe from Text' &&
+        line.length > 20 &&
+        line.length < 200 &&
+        !line.includes(':') &&
+        !line.match(/^[-*•]\s+/) &&
+        !line.match(/^\d+\.\s+/) &&
+        (line.includes('delicious') ||
+          line.includes('flavor') ||
+          line.includes('taste') ||
+          line.includes('perfect') ||
+          line.includes('tender') ||
+          line.includes('crispy') ||
+          line.includes('savory') ||
+          line.includes('sweet') ||
+          line.includes('spicy') ||
+          line.includes('rich') ||
+          line.includes('fresh'))
+      ) {
+        if (description) {
+          description += ' ' + line;
+        } else {
+          description = line;
         }
       }
 
@@ -281,7 +334,7 @@ function tryPatternParsing(content: string): RecipeParseResult {
 
     const recipe: RecipeFormData = {
       title,
-      description: '',
+      description: description.trim(),
       ingredients,
       instructions: instructions.join('\n'),
       notes: '',

@@ -52,7 +52,11 @@ export function RecipeForm({
   const createRecipe = useCreateRecipe();
   const updateRecipe = useUpdateRecipe();
   const uploadImage = useUploadImage();
-  const autoImageGeneration = useAutoImageGeneration();
+  const autoImageGeneration = useAutoImageGeneration({
+    onProgressUpdate: (progress) => {
+      imageGenerationContext.updateProgress(progress);
+    },
+  });
   const imageGenerationContext = useImageGenerationContext();
 
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -288,32 +292,12 @@ export function RecipeForm({
 
         // Use setTimeout to ensure navigation completes first
         timeoutRef.current = setTimeout(async () => {
-          let progressInterval: ReturnType<typeof setInterval> | null = null;
-
           try {
             if (isMobile)
               console.log('Auto-generating image for new recipe...');
 
-            // Simulate progress updates
-            progressInterval = setInterval(() => {
-              if (!isMountedRef.current) {
-                if (progressInterval) clearInterval(progressInterval);
-                return;
-              }
-
-              const currentProgress =
-                imageGenerationContext.generationState.progress;
-              if (currentProgress < 90) {
-                imageGenerationContext.updateProgress(
-                  currentProgress + Math.random() * 20
-                );
-              }
-            }, 500);
-
             const generationResult =
               await autoImageGeneration.generateForRecipe(data);
-
-            if (progressInterval) clearInterval(progressInterval);
 
             // Only proceed if component is still mounted
             if (!isMountedRef.current) return;
@@ -349,8 +333,6 @@ export function RecipeForm({
               );
             }
           } catch (autoGenError) {
-            if (progressInterval) clearInterval(progressInterval);
-
             console.warn('Auto image generation failed:', autoGenError);
 
             // Only update context if component is still mounted

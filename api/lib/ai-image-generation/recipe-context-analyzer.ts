@@ -1,4 +1,4 @@
-import { RecipeFormData } from '@/lib/schemas';
+import { RecipeFormData } from '../../../src/lib/schemas';
 
 export interface RecipeContext {
   cuisine: CuisineInfo | null;

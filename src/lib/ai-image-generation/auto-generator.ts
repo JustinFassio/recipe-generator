@@ -1,13 +1,11 @@
 import { RecipeFormData } from '@/lib/schemas';
-import {
-  generateEnhancedPrompt,
-  optimizePromptForDALLE,
-} from './enhanced-prompt-generator';
+// Frontend prompt generation removed - now handled by backend
 import { trackImageGenerationCost, calculateImageCost } from './cost-tracker';
 import {
   canGenerateImage,
   updateBudgetAfterGeneration,
 } from './budget-manager';
+// Image storage now handled by backend API
 
 export interface AutoGenerationOptions {
   enabled: boolean;
@@ -57,29 +55,21 @@ export async function generateImageForRecipe(
   }
 
   try {
-    // Generate enhanced prompt from recipe context
-    const enhancedPrompt = generateEnhancedPrompt(recipe, {
-      style: options.promptStyle || 'photographic',
-      mood: options.promptMood || 'appetizing',
-      focus: options.promptFocus || 'dish',
-      quality: options.quality,
-    });
-
-    const prompt = optimizePromptForDALLE(enhancedPrompt.primaryPrompt);
-
-    // Call image generation API
+    // Call image generation API with recipe data for backend-centric prompting
     const response = await fetch('/api/ai/generate-image', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        prompt,
         recipeTitle: recipe.title,
-        categories: recipe.categories,
+        description: recipe.description,
         ingredients: recipe.ingredients,
         instructions: recipe.instructions,
+        categories: recipe.categories,
         size: options.size,
         quality: options.quality,
-        useIntelligentPrompting: true,
+        style: options.promptStyle || 'photographic',
+        mood: options.promptMood || 'appetizing',
+        focus: options.promptFocus || 'dish',
         fallbackOnError: options.fallbackOnError,
       }),
     });
@@ -92,6 +82,9 @@ export async function generateImageForRecipe(
     const data = await response.json();
 
     if (data.success && data.imageUrl) {
+      // Image storage is now handled by the backend API
+      // The imageUrl returned is already a permanent Supabase URL
+
       // Track successful generation cost
       try {
         const actualCost = data.usage?.totalCost || expectedCost;
@@ -99,12 +92,12 @@ export async function generateImageForRecipe(
         // Track cost in database
         const costRecord = await trackImageGenerationCost({
           user_id: '', // Will be filled by the function
-          prompt: prompt,
+          prompt: data.promptUsed || 'Backend-generated prompt',
           size: options.size,
           quality: options.quality,
           cost: actualCost,
           success: true,
-          image_url: data.imageUrl,
+          image_url: data.imageUrl, // This is now a permanent URL from backend
           generation_time_ms: data.usage?.generationTimeMs,
         });
 
@@ -113,7 +106,7 @@ export async function generateImageForRecipe(
 
         return {
           success: true,
-          imageUrl: data.imageUrl,
+          imageUrl: data.imageUrl, // Permanent URL from backend
           usedFallback: data.usedFallback || false,
           cost: data.usage?.totalCost || expectedCost,
           costTrackingId: costRecord.id,
@@ -123,7 +116,7 @@ export async function generateImageForRecipe(
         // Still return success even if tracking fails
         return {
           success: true,
-          imageUrl: data.imageUrl,
+          imageUrl: data.imageUrl, // Permanent URL from backend
           usedFallback: data.usedFallback || false,
           cost: data.usage?.totalCost || expectedCost,
         };
@@ -133,7 +126,7 @@ export async function generateImageForRecipe(
       try {
         await trackImageGenerationCost({
           user_id: '', // Will be filled by the function
-          prompt: prompt,
+          prompt: 'Backend-generated prompt (failed)',
           size: options.size,
           quality: options.quality,
           cost: 0, // Failed generations don't cost money
@@ -159,7 +152,7 @@ export async function generateImageForRecipe(
   }
 }
 
-// Enhanced prompt generation is now handled by the enhanced-prompt-generator module
+// Enhanced prompt generation is now handled by the backend
 
 /**
  * Check if recipe should have auto-generation

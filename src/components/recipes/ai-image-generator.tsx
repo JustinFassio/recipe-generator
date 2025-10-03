@@ -4,10 +4,7 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { useImageGeneration } from '@/hooks/useImageGeneration';
 import { RecipeFormData } from '@/lib/schemas';
-import {
-  generateEnhancedPrompt,
-  optimizePromptForDALLE,
-} from '@/lib/ai-image-generation/enhanced-prompt-generator';
+// Frontend prompt generation removed - now handled by backend
 import { Wand2, RefreshCw, AlertCircle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
@@ -70,31 +67,27 @@ export function AIImageGenerator({
     }
 
     // Generate enhanced prompt using recipe context analysis
-    const enhancedPrompt = generateEnhancedPrompt(recipe, {
-      style: generationOptions.promptStyle,
-      mood: generationOptions.promptMood,
-      focus: generationOptions.promptFocus,
-      quality: generationOptions.quality,
-    });
-
-    const prompt = optimizePromptForDALLE(enhancedPrompt.primaryPrompt);
+    // Prompt generation now handled by backend
 
     try {
       await generateImage({
-        prompt,
         recipeTitle: recipe.title,
-        categories: recipe.categories,
+        description: recipe.description,
         ingredients: recipe.ingredients,
         instructions: recipe.instructions,
+        categories: recipe.categories,
         quality: generationOptions.quality,
         size: generationOptions.size,
+        style: generationOptions.promptStyle,
+        mood: generationOptions.promptMood,
+        focus: generationOptions.promptFocus,
       });
     } catch (error) {
       console.error('Image generation error:', error);
     }
   };
 
-  // Enhanced prompt generation is now handled by the enhanced-prompt-generator module
+  // Enhanced prompt generation is now handled by the backend
 
   const getCostEstimate = (): number => {
     const costs = {
