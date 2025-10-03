@@ -1,3 +1,4 @@
+console.log('🔧 RECIPE-FORM.TSX LOADED - Version 2025-10-03-19:54');
 import { useState, useEffect, useRef } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import type { FieldArrayPath } from 'react-hook-form';
@@ -17,9 +18,7 @@ import {
 import { useLocation, useNavigate } from 'react-router-dom';
 import { X, Upload, Plus } from 'lucide-react';
 import { AIImageGenerator } from './ai-image-generator';
-import { AutoImageGenerator } from './auto-image-generator';
 import { useAutoImageGeneration } from '@/hooks/useAutoImageGeneration';
-import { useImageGenerationContext } from '@/contexts/ImageGenerationContext';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import CategoryInput from '@/components/ui/CategoryInput';
@@ -53,13 +52,15 @@ export function RecipeForm({
   const updateRecipe = useUpdateRecipe();
   const uploadImage = useUploadImage();
   const autoImageGeneration = useAutoImageGeneration();
-  const imageGenerationContext = useImageGenerationContext();
 
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isMountedRef = useRef(true);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const autoGenerationTriggeredRef = useRef(false);
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+  const [imageGenerationProgress, setImageGenerationProgress] = useState(0);
   const [isOnline, setIsOnline] = useState(
     typeof navigator !== 'undefined' ? navigator.onLine : true
   );
@@ -171,6 +172,105 @@ export function RecipeForm({
         setup: initialData.setup || [],
         creator_rating: initialData.creator_rating || null,
       });
+
+      // Auto-generate image for new recipes parsed from chat (only once)
+      if (!autoGenerationTriggeredRef.current) {
+        console.log('🔍 CHAT RECIPE PARSED - Checking for auto-generation:', {
+          hasImageUrl: !!initialData.image_url,
+          hasTitle: !!initialData.title,
+          hasIngredients: !!(
+            initialData.ingredients && initialData.ingredients.length > 0
+          ),
+          hasDescription: !!initialData.description,
+          hasInstructions: !!initialData.instructions,
+          recipe: initialData,
+        });
+
+        const shouldAutoGenerate =
+          !initialData.image_url && // No existing image
+          initialData.title && // Has title
+          initialData.ingredients &&
+          initialData.ingredients.length > 0 && // Has ingredients
+          initialData.description &&
+          initialData.description.trim().length > 20 && // Has description
+          initialData.instructions &&
+          initialData.instructions.trim().length > 50; // Has instructions
+
+        console.log('🔍 AUTO-GENERATION DECISION:', {
+          shouldAutoGenerate,
+          reason: shouldAutoGenerate
+            ? 'All criteria met for auto-generation'
+            : 'Missing criteria for auto-generation',
+        });
+
+        if (shouldAutoGenerate) {
+          autoGenerationTriggeredRef.current = true; // Prevent multiple triggers
+          console.log('🚀 STARTING AUTO-GENERATION FROM CHAT PARSING');
+
+          // Show progress indicator
+          setIsGeneratingImage(true);
+          setImageGenerationProgress(10);
+
+          // Show toast notification
+          toast({
+            title: 'Generating Image',
+            description: 'Creating an AI-generated image for your recipe...',
+            variant: 'default',
+          });
+
+          // Start auto-generation in background
+          setTimeout(async () => {
+            try {
+              setImageGenerationProgress(30);
+
+              const generationResult =
+                await autoImageGeneration.generateForRecipe(initialData);
+
+              setImageGenerationProgress(80);
+
+              if (generationResult.success && generationResult.imageUrl) {
+                // Update the form with the generated image
+                setImagePreview(generationResult.imageUrl);
+                setValue('image_url', generationResult.imageUrl);
+
+                setImageGenerationProgress(100);
+
+                // Show success toast
+                toast({
+                  title: 'Image Generated!',
+                  description: 'Your recipe now has an AI-generated image.',
+                  variant: 'default',
+                });
+
+                console.log(
+                  '✅ AUTO-GENERATION COMPLETED:',
+                  generationResult.imageUrl
+                );
+
+                // Hide progress after a moment
+                setTimeout(() => {
+                  setIsGeneratingImage(false);
+                  setImageGenerationProgress(0);
+                }, 1000);
+              }
+            } catch (error) {
+              console.warn('Auto image generation failed:', error);
+
+              // Hide progress on error
+              setIsGeneratingImage(false);
+              setImageGenerationProgress(0);
+
+              // Show error toast
+              toast({
+                title: 'Image Generation Failed',
+                description:
+                  'Could not generate image automatically. You can add one manually.',
+                variant: 'destructive',
+              });
+            }
+          }, 500); // Small delay to ensure form is fully initialized
+        }
+      }
     }
   }, [initialData, reset]);
 
@@ -203,6 +303,7 @@ export function RecipeForm({
   };
 
   const onSubmit = async (data: RecipeFormData) => {
+    console.log('🚀 FORM SUBMIT TRIGGERED - Starting recipe submission');
     let uploadedImageUrl: string | null = null;
 
     try {
@@ -237,8 +338,6 @@ export function RecipeForm({
         console.log('User authenticated:', !!userData?.user);
       }
 
-      let createdRecipe = null;
-
       if (existingRecipe) {
         if (isMobile) console.log('Updating existing recipe...');
         await updateRecipe.mutateAsync({
@@ -247,7 +346,7 @@ export function RecipeForm({
         });
       } else {
         if (isMobile) console.log('Creating new recipe...');
-        createdRecipe = await createRecipe.mutateAsync({
+        await createRecipe.mutateAsync({
           ...recipeData,
           is_public: false,
           creator_rating: recipeData.creator_rating || null,
@@ -270,102 +369,8 @@ export function RecipeForm({
       onSuccess?.();
       navigate('/', { state: { refresh: Date.now() } });
 
-      // Auto-generate image for new recipes without images (in background after navigation)
-      if (
-        !existingRecipe &&
-        !imageUrl &&
-        autoImageGeneration.checkShouldGenerate(data, initialData)
-      ) {
-        // Start generation context immediately so progress shows on recipe card
-        imageGenerationContext.startGeneration(createdRecipe?.id || 'new');
-
-        // Show image generation toast
-        toast({
-          title: 'Generating Image',
-          description: 'Creating an AI-generated image for your recipe...',
-          variant: 'default',
-        });
-
-        // Use setTimeout to ensure navigation completes first
-        timeoutRef.current = setTimeout(async () => {
-          let progressInterval: ReturnType<typeof setInterval> | null = null;
-
-          try {
-            if (isMobile)
-              console.log('Auto-generating image for new recipe...');
-
-            // Simulate progress updates
-            progressInterval = setInterval(() => {
-              if (!isMountedRef.current) {
-                if (progressInterval) clearInterval(progressInterval);
-                return;
-              }
-
-              const currentProgress =
-                imageGenerationContext.generationState.progress;
-              if (currentProgress < 90) {
-                imageGenerationContext.updateProgress(
-                  currentProgress + Math.random() * 20
-                );
-              }
-            }, 500);
-
-            const generationResult =
-              await autoImageGeneration.generateForRecipe(data);
-
-            if (progressInterval) clearInterval(progressInterval);
-
-            // Only proceed if component is still mounted
-            if (!isMountedRef.current) return;
-
-            if (
-              generationResult.success &&
-              generationResult.imageUrl &&
-              createdRecipe
-            ) {
-              // Update the recipe with the generated image
-              await updateRecipe.mutateAsync({
-                id: createdRecipe.id,
-                updates: { image_url: generationResult.imageUrl },
-              });
-
-              // Complete generation in context
-              imageGenerationContext.completeGeneration(
-                generationResult.imageUrl
-              );
-
-              // Show success toast
-              toast({
-                title: 'Image Generated!',
-                description: 'Your recipe now has an AI-generated image.',
-                variant: 'default',
-              });
-
-              if (isMobile) console.log('Auto-generated image added to recipe');
-            } else {
-              imageGenerationContext.completeGeneration(
-                undefined,
-                generationResult.error
-              );
-            }
-          } catch (autoGenError) {
-            if (progressInterval) clearInterval(progressInterval);
-
-            console.warn('Auto image generation failed:', autoGenError);
-
-            // Only update context if component is still mounted
-            if (isMountedRef.current) {
-              imageGenerationContext.completeGeneration(
-                undefined,
-                autoGenError instanceof Error
-                  ? autoGenError.message
-                  : 'Generation failed'
-              );
-            }
-            // Don't fail the entire recipe save if auto-generation fails
-          }
-        }, 100); // Small delay to ensure navigation completes
-      }
+      // Auto-generation now happens when recipe is parsed from chat (in useEffect with initialData)
+      // No need to auto-generate on manual save
     } catch (error) {
       console.error('Error saving recipe:', error);
 
@@ -478,7 +483,37 @@ export function RecipeForm({
                 Recipe Image
               </label>
               <div className="mt-2 space-y-4">
-                {imagePreview && (
+                {/* Image Generation Progress */}
+                {isGeneratingImage && (
+                  <div className="relative h-48 w-full overflow-hidden rounded-lg bg-gradient-to-br from-blue-50 to-purple-50 border-2 border-dashed border-blue-300">
+                    <div className="flex h-full flex-col items-center justify-center space-y-4">
+                      <div className="flex items-center space-x-2">
+                        <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-200 border-t-blue-600"></div>
+                        <span className="text-lg font-medium text-blue-700">
+                          Generating Image...
+                        </span>
+                      </div>
+                      <div className="w-3/4">
+                        <div className="mb-2 flex justify-between text-sm text-blue-600">
+                          <span>AI Image Generation</span>
+                          <span>{imageGenerationProgress}%</span>
+                        </div>
+                        <div className="h-2 w-full rounded-full bg-blue-200">
+                          <div
+                            className="h-2 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-300 ease-out"
+                            style={{ width: `${imageGenerationProgress}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                      <p className="text-center text-sm text-blue-600">
+                        Creating a beautiful image for your recipe...
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Generated Image Preview */}
+                {imagePreview && !isGeneratingImage && (
                   <div className="relative h-48 w-full overflow-hidden rounded-lg bg-gray-100">
                     <img
                       src={imagePreview}
@@ -548,22 +583,7 @@ export function RecipeForm({
                     }}
                   />
 
-                  {/* Auto-Generation for New Recipes */}
-                  {!editRecipe && (
-                    <div className="mt-4">
-                      <AutoImageGenerator
-                        recipe={watch()}
-                        initialData={initialData}
-                        onImageGenerated={(imageUrl) => {
-                          setImagePreview(imageUrl);
-                          setValue('image_url', imageUrl);
-                        }}
-                        onError={(error) => {
-                          console.error('Auto-generation error:', error);
-                        }}
-                      />
-                    </div>
-                  )}
+                  {/* Auto-generation now happens automatically when recipe is parsed from chat */}
                 </div>
               </div>
             </div>

@@ -185,12 +185,29 @@ async function fetchUserData(userId: string): Promise<UserPreferencesForAI> {
     // Import Supabase client
     const { supabase } = await import('@/lib/supabase');
 
+    // First, validate that the user exists
+    const { data: userExists, error: userCheckError } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('id', userId)
+      .maybeSingle();
+
+    if (userCheckError) {
+      console.warn('Error checking if user exists:', userCheckError);
+      throw new Error('Failed to validate user');
+    }
+
+    if (!userExists) {
+      console.warn('User does not exist:', userId);
+      throw new Error('User not found');
+    }
+
     // Fetch profile data
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select(PROFILE_FIELDS_BASIC)
       .eq('id', userId)
-      .single();
+      .maybeSingle();
 
     if (profileError && profileError.code !== 'PGRST116') {
       console.warn('Error fetching profile data:', profileError);
@@ -201,7 +218,7 @@ async function fetchUserData(userId: string): Promise<UserPreferencesForAI> {
       .from('user_safety')
       .select('allergies, dietary_restrictions, medical_conditions')
       .eq('user_id', userId)
-      .single();
+      .maybeSingle();
 
     if (safetyError && safetyError.code !== 'PGRST116') {
       console.warn('Error fetching safety data:', safetyError);
@@ -214,7 +231,7 @@ async function fetchUserData(userId: string): Promise<UserPreferencesForAI> {
         'preferred_cuisines, available_equipment, disliked_ingredients, spice_tolerance'
       )
       .eq('user_id', userId)
-      .single();
+      .maybeSingle();
 
     if (cookingError && cookingError.code !== 'PGRST116') {
       console.warn('Error fetching cooking preferences:', cookingError);

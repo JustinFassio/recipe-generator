@@ -33,7 +33,7 @@ export function Header() {
             <img
               src="/recipe-generator-logo.png"
               alt="Recipe Generator Logo"
-              className="h-12 w-12 rounded-full object-cover"
+              className="h-18 w-18 rounded-lg object-contain"
             />
             <AppTitle size="sm" className="text-accent" />
           </div>

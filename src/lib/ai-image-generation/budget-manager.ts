@@ -24,10 +24,10 @@ export async function getUserBudget(userId?: string): Promise<UserBudget> {
     .from('user_budgets')
     .select('*')
     .eq('user_id', targetUserId)
-    .single();
+    .maybeSingle();
 
-  if (error && error.code !== 'PGRST116') {
-    // PGRST116 = no rows returned
+  if (error && error.code !== 'PGRST116' && error.code !== 'PGRST205') {
+    // PGRST116 = no rows returned, PGRST205 = table not found in schema cache
     throw error;
   }
 
@@ -111,7 +111,7 @@ export async function updateBudgetAfterGeneration(
       .from('user_budgets')
       .select('used_monthly')
       .eq('user_id', targetUserId)
-      .single();
+      .maybeSingle();
 
     if (currentBudget) {
       // Update the used_monthly amount

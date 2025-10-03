@@ -72,7 +72,7 @@ export function calculateImageCost(
  */
 export async function trackImageGenerationCost(
   costData: Omit<ImageGenerationCost, 'id' | 'created_at'>
-): Promise<ImageGenerationCost> {
+): Promise<ImageGenerationCost | null> {
   const { data: user } = await supabase.auth.getUser();
   if (!user.user) {
     throw new Error('User not authenticated');
@@ -92,6 +92,13 @@ export async function trackImageGenerationCost(
 
   if (error) {
     console.error('Failed to track image generation cost:', error);
+    // Don't throw error for schema cache issues - just log and continue
+    if (error.code === 'PGRST205') {
+      console.warn(
+        'Image generation cost tracking disabled - table not found in schema cache'
+      );
+      return null;
+    }
     throw error;
   }
 

@@ -1,115 +1,31 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
+import { createClient } from '@supabase/supabase-js';
 
 interface GenerateImageRequest {
-  prompt: string;
-  recipeTitle?: string;
-  categories?: string[];
-  ingredients?: string[];
-  instructions?: string;
+  recipeTitle: string;
+  description?: string;
+  ingredients: string[];
+  instructions: string;
+  categories: string[];
   size?: '1024x1024' | '1024x1792' | '1792x1024';
   quality?: 'standard' | 'hd';
-  useIntelligentPrompting?: boolean;
-  fallbackOnError?: boolean;
+  style?: 'photographic' | 'artistic' | 'minimalist' | 'luxury';
+  mood?: 'appetizing' | 'elegant' | 'rustic' | 'modern';
 }
 
-interface GenerateImageResponse {
-  success: boolean;
-  imageUrl?: string;
-  error?: string;
-  usedFallback?: boolean;
-  fallbackStrategy?: string;
-  usage?: {
-    promptTokens: number;
-    totalCost: number;
-  };
-}
+// Removed unused interface
 
-// Lightweight in-file rate limiter to avoid cross-env import issues
-type RateEntry = { count: number; resetTime: number };
-const imageRateStore: Record<string, RateEntry> = {};
-
-function createImageGenerationRateLimit() {
-  const windowMs = 60 * 1000; // 1 min
-  const max = 5; // 5 req/min per key
-
-  function getKey(req: VercelRequest): string {
-    const userId = (req.headers['x-user-id'] as string) || '';
-    const forwarded = (req.headers['x-forwarded-for'] as string) || '';
-    const ip =
-      forwarded.split(',')[0]?.trim() ||
-      (req.socket as { remoteAddress?: string })?.remoteAddress ||
-      'anonymous';
-    return userId || ip;
-  }
-
-  return (
-    handler: (req: VercelRequest, res: VercelResponse) => Promise<void> | void
-  ) => {
-    return async (req: VercelRequest, res: VercelResponse) => {
-      const key = getKey(req);
-      const now = Date.now();
-      const entry = imageRateStore[key];
-
-      if (!entry || entry.resetTime < now) {
-        imageRateStore[key] = { count: 0, resetTime: now + windowMs };
-      }
-
-      if (imageRateStore[key].count >= max) {
-        const retryAfter = Math.ceil(
-          (imageRateStore[key].resetTime - now) / 1000
-        );
-        res.status(429).json({
-          error: 'Rate limit exceeded. Please try again later.',
-          retryAfter,
-        });
-        return;
-      }
-
-      imageRateStore[key].count++;
-      return handler(req, res);
-    };
-  };
-}
-
-/**
- * AI Image Generation API Endpoint
- * Generates images using DALL-E 3 with enhanced prompting and fallback strategies
- *
- * NOTE: This endpoint enforces landscape orientation (1792x1024) for all generated images
- * regardless of the size parameter in the request. This ensures consistency with the UI frame.
- */
-const handler = async (
+export default async function handler(
   req: VercelRequest,
   res: VercelResponse
-): Promise<void> => {
+): Promise<void> {
   // Only allow POST requests
   if (req.method !== 'POST') {
-    res.status(405).json({ error: 'Method not allowed' });
+    res.status(405).json({ success: false, error: 'Method Not Allowed' });
     return;
   }
 
   try {
-    // Validate request body
-    const {
-      prompt,
-      recipeTitle,
-      categories,
-      quality = 'standard',
-      fallbackOnError = true,
-    }: GenerateImageRequest = req.body;
-
-    // Force landscape size on backend regardless of client input
-    const size = '1792x1024' as const;
-
-    if (!prompt || typeof prompt !== 'string') {
-      res.status(400).json({
-        success: false,
-        error: 'Prompt is required and must be a string',
-      });
-      return;
-    }
-
-    // Check API key
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
       console.error('OpenAI API key not configured');
@@ -120,11 +36,30 @@ const handler = async (
       return;
     }
 
-    // Generate enhanced prompt for recipe context
-    const enhancedPrompt = buildRecipeImagePrompt(
-      prompt,
+    const {
       recipeTitle,
-      categories
+      description,
+      ingredients,
+      instructions,
+      categories,
+      quality = 'standard',
+      style = 'photographic',
+      mood = 'appetizing',
+    }: GenerateImageRequest = req.body;
+
+    // Force landscape orientation for consistency with UI frame
+    const forcedSize = '1792x1024';
+
+    // Generate enhanced prompt
+    const prompt = generateEnhancedPrompt(
+      {
+        title: recipeTitle,
+        description: description || '',
+        ingredients,
+        instructions,
+        categories,
+      },
+      { style, mood, quality }
     );
 
     // Call DALL-E 3 API
@@ -138,9 +73,9 @@ const handler = async (
         },
         body: JSON.stringify({
           model: 'dall-e-3',
-          prompt: enhancedPrompt,
+          prompt,
           n: 1,
-          size,
+          size: forcedSize,
           quality,
           response_format: 'url',
         }),
@@ -150,159 +85,181 @@ const handler = async (
     if (!imageResponse.ok) {
       const errorData = await imageResponse.json();
       console.error('DALL-E API error:', errorData);
-
-      // Try fallback strategies if enabled
-      if (fallbackOnError) {
-        const fallbackPrompt = generateFallbackPrompt(prompt);
-
-        if (fallbackPrompt !== enhancedPrompt) {
-          console.log(
-            `[AI Image Generation] Trying fallback prompt: ${fallbackPrompt}`
-          );
-
-          const fallbackResponse = await fetch(
-            'https://api.openai.com/v1/images/generations',
-            {
-              method: 'POST',
-              headers: {
-                Authorization: `Bearer ${apiKey}`,
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                model: 'dall-e-3',
-                prompt: fallbackPrompt,
-                n: 1,
-                size,
-                quality,
-                response_format: 'url',
-              }),
-            }
-          );
-
-          if (fallbackResponse.ok) {
-            const fallbackData = await fallbackResponse.json();
-            res.status(200).json({
-              success: true,
-              imageUrl: fallbackData.data[0]?.url,
-              usedFallback: true,
-              fallbackStrategy: 'simplified_prompt',
-              usage: {
-                promptTokens: fallbackPrompt.length,
-                totalCost: calculateImageCost(size, quality),
-              },
-            });
-            return;
-          }
-        }
-      }
-
-      res.status(400).json({
-        success: false,
-        error: `Image generation failed: ${errorData.error?.message || 'Unknown error'}`,
-      });
-      return;
+      throw new Error(
+        errorData.error?.message || `HTTP ${imageResponse.status}`
+      );
     }
 
     const imageData = await imageResponse.json();
-    const generatedImageUrl = imageData.data[0]?.url;
+    const temporaryImageUrl = imageData.data[0]?.url;
 
-    if (!generatedImageUrl) {
-      res.status(500).json({
-        success: false,
-        error: 'No image URL returned from generation service',
-      });
-      return;
+    if (!temporaryImageUrl) {
+      throw new Error('No image URL returned from generation service');
     }
 
-    const response: GenerateImageResponse = {
-      success: true,
-      imageUrl: generatedImageUrl,
-      usage: {
-        promptTokens: enhancedPrompt.length,
-        totalCost: calculateImageCost(size, quality),
-      },
-    };
+    // Download and store the image to avoid 403 errors from expired DALL-E URLs
+    let permanentImageUrl: string;
+    try {
+      permanentImageUrl =
+        await downloadAndStoreGeneratedImage(temporaryImageUrl);
+    } catch (storageError) {
+      console.warn(
+        'Failed to store generated image, using temporary URL:',
+        storageError
+      );
+      permanentImageUrl = temporaryImageUrl; // Fallback to temporary URL
+    }
 
-    res.status(200).json(response);
-    return;
+    res.status(200).json({
+      success: true,
+      imageUrl: permanentImageUrl,
+      promptUsed: prompt,
+      usage: {
+        promptTokens: prompt.length,
+        totalCost: calculateImageCost(forcedSize, quality),
+      },
+    });
   } catch (error) {
     console.error('Image generation error:', error);
     res.status(500).json({
       success: false,
-      error: 'Internal server error during image generation',
+      error: `Image generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
     });
-    return;
   }
-};
+}
 
 /**
- * Build enhanced prompt for recipe images
+ * Generate enhanced prompt using recipe context analysis
  */
-function buildRecipeImagePrompt(
-  basePrompt: string,
-  recipeTitle?: string,
-  categories?: string[]
+function generateEnhancedPrompt(
+  recipe: {
+    title: string;
+    description: string;
+    ingredients: string[];
+    instructions: string;
+    categories: string[];
+  },
+  options: {
+    style: string;
+    mood: string;
+    quality: string;
+  }
 ): string {
-  let enhancedPrompt = basePrompt;
+  const parts: string[] = [];
 
-  // Add recipe context if available
-  if (recipeTitle) {
-    enhancedPrompt = `${recipeTitle}: ${enhancedPrompt}`;
+  // Start with dish title
+  parts.push(`A delicious ${recipe.title.toLowerCase()}`);
+
+  // Add description if available and rich
+  if (recipe.description && recipe.description.trim().length > 30) {
+    parts.push(recipe.description.trim());
   }
 
-  // Add category context for better image relevance
-  if (categories && categories.length > 0) {
-    const categoryContext = categories
-      .filter((cat) => cat.includes('Cuisine:'))
-      .map((cat) => cat.split(':')[1]?.trim())
-      .filter(Boolean)
-      .join(', ');
-
-    if (categoryContext) {
-      enhancedPrompt += `, ${categoryContext} style`;
-    }
+  // Add main ingredients (first 3)
+  if (recipe.ingredients.length > 0) {
+    const mainIngredients = recipe.ingredients.slice(0, 3);
+    parts.push(`featuring ${mainIngredients.join(' and ')}`);
   }
 
-  // Add professional food photography context
-  enhancedPrompt +=
-    ', professional food photography, high quality, appetizing, well-lit';
+  // Add style and mood
+  const styleMap: Record<string, string> = {
+    photographic: 'professional food photography',
+    artistic: 'artistic food presentation',
+    minimalist: 'clean, minimalist presentation',
+    luxury: 'luxury food styling',
+  };
 
-  return enhancedPrompt;
+  const moodMap: Record<string, string> = {
+    appetizing: 'appetizing and inviting',
+    elegant: 'elegant and sophisticated',
+    rustic: 'rustic and hearty',
+    modern: 'modern and contemporary',
+  };
+
+  parts.push(`${styleMap[options.style]}, ${moodMap[options.mood]}`);
+
+  // Add quality descriptor
+  if (options.quality === 'hd') {
+    parts.push('ultra high resolution');
+  } else {
+    parts.push('high quality');
+  }
+
+  return parts.join(', ');
 }
 
 /**
- * Generate fallback prompt when primary generation fails
+ * Download image from DALL-E URL and upload to Supabase storage
  */
-function generateFallbackPrompt(basePrompt: string): string {
-  // Simplify the prompt by removing complex elements
-  let fallbackPrompt = basePrompt;
+async function downloadAndStoreGeneratedImage(
+  imageUrl: string
+): Promise<string> {
+  try {
+    // Initialize Supabase client with service role key to bypass RLS
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-  // Remove overly complex descriptors
-  fallbackPrompt = fallbackPrompt.replace(/very|extremely|incredibly/gi, '');
-  fallbackPrompt = fallbackPrompt.replace(/,\s*,/g, ','); // Clean up double commas
-  fallbackPrompt = fallbackPrompt.replace(/\s+/g, ' ').trim(); // Clean up spaces
+    if (!supabaseUrl || !supabaseKey) {
+      throw new Error('Supabase configuration missing');
+    }
 
-  // Add basic food photography context
-  fallbackPrompt += ', food photography, appetizing';
+    const supabase = createClient(supabaseUrl, supabaseKey);
 
-  return fallbackPrompt;
+    // Download the image from DALL-E URL
+    const response = await fetch(imageUrl);
+    if (!response.ok) {
+      throw new Error(
+        `Failed to download image: ${response.status} ${response.statusText}`
+      );
+    }
+
+    const imageBlob = await response.blob();
+
+    // Generate a unique filename
+    const timestamp = Date.now();
+    const randomSuffix = Math.random().toString(36).slice(2, 8);
+    const fileName = `ai-generated-${timestamp}-${randomSuffix}.png`;
+
+    // Create the storage path (we'll use a generic user ID since we don't have auth context here)
+    const storagePath = `generated-images/${fileName}`;
+
+    // Upload to Supabase storage
+    const { error: uploadError } = await supabase.storage
+      .from('recipe-images')
+      .upload(storagePath, imageBlob, {
+        cacheControl: '31536000', // 1 year cache
+        contentType: 'image/png',
+        upsert: false, // Don't overwrite - each generation should be unique
+      });
+
+    if (uploadError) {
+      throw new Error(`Failed to upload image: ${uploadError.message}`);
+    }
+
+    // Get the public URL
+    const { data } = supabase.storage
+      .from('recipe-images')
+      .getPublicUrl(storagePath);
+
+    console.log(`Successfully stored generated image: ${data.publicUrl}`);
+    return data.publicUrl;
+  } catch (error) {
+    console.error('Error downloading and storing generated image:', error);
+    throw new Error(
+      `Failed to store generated image: ${error instanceof Error ? error.message : 'Unknown error'}`
+    );
+  }
 }
 
 /**
- * Calculate estimated cost for image generation
+ * Calculate image generation cost based on size and quality
  */
 function calculateImageCost(size: string, quality: string): number {
-  // DALL-E 3 pricing (as of 2024)
-  const costs = {
+  const costMap: Record<string, Record<string, number>> = {
     '1024x1024': { standard: 0.04, hd: 0.08 },
     '1024x1792': { standard: 0.08, hd: 0.12 },
     '1792x1024': { standard: 0.08, hd: 0.12 },
   };
 
-  return (
-    costs[size as keyof typeof costs]?.[quality as 'standard' | 'hd'] || 0.04
-  );
+  return costMap[size]?.[quality] || 0.04;
 }
-
-// Apply rate limiting
-export default createImageGenerationRateLimit()(handler);

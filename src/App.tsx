@@ -22,7 +22,6 @@ import { HealthCoachesPage } from '@/features/health-coach';
 import GlobalIngredientsPage from '@/pages/global-ingredients-page';
 import ShoppingCartPage from '@/pages/shopping-cart-page';
 import { SelectionProvider } from '@/contexts/SelectionContext';
-import { ImageGenerationProvider } from '@/contexts/ImageGenerationContext';
 
 import { Toaster } from '@/components/ui/toaster';
 
@@ -246,9 +245,7 @@ function App() {
         <BrowserRouter>
           <AuthProvider>
             <SelectionProvider>
-              <ImageGenerationProvider>
-                <AppContent />
-              </ImageGenerationProvider>
+              <AppContent />
             </SelectionProvider>
           </AuthProvider>
           <Toaster />

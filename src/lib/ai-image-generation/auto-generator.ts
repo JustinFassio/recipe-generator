@@ -116,7 +116,7 @@ export async function generateImageForRecipe(
           imageUrl: data.imageUrl,
           usedFallback: data.usedFallback || false,
           cost: data.usage?.totalCost || expectedCost,
-          costTrackingId: costRecord.id,
+          costTrackingId: costRecord?.id,
         };
       } catch (trackingError) {
         console.warn('Failed to track generation cost:', trackingError);
