@@ -15,20 +15,20 @@ import {
   useUploadImage,
 } from '@/hooks/use-recipes';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { X, Upload, Plus } from 'lucide-react';
-import { AIImageGenerator } from './ai-image-generator';
-import { useAutoImageGeneration } from '@/hooks/useAutoImageGeneration';
+import { X, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import CategoryInput from '@/components/ui/CategoryInput';
 import { CreatorRating } from '@/components/ui/rating';
 import { MAX_CATEGORIES_PER_RECIPE } from '@/lib/constants';
-import { processImageFile } from '@/lib/image-utils';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
 import { recipeApi } from '@/lib/api';
 import { Recipe } from '@/lib/types';
 import { RecipeVersions } from './recipe-versions';
+import { RecipeImageManager } from './recipe-image-manager';
+import { useAddRecipeImage } from '@/hooks/use-recipe-images';
+import { useAutoImageGeneration } from '@/hooks/useAutoImageGeneration';
 
 interface RecipeFormProps {
   recipe?: Recipe;
@@ -50,16 +50,16 @@ export function RecipeForm({
   const createRecipe = useCreateRecipe();
   const updateRecipe = useUpdateRecipe();
   const uploadImage = useUploadImage();
+  const addRecipeImage = useAddRecipeImage();
   const autoImageGeneration = useAutoImageGeneration();
 
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string>('');
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  // Image gallery state
+  const [recipeImages, setRecipeImages] = useState<Record<string, any>[]>([]);
+  
+  // Legacy state (to be removed)
   const isMountedRef = useRef(true);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const autoGenerationTriggeredRef = useRef(false);
-  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
-  const [imageGenerationProgress, setImageGenerationProgress] = useState(0);
   const [isOnline, setIsOnline] = useState(
     typeof navigator !== 'undefined' ? navigator.onLine : true
   );
@@ -206,10 +206,6 @@ export function RecipeForm({
           autoGenerationTriggeredRef.current = true; // Prevent multiple triggers
           console.log('🚀 STARTING AUTO-GENERATION FROM CHAT PARSING');
 
-          // Show progress indicator
-          setIsGeneratingImage(true);
-          setImageGenerationProgress(10);
-
           // Show toast notification
           toast({
             title: 'Generating Image',
@@ -220,19 +216,23 @@ export function RecipeForm({
           // Start auto-generation in background
           setTimeout(async () => {
             try {
-              setImageGenerationProgress(30);
-
               const generationResult =
                 await autoImageGeneration.generateForRecipe(initialData);
 
-              setImageGenerationProgress(80);
-
               if (generationResult.success && generationResult.imageUrl) {
-                // Update the form with the generated image
-                setImagePreview(generationResult.imageUrl);
-                setValue('image_url', generationResult.imageUrl);
+                // Add the generated image to the gallery
+                const generatedImage = {
+                  id: `ai-generated-${Date.now()}`,
+                  preview: generationResult.imageUrl,
+                  image_url: generationResult.imageUrl,
+                  caption: '',
+                  alt_text: `${initialData.title} - AI Generated Image`,
+                  is_primary: true, // First image is primary
+                  is_new: true,
+                  is_ai_generated: true,
+                };
 
-                setImageGenerationProgress(100);
+                setRecipeImages([generatedImage]);
 
                 // Show success toast
                 toast({
@@ -245,19 +245,9 @@ export function RecipeForm({
                   '✅ AUTO-GENERATION COMPLETED:',
                   generationResult.imageUrl
                 );
-
-                // Hide progress after a moment
-                setTimeout(() => {
-                  setIsGeneratingImage(false);
-                  setImageGenerationProgress(0);
-                }, 1000);
               }
             } catch (error) {
               console.warn('Auto image generation failed:', error);
-
-              // Hide progress on error
-              setIsGeneratingImage(false);
-              setImageGenerationProgress(0);
 
               // Show error toast
               toast({
@@ -273,28 +263,33 @@ export function RecipeForm({
     }
   }, [initialData, reset]);
 
+  // Load existing images when editing a recipe
   useEffect(() => {
     if (existingRecipe?.image_url) {
-      setImagePreview(existingRecipe.image_url);
+      // For now, just set the primary image URL for backward compatibility
+      // TODO: Load from gallery system when editing existing recipes
+      const existingImage = {
+        id: 'existing-main-image',
+        preview: existingRecipe.image_url,
+        image_url: existingRecipe.image_url,
+        caption: '',
+        alt_text: `${existingRecipe.title} - Main Image`,
+        is_primary: true,
+        is_new: false,
+        is_ai_generated: false,
+      };
+      setRecipeImages([existingImage]);
     }
-  }, [existingRecipe?.image_url]);
+  }, [existingRecipe?.image_url, existingRecipe?.title]);
 
-  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  // Handle image gallery changes
+  const handleImagesChange = (images: Record<string, any>[]) => {
+    setRecipeImages(images);
+  };
 
-    const result = await processImageFile(file);
-
-    if (result.success) {
-      setImageFile(result.compressedFile);
-      setImagePreview(result.previewUrl);
-    } else {
-      toast({
-        title: 'Invalid Image',
-        description: result.error,
-        variant: 'destructive',
-      });
-    }
+  const handlePrimaryImageChange = (imageId: string) => {
+    // Primary image change is handled by the RecipeImageManager component
+    console.log('Primary image changed to:', imageId);
   };
 
   const addIngredient = () => {
@@ -303,32 +298,36 @@ export function RecipeForm({
 
   const onSubmit = async (data: RecipeFormData) => {
     console.log('🚀 FORM SUBMIT TRIGGERED - Starting recipe submission');
-    let uploadedImageUrl: string | null = null;
+    const uploadedImageUrls: string[] = [];
 
     try {
       // Mobile-specific debugging
       if (isMobile) {
         console.log('Mobile device detected, submitting recipe...');
         console.log('Form data:', data);
+        console.log('Recipe images:', recipeImages);
       }
 
-      let imageUrl = data.image_url;
-
-      // Upload image if there's a new file
-      if (imageFile) {
-        if (isMobile) console.log('Uploading image on mobile...');
-        const uploadedUrl = await uploadImage.mutateAsync(imageFile);
-        if (!uploadedUrl) {
-          throw new Error('Failed to upload image');
+      // Upload new image files
+      const newImages = recipeImages.filter(img => img.is_new && img.file);
+      for (const image of newImages) {
+        if (image.file) {
+          const uploadedUrl = await uploadImage.mutateAsync(image.file);
+          if (!uploadedUrl) {
+            throw new Error(`Failed to upload image: ${image.id}`);
+          }
+          uploadedImageUrls.push(uploadedUrl);
+          image.image_url = uploadedUrl; // Update the image object with the uploaded URL
         }
-        imageUrl = uploadedUrl;
-        uploadedImageUrl = uploadedUrl; // Track for potential rollback
-        if (isMobile) console.log('Image uploaded successfully:', uploadedUrl);
       }
+
+      // Determine primary image URL
+      const primaryImage = recipeImages.find(img => img.is_primary);
+      const primaryImageUrl = primaryImage?.image_url || null;
 
       const recipeData = {
         ...data,
-        image_url: imageUrl && imageUrl.trim() !== '' ? imageUrl : null,
+        image_url: primaryImageUrl, // Keep for backward compatibility
       };
 
       if (isMobile) {
@@ -337,15 +336,16 @@ export function RecipeForm({
         console.log('User authenticated:', !!userData?.user);
       }
 
+      let recipe;
       if (existingRecipe) {
         if (isMobile) console.log('Updating existing recipe...');
-        await updateRecipe.mutateAsync({
+        recipe = await updateRecipe.mutateAsync({
           id: existingRecipe.id,
           updates: recipeData,
         });
       } else {
         if (isMobile) console.log('Creating new recipe...');
-        await createRecipe.mutateAsync({
+        recipe = await createRecipe.mutateAsync({
           ...recipeData,
           is_public: false,
           creator_rating: recipeData.creator_rating || null,
@@ -356,6 +356,30 @@ export function RecipeForm({
       }
 
       if (isMobile) console.log('Recipe operation completed successfully');
+
+      // Add images to gallery system
+      if (recipeImages.length > 0) {
+        console.log('Adding images to gallery system...');
+        const imagePromises = recipeImages.map(async (image, index) => {
+          const imageData = {
+            recipe_id: recipe.id,
+            image_url: image.image_url || image.preview,
+            is_primary: image.is_primary,
+            caption: image.caption || null,
+            alt_text: image.alt_text || `${data.title} - Image ${index + 1}`,
+            display_order: index,
+            uploaded_by: null, // Will be set by the API
+            generation_method: image.is_ai_generated ? 'ai_generated' as const : 'manual' as const,
+            generation_cost_id: null,
+            metadata: {},
+          };
+          
+          return addRecipeImage.mutateAsync(imageData);
+        });
+
+        await Promise.all(imagePromises);
+        console.log('All images added to gallery system');
+      }
 
       // Show success toast
       toast({
@@ -373,13 +397,16 @@ export function RecipeForm({
     } catch (error) {
       console.error('Error saving recipe:', error);
 
-      // Rollback: delete uploaded image if recipe operation failed
-      if (uploadedImageUrl) {
-        try {
-          await recipeApi.deleteImageFromStorage(uploadedImageUrl);
-          console.log('Rolled back uploaded image:', uploadedImageUrl);
-        } catch (rollbackError) {
-          console.warn('Failed to rollback uploaded image:', rollbackError);
+      // Rollback: delete uploaded images if recipe operation failed
+      if (uploadedImageUrls.length > 0) {
+        console.log('Rolling back uploaded images...');
+        for (const imageUrl of uploadedImageUrls) {
+          try {
+            await recipeApi.deleteImageFromStorage(imageUrl);
+            console.log('Rolled back uploaded image:', imageUrl);
+          } catch (rollbackError) {
+            console.warn('Failed to rollback uploaded image:', rollbackError);
+          }
         }
       }
 
@@ -477,113 +504,23 @@ export function RecipeForm({
               )}
             </div>
 
+            {/* Recipe Image Gallery Manager */}
             <div>
               <label className={createDaisyUILabelClasses()}>
-                Recipe Image
+                Recipe Images
               </label>
-              <div className="mt-2 space-y-4">
-                {/* Image Generation Progress */}
-                {isGeneratingImage && (
-                  <div className="relative h-48 w-full overflow-hidden rounded-lg bg-gradient-to-br from-blue-50 to-purple-50 border-2 border-dashed border-blue-300">
-                    <div className="flex h-full flex-col items-center justify-center space-y-4">
-                      <div className="flex items-center space-x-2">
-                        <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-200 border-t-blue-600"></div>
-                        <span className="text-lg font-medium text-blue-700">
-                          Generating Image...
-                        </span>
-                      </div>
-                      <div className="w-3/4">
-                        <div className="mb-2 flex justify-between text-sm text-blue-600">
-                          <span>AI Image Generation</span>
-                          <span>{imageGenerationProgress}%</span>
-                        </div>
-                        <div className="h-2 w-full rounded-full bg-blue-200">
-                          <div
-                            className="h-2 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-300 ease-out"
-                            style={{ width: `${imageGenerationProgress}%` }}
-                          ></div>
-                        </div>
-                      </div>
-                      <p className="text-center text-sm text-blue-600">
-                        Creating a beautiful image for your recipe...
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {/* Generated Image Preview */}
-                {imagePreview && !isGeneratingImage && (
-                  <div className="relative h-48 w-full overflow-hidden rounded-lg bg-gray-100">
-                    <img
-                      src={imagePreview}
-                      alt="Recipe preview"
-                      className="h-full w-full object-cover"
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="absolute top-2 right-2 bg-white/80 hover:bg-white"
-                      onClick={() => {
-                        setImagePreview('');
-                        setImageFile(null);
-                        setValue('image_url', null);
-                      }}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                )}
-
-                <div className="flex items-center space-x-2">
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageChange}
-                    className="hidden"
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="border-green-600 text-green-600 hover:bg-green-50"
-                    onClick={() => fileInputRef.current?.click()}
-                  >
-                    <Upload className="mr-2 h-4 w-4" />
-                    Upload Image
-                  </Button>
-                </div>
-
-                {/* AI Image Generation */}
-                <div className="mt-4 pt-4 border-t border-gray-200">
-                  <h4 className="font-medium text-gray-900 mb-3">
-                    AI Image Generation
-                  </h4>
-
-                  {/* Manual AI Generation */}
-                  <AIImageGenerator
-                    recipe={watch()}
-                    onImageGenerated={(imageUrl) => {
-                      setImagePreview(imageUrl);
-                      setValue('image_url', imageUrl);
-                      toast({
-                        title: 'Image Generated!',
-                        description:
-                          'AI-generated image has been added to your recipe.',
-                        variant: 'default',
-                      });
-                    }}
-                    onError={(error) => {
-                      toast({
-                        title: 'Generation Failed',
-                        description: error,
-                        variant: 'destructive',
-                      });
-                    }}
-                  />
-
-                  {/* Auto-generation now happens automatically when recipe is parsed from chat */}
-                </div>
+              <div className="mt-2">
+                <RecipeImageManager
+                  recipeData={watch()}
+                  onImagesChange={handleImagesChange}
+                  onPrimaryImageChange={handlePrimaryImageChange}
+                  disabled={
+                    createRecipe.isPending ||
+                    updateRecipe.isPending ||
+                    uploadImage.isPending ||
+                    !isOnline
+                  }
+                />
               </div>
             </div>
           </div>

@@ -53,7 +53,7 @@ export function RecipeViewPage() {
   // - Authenticated users: Try user query first, then public query as fallback
   // - Unauthenticated users: Use public query only
   const shouldFetchUser = !!user && !authLoading;
-  const shouldFetchPublic = true; // Always enable public query as fallback
+  const shouldFetchPublic = !user; // Only fetch public if no user
 
   console.log('🚀 [RecipeViewPage] Query optimization strategy:', {
     shouldFetchUser,
@@ -71,13 +71,17 @@ export function RecipeViewPage() {
     error: userError,
   } = useRecipe(shouldFetchUser ? id! : '');
 
+  // Only fetch public recipe if no user OR if user query failed
+  const shouldFetchPublicFallback = !user || (user && userError !== null);
+  
   const {
     data: publicRecipe,
     isLoading: publicLoading,
     error: publicError,
-  } = usePublicRecipe(id!, { enabled: shouldFetchPublic });
+  } = usePublicRecipe(id!, { enabled: shouldFetchPublicFallback });
 
   // Use whichever one succeeds (base recipe from database)
+  // Priority: userRecipe (for private recipes) > publicRecipe (for public recipes)
   const baseRecipe = userRecipe || publicRecipe;
 
   // Local state for version content when viewing specific versions
@@ -117,11 +121,25 @@ export function RecipeViewPage() {
     : baseRecipe;
   // isLoading is true only if at least one query is loading and no data has been found yet
   const isLoading = (userLoading || publicLoading) && !recipe;
-  // error if both queries have failed or neither query has returned data
-  const error =
-    !userLoading && !publicLoading && !recipe
-      ? userError || publicError || new Error('Recipe not found')
-      : null;
+  
+  // Enhanced error handling for private recipe access
+  const error = (() => {
+    if (userLoading || publicLoading || recipe) return null;
+    
+    // If user is authenticated but userRecipe failed, and publicRecipe also failed,
+    // this might be a private recipe access issue
+    if (user && userError && publicError) {
+      return new Error('This recipe is private and you do not have access to it.');
+    }
+    
+    // If no user but publicRecipe failed, recipe might not exist or not be public
+    if (!user && publicError) {
+      return new Error('Recipe not found or not publicly available.');
+    }
+    
+    // Fallback to original logic
+    return userError || publicError || new Error('Recipe not found');
+  })();
 
   // Helper functions must be declared before useEffect hooks that call them
   const loadVersionData = useCallback(
@@ -299,17 +317,14 @@ export function RecipeViewPage() {
     if (!user || !id) return;
 
     try {
-      const currentVersion =
-        versionContent?.version_number || requestedVersion || 1;
-      const userRating = await ratingApi.getUserVersionRating(
-        id,
-        currentVersion
-      );
+      // For now, use the community rating API since version-specific rating is not implemented
+      // TODO: Implement version-specific rating API
+      const communityRating = await ratingApi.getCommunityRating(id);
 
-      if (userRating) {
+      if (communityRating.userRating) {
         setUserComment({
-          rating: userRating.rating,
-          comment: userRating.comment || undefined,
+          rating: communityRating.userRating,
+          comment: undefined, // Comments not implemented yet
         });
       } else {
         setUserComment(null);
@@ -318,7 +333,7 @@ export function RecipeViewPage() {
       console.error('Failed to load user comment:', error);
       setUserComment(null);
     }
-  }, [user, id, versionContent?.version_number, requestedVersion]);
+  }, [user, id]);
 
   // Load user's comment when recipe is loaded and user is authenticated
   useEffect(() => {
