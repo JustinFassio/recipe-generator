@@ -35,6 +35,7 @@ import { CreatorRating, YourComment } from '@/components/ui/rating';
 import { CommentSystem } from './comment-system';
 import { AddToShoppingListButton } from '@/components/shopping-cart/AddToShoppingListButton';
 import { useUserGroceryCart } from '@/hooks/useUserGroceryCart';
+import { getSafeImageUrl } from '@/lib/image-cache-utils';
 
 interface RecipeViewProps {
   recipe: Recipe;
@@ -250,17 +251,28 @@ export function RecipeView({
       <div className={createDaisyUICardClasses('bordered')}>
         <div className="card-body pb-4">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
-            {recipe.image_url && (
-              <div className="lg:w-1/3">
-                <ProgressiveImage
-                  src={recipe.image_url}
-                  alt={recipe.title}
-                  className="h-48 w-full rounded-lg sm:h-64 lg:h-48"
-                  loading="eager"
-                  placeholder="/recipe-generator-logo.png"
-                />
-              </div>
-            )}
+            {recipe.image_url &&
+              (() => {
+                const safeImageUrl = getSafeImageUrl(
+                  recipe.image_url,
+                  recipe.updated_at,
+                  recipe.created_at,
+                  '/recipe-generator-logo.png'
+                );
+                return (
+                  safeImageUrl && (
+                    <div className="lg:w-1/3">
+                      <ProgressiveImage
+                        src={safeImageUrl}
+                        alt={recipe.title}
+                        className="h-48 w-full rounded-lg sm:h-64 lg:h-48"
+                        loading="eager"
+                        placeholder="/recipe-generator-logo.png"
+                      />
+                    </div>
+                  )
+                );
+              })()}
             <div className="flex-1">
               <h3
                 className={`${createDaisyUICardTitleClasses()} mb-4 text-xl font-bold sm:text-2xl lg:text-3xl`}
