@@ -113,7 +113,8 @@ export function RecipeViewPage() {
         cooking_time: versionContent.cooking_time,
         difficulty: versionContent.difficulty,
         creator_rating: versionContent.creator_rating,
-        image_url: versionContent.image_url,
+        // Use version image_url if available, otherwise fall back to main recipe image_url
+        image_url: versionContent.image_url || baseRecipe!.image_url,
       }
     : baseRecipe;
   // isLoading is true only if at least one query is loading and no data has been found yet

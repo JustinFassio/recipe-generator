@@ -112,6 +112,6 @@ export function getSafeImageUrl(
     return fallbackUrl || '';
   }
 
-  // Otherwise, return optimized URL
+  // For valid URLs, return optimized URL
   return getOptimizedImageUrl(imageUrl, updatedAt, createdAt);
 }
