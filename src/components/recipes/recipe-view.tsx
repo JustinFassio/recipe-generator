@@ -259,16 +259,6 @@ export function RecipeView({
                   recipe.created_at,
                   '/recipe-generator-logo.png'
                 );
-
-                // Debug logging
-                console.log('🖼️ Recipe Image Debug:', {
-                  recipeId: recipe.id,
-                  originalUrl: recipe.image_url,
-                  safeImageUrl,
-                  hasSafeUrl: !!safeImageUrl,
-                  fallback: '/recipe-generator-logo.png',
-                });
-
                 return (
                   safeImageUrl && (
                     <div className="lg:w-1/3">
