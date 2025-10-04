@@ -18,7 +18,6 @@ import {
   Plus,
   Shield,
 } from 'lucide-react';
-import { ProgressiveImage } from '@/components/shared/ProgressiveImage';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import CategoryChip from '@/components/ui/CategoryChip';
@@ -35,6 +34,7 @@ import { CreatorRating, YourComment } from '@/components/ui/rating';
 import { CommentSystem } from './comment-system';
 import { AddToShoppingListButton } from '@/components/shopping-cart/AddToShoppingListButton';
 import { useUserGroceryCart } from '@/hooks/useUserGroceryCart';
+import { RecipeImageGallery } from './recipe-image-gallery';
 
 interface RecipeViewProps {
   recipe: Recipe;
@@ -250,17 +250,6 @@ export function RecipeView({
       <div className={createDaisyUICardClasses('bordered')}>
         <div className="card-body pb-4">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
-            {recipe.image_url && (
-              <div className="lg:w-1/3">
-                <ProgressiveImage
-                  src={recipe.image_url}
-                  alt={recipe.title}
-                  className="h-48 w-full rounded-lg sm:h-64 lg:h-48"
-                  loading="eager"
-                  placeholder="/recipe-generator-logo.png"
-                />
-              </div>
-            )}
             <div className="flex-1">
               <h3
                 className={`${createDaisyUICardTitleClasses()} mb-4 text-xl font-bold sm:text-2xl lg:text-3xl`}
@@ -341,6 +330,26 @@ export function RecipeView({
           </div>
         </div>
       </div>
+
+      {/* Image Gallery - Only show for authenticated users viewing their own recipes */}
+      {onEdit && (
+        <RecipeImageGallery
+          recipeId={recipe.id}
+          recipeTitle={recipe.title}
+          mainImageUrl={recipe.image_url}
+          mainImageUpdatedAt={recipe.updated_at}
+          mainImageCreatedAt={recipe.created_at}
+          canEdit={!!onEdit}
+          onAddImage={() => {
+            // TODO: Implement add image functionality
+            console.log('Add image clicked');
+          }}
+          onEditImage={(image) => {
+            // TODO: Implement edit image functionality
+            console.log('Edit image clicked', image);
+          }}
+        />
+      )}
 
       {/* Grocery Compatibility Section */}
       {enhancedMatcher && Object.keys(groceries.groceries).length > 0 && (
@@ -810,8 +819,8 @@ export function RecipeView({
         </div>
       )}
 
-      {/* Comments Section for Public Recipes */}
-      {recipe.is_public && (
+      {/* Comments Section - Only show for authenticated users viewing their own recipes */}
+      {onEdit && (
         <div className={createDaisyUICardClasses('bordered')}>
           <div className="card-body">
             <CommentSystem

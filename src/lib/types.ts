@@ -26,6 +26,23 @@ export type PublicRecipe = Recipe & {
   author_name: string;
 };
 
+// Image Gallery types
+export type RecipeImage = {
+  id: string;
+  recipe_id: string;
+  image_url: string;
+  is_primary: boolean;
+  caption: string | null;
+  alt_text: string | null;
+  display_order: number;
+  created_at: string;
+  uploaded_by: string | null;
+  generation_method: 'manual' | 'ai_generated' | 'migrated';
+  generation_cost_id: string | null;
+  metadata: Record<string, unknown>;
+  updated_at: string;
+};
+
 // Recipe Versioning types
 export type RecipeVersion = {
   id: string;

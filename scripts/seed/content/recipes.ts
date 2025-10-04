@@ -30,7 +30,7 @@ export const seedRecipesData: SeedRecipe[] = [
     instructions:
       'Toast bread. Mash avocado with salt and pepper. Spread and top with chili flakes.',
     notes: 'Simple, fast breakfast.',
-    image_url: 'https://picsum.photos/seed/avocado_toast/800/600',
+    image_url: '/recipe-generator-logo.png',
     user_email: 'alice@example.com',
     is_public: true,
     categories: [
@@ -57,7 +57,7 @@ export const seedRecipesData: SeedRecipe[] = [
     instructions:
       'Slice mozzarella and tomatoes. Arrange with basil. Drizzle with balsamic and olive oil.',
     notes: 'Perfect summer salad.',
-    image_url: 'https://picsum.photos/seed/caprese_salad/800/600',
+    image_url: '/recipe-generator-logo.png',
     user_email: 'alice@example.com',
     is_public: false,
     categories: [
@@ -84,7 +84,7 @@ export const seedRecipesData: SeedRecipe[] = [
     instructions:
       'Cook pasta. Sauté garlic in oil. Add tomatoes and pasta. Finish with basil.',
     notes: '15-minute weeknight dinner.',
-    image_url: 'https://picsum.photos/seed/quick_pasta/800/600',
+    image_url: '/recipe-generator-logo.png',
     user_email: 'alice@example.com',
     is_public: false,
     categories: [
@@ -112,7 +112,7 @@ export const seedRecipesData: SeedRecipe[] = [
     instructions:
       'Stir fry vegetables in hot oil. Add soy sauce, ginger, and garlic. Serve over rice.',
     notes: 'Healthy and colorful.',
-    image_url: 'https://picsum.photos/seed/veggie_stir_fry/800/600',
+    image_url: '/recipe-generator-logo.png',
     user_email: 'alice@example.com',
     is_public: false,
     categories: [
@@ -141,7 +141,7 @@ export const seedRecipesData: SeedRecipe[] = [
     instructions:
       'Chop lettuce. Toss with dressing, croutons, parmesan. Finish with lemon.',
     notes: 'Great with grilled chicken.',
-    image_url: 'https://picsum.photos/seed/caesar_salad/800/600',
+    image_url: '/recipe-generator-logo.png',
     user_email: 'bob@example.com',
     is_public: true,
     categories: [
@@ -170,7 +170,7 @@ export const seedRecipesData: SeedRecipe[] = [
     instructions:
       'Season chicken with salt, pepper, and garlic powder. Grill over medium heat for 6-7 minutes per side.',
     notes: 'Perfect for meal prep.',
-    image_url: 'https://picsum.photos/seed/grilled_chicken/800/600',
+    image_url: '/recipe-generator-logo.png',
     user_email: 'bob@example.com',
     is_public: true,
     categories: [
@@ -197,7 +197,7 @@ export const seedRecipesData: SeedRecipe[] = [
     instructions:
       'Season ribs with brown sugar, paprika, and garlic powder. Smoke for 4-6 hours, then glaze with BBQ sauce.',
     notes: 'Low and slow is the way to go.',
-    image_url: 'https://picsum.photos/seed/bbq_ribs/800/600',
+    image_url: '/recipe-generator-logo.png',
     user_email: 'bob@example.com',
     is_public: true,
     categories: [
@@ -227,7 +227,7 @@ export const seedRecipesData: SeedRecipe[] = [
     instructions:
       'Sauté chicken and vegetables. Add rice and saffron. Add broth and cook until rice is tender. Add shrimp at the end.',
     notes: 'Traditional Spanish comfort food.',
-    image_url: 'https://picsum.photos/seed/paella/800/600',
+    image_url: '/recipe-generator-logo.png',
     user_email: 'cora@example.com',
     is_public: true,
     categories: [
@@ -255,7 +255,7 @@ export const seedRecipesData: SeedRecipe[] = [
     instructions:
       'Sauté curry paste in coconut milk. Add chicken and vegetables. Simmer until cooked through. Finish with basil.',
     notes: 'Adjust spice level to taste.',
-    image_url: 'https://picsum.photos/seed/thai_curry/800/600',
+    image_url: '/recipe-generator-logo.png',
     user_email: 'cora@example.com',
     is_public: false,
     categories: [
@@ -284,7 +284,7 @@ export const seedRecipesData: SeedRecipe[] = [
     instructions:
       'Make meringue with egg whites and sugar. Fold in almond flour and powdered sugar. Pipe and bake.',
     notes: 'Patience is key for perfect macarons.',
-    image_url: 'https://picsum.photos/seed/macarons/800/600',
+    image_url: '/recipe-generator-logo.png',
     user_email: 'david@example.com',
     is_public: true,
     categories: [
@@ -312,7 +312,7 @@ export const seedRecipesData: SeedRecipe[] = [
     instructions:
       'Mix dry ingredients. Add wet ingredients and knead. Let rise, then bake until golden.',
     notes: 'Great for sandwiches and toast.',
-    image_url: 'https://picsum.photos/seed/gf_bread/800/600',
+    image_url: '/recipe-generator-logo.png',
     user_email: 'david@example.com',
     is_public: true,
     categories: [
@@ -335,7 +335,7 @@ export const seedRecipesData: SeedRecipe[] = [
     instructions:
       'Scoop yogurt into bowl. Top with berries, granola, and chia seeds. Drizzle with honey.',
     notes: 'Perfect post-workout breakfast.',
-    image_url: 'https://picsum.photos/seed/yogurt_bowl/800/600',
+    image_url: '/recipe-generator-logo.png',
     user_email: 'emma@example.com',
     is_public: true,
     categories: [
@@ -363,7 +363,7 @@ export const seedRecipesData: SeedRecipe[] = [
     instructions:
       'Season salmon with salt, pepper, and dill. Air fry at 400°F for 8-10 minutes. Serve with lemon.',
     notes: 'Quick and healthy weeknight dinner.',
-    image_url: 'https://picsum.photos/seed/air_fryer_salmon/800/600',
+    image_url: '/recipe-generator-logo.png',
     user_email: 'emma@example.com',
     is_public: true,
     categories: [
@@ -393,7 +393,7 @@ export const seedRecipesData: SeedRecipe[] = [
     instructions:
       'Brown ground beef with onions. Add taco seasoning. Serve in tortillas with jalapeños, cilantro, and lime.',
     notes: 'Add more jalapeños for extra heat.',
-    image_url: 'https://picsum.photos/seed/spicy_tacos/800/600',
+    image_url: '/recipe-generator-logo.png',
     user_email: 'frank@example.com',
     is_public: true,
     categories: [
@@ -421,7 +421,7 @@ export const seedRecipesData: SeedRecipe[] = [
     instructions:
       'Marinate beef in soy sauce, brown sugar, garlic, ginger, and sesame oil. Grill until caramelized.',
     notes: 'Serve with rice and kimchi.',
-    image_url: 'https://picsum.photos/seed/korean_bbq/800/600',
+    image_url: '/recipe-generator-logo.png',
     user_email: 'frank@example.com',
     is_public: true,
     categories: [

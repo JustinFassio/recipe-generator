@@ -75,6 +75,23 @@ export function isLikelyExpiredUrl(url: string): boolean {
       return true;
     }
 
+    // Check for URLs with expiration timestamps in the query string
+    if (url.includes('se=') && url.includes('st=')) {
+      try {
+        const urlObj = new URL(url);
+        const expiresParam = urlObj.searchParams.get('se');
+        if (expiresParam) {
+          const expiresTime = new Date(expiresParam);
+          const now = new Date();
+          // If current time is past the expiration, consider it likely expired
+          return now.getTime() >= expiresTime.getTime();
+        }
+      } catch {
+        // If we can't parse the expiration, assume it might be expired
+        return true;
+      }
+    }
+
     return false;
   } catch {
     return false;
@@ -95,6 +112,6 @@ export function getSafeImageUrl(
     return fallbackUrl || '';
   }
 
-  // Otherwise, return optimized URL
+  // For valid URLs, return optimized URL
   return getOptimizedImageUrl(imageUrl, updatedAt, createdAt);
 }

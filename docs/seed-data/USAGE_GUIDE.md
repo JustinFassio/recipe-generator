@@ -229,7 +229,7 @@ npm run test:shopping-lists
   ],
   instructions: 'Mix ingredients and bake at 350°F for 30 minutes.',
   notes: 'Delicious and easy to make.',
-  image_url: 'https://picsum.photos/seed/new_recipe/800/600',
+  image_url: '/recipe-generator-logo.png',
   user_email: 'alice@example.com',
   is_public: true,
   categories: [

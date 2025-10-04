@@ -1,90 +1,187 @@
-import { supabase } from '@/lib/supabase';
-import { handleError } from '@/lib/api/shared/error-handling';
+import { supabase } from '../../supabase';
+import { handleError } from '../shared/error-handling';
 
-export interface CommentRow {
-  id: string;
-  recipe_id: string;
-  version_number: number | null;
-  user_id: string;
-  rating: number;
-  comment: string | null;
-  created_at: string;
-}
-
+/**
+ * Rating API - Operations for recipe ratings and comments
+ */
 export const ratingApi = {
-  async submitRating(
-    recipeId: string,
-    versionNumber: number | null,
-    rating: number,
-    comment?: string
-  ): Promise<void> {
+  // Community Rating API
+  async getCommunityRating(recipeId: string): Promise<{
+    average: number;
+    count: number;
+    userRating?: number;
+  }> {
     const {
       data: { user },
     } = await supabase.auth.getUser();
-    if (!user) throw new Error('User must be authenticated to rate');
 
-    const payload: Record<string, unknown> = {
+    // Get community rating stats
+    const { data: stats, error: statsError } = await supabase
+      .from('recipe_rating_stats')
+      .select('community_rating_average, community_rating_count')
+      .eq('recipe_id', recipeId)
+      .single();
+
+    if (statsError && statsError.code !== 'PGRST116') {
+      handleError(statsError, 'Get community rating stats');
+    }
+
+    // Get user's rating if authenticated
+    let userRating: number | undefined;
+    if (user) {
+      const { data: userRatingData, error: userError } = await supabase
+        .from('recipe_ratings')
+        .select('rating')
+        .eq('recipe_id', recipeId)
+        .eq('user_id', user.id)
+        .single();
+
+      if (userError && userError.code !== 'PGRST116') {
+        handleError(userError, 'Get user rating');
+      }
+
+      userRating = userRatingData?.rating;
+    }
+
+    return {
+      average: stats?.community_rating_average || 0,
+      count: stats?.community_rating_count || 0,
+      userRating,
+    };
+  },
+
+  async submitCommunityRating(recipeId: string, rating: number): Promise<void> {
+    const { data: authData } = await supabase.auth.getUser();
+    if (!authData || !authData.user) throw new Error('User not authenticated');
+    const user = authData.user;
+
+    const { error } = await supabase.from('recipe_ratings').upsert({
       recipe_id: recipeId,
-      version_number: versionNumber,
       user_id: user.id,
       rating,
       updated_at: new Date().toISOString(),
-    };
-    if (typeof comment === 'string') {
-      payload.comment = comment;
-    }
-
-    const { error } = await supabase.from('recipe_ratings').upsert(payload, {
-      onConflict: 'recipe_id,user_id',
     });
-    if (error) handleError(error, 'Submit rating with optional comment');
+
+    if (error) handleError(error, 'Submit community rating');
   },
 
-  async getComments(
-    recipeId: string,
-    versionNumber?: number,
-    limit = 20
-  ): Promise<CommentRow[]> {
-    let q = supabase
-      .from('recipe_ratings')
-      .select('*')
+  // Get comments for a recipe
+  async getComments(recipeId: string): Promise<{
+    id: string;
+    user_id: string;
+    comment: string;
+    rating?: number;
+    created_at: string;
+    updated_at: string;
+    user_profile?: {
+      id: string;
+      full_name: string;
+      avatar_url?: string;
+    };
+  }[]> {
+    const { data, error } = await supabase
+      .from('recipe_comments')
+      .select(`
+        id,
+        user_id,
+        comment,
+        rating,
+        created_at,
+        updated_at,
+        profiles!inner(
+          id,
+          full_name,
+          avatar_url
+        )
+      `)
       .eq('recipe_id', recipeId)
-      .not('comment', 'is', null)
-      .neq('comment', '')
-      .order('created_at', { ascending: false })
-      .limit(limit);
+      .order('created_at', { ascending: false });
 
-    if (typeof versionNumber === 'number') {
-      q = q.eq('version_number', versionNumber);
+    if (error) {
+      console.error('Failed to get comments:', error);
+      return [];
     }
 
-    const { data, error } = await q;
-    if (error) handleError(error, 'Get comments');
-    return (data as unknown as CommentRow[]) || [];
+    // Transform the data to match the expected type
+    return (data || []).map((comment: Record<string, any>) => ({
+      id: comment.id,
+      user_id: comment.user_id,
+      comment: comment.comment,
+      rating: comment.rating,
+      created_at: comment.created_at,
+      updated_at: comment.updated_at,
+      user_profile: comment.profiles ? {
+        id: comment.profiles.id,
+        full_name: comment.profiles.full_name,
+        avatar_url: comment.profiles.avatar_url,
+      } : undefined,
+    }));
   },
 
+  // Submit a comment for a recipe
+  async submitComment(recipeId: string, comment: string, rating?: number): Promise<void> {
+    const { data: authData } = await supabase.auth.getUser();
+    if (!authData || !authData.user) throw new Error('User not authenticated');
+    const user = authData.user;
+
+    const { error } = await supabase.from('recipe_comments').insert({
+      recipe_id: recipeId,
+      user_id: user.id,
+      comment,
+      rating,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    });
+
+    if (error) handleError(error, 'Submit comment');
+  },
+
+  // Get user's rating for a specific version
   async getUserVersionRating(
     recipeId: string,
     versionNumber: number
-  ): Promise<CommentRow | null> {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) return null;
+  ): Promise<{
+    rating: number;
+    comment?: string;
+  } | null> {
+    const { data: authData } = await supabase.auth.getUser();
+    if (!authData || !authData.user) return null;
+    const user = authData.user;
 
     const { data, error } = await supabase
       .from('recipe_ratings')
-      .select('*')
+      .select('rating, comment')
       .eq('recipe_id', recipeId)
-      .eq('version_number', versionNumber)
       .eq('user_id', user.id)
+      .eq('version_number', versionNumber)
       .single();
 
     if (error && error.code !== 'PGRST116') {
-      // PGRST116 means no rows found, which is fine
-      handleError(error, 'Get user version rating');
+      console.error('Failed to get user version rating:', error);
+      return null;
     }
 
-    return (data as unknown as CommentRow) || null;
+    return data ? {
+      rating: data.rating,
+      comment: data.comment,
+    } : null;
+  },
+
+  // Get user profile by ID (for comment system)
+  async getUserProfile(
+    userId: string
+  ): Promise<{ id: string; full_name: string; avatar_url?: string } | null> {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('id, full_name, avatar_url')
+      .eq('id', userId)
+      .single();
+
+    if (error && error.code !== 'PGRST116') {
+      console.error('Failed to get user profile:', error);
+      return null;
+    }
+
+    return data;
   },
 };
