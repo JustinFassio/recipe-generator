@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { VersionSelector } from './version-selector';
 import type { PublicRecipe, RecipeVersion } from '@/lib/types';
 import { useIngredientMatching } from '@/hooks/useIngredientMatching';
-import { getOptimizedImageUrl } from '@/lib/image-cache-utils';
+import { getSafeImageUrl } from '@/lib/image-cache-utils';
 
 // Constants
 const RECIPE_TITLE_MAX_LENGTH = 45;
@@ -117,10 +117,11 @@ export function VersionedRecipeCard({
         {recipe.image_url && (
           <div className="aspect-video overflow-hidden">
             <img
-              src={getOptimizedImageUrl(
+              src={getSafeImageUrl(
                 recipe.image_url!, // Safe due to conditional rendering guard
                 recipe.updated_at,
-                recipe.created_at
+                recipe.created_at,
+                '/recipe-generator-logo.png'
               )}
               alt={recipe.title}
               className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-105"

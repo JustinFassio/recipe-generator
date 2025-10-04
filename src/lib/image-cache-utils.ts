@@ -59,3 +59,42 @@ export function getOptimizedImageUrlWithImageTimestamp(
     ? `${imageUrl}?v=${new Date(imageUpdatedAt).getTime()}`
     : imageUrl;
 }
+
+/**
+ * Check if an image URL is likely to be expired or cause 403 errors
+ */
+export function isLikelyExpiredUrl(url: string): boolean {
+  try {
+    // Check for expired DALL-E URLs
+    if (url.includes('oaidalleapiprodscus.blob.core.windows.net')) {
+      return true;
+    }
+
+    // Check for other temporary URLs that might expire
+    if (url.includes('blob.core.windows.net') && !url.includes('supabase')) {
+      return true;
+    }
+
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Get a safe image URL with fallback handling
+ */
+export function getSafeImageUrl(
+  imageUrl: string,
+  updatedAt: string,
+  createdAt: string,
+  fallbackUrl?: string
+): string {
+  // If URL is likely expired, return fallback or null
+  if (isLikelyExpiredUrl(imageUrl)) {
+    return fallbackUrl || '';
+  }
+
+  // Otherwise, return optimized URL
+  return getOptimizedImageUrl(imageUrl, updatedAt, createdAt);
+}

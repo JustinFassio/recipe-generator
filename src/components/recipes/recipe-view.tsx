@@ -18,6 +18,7 @@ import {
   Plus,
   Shield,
 } from 'lucide-react';
+import { ProgressiveImage } from '@/components/shared/ProgressiveImage';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import CategoryChip from '@/components/ui/CategoryChip';
@@ -251,10 +252,12 @@ export function RecipeView({
           <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
             {recipe.image_url && (
               <div className="lg:w-1/3">
-                <img
+                <ProgressiveImage
                   src={recipe.image_url}
                   alt={recipe.title}
-                  className="h-48 w-full rounded-lg object-cover sm:h-64 lg:h-48"
+                  className="h-48 w-full rounded-lg sm:h-64 lg:h-48"
+                  loading="eager"
+                  placeholder="/recipe-generator-logo.png"
                 />
               </div>
             )}

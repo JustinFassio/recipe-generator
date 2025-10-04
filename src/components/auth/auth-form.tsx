@@ -159,11 +159,11 @@ export function AuthForm() {
             <div className="mb-6 text-center">
               {/* Logo */}
               <div className="mb-4 flex items-center justify-center">
-                <div className="flex h-32 w-32 items-center justify-center sm:h-40 sm:w-40 md:h-48 md:w-48">
+                <div className="flex h-44 w-44 items-center justify-center sm:h-52 sm:w-52 md:h-60 md:w-60">
                   <img
                     src="/recipe-generator-logo.png"
                     alt="Recipe Generator Logo"
-                    className="h-28 w-28 object-contain sm:h-36 sm:w-36 md:h-44 md:w-44"
+                    className="h-40 w-40 object-contain sm:h-48 sm:w-48 md:h-56 md:w-56"
                     onError={(e) => {
                       // Fallback to text if image fails to load
                       const target = e.target as HTMLImageElement;

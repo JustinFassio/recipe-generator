@@ -11,19 +11,17 @@ import {
   Check,
   Loader2,
   ShoppingCart,
-  Sparkles,
 } from 'lucide-react';
+import { ProgressiveImage } from '@/components/shared/ProgressiveImage';
 import CategoryChip from '@/components/ui/CategoryChip';
 import { Badge } from '@/components/ui/badge';
 import { useIngredientMatching } from '@/hooks/useIngredientMatching';
 import type { Recipe, PublicRecipe } from '@/lib/types';
-import { getOptimizedImageUrl } from '@/lib/image-cache-utils';
+import { getSafeImageUrl } from '@/lib/image-cache-utils';
 import { useDeleteRecipe } from '@/hooks/use-recipes';
 import { useState } from 'react';
 import { recipeApi } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthProvider';
-import { useImageGenerationContext } from '@/hooks/useImageGenerationContext';
-import { Progress } from '@/components/ui/progress';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -63,8 +61,6 @@ export function RecipeCard({
   const deleteRecipe = useDeleteRecipe();
   const { user } = useAuth();
   const ingredientMatching = useIngredientMatching();
-  // Safely get image generation context (may not be available in tests)
-  const imageGenerationContext = useImageGenerationContext();
 
   // Calculate compatibility
   const compatibility = ingredientMatching.calculateCompatibility(recipe);
@@ -74,22 +70,8 @@ export function RecipeCard({
   // Only show share button if explicitly requested and user owns the recipe
   const canShare = showShareButton && user?.id === recipe.user_id;
 
-  // Check if this recipe is currently having its image generated
-  const isGeneratingImage =
-    imageGenerationContext.generationState.isGenerating &&
-    imageGenerationContext.generationState.recipeId === recipe.id;
-  const generationProgress = imageGenerationContext.generationState.progress;
-
-  // Debug logging
-  if (imageGenerationContext.generationState.isGenerating) {
-    console.log('Image generation state:', {
-      isGenerating: imageGenerationContext.generationState.isGenerating,
-      recipeId: imageGenerationContext.generationState.recipeId,
-      currentRecipeId: recipe.id,
-      matches: imageGenerationContext.generationState.recipeId === recipe.id,
-      progress: generationProgress,
-    });
-  }
+  // Note: Image generation progress is now handled by the recipe update system
+  // The recipe will automatically update when the image is generated in the background
 
   // No longer using drawer - removed for simplicity
 
@@ -142,45 +124,28 @@ export function RecipeCard({
       <div
         className={`${createDaisyUICardClasses('bordered')} group relative overflow-hidden border border-gray-200 transition-all duration-200 hover:border-gray-300 hover:shadow-lg`}
       >
-        {recipe.image_url && (
-          <div className="aspect-video overflow-hidden">
-            <img
-              src={getOptimizedImageUrl(
-                recipe.image_url,
-                recipe.updated_at,
-                recipe.created_at
-              )}
-              alt={recipe.title}
-              className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-105"
-            />
-          </div>
-        )}
-
-        {/* Image Generation Progress Overlay */}
-        {isGeneratingImage && (
-          <div className="aspect-video overflow-hidden bg-gradient-to-br from-purple-100 to-blue-100 flex items-center justify-center">
-            <div className="text-center p-6">
-              <div className="mb-4">
-                <div className="w-12 h-12 mx-auto mb-2 bg-purple-600 rounded-full flex items-center justify-center">
-                  <Sparkles className="h-6 w-6 text-white animate-pulse" />
+        {recipe.image_url &&
+          (() => {
+            const safeImageUrl = getSafeImageUrl(
+              recipe.image_url,
+              recipe.updated_at,
+              recipe.created_at,
+              '/recipe-generator-logo.png'
+            );
+            return (
+              safeImageUrl && (
+                <div className="aspect-video overflow-hidden">
+                  <ProgressiveImage
+                    src={safeImageUrl}
+                    alt={recipe.title}
+                    className="h-full w-full transition-transform duration-200 group-hover:scale-105"
+                    loading="lazy"
+                    placeholder="/recipe-generator-logo.png"
+                  />
                 </div>
-                <h4 className="text-lg font-semibold text-purple-900">
-                  Generating Image
-                </h4>
-                <p className="text-sm text-purple-700">
-                  Creating your AI-generated recipe image...
-                </p>
-              </div>
-              <div className="w-full max-w-xs mx-auto">
-                <div className="flex items-center justify-between text-sm text-purple-800 mb-2">
-                  <span>Progress</span>
-                  <span>{Math.round(generationProgress)}%</span>
-                </div>
-                <Progress value={generationProgress} className="h-2" />
-              </div>
-            </div>
-          </div>
-        )}
+              )
+            );
+          })()}
 
         {/* Recipe Title - Above Image */}
         <div className="px-4 pt-4 pb-2">

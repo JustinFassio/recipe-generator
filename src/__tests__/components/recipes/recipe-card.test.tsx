@@ -122,8 +122,9 @@ describe('RecipeCard', () => {
 
     const image = screen.getByAltText('Test Recipe');
     expect(image).toBeInTheDocument();
+    // ProgressiveImage uses data-src for lazy loading, so check for that attribute
     expect(image).toHaveAttribute(
-      'src',
+      'data-src',
       expect.stringContaining('https://example.com/image.jpg')
     );
   });
