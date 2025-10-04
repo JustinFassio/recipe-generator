@@ -107,11 +107,27 @@ export function getSafeImageUrl(
   createdAt: string,
   fallbackUrl?: string
 ): string {
+  // Debug logging
+  const isExpired = isLikelyExpiredUrl(imageUrl);
+  console.log('🔍 getSafeImageUrl Debug:', {
+    originalUrl: imageUrl,
+    isExpired,
+    fallbackUrl,
+    updatedAt,
+    createdAt,
+  });
+
   // If URL is likely expired, return fallback or null
-  if (isLikelyExpiredUrl(imageUrl)) {
+  if (isExpired) {
+    console.log(
+      '❌ URL marked as expired, returning fallback:',
+      fallbackUrl || ''
+    );
     return fallbackUrl || '';
   }
 
-  // Otherwise, return optimized URL
-  return getOptimizedImageUrl(imageUrl, updatedAt, createdAt);
+  // For valid URLs, return optimized URL
+  const optimizedUrl = getOptimizedImageUrl(imageUrl, updatedAt, createdAt);
+  console.log('✅ URL is valid, returning optimized URL:', optimizedUrl);
+  return optimizedUrl;
 }
