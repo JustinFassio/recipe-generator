@@ -234,7 +234,7 @@ const aliceRecipes = [
     ingredients: ['2 slices sourdough', '1 ripe avocado', 'salt', 'pepper', 'chili flakes'],
     instructions: 'Toast bread. Mash avocado with salt and pepper. Spread and top with chili flakes.',
     notes: 'Simple, fast breakfast.',
-    image_url: 'https://picsum.photos/seed/avocado_toast/800/600',
+    image_url: '/recipe-generator-logo.png',
     is_public: true,
     categories: ['Course: Breakfast', 'Collection: Vegetarian', 'Collection: Quick & Easy', 'Technique: No-Cook', 'Occasion: Weekday', 'Dietary: Plant-Based']
   },
@@ -245,7 +245,7 @@ const aliceRecipes = [
     ingredients: ['fresh mozzarella', 'ripe tomatoes', 'fresh basil', 'balsamic glaze', 'extra virgin olive oil', 'salt', 'pepper'],
     instructions: 'Slice mozzarella and tomatoes. Arrange on plate with basil. Drizzle with balsamic and oil. Season with salt and pepper.',
     notes: 'Perfect summer appetizer.',
-    image_url: 'https://picsum.photos/seed/caprese_salad/800/600',
+    image_url: '/recipe-generator-logo.png',
     is_public: true,
     categories: ['Course: Appetizer', 'Cuisine: Italian', 'Collection: Vegetarian', 'Technique: No-Cook', 'Occasion: Summer', 'Dietary: Vegetarian']
   },
@@ -256,7 +256,7 @@ const aliceRecipes = [
     ingredients: ['pasta', 'tomato sauce', 'garlic', 'fresh herbs', 'red pepper flakes', 'Parmesan cheese', 'olive oil'],
     instructions: 'Cook pasta. Sauté garlic in oil. Add tomato sauce and herbs. Toss with pasta. Top with Parmesan.',
     notes: 'Quick weeknight dinner.',
-    image_url: 'https://picsum.photos/seed/quick_pasta/800/600',
+    image_url: '/recipe-generator-logo.png',
     is_public: false,
     categories: ['Course: Main', 'Cuisine: Italian', 'Collection: Quick & Easy', 'Technique: Sauté', 'Occasion: Weekday', 'Time: Under 30 Minutes']
   }
