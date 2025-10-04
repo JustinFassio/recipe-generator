@@ -13,8 +13,6 @@ interface GenerateImageRequest {
   mood?: 'appetizing' | 'elegant' | 'rustic' | 'modern';
 }
 
-// Removed unused interface
-
 export default async function handler(
   req: VercelRequest,
   res: VercelResponse
