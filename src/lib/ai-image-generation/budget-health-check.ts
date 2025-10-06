@@ -1,6 +1,6 @@
 /**
  * Budget System Health Check
- * 
+ *
  * This module provides health check functionality for the budget system
  * to monitor its status and identify issues.
  */
@@ -42,7 +42,7 @@ export async function checkBudgetSystemHealth(): Promise<BudgetHealthStatus> {
         .from('user_budgets')
         .select('count')
         .limit(1);
-      
+
       if (error) {
         issues.push(`Database connectivity issue: ${error.message}`);
       } else {
@@ -88,10 +88,12 @@ export async function checkBudgetSystemHealth(): Promise<BudgetHealthStatus> {
         period_start: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };
-      
+
       // Validate budget structure
-      if (testBudget.monthly_budget >= BUDGET_CONFIG.MIN_MONTHLY_BUDGET && 
-          testBudget.monthly_budget <= BUDGET_CONFIG.MAX_MONTHLY_BUDGET) {
+      if (
+        testBudget.monthly_budget >= BUDGET_CONFIG.MIN_MONTHLY_BUDGET &&
+        testBudget.monthly_budget <= BUDGET_CONFIG.MAX_MONTHLY_BUDGET
+      ) {
         checks.budgetValidation = true;
       } else {
         issues.push('Budget validation logic failed');
@@ -111,7 +113,6 @@ export async function checkBudgetSystemHealth(): Promise<BudgetHealthStatus> {
     } catch (error) {
       issues.push(`Cost calculation check failed: ${error}`);
     }
-
   } catch (error) {
     issues.push(`Health check system error: ${error}`);
   }
@@ -119,7 +120,7 @@ export async function checkBudgetSystemHealth(): Promise<BudgetHealthStatus> {
   // Determine overall status
   const passedChecks = Object.values(checks).filter(Boolean).length;
   const totalChecks = Object.keys(checks).length;
-  
+
   let status: 'healthy' | 'degraded' | 'unhealthy';
   if (passedChecks === totalChecks) {
     status = 'healthy';
@@ -150,7 +151,7 @@ export async function quickBudgetHealthCheck(): Promise<{
       .from('user_budgets')
       .select('count')
       .limit(1);
-    
+
     if (error) {
       return {
         status: 'error',
@@ -192,10 +193,12 @@ export async function getBudgetSystemMetrics(): Promise<{
 
     const totalBudgets = budgets?.length || 0;
     const totalUsers = totalBudgets; // Assuming 1:1 relationship
-    const averageBudget = totalBudgets > 0 
-      ? budgets.reduce((sum, b) => sum + b.monthly_budget, 0) / totalBudgets 
-      : 0;
-    const totalSpent = budgets?.reduce((sum, b) => sum + b.used_monthly, 0) || 0;
+    const averageBudget =
+      totalBudgets > 0
+        ? budgets.reduce((sum, b) => sum + b.monthly_budget, 0) / totalBudgets
+        : 0;
+    const totalSpent =
+      budgets?.reduce((sum, b) => sum + b.used_monthly, 0) || 0;
 
     return {
       totalUsers,
@@ -258,8 +261,10 @@ export async function testBudgetSystem(): Promise<{
     // Test 2: Budget validation
     try {
       const testAmount = BUDGET_CONFIG.DEFAULT_MONTHLY_BUDGET;
-      if (testAmount >= BUDGET_CONFIG.MIN_MONTHLY_BUDGET && 
-          testAmount <= BUDGET_CONFIG.MAX_MONTHLY_BUDGET) {
+      if (
+        testAmount >= BUDGET_CONFIG.MIN_MONTHLY_BUDGET &&
+        testAmount <= BUDGET_CONFIG.MAX_MONTHLY_BUDGET
+      ) {
         results.budgetValidation = true;
       } else {
         errors.push('Budget validation test failed');
@@ -291,7 +296,6 @@ export async function testBudgetSystem(): Promise<{
     } catch (error) {
       errors.push(`Budget check test error: ${error}`);
     }
-
   } catch (error) {
     errors.push(`Budget system test error: ${error}`);
   }

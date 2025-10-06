@@ -111,7 +111,6 @@ export function BudgetSettings() {
     }
   };
 
-
   if (isLoading) {
     return (
       <Card>
@@ -182,7 +181,8 @@ export function BudgetSettings() {
                   onChange={(e) =>
                     handleInputChange(
                       'monthly_limit',
-                      parseFloat(e.target.value) || BUDGET_CONFIG.MIN_MONTHLY_BUDGET
+                      parseFloat(e.target.value) ||
+                        BUDGET_CONFIG.MIN_MONTHLY_BUDGET
                     )
                   }
                   className="pl-10"
@@ -198,8 +198,9 @@ export function BudgetSettings() {
           <Alert>
             <Info className="h-4 w-4" />
             <AlertDescription>
-              <strong>Current Features:</strong> Only monthly budget limits are currently supported. 
-              Daily/weekly limits, alerts, and auto-pause features are planned for future releases.
+              <strong>Current Features:</strong> Only monthly budget limits are
+              currently supported. Daily/weekly limits, alerts, and auto-pause
+              features are planned for future releases.
             </AlertDescription>
           </Alert>
 

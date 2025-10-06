@@ -1,9 +1,9 @@
 import { supabase } from '@/lib/supabase';
-import { 
-  BUDGET_CONFIG, 
-  validateBudgetAmount, 
+import {
+  BUDGET_CONFIG,
+  validateBudgetAmount,
   validateUserId,
-  canAffordGeneration
+  canAffordGeneration,
 } from '@/config/budget';
 import { BudgetPerformanceMonitor } from './budget-monitoring';
 
@@ -21,7 +21,7 @@ export interface UserBudget {
 export async function getUserBudget(userId?: string): Promise<UserBudget> {
   const monitor = BudgetPerformanceMonitor.getInstance();
   const endTimer = monitor.startTimer('getUserBudget');
-  
+
   try {
     const { data: user } = await supabase.auth.getUser();
     const targetUserId = userId || user.user?.id;
@@ -32,41 +32,41 @@ export async function getUserBudget(userId?: string): Promise<UserBudget> {
       throw new Error(userIdValidation.error || 'User not authenticated');
     }
 
-  // Try to get existing budget
-  const { data: existingBudget, error } = await supabase
-    .from('user_budgets')
-    .select('*')
-    .eq('user_id', targetUserId)
-    .maybeSingle();
+    // Try to get existing budget
+    const { data: existingBudget, error } = await supabase
+      .from('user_budgets')
+      .select('*')
+      .eq('user_id', targetUserId)
+      .maybeSingle();
 
-  if (error && error.code !== 'PGRST116' && error.code !== 'PGRST205') {
-    // PGRST116 = no rows returned, PGRST205 = table not found in schema cache
-    throw error;
-  }
+    if (error && error.code !== 'PGRST116' && error.code !== 'PGRST205') {
+      // PGRST116 = no rows returned, PGRST205 = table not found in schema cache
+      throw error;
+    }
 
-  // Return existing budget or create default
-  if (existingBudget) {
-    return existingBudget;
-  }
+    // Return existing budget or create default
+    if (existingBudget) {
+      return existingBudget;
+    }
 
-  // Create default budget
-  const defaultBudget: UserBudget = {
-    user_id: targetUserId!,
-    monthly_budget: BUDGET_CONFIG.DEFAULT_MONTHLY_BUDGET,
-    used_monthly: 0,
-    period_start: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  };
+    // Create default budget
+    const defaultBudget: UserBudget = {
+      user_id: targetUserId!,
+      monthly_budget: BUDGET_CONFIG.DEFAULT_MONTHLY_BUDGET,
+      used_monthly: 0,
+      period_start: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
 
-  const { data: newBudget, error: createError } = await supabase
-    .from('user_budgets')
-    .insert(defaultBudget)
-    .select()
-    .single();
+    const { data: newBudget, error: createError } = await supabase
+      .from('user_budgets')
+      .insert(defaultBudget)
+      .select()
+      .single();
 
-  if (createError) {
-    throw createError;
-  }
+    if (createError) {
+      throw createError;
+    }
 
     return newBudget;
   } finally {
@@ -169,10 +169,14 @@ export async function canGenerateImage(
 ): Promise<{ allowed: boolean; reason?: string }> {
   try {
     const budget = await getUserBudget(userId);
-    
+
     // Use the configuration-based validation
-    const result = canAffordGeneration(cost, budget.used_monthly, budget.monthly_budget);
-    
+    const result = canAffordGeneration(
+      cost,
+      budget.used_monthly,
+      budget.monthly_budget
+    );
+
     if (!result.allowed) {
       return {
         allowed: false,

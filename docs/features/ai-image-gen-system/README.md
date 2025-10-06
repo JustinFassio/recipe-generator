@@ -47,7 +47,7 @@ graph TB
     G --> I[Update Budget]
     I --> J[Cost Tracker]
     J --> K[Database]
-    
+
     L[Budget Settings UI] --> M[Budget Manager]
     M --> K
 ```
@@ -105,6 +105,7 @@ CREATE TABLE image_generation_costs (
 - `canGenerateImage()`: Check if generation is allowed
 
 **Interface**:
+
 ```typescript
 interface UserBudget {
   user_id: string;
@@ -120,6 +121,7 @@ interface UserBudget {
 **Location**: `src/components/settings/budget-settings.tsx`
 
 **Features**:
+
 - Monthly budget configuration
 - Current spending display
 - Budget status alerts
@@ -130,6 +132,7 @@ interface UserBudget {
 **Location**: `src/lib/ai-image-generation/cost-tracker.ts`
 
 **Functions**:
+
 - `calculateImageCost()`: Calculate cost based on size/quality
 - `trackImageGenerationCost()`: Record generation costs
 - `getUserCostSummary()`: Get user spending analytics
@@ -137,6 +140,7 @@ interface UserBudget {
 ## 🔄 Budget Management Flow
 
 ### 1. User Registration
+
 ```typescript
 // Automatic budget creation for new users
 const defaultBudget: UserBudget = {
@@ -149,6 +153,7 @@ const defaultBudget: UserBudget = {
 ```
 
 ### 2. Image Generation Request
+
 ```typescript
 // Check budget before generation
 const budgetCheck = await canGenerateImage(expectedCost);
@@ -161,6 +166,7 @@ if (!budgetCheck.allowed) {
 ```
 
 ### 3. Cost Tracking
+
 ```typescript
 // Update budget after successful generation
 await updateBudgetAfterGeneration(actualCost);
@@ -170,14 +176,14 @@ await updateBudgetAfterGeneration(actualCost);
 
 ### Cost Calculation
 
-| Size | Quality | Cost |
-|------|---------|------|
+| Size      | Quality  | Cost  |
+| --------- | -------- | ----- |
 | 1024x1024 | Standard | $0.04 |
-| 1024x1024 | HD | $0.08 |
+| 1024x1024 | HD       | $0.08 |
 | 1024x1792 | Standard | $0.08 |
-| 1024x1792 | HD | $0.12 |
+| 1024x1792 | HD       | $0.12 |
 | 1792x1024 | Standard | $0.08 |
-| 1792x1024 | HD | $0.12 |
+| 1792x1024 | HD       | $0.12 |
 
 ### Cost Tracking Flow
 
@@ -191,12 +197,14 @@ await updateBudgetAfterGeneration(actualCost);
 ### Budget Settings Page
 
 **Features**:
+
 - **Current Status**: Shows remaining budget and usage
 - **Monthly Limit**: Primary budget configuration
 - **Cost Reference**: Information about image generation costs
 - **Budget Alerts**: Warnings when budget is exceeded
 
 **UI Components**:
+
 - Budget status display
 - Monthly limit input
 - Save/update functionality
@@ -273,17 +281,20 @@ CREATE POLICY "Users can upsert their own budget" ON user_budgets
 #### 1. 404 Errors for `user_budgets` Table
 
 **Symptoms**:
+
 ```
 GET user_budgets?select=*&user_id=eq.xxx 404 (Not Found)
 POST user_budgets?select=* 404 (Not Found)
 ```
 
 **Causes**:
+
 - User not authenticated
 - RLS policy violations
 - Missing budget record for new user
 
 **Solutions**:
+
 - Verify user authentication status
 - Check RLS policies are correctly configured
 - Ensure budget creation logic is working
@@ -291,15 +302,18 @@ POST user_budgets?select=* 404 (Not Found)
 #### 2. Budget Not Created for New Users
 
 **Symptoms**:
+
 - New users can't access budget settings
 - Budget checks fail for new users
 
 **Causes**:
+
 - `getUserBudget()` function not called
 - Budget creation logic failing
 - Database permissions issues
 
 **Solutions**:
+
 - Check `getUserBudget()` is called during user onboarding
 - Verify budget creation logic in `budget-manager.ts`
 - Test database permissions for new users
@@ -307,15 +321,18 @@ POST user_budgets?select=* 404 (Not Found)
 #### 3. Cost Tracking Not Working
 
 **Symptoms**:
+
 - Budget not updated after image generation
 - Spending not reflected in budget status
 
 **Causes**:
+
 - `updateBudgetAfterGeneration()` not called
 - Cost tracking database errors
 - Budget update logic failing
 
 **Solutions**:
+
 - Verify cost tracking is called after successful generation
 - Check `updateBudgetAfterGeneration()` implementation
 - Test budget update database operations
@@ -323,17 +340,20 @@ POST user_budgets?select=* 404 (Not Found)
 ### Debugging Steps
 
 1. **Check Authentication**:
+
    ```typescript
    const { data: user } = await supabase.auth.getUser();
    console.log('User authenticated:', !!user?.user);
    ```
 
 2. **Verify Budget Record**:
+
    ```sql
    SELECT * FROM user_budgets WHERE user_id = 'user-id';
    ```
 
 3. **Test Budget Operations**:
+
    ```typescript
    try {
      const budget = await getUserBudget();

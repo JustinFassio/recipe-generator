@@ -1,10 +1,13 @@
 /**
  * Budget System Monitoring
- * 
+ *
  * This module provides monitoring and alerting functionality for the budget system.
  */
 
-import { checkBudgetSystemHealth, getBudgetSystemMetrics } from './budget-health-check';
+import {
+  checkBudgetSystemHealth,
+  getBudgetSystemMetrics,
+} from './budget-health-check';
 
 export interface BudgetAlert {
   id: string;
@@ -141,7 +144,7 @@ export async function getBudgetSystemStatus(): Promise<{
       status: health.status,
       uptime: metrics.systemUptime,
       lastError: health.issues[0] || undefined,
-      activeAlerts: monitoring.alerts.filter(a => !a.resolved).length,
+      activeAlerts: monitoring.alerts.filter((a) => !a.resolved).length,
       totalUsers: metrics.totalUsers,
       totalSpent: metrics.totalSpent,
     };
@@ -162,7 +165,7 @@ export async function getBudgetSystemStatus(): Promise<{
  */
 export function logBudgetEvent(
   event: string,
-  details: Record<string, any> = {},
+  details: Record<string, unknown> = {},
   level: 'info' | 'warn' | 'error' = 'info'
 ): void {
   const logEntry = {
@@ -182,7 +185,10 @@ export function logBudgetEvent(
  */
 export class BudgetPerformanceMonitor {
   private static instance: BudgetPerformanceMonitor;
-  private metrics: Map<string, { count: number; totalTime: number; avgTime: number }> = new Map();
+  private metrics: Map<
+    string,
+    { count: number; totalTime: number; avgTime: number }
+  > = new Map();
 
   static getInstance(): BudgetPerformanceMonitor {
     if (!BudgetPerformanceMonitor.instance) {
@@ -193,7 +199,7 @@ export class BudgetPerformanceMonitor {
 
   startTimer(operation: string): () => void {
     const startTime = Date.now();
-    
+
     return () => {
       const duration = Date.now() - startTime;
       this.recordMetric(operation, duration);
@@ -201,22 +207,30 @@ export class BudgetPerformanceMonitor {
   }
 
   private recordMetric(operation: string, duration: number): void {
-    const existing = this.metrics.get(operation) || { count: 0, totalTime: 0, avgTime: 0 };
+    const existing = this.metrics.get(operation) || {
+      count: 0,
+      totalTime: 0,
+      avgTime: 0,
+    };
     const updated = {
       count: existing.count + 1,
       totalTime: existing.totalTime + duration,
       avgTime: (existing.totalTime + duration) / (existing.count + 1),
     };
-    
+
     this.metrics.set(operation, updated);
-    
+
     // Log slow operations
-    if (duration > 1000) { // More than 1 second
+    if (duration > 1000) {
+      // More than 1 second
       logBudgetEvent('slow-operation', { operation, duration }, 'warn');
     }
   }
 
-  getMetrics(): Record<string, { count: number; totalTime: number; avgTime: number }> {
+  getMetrics(): Record<
+    string,
+    { count: number; totalTime: number; avgTime: number }
+  > {
     return Object.fromEntries(this.metrics);
   }
 
@@ -240,7 +254,8 @@ export class BudgetSystemWatchdog {
     return BudgetSystemWatchdog.instance;
   }
 
-  start(intervalMs: number = 60000): void { // Default 1 minute
+  start(intervalMs: number = 60000): void {
+    // Default 1 minute
     if (this.isRunning) {
       logBudgetEvent('watchdog-already-running', {}, 'warn');
       return;
@@ -251,10 +266,14 @@ export class BudgetSystemWatchdog {
       try {
         const attention = await needsAttention();
         if (attention.needsAttention) {
-          logBudgetEvent('budget-system-needs-attention', {
-            severity: attention.severity,
-            reasons: attention.reasons,
-          }, attention.severity === 'critical' ? 'error' : 'warn');
+          logBudgetEvent(
+            'budget-system-needs-attention',
+            {
+              severity: attention.severity,
+              reasons: attention.reasons,
+            },
+            attention.severity === 'critical' ? 'error' : 'warn'
+          );
         }
       } catch (error) {
         logBudgetEvent('watchdog-check-failed', { error }, 'error');

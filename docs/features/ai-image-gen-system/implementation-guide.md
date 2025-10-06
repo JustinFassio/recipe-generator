@@ -86,11 +86,13 @@ export const BUDGET_CONFIG = {
 ### Step 1: Budget Manager Setup
 
 1. **Install Dependencies**:
+
    ```bash
    npm install @supabase/supabase-js
    ```
 
 2. **Create Budget Manager**:
+
    ```typescript
    // src/lib/ai-image-generation/budget-manager.ts
    import { supabase } from '@/lib/supabase';
@@ -112,11 +114,18 @@ export const BUDGET_CONFIG = {
 ### Step 2: Cost Tracking Integration
 
 1. **Add to Image Generation Flow**:
+
    ```typescript
    // In your image generation function
-   import { canGenerateImage, updateBudgetAfterGeneration } from '@/lib/ai-image-generation/budget-manager';
+   import {
+     canGenerateImage,
+     updateBudgetAfterGeneration,
+   } from '@/lib/ai-image-generation/budget-manager';
 
-   export async function generateImage(prompt: string, options: GenerationOptions) {
+   export async function generateImage(
+     prompt: string,
+     options: GenerationOptions
+   ) {
      // 1. Check budget before generation
      const budgetCheck = await canGenerateImage(expectedCost);
      if (!budgetCheck.allowed) {
@@ -138,13 +147,17 @@ export const BUDGET_CONFIG = {
 ### Step 3: User Interface Implementation
 
 1. **Create Budget Settings Component**:
+
    ```typescript
    // src/components/settings/budget-settings.tsx
-   import { getUserBudget, updateUserBudget } from '@/lib/ai-image-generation/budget-manager';
+   import {
+     getUserBudget,
+     updateUserBudget,
+   } from '@/lib/ai-image-generation/budget-manager';
 
    export function BudgetSettings() {
      const [budget, setBudget] = useState<UserBudget | null>(null);
-     
+
      // Implementation focusing only on working features
      // Remove non-functional UI elements
    }
@@ -168,9 +181,13 @@ export const BUDGET_CONFIG = {
 ### Unit Tests
 
 1. **Budget Manager Tests**:
+
    ```typescript
    // tests/budget-manager.test.ts
-   import { getUserBudget, canGenerateImage } from '@/lib/ai-image-generation/budget-manager';
+   import {
+     getUserBudget,
+     canGenerateImage,
+   } from '@/lib/ai-image-generation/budget-manager';
 
    describe('Budget Manager', () => {
      test('should create default budget for new user', async () => {
@@ -187,6 +204,7 @@ export const BUDGET_CONFIG = {
    ```
 
 2. **UI Component Tests**:
+
    ```typescript
    // tests/budget-settings.test.tsx
    import { render, screen } from '@testing-library/react';
@@ -225,7 +243,7 @@ export async function checkBudgetSystemHealth(): Promise<{
   issues: string[];
 }> {
   const issues: string[] = [];
-  
+
   try {
     // Test budget creation
     const testBudget = await getUserBudget('test-user');
@@ -237,7 +255,12 @@ export async function checkBudgetSystemHealth(): Promise<{
   }
 
   return {
-    status: issues.length === 0 ? 'healthy' : issues.length < 3 ? 'degraded' : 'unhealthy',
+    status:
+      issues.length === 0
+        ? 'healthy'
+        : issues.length < 3
+          ? 'degraded'
+          : 'unhealthy',
     issues,
   };
 }
@@ -251,13 +274,13 @@ Add comprehensive logging:
 // src/lib/ai-image-generation/budget-manager.ts
 export async function getUserBudget(userId?: string): Promise<UserBudget> {
   console.log(`[Budget] Getting budget for user: ${userId}`);
-  
+
   try {
     const { data: user } = await supabase.auth.getUser();
     console.log(`[Budget] User authenticated: ${!!user.user}`);
-    
+
     // ... rest of implementation
-    
+
     console.log(`[Budget] Budget retrieved successfully:`, budget);
     return budget;
   } catch (error) {
@@ -272,18 +295,22 @@ export async function getUserBudget(userId?: string): Promise<UserBudget> {
 #### Issue: 404 Errors for user_budgets
 
 **Symptoms**:
+
 ```
 GET user_budgets?select=*&user_id=eq.xxx 404 (Not Found)
 ```
 
 **Solutions**:
+
 1. Check if user is authenticated:
+
    ```typescript
    const { data: user } = await supabase.auth.getUser();
    console.log('User authenticated:', !!user.user);
    ```
 
 2. Verify RLS policies:
+
    ```sql
    SELECT * FROM pg_policies WHERE tablename = 'user_budgets';
    ```
@@ -301,11 +328,14 @@ GET user_budgets?select=*&user_id=eq.xxx 404 (Not Found)
 #### Issue: Budget Not Updated After Generation
 
 **Symptoms**:
+
 - Budget not reflecting recent image generation costs
 - `used_monthly` not increasing
 
 **Solutions**:
+
 1. Check if `updateBudgetAfterGeneration` is called:
+
    ```typescript
    // In your image generation function
    if (result.success) {
@@ -333,15 +363,20 @@ Implement budget data caching:
 
 ```typescript
 // src/lib/ai-image-generation/budget-cache.ts
-const budgetCache = new Map<string, { budget: UserBudget; timestamp: number }>();
+const budgetCache = new Map<
+  string,
+  { budget: UserBudget; timestamp: number }
+>();
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
-export async function getCachedBudget(userId: string): Promise<UserBudget | null> {
+export async function getCachedBudget(
+  userId: string
+): Promise<UserBudget | null> {
   const cached = budgetCache.get(userId);
   if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
     return cached.budget;
   }
-  
+
   const budget = await getUserBudget(userId);
   budgetCache.set(userId, { budget, timestamp: Date.now() });
   return budget;
@@ -354,11 +389,13 @@ Optimize multiple budget updates:
 
 ```typescript
 // src/lib/ai-image-generation/budget-batch.ts
-export async function updateMultipleBudgets(updates: Array<{ userId: string; cost: number }>) {
-  const promises = updates.map(({ userId, cost }) => 
+export async function updateMultipleBudgets(
+  updates: Array<{ userId: string; cost: number }>
+) {
+  const promises = updates.map(({ userId, cost }) =>
     updateBudgetAfterGeneration(cost, userId)
   );
-  
+
   await Promise.allSettled(promises);
 }
 ```
@@ -373,11 +410,11 @@ export function validateBudgetInput(input: any): UserBudget {
   if (!input.user_id || typeof input.user_id !== 'string') {
     throw new Error('Invalid user_id');
   }
-  
+
   if (typeof input.monthly_budget !== 'number' || input.monthly_budget < 0) {
     throw new Error('Invalid monthly_budget');
   }
-  
+
   return input as UserBudget;
 }
 ```
@@ -388,20 +425,24 @@ export function validateBudgetInput(input: any): UserBudget {
 // src/lib/ai-image-generation/budget-rate-limit.ts
 const rateLimitMap = new Map<string, number>();
 
-export function checkRateLimit(userId: string, maxRequests = 10, windowMs = 60000): boolean {
+export function checkRateLimit(
+  userId: string,
+  maxRequests = 10,
+  windowMs = 60000
+): boolean {
   const now = Date.now();
   const userRequests = rateLimitMap.get(userId) || 0;
-  
+
   if (userRequests >= maxRequests) {
     return false;
   }
-  
+
   rateLimitMap.set(userId, userRequests + 1);
   setTimeout(() => {
     const current = rateLimitMap.get(userId) || 0;
     rateLimitMap.set(userId, Math.max(0, current - 1));
   }, windowMs);
-  
+
   return true;
 }
 ```
@@ -412,7 +453,10 @@ export function checkRateLimit(userId: string, maxRequests = 10, windowMs = 6000
 
 ```typescript
 // src/lib/ai-image-generation/budget-analytics.ts
-export async function getBudgetAnalytics(userId: string, period: 'week' | 'month' | 'year') {
+export async function getBudgetAnalytics(
+  userId: string,
+  period: 'week' | 'month' | 'year'
+) {
   const { data: costs } = await supabase
     .from('image_generation_costs')
     .select('*')
@@ -423,7 +467,7 @@ export async function getBudgetAnalytics(userId: string, period: 'week' | 'month
   return {
     totalSpent: costs.reduce((sum, cost) => sum + cost.cost, 0),
     totalGenerations: costs.length,
-    successfulGenerations: costs.filter(c => c.success).length,
+    successfulGenerations: costs.filter((c) => c.success).length,
     averageCost: costs.reduce((sum, cost) => sum + cost.cost, 0) / costs.length,
     costBySize: groupBy(costs, 'size'),
     costByQuality: groupBy(costs, 'quality'),
@@ -438,9 +482,9 @@ export async function getBudgetAnalytics(userId: string, period: 'week' | 'month
 export async function checkBudgetAlerts(userId: string) {
   const budget = await getUserBudget(userId);
   const usagePercentage = (budget.used_monthly / budget.monthly_budget) * 100;
-  
+
   const alerts = [];
-  
+
   if (usagePercentage >= 90) {
     alerts.push({
       type: 'critical',
@@ -454,7 +498,7 @@ export async function checkBudgetAlerts(userId: string) {
       percentage: usagePercentage,
     });
   }
-  
+
   return alerts;
 }
 ```
