@@ -53,17 +53,7 @@ export function RecipeViewPage() {
   // - Authenticated users: Try user query first, then public query as fallback
   // - Unauthenticated users: Use public query only
   const shouldFetchUser = !!user && !authLoading;
-  const shouldFetchPublic = true; // Always enable public query as fallback
-
-  console.log('🚀 [RecipeViewPage] Query optimization strategy:', {
-    shouldFetchUser,
-    shouldFetchPublic,
-    hasUser: !!user,
-    authLoading,
-    strategy: shouldFetchUser
-      ? 'user-first-public-fallback'
-      : 'public-query-only',
-  });
+  const shouldFetchPublic = !shouldFetchUser; // Only fetch public if no authenticated user
 
   const {
     data: userRecipe,
@@ -76,6 +66,18 @@ export function RecipeViewPage() {
     isLoading: publicLoading,
     error: publicError,
   } = usePublicRecipe(id!, { enabled: shouldFetchPublic });
+
+  console.log('🚀 [RecipeViewPage] Query optimization strategy:', {
+    shouldFetchUser,
+    shouldFetchPublic,
+    hasUser: !!user,
+    authLoading,
+    userError: userError?.message,
+    publicError: publicError?.message,
+    strategy: shouldFetchUser
+      ? 'user-first-public-fallback'
+      : 'public-query-only',
+  });
 
   // Use whichever one succeeds (base recipe from database)
   const baseRecipe = userRecipe || publicRecipe;
@@ -598,6 +600,18 @@ export function RecipeViewPage() {
   const shouldShowEdit = !shouldShowSave;
 
   const handleEdit = () => {
+    if (!recipe) return;
+
+    // If this is a shared (public) recipe and the current user is the owner,
+    // warn that edits will update the publicly shared version
+    const isSharedPublic = !!recipe.is_public;
+    if (isOwner && isSharedPublic) {
+      const proceed = window.confirm(
+        'Shared recipe, editing will update the public version. Would you like to continue?'
+      );
+      if (!proceed) return;
+    }
+
     navigate('/add', { state: { recipe } });
   };
 
@@ -658,6 +672,25 @@ export function RecipeViewPage() {
                       {versions.length !== 1 ? 's' : ''}
                     </Badge>
                   </div>
+                )}
+
+                {/* Owner-facing share status pill */}
+                {isOwner && (
+                  <Badge
+                    variant="outline"
+                    className={`text-xs ${
+                      (recipe?.is_public || !!publicRecipe)
+                        ? 'bg-green-100 text-green-800 border-green-300'
+                        : 'bg-gray-100 text-gray-700 border-gray-300'
+                    }`}
+                    title={
+                      (recipe?.is_public || !!publicRecipe)
+                        ? 'This recipe is currently shared publicly'
+                        : 'This recipe is not currently shared'
+                    }
+                  >
+                    {(recipe?.is_public || !!publicRecipe) ? 'Shared' : 'Not shared'}
+                  </Badge>
                 )}
               </div>
 
