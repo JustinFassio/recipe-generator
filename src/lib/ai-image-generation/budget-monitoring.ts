@@ -226,8 +226,7 @@ export class BudgetPerformanceMonitor {
     this.metrics.set(operation, updated);
 
     // Log slow operations
-    if (duration > 1000) {
-      // More than 1 second
+    if (duration > BUDGET_CONFIG.PERFORMANCE_THRESHOLDS.SLOW_OPERATION_MS) {
       logBudgetEvent('slow-operation', { operation, duration }, 'warn');
     }
   }

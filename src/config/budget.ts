@@ -55,6 +55,11 @@ export const BUDGET_CONFIG = {
     BUDGET_CHECKS_PER_MINUTE: 60,
     BUDGET_UPDATES_PER_MINUTE: 10,
   },
+
+  // Performance monitoring thresholds
+  PERFORMANCE_THRESHOLDS: {
+    SLOW_OPERATION_MS: 1000, // Log operations taking longer than 1 second
+  },
 } as const;
 
 /**
