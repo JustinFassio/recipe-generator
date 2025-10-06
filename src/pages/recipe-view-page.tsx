@@ -679,17 +679,19 @@ export function RecipeViewPage() {
                   <Badge
                     variant="outline"
                     className={`text-xs ${
-                      (recipe?.is_public || !!publicRecipe)
+                      recipe?.is_public || !!publicRecipe
                         ? 'bg-green-100 text-green-800 border-green-300'
                         : 'bg-gray-100 text-gray-700 border-gray-300'
                     }`}
                     title={
-                      (recipe?.is_public || !!publicRecipe)
+                      recipe?.is_public || !!publicRecipe
                         ? 'This recipe is currently shared publicly'
                         : 'This recipe is not currently shared'
                     }
                   >
-                    {(recipe?.is_public || !!publicRecipe) ? 'Shared' : 'Not shared'}
+                    {recipe?.is_public || !!publicRecipe
+                      ? 'Shared'
+                      : 'Not shared'}
                   </Badge>
                 )}
               </div>
