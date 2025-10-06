@@ -53,7 +53,7 @@ export function RecipeViewPage() {
   // - Authenticated users: Try user query first, then public query as fallback
   // - Unauthenticated users: Use public query only
   const shouldFetchUser = !!user && !authLoading;
-  const shouldFetchPublic = !shouldFetchUser; // Only fetch public if no authenticated user
+  const shouldFetchPublic = true; // Always enable public query as fallback
 
   const {
     data: userRecipe,
