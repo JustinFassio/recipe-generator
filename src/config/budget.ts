@@ -34,6 +34,7 @@ export const BUDGET_CONFIG = {
   ALERT_THRESHOLDS: {
     WARNING: 75, // 75% of budget used
     CRITICAL: 90, // 90% of budget used
+    HIGH_SPENDING_MULTIPLIER: 10, // Alert when total spent exceeds average budget by 10x
   },
 
   // Error handling settings

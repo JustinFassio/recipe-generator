@@ -8,6 +8,7 @@ import {
   checkBudgetSystemHealth,
   getBudgetSystemMetrics,
 } from './budget-health-check';
+import { BUDGET_CONFIG } from '@/config/budget';
 
 export interface BudgetAlert {
   id: string;
@@ -52,7 +53,11 @@ export async function monitorBudgetSystem(): Promise<BudgetMonitoringData> {
   }
 
   // Generate alerts based on metrics
-  if (metrics.totalSpent > metrics.averageBudget * 10) {
+  if (
+    metrics.totalSpent >
+    metrics.averageBudget *
+      BUDGET_CONFIG.ALERT_THRESHOLDS.HIGH_SPENDING_MULTIPLIER
+  ) {
     alerts.push({
       id: `high-spending-${Date.now()}`,
       type: 'warning',
