@@ -181,8 +181,9 @@ export function BudgetSettings() {
                   onChange={(e) =>
                     handleInputChange(
                       'monthly_limit',
-                      parseFloat(e.target.value) ||
-                        BUDGET_CONFIG.MIN_MONTHLY_BUDGET
+                      Number.isNaN(parseFloat(e.target.value))
+                        ? BUDGET_CONFIG.MIN_MONTHLY_BUDGET
+                        : parseFloat(e.target.value)
                     )
                   }
                   className="pl-10"
