@@ -11,7 +11,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
 // TODO: If the Badge component is needed in the future (e.g., for budget status indicators), uncomment this import
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { DollarSign, AlertTriangle, Save, Info } from 'lucide-react';
@@ -19,6 +18,7 @@ import {
   getUserBudget,
   type UserBudget,
 } from '@/lib/ai-image-generation/budget-manager';
+import { BUDGET_CONFIG, formatCurrency } from '@/config/budget';
 import { toast } from '@/hooks/use-toast';
 
 export function BudgetSettings() {
@@ -29,14 +29,11 @@ export function BudgetSettings() {
   const [isSaving, setIsSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
 
-  // Form state
-  const [formData, setFormData] = useState({
-    monthly_limit: 10,
-    daily_limit: 1,
-    weekly_limit: 3,
-    alert_threshold: 80,
-    auto_pause_enabled: true,
-    pause_at_limit: true,
+  // Form state - Only include working features
+  const [formData, setFormData] = useState<{
+    monthly_limit: number;
+  }>({
+    monthly_limit: BUDGET_CONFIG.DEFAULT_MONTHLY_BUDGET,
   });
 
   useEffect(() => {
@@ -53,11 +50,6 @@ export function BudgetSettings() {
 
       setFormData({
         monthly_limit: budgetData.monthly_budget,
-        daily_limit: 0, // Simplified budget doesn't have daily_limit
-        weekly_limit: 0, // Simplified budget doesn't have weekly_limit
-        alert_threshold: 0, // Simplified budget doesn't have alert_threshold
-        auto_pause_enabled: false, // Simplified budget doesn't have auto_pause_enabled
-        pause_at_limit: false, // Simplified budget doesn't have pause_at_limit
       });
     } catch (error) {
       console.error('Failed to load budget data:', error);
@@ -119,12 +111,6 @@ export function BudgetSettings() {
     }
   };
 
-  const formatCurrency = (amount: number) => `$${amount.toFixed(2)}`;
-
-  // Removed unused getStatusColor function
-
-  // Removed getStatusBadge function as it's no longer used with simplified budget
-
   if (isLoading) {
     return (
       <Card>
@@ -177,152 +163,47 @@ export function BudgetSettings() {
             </div>
           )}
 
-          {/* Budget Limits */}
+          {/* Monthly Budget Limit */}
           <div className="space-y-4">
-            <h3 className="text-lg font-medium">Budget Limits</h3>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="daily_limit">Daily Limit</Label>
-                <div className="relative">
-                  <DollarSign className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                  <Input
-                    id="daily_limit"
-                    type="number"
-                    min="0"
-                    max="100"
-                    step="0.01"
-                    value={formData.daily_limit}
-                    onChange={(e) =>
-                      handleInputChange(
-                        'daily_limit',
-                        parseFloat(e.target.value) || 0
-                      )
-                    }
-                    className="pl-10"
-                  />
-                </div>
-                <p className="text-xs text-gray-600">
-                  Maximum daily spending on image generation
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="weekly_limit">Weekly Limit</Label>
-                <div className="relative">
-                  <DollarSign className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                  <Input
-                    id="weekly_limit"
-                    type="number"
-                    min="0"
-                    max="500"
-                    step="0.01"
-                    value={formData.weekly_limit}
-                    onChange={(e) =>
-                      handleInputChange(
-                        'weekly_limit',
-                        parseFloat(e.target.value) || 0
-                      )
-                    }
-                    className="pl-10"
-                  />
-                </div>
-                <p className="text-xs text-gray-600">
-                  Maximum weekly spending on image generation
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="monthly_limit">Monthly Limit</Label>
-                <div className="relative">
-                  <DollarSign className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                  <Input
-                    id="monthly_limit"
-                    type="number"
-                    min="0"
-                    max="2000"
-                    step="0.01"
-                    value={formData.monthly_limit}
-                    onChange={(e) =>
-                      handleInputChange(
-                        'monthly_limit',
-                        parseFloat(e.target.value) || 0
-                      )
-                    }
-                    className="pl-10"
-                  />
-                </div>
-                <p className="text-xs text-gray-600">
-                  Maximum monthly spending on image generation
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Alert Settings */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium">Alert Settings</h3>
+            <h3 className="text-lg font-medium">Monthly Budget Limit</h3>
 
             <div className="space-y-2">
-              <Label htmlFor="alert_threshold">Alert Threshold (%)</Label>
-              <Input
-                id="alert_threshold"
-                type="number"
-                min="10"
-                max="99"
-                value={formData.alert_threshold}
-                onChange={(e) =>
-                  handleInputChange(
-                    'alert_threshold',
-                    parseInt(e.target.value) || 80
-                  )
-                }
-              />
+              <Label htmlFor="monthly_limit">Monthly Limit</Label>
+              <div className="relative">
+                <DollarSign className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Input
+                  id="monthly_limit"
+                  type="number"
+                  min={BUDGET_CONFIG.MIN_MONTHLY_BUDGET}
+                  max={BUDGET_CONFIG.MAX_MONTHLY_BUDGET}
+                  step="0.01"
+                  value={formData.monthly_limit}
+                  onChange={(e) =>
+                    handleInputChange(
+                      'monthly_limit',
+                      Number.isNaN(parseFloat(e.target.value))
+                        ? BUDGET_CONFIG.MIN_MONTHLY_BUDGET
+                        : parseFloat(e.target.value)
+                    )
+                  }
+                  className="pl-10"
+                />
+              </div>
               <p className="text-xs text-gray-600">
-                Get notified when you reach this percentage of your budget limit
+                Maximum monthly spending on AI image generation
               </p>
             </div>
           </div>
 
-          {/* Safety Controls */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium">Safety Controls</h3>
-
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label htmlFor="auto_pause">Auto-Pause Generation</Label>
-                  <p className="text-sm text-gray-600">
-                    Automatically pause image generation when budget limits are
-                    reached
-                  </p>
-                </div>
-                <Switch
-                  id="auto_pause"
-                  checked={formData.auto_pause_enabled}
-                  onCheckedChange={(checked) =>
-                    handleInputChange('auto_pause_enabled', checked)
-                  }
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label htmlFor="pause_at_limit">Pause at Limit</Label>
-                  <p className="text-sm text-gray-600">
-                    Immediately stop generation when any budget limit is reached
-                  </p>
-                </div>
-                <Switch
-                  id="pause_at_limit"
-                  checked={formData.pause_at_limit}
-                  onCheckedChange={(checked) =>
-                    handleInputChange('pause_at_limit', checked)
-                  }
-                />
-              </div>
-            </div>
-          </div>
+          {/* Feature Status */}
+          <Alert>
+            <Info className="h-4 w-4" />
+            <AlertDescription>
+              <strong>Current Features:</strong> Only monthly budget limits are
+              currently supported. Daily/weekly limits, alerts, and auto-pause
+              features are planned for future releases.
+            </AlertDescription>
+          </Alert>
 
           {/* Cost Information */}
           <Alert>
@@ -349,7 +230,6 @@ export function BudgetSettings() {
       </Card>
 
       {/* Budget Status Alert */}
-      {/* Budget Status Alert - Simplified budget doesn't have pause functionality */}
       {budgetStatus &&
         budgetStatus.used_monthly >= budgetStatus.monthly_budget && (
           <Alert variant="destructive">

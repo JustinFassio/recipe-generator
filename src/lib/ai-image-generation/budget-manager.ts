@@ -1,4 +1,11 @@
 import { supabase } from '@/lib/supabase';
+import {
+  BUDGET_CONFIG,
+  validateBudgetAmount,
+  validateUserId,
+  canAffordGeneration,
+} from '@/config/budget';
+import { BudgetPerformanceMonitor } from './budget-monitoring';
 
 export interface UserBudget {
   user_id: string;
@@ -12,50 +19,59 @@ export interface UserBudget {
  * Get or create user budget settings
  */
 export async function getUserBudget(userId?: string): Promise<UserBudget> {
-  const { data: user } = await supabase.auth.getUser();
-  const targetUserId = userId || user.user?.id;
+  const monitor = BudgetPerformanceMonitor.getInstance();
+  const endTimer = monitor.startTimer('getUserBudget');
 
-  if (!targetUserId) {
-    throw new Error('User not authenticated');
+  try {
+    const { data: user } = await supabase.auth.getUser();
+    const targetUserId = userId || user.user?.id;
+
+    // Validate user ID
+    const userIdValidation = validateUserId(targetUserId);
+    if (!userIdValidation.valid) {
+      throw new Error(userIdValidation.error || 'User not authenticated');
+    }
+
+    // Try to get existing budget
+    const { data: existingBudget, error } = await supabase
+      .from('user_budgets')
+      .select('*')
+      .eq('user_id', targetUserId)
+      .maybeSingle();
+
+    if (error && error.code !== 'PGRST116' && error.code !== 'PGRST205') {
+      // PGRST116 = no rows returned, PGRST205 = table not found in schema cache
+      throw error;
+    }
+
+    // Return existing budget or create default
+    if (existingBudget) {
+      return existingBudget;
+    }
+
+    // Create default budget
+    const defaultBudget: UserBudget = {
+      user_id: targetUserId!,
+      monthly_budget: BUDGET_CONFIG.DEFAULT_MONTHLY_BUDGET,
+      used_monthly: 0,
+      period_start: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+
+    const { data: newBudget, error: createError } = await supabase
+      .from('user_budgets')
+      .insert(defaultBudget)
+      .select()
+      .single();
+
+    if (createError) {
+      throw createError;
+    }
+
+    return newBudget;
+  } finally {
+    endTimer();
   }
-
-  // Try to get existing budget
-  const { data: existingBudget, error } = await supabase
-    .from('user_budgets')
-    .select('*')
-    .eq('user_id', targetUserId)
-    .maybeSingle();
-
-  if (error && error.code !== 'PGRST116' && error.code !== 'PGRST205') {
-    // PGRST116 = no rows returned, PGRST205 = table not found in schema cache
-    throw error;
-  }
-
-  // Return existing budget or create default
-  if (existingBudget) {
-    return existingBudget;
-  }
-
-  // Create default budget
-  const defaultBudget: UserBudget = {
-    user_id: targetUserId,
-    monthly_budget: 10, // $10/month default
-    used_monthly: 0,
-    period_start: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  };
-
-  const { data: newBudget, error: createError } = await supabase
-    .from('user_budgets')
-    .insert(defaultBudget)
-    .select()
-    .single();
-
-  if (createError) {
-    throw createError;
-  }
-
-  return newBudget;
 }
 
 /**
@@ -68,8 +84,18 @@ export async function updateUserBudget(
   const { data: user } = await supabase.auth.getUser();
   const targetUserId = userId || user.user?.id;
 
-  if (!targetUserId) {
-    throw new Error('User not authenticated');
+  // Validate user ID
+  const userIdValidation = validateUserId(targetUserId);
+  if (!userIdValidation.valid) {
+    throw new Error(userIdValidation.error || 'User not authenticated');
+  }
+
+  // Validate budget amount if provided
+  if (budgetData.monthly_budget !== undefined) {
+    const budgetValidation = validateBudgetAmount(budgetData.monthly_budget);
+    if (!budgetValidation.valid) {
+      throw new Error(budgetValidation.error);
+    }
   }
 
   const updateData = {
@@ -102,8 +128,10 @@ export async function updateBudgetAfterGeneration(
     const { data: user } = await supabase.auth.getUser();
     const targetUserId = userId || user.user?.id;
 
-    if (!targetUserId) {
-      throw new Error('User not authenticated');
+    // Validate user ID
+    const userIdValidation = validateUserId(targetUserId);
+    if (!userIdValidation.valid) {
+      throw new Error(userIdValidation.error || 'User not authenticated');
     }
 
     // Get current budget first
@@ -141,18 +169,25 @@ export async function canGenerateImage(
 ): Promise<{ allowed: boolean; reason?: string }> {
   try {
     const budget = await getUserBudget(userId);
-    const remaining = budget.monthly_budget - budget.used_monthly;
 
-    if (cost > remaining) {
+    // Use the configuration-based validation
+    const result = canAffordGeneration(
+      cost,
+      budget.used_monthly,
+      budget.monthly_budget
+    );
+
+    if (!result.allowed) {
       return {
         allowed: false,
-        reason: `Monthly budget limit would be exceeded. Remaining: $${remaining.toFixed(2)}`,
+        reason: result.reason || 'Budget limit would be exceeded',
       };
     }
 
     return { allowed: true };
   } catch (error) {
     console.warn('Budget check failed, allowing generation:', error);
-    return { allowed: true };
+    // Fail open if budget system is down
+    return { allowed: BUDGET_CONFIG.ERROR_HANDLING.FAIL_OPEN };
   }
 }
