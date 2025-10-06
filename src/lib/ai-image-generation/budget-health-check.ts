@@ -124,7 +124,10 @@ export async function checkBudgetSystemHealth(): Promise<BudgetHealthStatus> {
   let status: 'healthy' | 'degraded' | 'unhealthy';
   if (passedChecks === totalChecks) {
     status = 'healthy';
-  } else if (passedChecks >= totalChecks * 0.6) {
+  } else if (
+    passedChecks >=
+    totalChecks * BUDGET_CONFIG.HEALTH_THRESHOLDS.DEGRADED_PERCENTAGE
+  ) {
     status = 'degraded';
   } else {
     status = 'unhealthy';

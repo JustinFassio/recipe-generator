@@ -65,6 +65,11 @@ export const BUDGET_CONFIG = {
   MONITORING: {
     DEFAULT_WATCHDOG_INTERVAL_MS: 60000, // Default 1 minute watchdog interval
   },
+
+  // Health check thresholds
+  HEALTH_THRESHOLDS: {
+    DEGRADED_PERCENTAGE: 0.6, // 60% - system considered degraded if this percentage of checks pass
+  },
 } as const;
 
 /**
