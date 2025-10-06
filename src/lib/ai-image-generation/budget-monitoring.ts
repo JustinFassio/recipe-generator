@@ -258,8 +258,9 @@ export class BudgetSystemWatchdog {
     return BudgetSystemWatchdog.instance;
   }
 
-  start(intervalMs: number = 60000): void {
-    // Default 1 minute
+  start(
+    intervalMs: number = BUDGET_CONFIG.MONITORING.DEFAULT_WATCHDOG_INTERVAL_MS
+  ): void {
     if (this.isRunning) {
       logBudgetEvent('watchdog-already-running', {}, 'warn');
       return;

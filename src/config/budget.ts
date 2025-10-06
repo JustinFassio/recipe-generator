@@ -60,6 +60,11 @@ export const BUDGET_CONFIG = {
   PERFORMANCE_THRESHOLDS: {
     SLOW_OPERATION_MS: 1000, // Log operations taking longer than 1 second
   },
+
+  // Monitoring configuration
+  MONITORING: {
+    DEFAULT_WATCHDOG_INTERVAL_MS: 60000, // Default 1 minute watchdog interval
+  },
 } as const;
 
 /**
