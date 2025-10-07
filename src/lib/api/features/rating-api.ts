@@ -78,11 +78,11 @@ export const ratingApi = {
       .eq('recipe_id', recipeId)
       .eq('version_number', versionNumber)
       .eq('user_id', user.id)
-      .single();
+      .maybeSingle(); // Use maybeSingle() to avoid 406 errors when no rating exists
 
-    if (error && error.code !== 'PGRST116') {
-      // PGRST116 means no rows found, which is fine
+    if (error) {
       handleError(error, 'Get user version rating');
+      return null;
     }
 
     return (data as unknown as CommentRow) || null;
