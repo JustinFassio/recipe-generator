@@ -8,8 +8,8 @@
  * 3. Update the database with the new URLs
  */
 
-const { createClient } = require('@supabase/supabase-js');
-const fetch = require('node-fetch');
+import { createClient } from '@supabase/supabase-js';
+import fetch from 'node-fetch';
 
 // Configuration
 const SUPABASE_URL = process.env.SUPABASE_URL;
