@@ -161,8 +161,8 @@ async function migrateDalleImages() {
 }
 
 // Run the migration
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   migrateDalleImages();
 }
 
-module.exports = { migrateDalleImages, isDalleUrl };
+export { migrateDalleImages, isDalleUrl };
