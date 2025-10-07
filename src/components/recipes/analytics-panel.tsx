@@ -128,7 +128,7 @@ export function AnalyticsPanel({
           recipe_id: recipeId,
           version_number: versionNumber || null,
           user_id: user.id,
-          viewed_date: new Date().toISOString(),
+          viewed_at: new Date().toISOString(), // Fixed: column is 'viewed_at' not 'viewed_date'
         });
       }
     } catch (error) {

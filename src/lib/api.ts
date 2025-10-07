@@ -250,6 +250,13 @@ export const recipeApi = {
         .single();
 
       if (recipeError) {
+        // PGRST116 = not found or not public (this is expected, not an error)
+        if (recipeError.code === 'PGRST116') {
+          console.log('📝 [API] Recipe not found or not public:', id);
+          return null;
+        }
+
+        // Only log unexpected errors
         console.error('❌ [API] Recipe fetch error:', {
           code: recipeError.code,
           message: recipeError.message,
@@ -257,12 +264,6 @@ export const recipeApi = {
           hint: recipeError.hint,
           recipeId: id,
         });
-
-        // Handle specific error cases
-        if (recipeError.code === 'PGRST116') {
-          console.log('📝 [API] Recipe not found or not public:', id);
-          return null;
-        }
 
         handleError(recipeError, 'Get public recipe');
       }
