@@ -913,61 +913,76 @@ export default function ShoppingCartPage() {
                               return (
                                 <div
                                   key={`${region}-${index}`}
-                                  className="flex items-center justify-between p-3 bg-base-100 rounded-lg border border-base-300"
+                                  className="p-3 bg-base-100 rounded-lg border border-base-300"
                                 >
-                                  <div className="flex-1">
-                                    <div className="flex items-center gap-2 mb-2">
-                                      <span className="font-semibold">
+                                  {/* Mobile-optimized cuisine card layout */}
+                                  <div className="space-y-3 sm:space-y-0">
+                                    {/* Top row: Cuisine name and badges */}
+                                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                                      <span className="font-semibold text-lg">
                                         {cuisineData.cuisine}
                                       </span>
-                                      <div className="badge badge-outline">
-                                        {actualCoverage}% coverage
-                                      </div>
-                                      <div className="badge badge-warning">
-                                        {actuallyMissing.length} missing
-                                      </div>
-                                      <div className="badge badge-info">
-                                        {allStaples.length} total staples
+                                      <div className="flex flex-wrap gap-1 sm:gap-2">
+                                        <div className="badge badge-outline badge-sm">
+                                          {actualCoverage}% coverage
+                                        </div>
+                                        <div className="badge badge-warning badge-sm">
+                                          {actuallyMissing.length} missing
+                                        </div>
+                                        <div className="badge badge-info badge-sm">
+                                          {allStaples.length} total staples
+                                        </div>
                                       </div>
                                     </div>
+
+                                    {/* Middle row: Missing ingredients */}
                                     <div className="text-sm text-base-content/60">
-                                      Missing:{' '}
-                                      {actuallyMissing
-                                        .slice(0, 3)
-                                        .map((s) => s.ingredient)
-                                        .join(', ')}
-                                      {actuallyMissing.length > 3 &&
-                                        ` +${actuallyMissing.length - 3} more`}
+                                      <span className="font-medium">
+                                        Missing:
+                                      </span>{' '}
+                                      <span className="break-words">
+                                        {actuallyMissing
+                                          .slice(0, 3)
+                                          .map((s) => s.ingredient)
+                                          .join(', ')}
+                                        {actuallyMissing.length > 3 &&
+                                          ` +${actuallyMissing.length - 3} more`}
+                                      </span>
                                     </div>
-                                  </div>
-                                  <div className="flex gap-2">
-                                    <button
-                                      className="btn btn-sm btn-outline"
-                                      onClick={() => {
-                                        setSelectedCuisine(cuisineData.cuisine);
-                                        setIsModalOpen(true);
-                                      }}
-                                    >
-                                      View All ({allStaples.length})
-                                    </button>
-                                    <button
-                                      className="btn btn-sm btn-primary"
-                                      onClick={async () => {
-                                        const recommendations =
-                                          getRecommendedAdditions(
-                                            cuisineData.cuisine.toLowerCase(),
-                                            3
+
+                                    {/* Bottom row: Action buttons */}
+                                    <div className="flex flex-col sm:flex-row gap-2 sm:gap-2">
+                                      <button
+                                        className="btn btn-sm btn-outline flex-1 sm:flex-none"
+                                        onClick={() => {
+                                          setSelectedCuisine(
+                                            cuisineData.cuisine
                                           );
-                                        const ingredients = recommendations.map(
-                                          (s) => s.ingredient
-                                        );
-                                        await addStaplesToGroceriesAsUnavailable(
-                                          ingredients
-                                        );
-                                      }}
-                                    >
-                                      Add Essentials
-                                    </button>
+                                          setIsModalOpen(true);
+                                        }}
+                                      >
+                                        View All ({allStaples.length})
+                                      </button>
+                                      <button
+                                        className="btn btn-sm btn-primary flex-1 sm:flex-none"
+                                        onClick={async () => {
+                                          const recommendations =
+                                            getRecommendedAdditions(
+                                              cuisineData.cuisine.toLowerCase(),
+                                              3
+                                            );
+                                          const ingredients =
+                                            recommendations.map(
+                                              (s) => s.ingredient
+                                            );
+                                          await addStaplesToGroceriesAsUnavailable(
+                                            ingredients
+                                          );
+                                        }}
+                                      >
+                                        Add Essentials
+                                      </button>
+                                    </div>
                                   </div>
                                 </div>
                               );
