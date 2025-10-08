@@ -434,33 +434,37 @@ export default function ShoppingCartPage() {
   return (
     <div className="container mx-auto p-6 max-w-7xl">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <ShoppingCart className="w-8 h-8 text-primary" />
-          <div>
-            <h1 className="text-3xl font-bold">Shopping Cart</h1>
-            <p className="text-base-content/70">
-              {allItems.length} items • {incompleteItems.length} remaining
-            </p>
+      <div className="mb-6">
+        {/* Mobile-optimized header layout */}
+        <div className="space-y-3 sm:space-y-0">
+          {/* Top row: Title and icon (mobile: stacked, desktop: side by side) */}
+          <div className="flex items-center gap-3">
+            <ShoppingCart className="w-8 h-8 text-primary" />
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold">Shopping Cart</h1>
+              <p className="text-sm sm:text-base text-base-content/70">
+                {allItems.length} items • {incompleteItems.length} remaining
+              </p>
+            </div>
           </div>
-        </div>
 
-        {/* Quick actions */}
-        <div className="flex gap-2">
-          <button
-            className="btn btn-outline btn-sm"
-            onClick={handleClearCompleted}
-            disabled={completedItems.length === 0}
-          >
-            Clear Completed
-          </button>
-          <button
-            className="btn btn-error btn-outline btn-sm"
-            onClick={handleClearAll}
-            disabled={allItems.length === 0}
-          >
-            Clear All
-          </button>
+          {/* Bottom row: Quick actions (mobile: full width, desktop: compact) */}
+          <div className="flex flex-wrap gap-2 sm:gap-2">
+            <button
+              className="btn btn-outline btn-sm flex-1 sm:flex-none"
+              onClick={handleClearCompleted}
+              disabled={completedItems.length === 0}
+            >
+              Clear Completed
+            </button>
+            <button
+              className="btn btn-error btn-outline btn-sm flex-1 sm:flex-none"
+              onClick={handleClearAll}
+              disabled={allItems.length === 0}
+            >
+              Clear All
+            </button>
+          </div>
         </div>
       </div>
 
