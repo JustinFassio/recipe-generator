@@ -311,11 +311,18 @@ export default function ExplorePage() {
           className="mb-6"
         />
 
-        {/* Sorting Controls */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center space-x-2">
-            <span className="text-sm font-medium text-gray-700">Sort by:</span>
-            <div className="flex items-center space-x-1">
+        {/* Sorting Controls - Mobile Optimized */}
+        <div className="mb-6">
+          <div className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+            {/* Sort by label */}
+            <div className="flex items-center">
+              <span className="text-sm font-medium text-gray-700">
+                Sort by:
+              </span>
+            </div>
+
+            {/* Sorting buttons - responsive layout */}
+            <div className="flex flex-wrap items-center gap-2 sm:gap-1">
               <Button
                 size="sm"
                 variant={sortBy === 'rating' ? 'default' : 'outline'}

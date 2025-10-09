@@ -647,14 +647,20 @@ export function RecipeViewPage() {
     }
   };
 
+  const handleViewVersion = () => {
+    setShowVersions(true);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50">
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         {/* Version Navigation Header - Show for owned recipes OR when versions exist */}
         {(isOwner || versions.length > 0) && (
           <div className="mb-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center space-x-4">
+            {/* Mobile-optimized header layout */}
+            <div className="space-y-3 sm:space-y-0">
+              {/* Top row: Back button and View Version (mobile: stacked, desktop: side by side) */}
+              <div className="flex items-center justify-between">
                 <Button
                   variant="ghost"
                   size="sm"
@@ -665,14 +671,28 @@ export function RecipeViewPage() {
                   Back
                 </Button>
 
+                {/* View Version button - only show on desktop or when there are versions */}
                 {versions.length > 0 && (
-                  <div className="flex items-center space-x-2">
-                    <Badge variant="outline" className="text-xs">
-                      <GitBranch className="h-3 w-3 mr-1" />
-                      {versions.length} version
-                      {versions.length !== 1 ? 's' : ''}
-                    </Badge>
-                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleViewVersion}
+                    className="hidden sm:flex items-center text-xs"
+                  >
+                    <GitBranch className="h-3 w-3 mr-1" />
+                    View Version
+                  </Button>
+                )}
+              </div>
+
+              {/* Bottom row: Status pills (mobile: full width, desktop: compact) */}
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                {versions.length > 0 && (
+                  <Badge variant="outline" className="text-xs">
+                    <GitBranch className="h-3 w-3 mr-1" />
+                    {versions.length} version
+                    {versions.length !== 1 ? 's' : ''}
+                  </Badge>
                 )}
 
                 {/* Owner-facing share status pill */}
@@ -695,114 +715,128 @@ export function RecipeViewPage() {
                       : 'Not shared'}
                   </Badge>
                 )}
-              </div>
 
-              <div className="flex items-center space-x-2">
+                {/* Mobile View Version button - show on mobile when there are versions */}
                 {versions.length > 0 && (
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setShowVersions(!showVersions)}
+                    onClick={handleViewVersion}
+                    className="sm:hidden text-xs"
                   >
-                    <GitBranch className="h-4 w-4 mr-2" />
-                    {showVersions ? 'Hide' : 'View'} Versions ({versions.length}
-                    )
+                    <GitBranch className="h-3 w-3 mr-1" />
+                    View Version
                   </Button>
                 )}
               </div>
             </div>
 
-            {/* Current Version Info */}
-            <div className="bg-white rounded-lg border border-gray-200 p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="flex items-center space-x-2">
-                    <Badge
-                      variant={
-                        versionContent?.version_number === 0 ||
-                        (versionContent &&
-                          versions.length > 0 &&
-                          versionContent.version_number ===
-                            Math.max(...versions.map((v) => v.version_number)))
-                          ? 'default'
-                          : 'secondary'
-                      }
-                      className={
-                        versionContent?.version_number === 0
-                          ? 'bg-amber-100 text-amber-800 border-amber-300'
-                          : versionContent &&
-                              versions.length > 0 &&
-                              versionContent.version_number ===
-                                Math.max(
-                                  ...versions.map((v) => v.version_number)
-                                )
-                            ? 'bg-green-100 text-green-800 border-green-300'
-                            : ''
-                      }
-                    >
-                      {versionContent?.version_number === 0
-                        ? 'Original'
-                        : `v${versionContent?.version_number || currentVersionNumber}`}
-                      {versionContent &&
+            {/* Versions Toggle Button */}
+            {versions.length > 0 && (
+              <div className="mt-4">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowVersions(!showVersions)}
+                  className="w-full sm:w-auto"
+                >
+                  <GitBranch className="h-4 w-4 mr-2" />
+                  {showVersions ? 'Hide' : 'View'} Versions ({versions.length})
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Current Version Info */}
+        {(isOwner || versions.length > 0) && (
+          <div className="bg-white rounded-lg border border-gray-200 p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="flex items-center space-x-2">
+                  <Badge
+                    variant={
+                      versionContent?.version_number === 0 ||
+                      (versionContent &&
                         versions.length > 0 &&
                         versionContent.version_number ===
-                          Math.max(...versions.map((v) => v.version_number)) &&
-                        versionContent.version_number > 0 &&
-                        ' (Latest)'}
-                    </Badge>
-                    {versionContent?.version_name && (
-                      <span className="text-sm font-medium text-gray-700">
-                        {versionContent.version_name}
-                      </span>
-                    )}
-                    {recipe && !versionContent?.version_name && (
-                      <span className="text-sm font-medium text-gray-900">
-                        {recipe.title}
-                      </span>
-                    )}
-                  </div>
-                  {versionContent?.changelog && (
-                    <div className="text-sm text-gray-600 mt-1">
-                      <strong>
-                        {versionContent.version_number === 0
-                          ? 'Description:'
-                          : 'Changes:'}
-                      </strong>{' '}
-                      {versionContent.changelog}
-                    </div>
+                          Math.max(...versions.map((v) => v.version_number)))
+                        ? 'default'
+                        : 'secondary'
+                    }
+                    className={
+                      versionContent?.version_number === 0
+                        ? 'bg-amber-100 text-amber-800 border-amber-300'
+                        : versionContent &&
+                            versions.length > 0 &&
+                            versionContent.version_number ===
+                              Math.max(...versions.map((v) => v.version_number))
+                          ? 'bg-green-100 text-green-800 border-green-300'
+                          : ''
+                    }
+                  >
+                    {versionContent?.version_number === 0
+                      ? 'Original'
+                      : `v${versionContent?.version_number || currentVersionNumber}`}
+                    {versionContent &&
+                      versions.length > 0 &&
+                      versionContent.version_number ===
+                        Math.max(...versions.map((v) => v.version_number)) &&
+                      versionContent.version_number > 0 &&
+                      ' (Latest)'}
+                  </Badge>
+                  {versionContent?.version_name && (
+                    <span className="text-sm font-medium text-gray-700">
+                      {versionContent.version_name}
+                    </span>
                   )}
-                  {versionContent && (
-                    <div className="text-xs text-gray-500 mt-1">
-                      {versionContent.version_number === 0
-                        ? 'Original recipe'
-                        : `Created ${new Date(versionContent.created_at).toLocaleDateString()}`}
-                    </div>
-                  )}
-                  {recipe?.creator_rating && (
-                    <div className="flex items-center space-x-1 mt-1">
-                      <span className="text-xs text-gray-500">
-                        Creator rating:
-                      </span>
-                      <div className="flex items-center">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <span
-                            key={star}
-                            className={`text-xs ${
-                              star <= recipe.creator_rating!
-                                ? 'text-orange-400'
-                                : 'text-gray-300'
-                            }`}
-                          >
-                            ★
-                          </span>
-                        ))}
-                      </div>
-                      <span className="text-xs text-gray-500">
-                        ({recipe.creator_rating}/5)
-                      </span>
-                    </div>
+                  {recipe && !versionContent?.version_name && (
+                    <span className="text-sm font-medium text-gray-900">
+                      {recipe.title}
+                    </span>
                   )}
                 </div>
+                {versionContent?.changelog && (
+                  <div className="text-sm text-gray-600 mt-1">
+                    <strong>
+                      {versionContent.version_number === 0
+                        ? 'Description:'
+                        : 'Changes:'}
+                    </strong>{' '}
+                    {versionContent.changelog}
+                  </div>
+                )}
+                {versionContent && (
+                  <div className="text-xs text-gray-500 mt-1">
+                    {versionContent.version_number === 0
+                      ? 'Original recipe'
+                      : `Created ${new Date(versionContent.created_at).toLocaleDateString()}`}
+                  </div>
+                )}
+                {recipe?.creator_rating && (
+                  <div className="flex items-center space-x-1 mt-1">
+                    <span className="text-xs text-gray-500">
+                      Creator rating:
+                    </span>
+                    <div className="flex items-center">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <span
+                          key={star}
+                          className={`text-xs ${
+                            star <= recipe.creator_rating!
+                              ? 'text-orange-400'
+                              : 'text-gray-300'
+                          }`}
+                        >
+                          ★
+                        </span>
+                      ))}
+                    </div>
+                    <span className="text-xs text-gray-500">
+                      ({recipe.creator_rating}/5)
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
