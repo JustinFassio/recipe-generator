@@ -22,6 +22,8 @@ import { HealthCoachesPage } from '@/features/health-coach';
 import GlobalIngredientsPage from '@/pages/global-ingredients-page';
 import ShoppingCartPage from '@/pages/shopping-cart-page';
 import { SelectionProvider } from '@/contexts/SelectionContext';
+import SubscriptionPage from '@/pages/SubscriptionPage';
+import SubscriptionSuccessPage from '@/pages/SubscriptionSuccessPage';
 
 import { Toaster } from '@/components/ui/toaster';
 
@@ -225,6 +227,34 @@ function AppContent() {
               <Header />
               <main>
                 <GlobalIngredientsPage />
+              </main>
+            </div>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Subscription routes */}
+      <Route
+        path="/subscription"
+        element={
+          <ProtectedRoute>
+            <div className="bg-base-100 min-h-screen">
+              <Header />
+              <main>
+                <SubscriptionPage />
+              </main>
+            </div>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/subscription/success"
+        element={
+          <ProtectedRoute>
+            <div className="bg-base-100 min-h-screen">
+              <Header />
+              <main>
+                <SubscriptionSuccessPage />
               </main>
             </div>
           </ProtectedRoute>

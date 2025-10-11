@@ -1,16 +1,26 @@
-import { LogOut, Menu, X, User, Settings, ShoppingCart } from 'lucide-react';
+import {
+  LogOut,
+  Menu,
+  X,
+  User,
+  Settings,
+  ShoppingCart,
+  Sparkles,
+} from 'lucide-react';
 import { useAuth } from '@/contexts/AuthProvider';
 import { useLocation, useNavigate } from 'react-router-dom';
 // AccessibilityProvider removed to prevent duplicate theme application
 import { AppTitle } from '@/components/ui/app-title';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
+import { useHasPremiumAccess } from '@/hooks/useSubscription';
 
 export function Header() {
   const { user, profile, signOut } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { hasAccess, isInTrial } = useHasPremiumAccess();
 
   const handleSignOut = async () => {
     try {
@@ -90,6 +100,27 @@ export function Header() {
             >
               Health Reports
             </Button>
+
+            {/* Subscription Button */}
+            {hasAccess ? (
+              <Button
+                variant="outline"
+                onClick={() => navigate('/subscription')}
+                className="border-primary text-primary hover:bg-primary/10"
+              >
+                <Sparkles className="w-4 h-4 mr-2" />
+                {isInTrial ? 'Trial' : 'Premium'}
+              </Button>
+            ) : (
+              <Button
+                variant="default"
+                onClick={() => navigate('/subscription')}
+                className="bg-gradient-to-r from-primary to-accent text-primary-content hover:opacity-90"
+              >
+                <Sparkles className="w-4 h-4 mr-2" />
+                Upgrade
+              </Button>
+            )}
 
             {/* AccessibilityProvider removed to prevent duplicate theme application */}
 
@@ -259,6 +290,33 @@ export function Header() {
             >
               Health Reports
             </Button>
+
+            {/* Subscription Button - Mobile */}
+            {hasAccess ? (
+              <Button
+                variant="outline"
+                onClick={() => {
+                  navigate('/subscription');
+                  closeMobileMenu();
+                }}
+                className="w-full justify-start border-primary text-primary hover:bg-primary/10"
+              >
+                <Sparkles className="w-4 h-4 mr-2" />
+                {isInTrial ? 'Trial Active' : 'Premium Member'}
+              </Button>
+            ) : (
+              <Button
+                variant="default"
+                onClick={() => {
+                  navigate('/subscription');
+                  closeMobileMenu();
+                }}
+                className="w-full justify-start bg-gradient-to-r from-primary to-accent text-primary-content hover:opacity-90"
+              >
+                <Sparkles className="w-4 h-4 mr-2" />
+                Upgrade to Premium
+              </Button>
+            )}
 
             <Button
               variant="ghost"
