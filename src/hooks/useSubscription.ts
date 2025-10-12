@@ -45,11 +45,20 @@ export function useSubscriptionStatus() {
         if (error.code === 'PGRST116') {
           return null;
         }
+        // If table doesn't exist (404), return null gracefully
+        if (error.code === '42P01' || error.message?.includes('404')) {
+          console.warn(
+            'Subscription table not found - migration may not be applied yet'
+          );
+          return null;
+        }
         throw error;
       }
 
       return data;
     },
+    retry: false, // Don't retry if table doesn't exist
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
   });
 }
 
@@ -69,11 +78,20 @@ export function useSubscription() {
         if (error.code === 'PGRST116') {
           return null;
         }
+        // If table doesn't exist (404), return null gracefully
+        if (error.code === '42P01' || error.message?.includes('404')) {
+          console.warn(
+            'Subscription table not found - migration may not be applied yet'
+          );
+          return null;
+        }
         throw error;
       }
 
       return data;
     },
+    retry: false, // Don't retry if table doesn't exist
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
   });
 }
 
