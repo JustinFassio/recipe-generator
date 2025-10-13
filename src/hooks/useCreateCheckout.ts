@@ -42,9 +42,9 @@ export function useCreateCheckout() {
       console.log('[Checkout] API response status:', response.status);
 
       if (!response.ok) {
-        const text = await response.text();
-        console.error('[Checkout] API error:', text);
-        throw new Error(text || `HTTP ${response.status}`);
+        const error = await response.json();
+        console.error('[Checkout] API error:', error);
+        throw new Error(error.error || 'Failed to create checkout session');
       }
 
       const data: CheckoutResponse = await response.json();
