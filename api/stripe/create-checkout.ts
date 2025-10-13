@@ -2,15 +2,6 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-09-30.clover',
-});
-
-const supabase = createClient(
-  process.env.VITE_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
-
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Only allow POST requests
   if (req.method !== 'POST') {
@@ -18,6 +9,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
+    // Guard and normalize env vars
+    const secretKey = (process.env.STRIPE_SECRET_KEY || '').trim();
+    const priceId = (process.env.STRIPE_PRICE_ID || '').trim();
+    const supabaseUrl = (process.env.VITE_SUPABASE_URL || '').trim();
+    const supabaseKey = (process.env.SUPABASE_SERVICE_ROLE_KEY || '').trim();
+
+    if (!secretKey || !priceId || !supabaseUrl || !supabaseKey) {
+      console.error('[Checkout] Missing environment variables');
+      return res.status(500).json({
+        error: 'Stripe not configured',
+        details: 'Missing required environment variables',
+      });
+    }
+
+    // Initialize Stripe and Supabase inside handler
+    const stripe = new Stripe(secretKey, { apiVersion: '2025-09-30.clover' });
+    const supabase = createClient(supabaseUrl, supabaseKey);
     // Get authorization token
     const authHeader = req.headers.authorization;
     console.log('[Checkout] Auth header present:', !!authHeader);
@@ -86,9 +94,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       customer: customerId,
       line_items: [
         {
-          // Replace with your actual Stripe Price ID
-          // Create this in Stripe Dashboard: Products → Add Product → $5.99/month
-          price: process.env.STRIPE_PRICE_ID || 'price_xxxxx',
+          price: priceId,
           quantity: 1,
         },
       ],
@@ -106,12 +112,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       allow_promotion_codes: true, // Allow coupon codes
     });
 
+    res.setHeader('Content-Type', 'application/json');
     return res.status(200).json({
       sessionId: session.id,
       url: session.url,
     });
   } catch (error) {
     console.error('Error creating checkout session:', error);
+    res.setHeader('Content-Type', 'application/json');
     return res.status(500).json({
       error: error instanceof Error ? error.message : 'Internal server error',
     });
