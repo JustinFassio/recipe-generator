@@ -45,8 +45,8 @@ export function useSubscriptionStatus() {
         if (error.code === 'PGRST116') {
           return null;
         }
-        // If table doesn't exist (404), return null gracefully
-        if (error.code === '42P01' || error.message?.includes('404')) {
+        // If table doesn't exist, return null gracefully
+        if (error.code === '42P01' || error.code === 'PGRST205') {
           console.warn(
             'Subscription table not found - migration may not be applied yet'
           );
@@ -78,8 +78,8 @@ export function useSubscription() {
         if (error.code === 'PGRST116') {
           return null;
         }
-        // If table doesn't exist (404), return null gracefully
-        if (error.code === '42P01' || error.message?.includes('404')) {
+        // If table doesn't exist, return null gracefully
+        if (error.code === '42P01' || error.code === 'PGRST205') {
           console.warn(
             'Subscription table not found - migration may not be applied yet'
           );
