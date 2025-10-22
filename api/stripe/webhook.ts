@@ -68,7 +68,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         // Get subscription details
         const subscription = (await stripe.subscriptions.retrieve(
           session.subscription as string
-        )) as Stripe.Subscription & {
+        )) as unknown as Stripe.Subscription & {
           current_period_start: number;
           current_period_end: number;
         };
@@ -78,7 +78,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           user_id: userId,
           stripe_customer_id: session.customer as string,
           stripe_subscription_id: subscription.id,
-          stripe_price_id: subscription.items.data[0].price.id,
+          stripe_price_id: subscription.items.data[0]?.price?.id,
           status: subscription.status,
           trial_start: subscription.trial_start
             ? new Date(subscription.trial_start * 1000).toISOString()
