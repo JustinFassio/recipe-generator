@@ -20,7 +20,7 @@ export const setupDatabaseTests = () => {
     vi.unmock('@supabase/supabase-js');
 
     // Use real Supabase client
-    return createDbClient('service');
+    return createDbClient();
   } else {
     throw new Error('Database tests require Supabase environment variables');
   }
