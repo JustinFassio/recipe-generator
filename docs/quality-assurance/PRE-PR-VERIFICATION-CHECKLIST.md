@@ -17,6 +17,8 @@
 - [ ] **TypeScript compilation**: `npx tsc --noEmit`
 - [ ] **Build verification**: `npm run build`
 - [ ] **Security audit**: `npm audit`
+- [ ] **Security scan for secrets**: `grep -r "SERVICE_ROLE_KEY\|SECRET_KEY" src/ --exclude-dir=node_modules`
+- [ ] **Environment variable exposure check**: Verify no service keys in client-accessible code
 
 ### **2. Code Quality Baseline**
 
@@ -54,6 +56,8 @@
 - [ ] **Prettier formatting**: Consistent code style
 - [ ] **Accessibility**: Proper ARIA labels, semantic HTML
 - [ ] **Performance**: Avoid unnecessary re-renders, optimize imports
+- [ ] **Security compliance**: No service keys in client code, proper environment variable usage
+- [ ] **Secret management**: Verify only anon keys in client-accessible files
 
 ---
 
@@ -244,6 +248,8 @@ export function utilityFunction(input: string): string {
 - [ ] **No hardcoded values**: Use constants or configuration
 - [ ] **No magic numbers**: Use named constants
 - [ ] **No commented-out code**: Remove or implement
+- [ ] **No service keys in client code**: Verify SUPABASE_SERVICE_ROLE_KEY not exposed
+- [ ] **No secrets in test files**: Ensure test utilities don't expose production secrets
 
 ### **16. TypeScript Issues**
 
@@ -252,6 +258,31 @@ export function utilityFunction(input: string): string {
 - [ ] **No unused variables**: Remove or use all declared variables
 - [ ] **Proper interface definitions**: Use interfaces for object shapes
 - [ ] **Generic type usage**: Use generics where appropriate
+
+---
+
+## 🔒 **Security Validation Requirements**
+
+### **16.1 Secret Scanning**
+
+- [ ] **Scan for service keys**: `grep -r "SERVICE_ROLE_KEY\|SECRET_KEY" src/ --exclude-dir=node_modules`
+- [ ] **Check environment variable usage**: Verify only safe env vars in client code
+- [ ] **Validate test file security**: Ensure test utilities don't expose production secrets
+- [ ] **Review database client configuration**: Confirm only anon keys in client-accessible code
+
+### **16.2 Environment Variable Security**
+
+- [ ] **Client-safe variables only**: Only `VITE_*` and `SUPABASE_ANON_KEY` in client code
+- [ ] **Service keys isolated**: `SUPABASE_SERVICE_ROLE_KEY` only in server-side code
+- [ ] **Test environment separation**: Test files use mock data, not production secrets
+- [ ] **Build-time validation**: Ensure secrets not bundled in client builds
+
+### **16.3 Database Security**
+
+- [ ] **Anon key only**: Database clients use only anon keys for security
+- [ ] **No admin operations**: Client code cannot perform admin operations
+- [ ] **Proper RLS**: Row Level Security policies protect data access
+- [ ] **Service role isolation**: Service role only used in server-side functions
 
 ---
 
