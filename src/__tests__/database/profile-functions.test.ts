@@ -1,7 +1,10 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import { createDbClient, shouldRunDbTests } from './_utils/dbClient';
-import { createUserAndProfile } from './_utils/factories';
-import { truncatePhase1Tables } from './_utils/cleanup';
+import {
+  createDbClient,
+  shouldRunDbTests,
+} from '../../../tests/database/_utils/dbClient';
+import { createUserAndProfile } from '../../../tests/database/_utils/factories';
+import { truncatePhase1Tables } from '../../../tests/database/_utils/cleanup';
 
 // Expected DB function:
 // - get_complete_user_profile(user_id uuid)

@@ -7,7 +7,7 @@ import { vi } from 'vitest';
 import {
   createDbClient,
   shouldRunDbTests,
-} from '../__tests__/database/_utils/dbClient';
+} from '../../tests/database/_utils/dbClient';
 
 /**
  * Setup database tests with real Supabase client
