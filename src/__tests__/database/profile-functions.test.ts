@@ -18,7 +18,7 @@ RUN
       });
 
       it('get_complete_user_profile: returns profile for valid user', async () => {
-        const { user } = await createUserAndProfile(admin, { username: null });
+        const { user } = await createUserAndProfile(admin);
 
         const { data, error } = await admin.rpc('get_complete_user_profile', {
           p_user_id: user.id,
@@ -75,7 +75,7 @@ RUN
       });
 
       it('profiles trigger update_updated_at_column: updates timestamp on row change', async () => {
-        const { user } = await createUserAndProfile(admin, { username: null });
+        const { user } = await createUserAndProfile(admin);
 
         const { data: beforeRow } = await admin
           .from('profiles')
