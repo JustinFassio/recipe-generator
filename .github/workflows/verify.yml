@@ -26,6 +26,23 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Install Supabase CLI
+        run: npm install -g supabase
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+      - name: Link to Supabase project
+        run: |
+          if [ -n "${{ secrets.SUPABASE_URL }}" ] && [ -n "${{ secrets.SUPABASE_ACCESS_TOKEN }}" ]; then
+            echo "🔗 Linking to Supabase project..."
+            supabase link --project-ref ${{ secrets.SUPABASE_PROJECT_REF }}
+            echo "✅ Linked to Supabase project"
+          else
+            echo "⚠️  Skipping Supabase link - missing credentials"
+          fi
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
       - name: Create environment file for tests
         run: |
           echo "🔍 Creating environment file for tests..."
@@ -33,13 +50,25 @@ jobs:
           # Create .env.local with secrets for test environment
           echo "VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL }}" >> .env.local
           echo "VITE_SUPABASE_ANON_KEY=${{ secrets.VITE_SUPABASE_ANON_KEY }}" >> .env.local
+          echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" >> .env.local
+          echo "SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}" >> .env.local
+          echo "SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" >> .env.local
           echo "VITE_OPENAI_MODEL=${{ secrets.VITE_OPENAI_MODEL || 'gpt-4o-mini' }}" >> .env.local
 
-          # Note: Tests use mocked Supabase, so secrets are optional for unit tests
-          # but may be needed for integration tests
-          echo "ℹ️  Using secrets for test environment (tests are mocked)"
-
+          echo "ℹ️  Using secrets for test environment (including database integration tests)"
           echo "✅ Environment configured for tests"
+
+      - name: Apply database migrations
+        run: |
+          if [ -n "${{ secrets.SUPABASE_URL }}" ] && [ -n "${{ secrets.SUPABASE_ACCESS_TOKEN }}" ]; then
+            echo "🗄️  Applying database migrations..."
+            supabase db push --project-ref ${{ secrets.SUPABASE_PROJECT_REF }}
+            echo "✅ Database migrations applied"
+          else
+            echo "⚠️  Skipping database migrations - missing credentials"
+          fi
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
 
       - name: Run linting
         run: npm run lint
@@ -55,6 +84,9 @@ jobs:
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           VITE_OPENAI_MODEL: ${{ secrets.VITE_OPENAI_MODEL || 'gpt-4o-mini' }}
 
       - name: Check coverage
@@ -62,6 +94,9 @@ jobs:
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           VITE_OPENAI_MODEL: ${{ secrets.VITE_OPENAI_MODEL || 'gpt-4o-mini' }}
 
       - name: Build
@@ -69,6 +104,9 @@ jobs:
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           VITE_OPENAI_MODEL: ${{ secrets.VITE_OPENAI_MODEL || 'gpt-4o-mini' }}
 
       - name: Security audit

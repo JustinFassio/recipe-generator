@@ -10,8 +10,18 @@ if (!url || !anonKey) {
 }
 
 export function shouldRunDbTests(): boolean {
-  // Tests only require anon key for security
-  return Boolean(url && anonKey);
+  // Check for required environment variables
+  const hasUrl = Boolean(url);
+  const hasAnonKey = Boolean(anonKey);
+
+  if (!hasUrl || !hasAnonKey) {
+    console.warn(
+      'Skipping DB integration tests: SUPABASE_URL and/or SUPABASE_ANON_KEY not set'
+    );
+    return false;
+  }
+
+  return true;
 }
 
 export function hasServiceRole(): boolean {
@@ -20,8 +30,18 @@ export function hasServiceRole(): boolean {
 }
 
 export function createDbClient(): SupabaseClient {
+  // Validate required environment variables
+  if (!url) {
+    throw new Error('Missing SUPABASE_URL. Set SUPABASE_URL in environment.');
+  }
+  if (!anonKey) {
+    throw new Error(
+      'Missing SUPABASE_ANON_KEY. Set SUPABASE_ANON_KEY in environment.'
+    );
+  }
+
   // Always use anon key for security - no service key exposure
-  return createClient(url!, anonKey!, {
+  return createClient(url, anonKey, {
     auth: {
       persistSession: false,
       autoRefreshToken: false,
