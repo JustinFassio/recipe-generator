@@ -1,28 +1,41 @@
-// Removed SupabaseClient import as it's not used for security reasons
+import { SupabaseClient } from '@supabase/supabase-js';
 
-export async function createUserAndProfile() {
+export async function createUserAndProfile(admin: SupabaseClient) {
   const email = `test+${Date.now()}_${Math.random().toString(36).slice(2)}@example.com`;
   const password = 'Password123!';
-  const userId = crypto.randomUUID();
 
-  // For testing purposes, we'll create a mock user object
-  // For unit tests, we intentionally create a mock user object to avoid external dependencies.
-  // In integration tests, you would use the Supabase Auth API to create real users.
-  const mockUser = {
-    id: userId,
-    email,
+  // Create user via Supabase Auth Admin API
+  const { data: authData, error: authError } =
+    await admin.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+    });
+
+  if (authError) {
+    throw new Error(`Failed to create user: ${authError.message}`);
+  }
+
+  const user = authData.user;
+  if (!user) {
+    throw new Error('User creation succeeded but no user returned');
+  }
+
+  // Create profile
+  const { error: profileError } = await admin.from('profiles').insert({
+    id: user.id,
+    username: `user_${Math.random().toString(36).slice(2, 8)}`,
+    full_name: 'Test User',
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-  };
+  });
 
-  // Note: Profile creation will be skipped in client-side tests for security
-  // These tests should be run in server-side environments only
-  console.warn(
-    'Database tests running with anon key - profile creation may be limited'
-  );
+  if (profileError) {
+    console.warn('Profile creation failed:', profileError.message);
+  }
 
   return {
-    user: mockUser,
+    user,
     email,
     password,
   };
