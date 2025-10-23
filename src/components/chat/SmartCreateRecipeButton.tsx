@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Save, Loader2, AlertCircle, CheckCircle } from 'lucide-react';
 import { parseRecipeUnified } from '@/lib/recipe-parser-unified';
 import { toast } from '@/hooks/use-toast';
+import { useHasPremiumAccess } from '@/hooks/useSubscription';
+import { SubscriptionGate } from '@/components/subscription/SubscriptionGate';
 import type { RecipeFormData } from '@/lib/schemas';
 
 interface SmartCreateRecipeButtonProps {
@@ -17,8 +19,14 @@ export const SmartCreateRecipeButton: React.FC<
   const [parseStatus, setParseStatus] = useState<'idle' | 'success' | 'error'>(
     'idle'
   );
+  const { hasAccess, isLoading: subscriptionLoading } = useHasPremiumAccess();
 
   const handleCreateRecipe = async () => {
+    // Check subscription first
+    if (!hasAccess) {
+      return; // Don't proceed if no subscription
+    }
+
     setIsLoading(true);
     setParseStatus('idle');
 
@@ -127,11 +135,24 @@ export const SmartCreateRecipeButton: React.FC<
     return baseClasses;
   };
 
+  // Show subscription gate if user doesn't have access
+  if (!hasAccess) {
+    return (
+      <div className={`p-4 ${className}`}>
+        <SubscriptionGate
+          feature="Save Recipe"
+          description="Save your AI-generated recipe to your collection"
+          icon={<Save className="h-8 w-8" />}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className={`flex justify-center p-4 ${className}`}>
       <button
         onClick={handleCreateRecipe}
-        disabled={isLoading}
+        disabled={isLoading || subscriptionLoading}
         className={getButtonClasses()}
       >
         {getButtonContent()}
