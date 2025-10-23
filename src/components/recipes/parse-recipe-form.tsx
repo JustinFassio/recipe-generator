@@ -10,9 +10,11 @@ import {
   createDaisyUIAlertClasses,
   createDaisyUIAlertDescriptionClasses,
 } from '@/lib/alert-migration';
-import { Loader2, Wand2 } from 'lucide-react';
+import { Loader2, Wand2, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { useHasPremiumAccess } from '@/hooks/useSubscription';
+import { SubscriptionGate } from '@/components/subscription/SubscriptionGate';
 import {
   parseRecipeSchema,
   type ParseRecipeFormData,
@@ -28,6 +30,7 @@ interface ParseRecipeFormProps {
 export function ParseRecipeForm({ onParsed }: ParseRecipeFormProps) {
   const [showExample, setShowExample] = useState(false);
   const parseRecipe = useParseRecipe();
+  const { hasAccess, isLoading: subscriptionLoading } = useHasPremiumAccess();
 
   const {
     register,
@@ -147,6 +150,27 @@ export function ParseRecipeForm({ onParsed }: ParseRecipeFormProps) {
     setShowExample(false);
   };
 
+  // Show subscription gate if user doesn't have access
+  if (!hasAccess) {
+    return (
+      <div className={createDaisyUICardClasses('bordered')}>
+        <div className="card-body">
+          <h3
+            className={`${createDaisyUICardTitleClasses()} flex items-center space-x-2`}
+          >
+            <Wand2 className="h-5 w-5 text-orange-500" />
+            <span>Parse Recipe</span>
+          </h3>
+          <SubscriptionGate
+            feature="Save Recipe"
+            description="Parse and save your recipe to your collection"
+            icon={<Save className="h-8 w-8" />}
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={createDaisyUICardClasses('bordered')}>
       <div className="card-body">
@@ -231,7 +255,7 @@ export function ParseRecipeForm({ onParsed }: ParseRecipeFormProps) {
           <Button
             type="submit"
             className="w-full"
-            disabled={parseRecipe.isPending}
+            disabled={parseRecipe.isPending || subscriptionLoading}
           >
             {parseRecipe.isPending ? (
               <>
