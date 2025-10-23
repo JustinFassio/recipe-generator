@@ -1,5 +1,8 @@
 import { describe, it, expect, beforeAll, vi } from 'vitest';
-import { createDbClient, shouldRunDbTests } from './_utils/dbClient';
+import {
+  createDbClient,
+  shouldRunDbTests,
+} from '../../../tests/database/_utils/dbClient';
 import { setupDatabaseTests } from '../../test/database-setup';
 
 // Unmock Supabase for database tests

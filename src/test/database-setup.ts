@@ -7,7 +7,7 @@ import { vi } from 'vitest';
 import {
   createDbClient,
   shouldRunDbTests,
-} from '../__tests__/database/_utils/dbClient';
+} from '../../tests/database/_utils/dbClient';
 
 /**
  * Setup database tests with real Supabase client
@@ -19,7 +19,7 @@ export const setupDatabaseTests = () => {
     vi.unmock('@/lib/supabase');
     vi.unmock('@supabase/supabase-js');
 
-    // Use real Supabase client
+    // Use real Supabase client with service role for admin operations
     return createDbClient('service');
   } else {
     throw new Error('Database tests require Supabase environment variables');

@@ -74,3 +74,6 @@ test-*.png
 
 # Environment files
 .env*.local
+
+# Local Supabase service role key for tests (DO NOT COMMIT)
+.supabase/service_role_key
