@@ -68,15 +68,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         // Get subscription details
         const subscription = (await stripe.subscriptions.retrieve(
           session.subscription as string
-        )) as unknown as Stripe.Subscription;
+        )) as unknown as Stripe.Subscription & {
+          current_period_start: number;
+          current_period_end: number;
+        };
 
         // Create or update subscription record
-        const subAny = subscription as Record<string, unknown>;
         await supabase.from('user_subscriptions').upsert({
           user_id: userId,
           stripe_customer_id: session.customer as string,
           stripe_subscription_id: subscription.id,
-          stripe_price_id: subscription.items.data[0]?.price?.id as string,
+          stripe_price_id: subscription.items.data[0]?.price?.id,
           status: subscription.status,
           trial_start: subscription.trial_start
             ? new Date(subscription.trial_start * 1000).toISOString()
@@ -85,10 +87,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             ? new Date(subscription.trial_end * 1000).toISOString()
             : null,
           current_period_start: new Date(
-            (subAny.current_period_start as number) * 1000
+            subscription.current_period_start * 1000
           ).toISOString(),
           current_period_end: new Date(
-            (subAny.current_period_end as number) * 1000
+            subscription.current_period_end * 1000
           ).toISOString(),
           cancel_at_period_end: subscription.cancel_at_period_end,
         });
@@ -98,8 +100,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
 
       case 'customer.subscription.updated': {
-        const subscription = event.data.object as Stripe.Subscription;
-        const subAny = subscription as Record<string, unknown>;
+        const subscription = event.data.object as Stripe.Subscription & {
+          current_period_start: number;
+          current_period_end: number;
+        };
 
         await supabase
           .from('user_subscriptions')
@@ -112,10 +116,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
               ? new Date(subscription.trial_end * 1000).toISOString()
               : null,
             current_period_start: new Date(
-              (subAny.current_period_start as number) * 1000
+              subscription.current_period_start * 1000
             ).toISOString(),
             current_period_end: new Date(
-              (subAny.current_period_end as number) * 1000
+              subscription.current_period_end * 1000
             ).toISOString(),
             cancel_at_period_end: subscription.cancel_at_period_end,
             canceled_at: subscription.canceled_at

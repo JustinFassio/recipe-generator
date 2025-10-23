@@ -5,27 +5,38 @@ import { createClient } from '@supabase/supabase-js';
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Only allow POST requests
   if (req.method !== 'POST') {
+    res.setHeader('Content-Type', 'application/json');
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  // Check environment variables
+  const stripeSecretKey = process.env.STRIPE_SECRET_KEY?.trim();
+  const supabaseUrl = process.env.VITE_SUPABASE_URL?.trim();
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
+  const priceId = process.env.STRIPE_PRICE_ID?.trim();
+
+  if (!stripeSecretKey || !supabaseUrl || !supabaseServiceKey || !priceId) {
+    console.error('Missing required environment variables:', {
+      hasStripeKey: !!stripeSecretKey,
+      hasSupabaseUrl: !!supabaseUrl,
+      hasServiceKey: !!supabaseServiceKey,
+      hasPriceId: !!priceId,
+    });
+    res.setHeader('Content-Type', 'application/json');
+    return res.status(500).json({
+      error: 'Stripe not configured',
+      details: 'Missing required environment variables',
+    });
+  }
+
+  // Initialize clients inside handler
+  const stripe = new Stripe(stripeSecretKey, {
+    apiVersion: '2025-09-30.clover',
+  });
+
+  const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
   try {
-    // Guard and normalize env vars
-    const secretKey = (process.env.STRIPE_SECRET_KEY || '').trim();
-    const priceId = (process.env.STRIPE_PRICE_ID || '').trim();
-    const supabaseUrl = (process.env.VITE_SUPABASE_URL || '').trim();
-    const supabaseKey = (process.env.SUPABASE_SERVICE_ROLE_KEY || '').trim();
-
-    if (!secretKey || !priceId || !supabaseUrl || !supabaseKey) {
-      console.error('[Checkout] Missing environment variables');
-      return res.status(500).json({
-        error: 'Stripe not configured',
-        details: 'Missing required environment variables',
-      });
-    }
-
-    // Initialize Stripe and Supabase inside handler
-    const stripe = new Stripe(secretKey, { apiVersion: '2025-09-30.clover' });
-    const supabase = createClient(supabaseUrl, supabaseKey);
     // Get authorization token
     const authHeader = req.headers.authorization;
     console.log('[Checkout] Auth header present:', !!authHeader);
