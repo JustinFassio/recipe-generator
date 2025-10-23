@@ -43,7 +43,7 @@
       "destination": "/index.html"
     },
     {
-      "source": "/subscription",
+      "source": "/subscription(.*)",
       "destination": "/index.html"
     }
   ],
