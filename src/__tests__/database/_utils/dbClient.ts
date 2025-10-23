@@ -1,4 +1,6 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import fs from 'fs';
+import path from 'path';
 
 type ClientRole = 'anon' | 'service';
 
@@ -7,16 +9,27 @@ const anonKey =
   process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
 let serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-// Fallback: if running against local Supabase and no service key provided, use default local service role
-// This matches the key used in scripts/create-test-user.js
+// Fallback: when running against local Supabase, allow loading a local, untracked
+// service role key file. Do NOT commit this file. Prefer setting SUPABASE_SERVICE_ROLE_KEY env var.
+const localKeyFile =
+  process.env.SUPABASE_SERVICE_ROLE_KEY_FILE ||
+  path.resolve(process.cwd(), '.supabase', 'service_role_key');
+
 if (
   (!serviceKey || serviceKey.length === 0) &&
   url &&
   url.includes('127.0.0.1')
 ) {
-  console.log('Using fallback service key for local Supabase');
-  serviceKey =
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU';
+  if (fs.existsSync(localKeyFile)) {
+    console.log('Using local service key from', localKeyFile);
+    serviceKey = fs.readFileSync(localKeyFile, 'utf8').trim();
+  } else {
+    console.warn(
+      'No SUPABASE_SERVICE_ROLE_KEY and no local key file found; tests requiring the service role will be skipped. Create a local key file at ' +
+        localKeyFile +
+        ' or set SUPABASE_SERVICE_ROLE_KEY in your environment.'
+    );
+  }
 }
 
 if (!url || !anonKey) {
