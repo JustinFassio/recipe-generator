@@ -1,20 +1,8 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-type ClientRole = 'anon' | 'service';
-
 const url = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const anonKey =
   process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
-let serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-console.log('Initial serviceKey:', serviceKey);
-// Fallback: if running against local Supabase, always use local service role key
-// This matches the key used in scripts/create-test-user.js
-if (url && url.includes('127.0.0.1')) {
-  console.log('Using local service key for local Supabase');
-  serviceKey =
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU';
-}
-console.log('Final serviceKey:', serviceKey);
 
 if (!url || !anonKey) {
   // Tests that require DB will be skipped when env is missing
@@ -22,17 +10,18 @@ if (!url || !anonKey) {
 }
 
 export function shouldRunDbTests(): boolean {
-  // Phase 1 tests require admin user creation via service role
-  return Boolean(url && anonKey && serviceKey);
+  // Tests only require anon key for security
+  return Boolean(url && anonKey);
 }
 
 export function hasServiceRole(): boolean {
-  return Boolean(serviceKey);
+  // Service role is not available in client-side tests for security
+  return false;
 }
 
-export function createDbClient(role: ClientRole = 'anon'): SupabaseClient {
-  const key = role === 'service' ? (serviceKey ?? anonKey!) : anonKey!;
-  return createClient(url!, key, {
+export function createDbClient(): SupabaseClient {
+  // Always use anon key for security - no service key exposure
+  return createClient(url!, anonKey!, {
     auth: {
       persistSession: false,
       autoRefreshToken: false,
