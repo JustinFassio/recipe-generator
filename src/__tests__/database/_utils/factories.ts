@@ -6,7 +6,8 @@ export async function createUserAndProfile() {
   const userId = crypto.randomUUID();
 
   // For testing purposes, we'll create a mock user object
-  // In a real test environment, you would use the Supabase Auth API
+  // For unit tests, we intentionally create a mock user object to avoid external dependencies.
+  // In integration tests, you would use the Supabase Auth API to create real users.
   const mockUser = {
     id: userId,
     email,
