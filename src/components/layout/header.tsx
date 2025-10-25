@@ -55,7 +55,7 @@ export function Header() {
         </div>
 
         {/* Centered Navigation */}
-        <div className="navbar-center hidden md:flex">
+        <div className="absolute left-1/2 transform -translate-x-1/2 hidden md:flex">
           <nav className="flex items-center gap-x-4">
             <Button
               variant={location.pathname === '/recipes' ? 'default' : 'ghost'}
@@ -68,7 +68,7 @@ export function Header() {
               title="My Recipes"
             >
               <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
-              <span className="hidden xl:inline">My Recipes</span>
+              <span className="hidden lg:inline">My Recipes</span>
             </Button>
             <Button
               variant={location.pathname === '/explore' ? 'default' : 'ghost'}
@@ -77,7 +77,7 @@ export function Header() {
               title="Explore Recipes"
             >
               <Compass className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
-              <span className="hidden xl:inline">Explore</span>
+              <span className="hidden lg:inline">Explore</span>
             </Button>
             <Button
               variant={location.pathname === '/kitchen' ? 'default' : 'ghost'}
@@ -90,7 +90,7 @@ export function Header() {
               title="My Kitchen"
             >
               <ChefHat className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
-              <span className="hidden xl:inline">My Kitchen</span>
+              <span className="hidden lg:inline">My Kitchen</span>
             </Button>
             <Button
               variant={location.pathname === '/cart' ? 'default' : 'ghost'}
@@ -103,7 +103,7 @@ export function Header() {
               title="Shopping Cart"
             >
               <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
-              <span className="hidden xl:inline">Cart</span>
+              <span className="hidden lg:inline">Cart</span>
             </Button>
             <Button
               variant={
@@ -114,7 +114,7 @@ export function Header() {
               title="Health Reports"
             >
               <Heart className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
-              <span className="hidden xl:inline">Health Reports</span>
+              <span className="hidden lg:inline">Health Reports</span>
             </Button>
           </nav>
         </div>
@@ -131,7 +131,7 @@ export function Header() {
                 title={isInTrial ? 'Trial Active' : 'Premium Member'}
               >
                 <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
-                <span className="hidden xl:inline">
+                <span className="hidden lg:inline">
                   {isInTrial ? 'Trial Active' : 'Premium Member'}
                 </span>
               </Button>
@@ -143,7 +143,7 @@ export function Header() {
                 title="Upgrade to Premium"
               >
                 <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
-                <span className="hidden xl:inline">Upgrade to Premium</span>
+                <span className="hidden lg:inline">Upgrade to Premium</span>
               </Button>
             )}
 
