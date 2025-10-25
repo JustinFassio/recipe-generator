@@ -18,7 +18,6 @@
   .card-recipe {
     @apply bg-base-100 border-primary border-2;
   }
-
 }
 
 :root {

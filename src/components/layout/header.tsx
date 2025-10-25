@@ -42,15 +42,19 @@ export function Header() {
       <div className="navbar-start">
         {/* Mobile Menu Dropdown */}
         <div className="dropdown">
-          <button 
-            tabIndex={0} 
+          <button
+            tabIndex={0}
             className="btn btn-ghost btn-circle lg:hidden"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
-            {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            {isMobileMenuOpen ? (
+              <X className="h-5 w-5" />
+            ) : (
+              <Menu className="h-5 w-5" />
+            )}
           </button>
-          <ul 
-            tabIndex={0} 
+          <ul
+            tabIndex={0}
             className="menu dropdown-content menu-sm rounded-box bg-base-100 mt-3 w-52 p-2 shadow z-50"
           >
             {/* Mobile Navigation Items */}
@@ -124,7 +128,11 @@ export function Header() {
                 className="w-full justify-start"
               >
                 <Sparkles className="h-5 w-5" />
-                {hasAccess ? (isInTrial ? 'Trial Active' : 'Premium Member') : 'Upgrade to Premium'}
+                {hasAccess
+                  ? isInTrial
+                    ? 'Trial Active'
+                    : 'Premium Member'
+                  : 'Upgrade to Premium'}
               </button>
             </li>
             <li>
@@ -153,7 +161,7 @@ export function Header() {
             </li>
           </ul>
         </div>
-        
+
         {/* Logo and Title */}
         <div className="flex items-center space-x-2">
           <img
@@ -161,7 +169,9 @@ export function Header() {
             alt="Recipe Generator Logo"
             className="h-10 w-10 lg:h-12 lg:w-12 rounded-lg object-contain"
           />
-          <span className="text-xl font-bold hidden sm:inline">Recipe Generator</span>
+          <span className="text-xl font-bold hidden sm:inline">
+            Recipe Generator
+          </span>
         </div>
       </div>
 
@@ -207,7 +217,9 @@ export function Header() {
           <li>
             <button
               onClick={() => navigate('/evaluation-report')}
-              className={location.pathname === '/evaluation-report' ? 'active' : ''}
+              className={
+                location.pathname === '/evaluation-report' ? 'active' : ''
+              }
             >
               <Heart className="h-5 w-5" />
               Health Reports
@@ -219,11 +231,10 @@ export function Header() {
       {/* Section 3: navbar-end (Upgrade + Avatar) */}
       <div className="navbar-end">
         {/* Subscription Button */}
-        <button 
+        <button
           onClick={() => navigate('/subscription')}
-          className={`btn btn-sm ${hasAccess 
-            ? "btn-outline btn-primary" 
-            : "btn-primary"
+          className={`btn btn-sm ${
+            hasAccess ? 'btn-outline btn-primary' : 'btn-primary'
           }`}
         >
           <Sparkles className="h-4 w-4" />
