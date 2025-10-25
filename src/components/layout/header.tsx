@@ -39,28 +39,6 @@ export function Header() {
 
   return (
     <div className="relative">
-      <style>{`
-        .responsive-title {
-          font-size: clamp(0.625rem, 1.5vw + 0.25rem, 2.5rem);
-          line-height: 1.1;
-          transition: font-size 0.3s ease;
-        }
-        @media (min-width: 640px) {
-          .responsive-title {
-            font-size: clamp(0.875rem, 2vw + 0.25rem, 2.5rem);
-          }
-        }
-        @media (min-width: 1024px) {
-          .responsive-title {
-            font-size: clamp(1.125rem, 2.5vw + 0.5rem, 2.5rem);
-          }
-        }
-        @media (min-width: 1536px) {
-          .responsive-title {
-            font-size: clamp(1.5rem, 3vw + 0.5rem, 2.5rem);
-          }
-        }
-      `}</style>
       <header className="navbar bg-base-300 text-base-content border-b shadow-sm">
         <div className="navbar-start flex-shrink-0">
           <div className="flex items-center space-x-2 sm:space-x-4">
