@@ -55,7 +55,7 @@ export function Header() {
         </div>
 
         {/* Centered Navigation */}
-        <div className="absolute left-1/2 transform -translate-x-1/2 hidden md:flex">
+        <div className="navbar-center hidden md:flex">
           <nav className="flex items-center gap-x-4">
             <Button
               variant={location.pathname === '/recipes' ? 'default' : 'ghost'}
