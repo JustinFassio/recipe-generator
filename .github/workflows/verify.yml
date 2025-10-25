@@ -78,16 +78,6 @@ jobs:
       - name: Check formatting
         run: npm run format:check
 
-      - name: Auto-fix formatting issues
-        run: |
-          if ! npm run format:check; then
-            echo "🔧 Auto-fixing formatting issues..."
-            npm run format
-            echo "✅ Formatting issues fixed"
-          else
-            echo "✅ Code formatting is correct"
-          fi
-
       - name: Type check
         run: npx tsc --noEmit
 
