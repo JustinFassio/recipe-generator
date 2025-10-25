@@ -45,6 +45,8 @@ export function ChatInterface({
     sendMessage,
     startNewRecipe,
     changePersona,
+    generateEvaluationReport,
+    saveEvaluationReport,
   } = useConversation(defaultPersona);
 
   const { selections, updateSelections } = useSelections();
@@ -383,6 +385,9 @@ export function ChatInterface({
             .join('\n\n')}
           onRecipeParsed={onRecipeGenerated}
           className="bg-gradient-to-r from-green-50 to-blue-50 border-t"
+          persona={persona}
+          onGenerateReport={generateEvaluationReport}
+          onSaveReport={saveEvaluationReport}
         />
       )}
 

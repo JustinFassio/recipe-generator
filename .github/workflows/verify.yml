@@ -28,8 +28,12 @@ jobs:
 
       - name: Install Supabase CLI
         run: |
-          curl -fsSL https://deb.nodesource.com/setup_18.x | bash - # ensure Node 18 is available
-          curl -sL https://github.com/supabase/cli/releases/latest/download/supabase_linux_amd64.tar.gz | tar -xz -C /usr/local/bin supabase
+          # Download Supabase CLI to local directory (no root required)
+          curl -sL https://github.com/supabase/cli/releases/latest/download/supabase_linux_amd64.tar.gz | tar -xz
+          # Make it executable and add to PATH for this session
+          chmod +x supabase
+          echo "$(pwd)" >> $GITHUB_PATH
+          echo "✅ Supabase CLI installed to $(pwd)"
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
 

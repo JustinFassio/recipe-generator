@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthProvider';
 import {
   getUserEvaluationReports,
@@ -28,6 +29,7 @@ import { formatDate, isFallbackReport } from './utils';
 
 export default function EvaluationReportPage() {
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
   const [reports, setReports] = useState<EvaluationReport[]>([]);
   const [selectedReport, setSelectedReport] = useState<EvaluationReport | null>(
     null
@@ -56,6 +58,22 @@ export default function EvaluationReportPage() {
       loadUserReports();
     }
   }, [user?.id, loadUserReports]);
+
+  // Handle refresh parameter from navigation
+  useEffect(() => {
+    const refreshParam = searchParams.get('refresh');
+    if (refreshParam === 'true' && user?.id) {
+      // Force reload reports when coming from report generation
+      setLoading(true);
+      loadUserReports();
+
+      // Clean up the URL parameter
+      const newSearchParams = new URLSearchParams(searchParams);
+      newSearchParams.delete('refresh');
+      const newUrl = `${window.location.pathname}${newSearchParams.toString() ? `?${newSearchParams.toString()}` : ''}`;
+      window.history.replaceState({}, '', newUrl);
+    }
+  }, [searchParams, user?.id, loadUserReports]);
 
   const downloadReport = (report: EvaluationReport) => {
     try {
