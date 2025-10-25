@@ -70,7 +70,8 @@ export default function EvaluationReportPage() {
       // Clean up the URL parameter
       const newSearchParams = new URLSearchParams(searchParams);
       newSearchParams.delete('refresh');
-      const newUrl = `${window.location.pathname}${newSearchParams.toString() ? `?${newSearchParams.toString()}` : ''}`;
+      const searchParamsString = newSearchParams.toString();
+      const newUrl = `${window.location.pathname}${searchParamsString ? `?${searchParamsString}` : ''}`;
       window.history.replaceState({}, '', newUrl);
     }
   }, [searchParams, user?.id, loadUserReports]);

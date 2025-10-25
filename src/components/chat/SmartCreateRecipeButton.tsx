@@ -5,6 +5,8 @@ import { parseRecipeUnified } from '@/lib/recipe-parser-unified';
 import { toast } from '@/hooks/use-toast';
 import type { RecipeFormData } from '@/lib/schemas';
 
+const HEALTH_ASSISTANT_PERSONA = 'drLunaClearwater';
+
 interface SmartCreateRecipeButtonProps {
   conversationContent: string;
   onRecipeParsed: (recipe: RecipeFormData) => void;
@@ -34,7 +36,7 @@ export const SmartCreateRecipeButton: React.FC<
     setIsLoading(true);
     setParseStatus('idle');
 
-    const isHealthAssistant = persona === 'drLunaClearwater';
+    const isHealthAssistant = persona === HEALTH_ASSISTANT_PERSONA;
 
     try {
       if (isHealthAssistant) {
@@ -125,7 +127,7 @@ export const SmartCreateRecipeButton: React.FC<
   };
 
   const getButtonContent = () => {
-    const isHealthAssistant = persona === 'drLunaClearwater';
+    const isHealthAssistant = persona === HEALTH_ASSISTANT_PERSONA;
 
     if (isLoading) {
       return (

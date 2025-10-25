@@ -28,7 +28,9 @@ jobs:
 
       - name: Install Supabase CLI
         run: |
-          # Download Supabase CLI to local directory (no root required)
+          # Remove any existing supabase file/directory before extraction
+          rm -rf supabase
+          # Download Supabase CLI to the current working directory (no root required)
           curl -sL https://github.com/supabase/cli/releases/latest/download/supabase_linux_amd64.tar.gz | tar -xz
           # Make it executable and add to PATH for this session
           chmod +x supabase
