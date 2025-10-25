@@ -56,7 +56,7 @@ export function Header() {
 
         {/* Centered Navigation */}
         <div className="navbar-center hidden md:flex">
-          <nav className="flex items-center space-x-0">
+          <nav className="flex items-center gap-x-4">
             <Button
               variant={location.pathname === '/recipes' ? 'default' : 'ghost'}
               onClick={() => navigate('/recipes')}
