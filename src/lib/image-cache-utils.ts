@@ -75,6 +75,11 @@ export function isLikelyExpiredUrl(url: string): boolean {
       return true;
     }
 
+    // Check for expired Unsplash URLs (they frequently return 404)
+    if (url.includes('images.unsplash.com')) {
+      return true;
+    }
+
     // Check for URLs with expiration timestamps in the query string
     if (url.includes('se=') && url.includes('st=')) {
       try {
