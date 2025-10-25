@@ -216,27 +216,33 @@ export function RecipeView({
   };
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
+    <div className="mx-auto max-w-4xl space-y-6 overflow-x-hidden">
       {/* Header */}
-      <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
-        {onBack && (
-          <Button variant="ghost" onClick={onBack}>
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Recipes
-          </Button>
-        )}
-        {onEdit && (
-          <Button onClick={onEdit}>
-            <Edit className="mr-2 h-4 w-4" />
-            Edit Recipe
-          </Button>
-        )}
-        {onSave && (
-          <Button onClick={onSave}>
-            <Save className="mr-2 h-4 w-4" />
-            Save Recipe
-          </Button>
-        )}
+      <div className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0 gap-3">
+        <div className="flex flex-col sm:flex-row gap-3">
+          {onBack && (
+            <Button
+              variant="ghost"
+              onClick={onBack}
+              className="w-full sm:w-auto text-sm"
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Recipes
+            </Button>
+          )}
+          {onEdit && (
+            <Button onClick={onEdit} className="w-full sm:w-auto text-sm">
+              <Edit className="mr-2 h-4 w-4" />
+              Edit Recipe
+            </Button>
+          )}
+          {onSave && (
+            <Button onClick={onSave} className="w-full sm:w-auto text-sm">
+              <Save className="mr-2 h-4 w-4" />
+              Save Recipe
+            </Button>
+          )}
+        </div>
         <AddToShoppingListButton
           ingredients={recipe.ingredients}
           recipeId={recipe.id}
@@ -244,13 +250,14 @@ export function RecipeView({
           variant="outline"
           size="default"
           showCount={false}
+          className="w-full sm:w-auto"
         />
       </div>
 
       {/* Recipe Header */}
       <div className={createDaisyUICardClasses('bordered')}>
         <div className="card-body pb-4">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
+          <div className="flex flex-col gap-4 sm:gap-6 lg:flex-row lg:items-start">
             {recipe.image_url &&
               (() => {
                 const safeImageUrl = getSafeImageUrl(
@@ -275,7 +282,7 @@ export function RecipeView({
               })()}
             <div className="flex-1">
               <h3
-                className={`${createDaisyUICardTitleClasses()} mb-4 text-xl font-bold sm:text-2xl lg:text-3xl`}
+                className={`${createDaisyUICardTitleClasses()} mb-4 text-lg font-bold sm:text-xl lg:text-2xl xl:text-3xl break-words`}
               >
                 {recipe.title}
               </h3>
@@ -283,7 +290,7 @@ export function RecipeView({
               {/* Recipe Description */}
               {recipe.description && (
                 <div className="mb-4">
-                  <p className="text-lg text-gray-700 leading-relaxed">
+                  <p className="text-base sm:text-lg text-gray-700 leading-relaxed break-words">
                     {recipe.description}
                   </p>
                 </div>
@@ -476,9 +483,9 @@ export function RecipeView({
                             <div className="h-2 w-2 rounded-full bg-orange-500"></div>
                           )}
                         </div>
-                        <div className="flex-1 flex items-center justify-between">
+                        <div className="flex-1 flex items-center justify-between min-w-0">
                           <p
-                            className={`leading-relaxed ${
+                            className={`leading-relaxed break-words ${
                               isAvailable
                                 ? 'text-gray-900 font-medium'
                                 : 'text-gray-700'
@@ -487,10 +494,10 @@ export function RecipeView({
                             {ingredient}
                           </p>
                           {enhancedMatcher && (
-                            <div className="flex items-center space-x-2">
+                            <div className="flex flex-wrap items-center gap-1 sm:gap-2 ml-2">
                               {getIngredientBadge(match)}
                               {match.matchedGroceryIngredient && (
-                                <span className="text-xs text-gray-500">
+                                <span className="text-xs text-gray-500 break-words">
                                   (matches: {match.matchedGroceryIngredient})
                                 </span>
                               )}
@@ -555,8 +562,8 @@ export function RecipeView({
                                       !wasClicked && !isAlreadyInCart;
 
                                     return shouldShowButton ? (
-                                      <div className="inline-flex items-center rounded border p-1 bg-white text-xs max-w-xs">
-                                        <div className="min-w-0 mr-2">
+                                      <div className="inline-flex items-center rounded border p-1 bg-white text-xs max-w-full sm:max-w-xs">
+                                        <div className="min-w-0 mr-2 flex-1">
                                           <div className="font-medium truncate">
                                             {globalIngredientData.name}
                                           </div>
@@ -576,7 +583,7 @@ export function RecipeView({
                                             )
                                           }
                                           disabled={cartLoading}
-                                          className="h-6 px-2 text-xs"
+                                          className="h-6 px-2 text-xs flex-shrink-0"
                                         >
                                           <Plus className="h-2 w-2 mr-1" /> Add
                                         </Button>
