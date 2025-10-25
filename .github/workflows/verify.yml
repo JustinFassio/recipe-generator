@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [main, develop]
   push:
-    branches: [main, develop, 'fix/*', 'feature/*', 'chore/*']
+    branches: [main, develop]
 
 jobs:
   verify:
@@ -28,14 +28,8 @@ jobs:
 
       - name: Install Supabase CLI
         run: |
-          # Remove any existing supabase file/directory before extraction
-          rm -rf supabase
-          # Download Supabase CLI to the current working directory (no root required)
-          curl -sL https://github.com/supabase/cli/releases/latest/download/supabase_linux_amd64.tar.gz | tar -xz
-          # Make it executable and add to PATH for this session
-          chmod +x supabase
-          echo "$(pwd)" >> $GITHUB_PATH
-          echo "✅ Supabase CLI installed to $(pwd)"
+          curl -fsSL https://deb.nodesource.com/setup_18.x | bash - # ensure Node 18 is available
+          curl -sL https://github.com/supabase/cli/releases/latest/download/supabase_linux_amd64.tar.gz | tar -xz -C /usr/local/bin supabase
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
 
