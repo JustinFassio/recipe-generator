@@ -149,9 +149,20 @@ export default async function handler(
         error: `Image generation failed: ${errorMessage}`,
       });
     } catch (sendError) {
-      // If JSON send fails, log the error and try plain text
+      // If JSON send fails, log the error
       console.error('Failed to send error response:', sendError);
-      res.status(500).send(`Image generation failed: ${errorMessage}`);
+
+      // Only attempt fallback if headers haven't been sent yet
+      if (!res.headersSent) {
+        try {
+          res.status(500).send(`Image generation failed: ${errorMessage}`);
+        } catch (fallbackError) {
+          console.error(
+            'Failed to send fallback error response:',
+            fallbackError
+          );
+        }
+      }
     }
   }
 }

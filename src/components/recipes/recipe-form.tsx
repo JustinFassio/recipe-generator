@@ -22,7 +22,10 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import CategoryInput from '@/components/ui/CategoryInput';
 import { CreatorRating } from '@/components/ui/rating';
-import { MAX_CATEGORIES_PER_RECIPE } from '@/lib/constants';
+import {
+  MAX_CATEGORIES_PER_RECIPE,
+  FALLBACK_IMAGE_PATH,
+} from '@/lib/constants';
 import { processImageFile } from '@/lib/image-utils';
 import { getSafeImageUrl } from '@/lib/image-cache-utils';
 import { toast } from '@/hooks/use-toast';
@@ -281,12 +284,12 @@ export function RecipeForm({
         existingRecipe.image_url,
         existingRecipe.updated_at,
         existingRecipe.created_at,
-        '/recipe-generator-logo.png'
+        FALLBACK_IMAGE_PATH
       );
       // Only set preview if we got a valid URL (not just the fallback)
-      if (safeUrl && safeUrl !== '/recipe-generator-logo.png') {
+      if (safeUrl && safeUrl !== FALLBACK_IMAGE_PATH) {
         setImagePreview(safeUrl);
-      } else if (safeUrl === '/recipe-generator-logo.png') {
+      } else if (safeUrl === FALLBACK_IMAGE_PATH) {
         // Image expired/invalid - show fallback and clear the form field
         setImagePreview('');
         setValue('image_url', null);
@@ -539,12 +542,12 @@ export function RecipeForm({
                         imagePreview,
                         editRecipe?.updated_at || new Date().toISOString(),
                         editRecipe?.created_at || new Date().toISOString(),
-                        '/recipe-generator-logo.png'
+                        FALLBACK_IMAGE_PATH
                       )}
                       alt="Recipe preview"
                       className="h-full w-full object-cover"
                       loading="eager"
-                      placeholder="/recipe-generator-logo.png"
+                      placeholder={FALLBACK_IMAGE_PATH}
                     />
                     <Button
                       type="button"
