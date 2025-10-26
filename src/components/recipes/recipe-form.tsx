@@ -29,8 +29,6 @@ import { supabase } from '@/lib/supabase';
 import { recipeApi } from '@/lib/api';
 import { Recipe } from '@/lib/types';
 import { RecipeVersions } from './recipe-versions';
-import { ProgressiveImage } from '@/components/shared/ProgressiveImage';
-import { getSafeImageUrl } from '@/lib/image-cache-utils';
 
 interface RecipeFormProps {
   recipe?: Recipe;
@@ -516,26 +514,11 @@ export function RecipeForm({
                 {/* Generated Image Preview */}
                 {imagePreview && !isGeneratingImage && (
                   <div className="relative h-48 w-full overflow-hidden rounded-lg bg-gray-100">
-                    {(() => {
-                      const safeImageUrl = existingRecipe
-                        ? getSafeImageUrl(
-                            imagePreview,
-                            existingRecipe.updated_at,
-                            existingRecipe.created_at,
-                            '/recipe-generator-logo.png'
-                          )
-                        : imagePreview;
-                      return (
-                        safeImageUrl && (
-                          <ProgressiveImage
-                            src={safeImageUrl}
-                            alt="Recipe preview"
-                            className="h-full w-full object-cover"
-                            placeholder="/recipe-generator-logo.png"
-                          />
-                        )
-                      );
-                    })()}
+                    <img
+                      src={imagePreview}
+                      alt="Recipe preview"
+                      className="h-full w-full object-cover"
+                    />
                     <Button
                       type="button"
                       variant="ghost"
