@@ -12,6 +12,7 @@ import { VersionSelector } from './version-selector';
 import type { PublicRecipe, RecipeVersion } from '@/lib/types';
 import { useIngredientMatching } from '@/hooks/useIngredientMatching';
 import { getSafeImageUrl } from '@/lib/image-cache-utils';
+import { ProgressiveImage } from '@/components/shared/ProgressiveImage';
 
 // Constants
 const RECIPE_TITLE_MAX_LENGTH = 45;
@@ -114,20 +115,28 @@ export function VersionedRecipeCard({
       <div
         className={`${createDaisyUICardClasses('bordered')} group relative overflow-hidden border border-gray-200 transition-all duration-200 hover:border-gray-300 hover:shadow-lg`}
       >
-        {recipe.image_url && (
-          <div className="aspect-video overflow-hidden">
-            <img
-              src={getSafeImageUrl(
-                recipe.image_url!, // Safe due to conditional rendering guard
-                recipe.updated_at,
-                recipe.created_at,
-                '/recipe-generator-logo.png'
-              )}
-              alt={recipe.title}
-              className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-105"
-            />
-          </div>
-        )}
+        {recipe.image_url &&
+          (() => {
+            const safeImageUrl = getSafeImageUrl(
+              recipe.image_url,
+              recipe.updated_at,
+              recipe.created_at,
+              '/recipe-generator-logo.png'
+            );
+            return (
+              safeImageUrl && (
+                <div className="aspect-video overflow-hidden">
+                  <ProgressiveImage
+                    src={safeImageUrl}
+                    alt={recipe.title}
+                    className="h-full w-full transition-transform duration-200 group-hover:scale-105"
+                    loading="lazy"
+                    placeholder="/recipe-generator-logo.png"
+                  />
+                </div>
+              )
+            );
+          })()}
 
         {/* Recipe Title */}
         <div className="px-4 pt-4 pb-2">
