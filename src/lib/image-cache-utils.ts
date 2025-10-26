@@ -65,16 +65,6 @@ export function getOptimizedImageUrlWithImageTimestamp(
  */
 export function isLikelyExpiredUrl(url: string): boolean {
   try {
-    // Check for expired DALL-E URLs
-    if (url.includes('oaidalleapiprodscus.blob.core.windows.net')) {
-      return true;
-    }
-
-    // Check for other temporary URLs that might expire
-    if (url.includes('blob.core.windows.net') && !url.includes('supabase')) {
-      return true;
-    }
-
     // Check for expired Unsplash URLs (they frequently return 404)
     if (url.includes('images.unsplash.com')) {
       return true;
@@ -92,8 +82,9 @@ export function isLikelyExpiredUrl(url: string): boolean {
           return now.getTime() >= expiresTime.getTime();
         }
       } catch {
-        // If we can't parse the expiration, assume it might be expired
-        return true;
+        // If we can't parse the expiration, DON'T assume it's expired
+        // Only return true if we're CERTAIN it's expired
+        return false;
       }
     }
 

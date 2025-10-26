@@ -24,11 +24,13 @@ import CategoryInput from '@/components/ui/CategoryInput';
 import { CreatorRating } from '@/components/ui/rating';
 import { MAX_CATEGORIES_PER_RECIPE } from '@/lib/constants';
 import { processImageFile } from '@/lib/image-utils';
+import { getSafeImageUrl } from '@/lib/image-cache-utils';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
 import { recipeApi } from '@/lib/api';
 import { Recipe } from '@/lib/types';
 import { RecipeVersions } from './recipe-versions';
+import { ProgressiveImage } from '@/components/shared/ProgressiveImage';
 
 interface RecipeFormProps {
   recipe?: Recipe;
@@ -275,9 +277,27 @@ export function RecipeForm({
 
   useEffect(() => {
     if (existingRecipe?.image_url) {
-      setImagePreview(existingRecipe.image_url);
+      const safeUrl = getSafeImageUrl(
+        existingRecipe.image_url,
+        existingRecipe.updated_at,
+        existingRecipe.created_at,
+        '/recipe-generator-logo.png'
+      );
+      // Only set preview if we got a valid URL (not just the fallback)
+      if (safeUrl && safeUrl !== '/recipe-generator-logo.png') {
+        setImagePreview(safeUrl);
+      } else if (safeUrl === '/recipe-generator-logo.png') {
+        // Image expired/invalid - show fallback and clear the form field
+        setImagePreview('');
+        setValue('image_url', null);
+      }
     }
-  }, [existingRecipe?.image_url]);
+  }, [
+    existingRecipe?.image_url,
+    existingRecipe?.updated_at,
+    existingRecipe?.created_at,
+    setValue,
+  ]);
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -514,10 +534,17 @@ export function RecipeForm({
                 {/* Generated Image Preview */}
                 {imagePreview && !isGeneratingImage && (
                   <div className="relative h-48 w-full overflow-hidden rounded-lg bg-gray-100">
-                    <img
-                      src={imagePreview}
+                    <ProgressiveImage
+                      src={getSafeImageUrl(
+                        imagePreview,
+                        editRecipe?.updated_at || new Date().toISOString(),
+                        editRecipe?.created_at || new Date().toISOString(),
+                        '/recipe-generator-logo.png'
+                      )}
                       alt="Recipe preview"
                       className="h-full w-full object-cover"
+                      loading="eager"
+                      placeholder="/recipe-generator-logo.png"
                     />
                     <Button
                       type="button"

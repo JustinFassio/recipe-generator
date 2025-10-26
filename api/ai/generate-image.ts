@@ -24,6 +24,13 @@ export default async function handler(
   }
 
   try {
+    // Validate request body exists
+    if (!req.body) {
+      res
+        .status(400)
+        .json({ success: false, error: 'Request body is required' });
+      return;
+    }
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
       console.error('OpenAI API key not configured');
@@ -45,6 +52,19 @@ export default async function handler(
       mood = 'appetizing',
     }: GenerateImageRequest = req.body;
 
+    // Validate required fields
+    if (!recipeTitle) {
+      res
+        .status(400)
+        .json({ success: false, error: 'Recipe title is required' });
+      return;
+    }
+
+    // Ensure arrays exist with defaults
+    const safeIngredients = Array.isArray(ingredients) ? ingredients : [];
+    const safeCategories = Array.isArray(categories) ? categories : [];
+    const safeInstructions = instructions || '';
+
     // Force landscape orientation for consistency with UI frame
     const forcedSize = '1792x1024';
 
@@ -53,9 +73,9 @@ export default async function handler(
       {
         title: recipeTitle,
         description: description || '',
-        ingredients,
-        instructions,
-        categories,
+        ingredients: safeIngredients,
+        instructions: safeInstructions,
+        categories: safeCategories,
       },
       { style, mood, quality }
     );
@@ -119,10 +139,20 @@ export default async function handler(
     });
   } catch (error) {
     console.error('Image generation error:', error);
-    res.status(500).json({
-      success: false,
-      error: `Image generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
-    });
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error';
+
+    // Ensure we always send a proper JSON response
+    try {
+      res.status(500).json({
+        success: false,
+        error: `Image generation failed: ${errorMessage}`,
+      });
+    } catch (sendError) {
+      // If JSON send fails, log the error and try plain text
+      console.error('Failed to send error response:', sendError);
+      res.status(500).send(`Image generation failed: ${errorMessage}`);
+    }
   }
 }
 
@@ -154,7 +184,11 @@ function generateEnhancedPrompt(
   }
 
   // Add main ingredients (first 3)
-  if (recipe.ingredients.length > 0) {
+  if (
+    recipe.ingredients &&
+    Array.isArray(recipe.ingredients) &&
+    recipe.ingredients.length > 0
+  ) {
     const mainIngredients = recipe.ingredients.slice(0, 3);
     parts.push(`featuring ${mainIngredients.join(' and ')}`);
   }
