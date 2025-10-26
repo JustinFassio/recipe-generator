@@ -15,6 +15,9 @@
 export const MAX_CATEGORIES_PER_RECIPE = 6;
 export const MAX_CATEGORY_LENGTH = 50;
 
+// Image fallback path
+export const FALLBACK_IMAGE_PATH = '/recipe-generator-logo.png';
+
 // Predefined categories for filtering
 export const PREDEFINED_CATEGORIES = [
   'Collection: Quick & Easy',

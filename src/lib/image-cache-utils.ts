@@ -65,16 +65,6 @@ export function getOptimizedImageUrlWithImageTimestamp(
  */
 export function isLikelyExpiredUrl(url: string): boolean {
   try {
-    // Check for expired DALL-E URLs
-    if (url.includes('oaidalleapiprodscus.blob.core.windows.net')) {
-      return true;
-    }
-
-    // Check for other temporary URLs that might expire
-    if (url.includes('blob.core.windows.net') && !url.includes('supabase')) {
-      return true;
-    }
-
     // Check for URLs with expiration timestamps in the query string
     if (url.includes('se=') && url.includes('st=')) {
       try {
@@ -87,8 +77,9 @@ export function isLikelyExpiredUrl(url: string): boolean {
           return now.getTime() >= expiresTime.getTime();
         }
       } catch {
-        // If we can't parse the expiration, assume it might be expired
-        return true;
+        // If we can't parse the expiration, DON'T assume it's expired
+        // Only return true if we're CERTAIN it's expired
+        return false;
       }
     }
 
@@ -107,11 +98,16 @@ export function getSafeImageUrl(
   createdAt: string,
   fallbackUrl?: string
 ): string {
-  // If URL is likely expired, return fallback or null
+  // If the image_url is already the fallback logo, return it as-is
+  if (imageUrl === '/recipe-generator-logo.png' || imageUrl === fallbackUrl) {
+    return imageUrl;
+  }
+
+  // If URL is likely expired (for DALL-E URLs or expired Azure blob URLs), return fallback
   if (isLikelyExpiredUrl(imageUrl)) {
     return fallbackUrl || '';
   }
 
-  // For valid URLs, return optimized URL
+  // For valid URLs (Supabase storage URLs), return optimized URL
   return getOptimizedImageUrl(imageUrl, updatedAt, createdAt);
 }

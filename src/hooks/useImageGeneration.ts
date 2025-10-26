@@ -61,8 +61,15 @@ export function useImageGeneration(options?: UseImageGenerationOptions) {
         setGenerationProgress(95);
 
         if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Failed to generate image');
+          let errorMessage = 'Failed to generate image';
+          try {
+            const errorData = await response.json();
+            errorMessage = errorData.error || errorMessage;
+          } catch {
+            // If JSON parsing fails, use status text
+            errorMessage = `${response.status} ${response.statusText}`;
+          }
+          throw new Error(errorMessage);
         }
 
         const data: GenerateImageResponse = await response.json();
