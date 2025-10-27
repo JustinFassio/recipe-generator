@@ -538,12 +538,14 @@ export function RecipeForm({
                 {imagePreview && !isGeneratingImage && (
                   <div className="relative h-48 w-full overflow-hidden rounded-lg bg-gray-100">
                     <ProgressiveImage
-                      src={getSafeImageUrl(
-                        imagePreview,
-                        editRecipe?.updated_at || new Date().toISOString(),
-                        editRecipe?.created_at || new Date().toISOString(),
-                        FALLBACK_IMAGE_PATH
-                      )}
+                      src={
+                        getSafeImageUrl(
+                          imagePreview,
+                          editRecipe?.updated_at || new Date().toISOString(),
+                          editRecipe?.created_at || new Date().toISOString(),
+                          FALLBACK_IMAGE_PATH
+                        ) || FALLBACK_IMAGE_PATH
+                      }
                       alt="Recipe preview"
                       className="h-full w-full object-cover"
                       loading="eager"
