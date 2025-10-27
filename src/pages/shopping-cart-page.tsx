@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useGroceriesQuery } from '@/hooks/useGroceriesQuery';
 import { useShoppingCartAI } from '@/hooks/useShoppingCartAI';
-import { useGroceries } from '@/hooks/useGroceries';
 import { useUserGroceryCart } from '@/hooks/useUserGroceryCart';
 import { ShoppingCartChat } from '@/components/shopping-cart/ShoppingCartChat';
 import { IngredientCard } from '@/components/groceries/IngredientCard';
@@ -189,7 +188,6 @@ function ShoppingItemCard({
 // Main shopping cart page
 export default function ShoppingCartPage() {
   const groceries = useGroceriesQuery();
-  const { addIngredients } = useGroceries();
   const {
     loading: cartLoading,
     removeFromCart,
@@ -231,7 +229,7 @@ export default function ShoppingCartPage() {
     try {
       await upsertSystemIngredient(name, category);
       // Add to groceries in unavailable state
-      addIngredients(category, [name]);
+      groceries.toggleIngredient(category, name);
       toast({
         title: 'Added to Kitchen',
         description: `${name} added to kitchen inventory as unavailable (needs to be purchased)`,
@@ -267,7 +265,7 @@ export default function ShoppingCartPage() {
       for (const staple of staples) {
         const category = categorizeIngredient(staple);
         await upsertSystemIngredient(staple, category);
-        addIngredients(category, [staple]);
+        groceries.toggleIngredient(category, staple);
       }
 
       toast({

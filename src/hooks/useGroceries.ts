@@ -1,7 +1,14 @@
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthProvider';
 import { useToast } from '@/hooks/use-toast';
 import { getUserGroceries, updateUserGroceries } from '@/lib/user-preferences';
+import { deduplicatedRequest } from '@/lib/request-deduplication';
+
+// Global guard to prevent multiple hook instances from loading simultaneously
+const globalLoadingState = {
+  isLoading: false,
+  loadedUserId: null as string | null,
+};
 
 export interface UseGroceriesReturn {
   // State
@@ -61,6 +68,10 @@ export function useGroceries(): UseGroceriesReturn {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Refs to prevent duplicate loads and track state
+  const loadedUserIdRef = useRef<string | null>(null);
+  const isLoadingRef = useRef(false);
+
   // Computed values (unique ingredients across categories)
   const selectedCount = Array.from(
     new Set<string>(Object.values(groceries).flat())
@@ -99,18 +110,57 @@ export function useGroceries(): UseGroceriesReturn {
     return totalChanges;
   }, [groceries, originalGroceries]);
 
-  // Load groceries from database
+  // Load groceries from database with deduplication
   const loadGroceries = useCallback(async () => {
     if (!user?.id) {
       setError('User not authenticated');
+      loadedUserIdRef.current = null;
+      globalLoadingState.loadedUserId = null;
       return;
     }
 
+    // GLOBAL GUARD: Prevent any instance from loading if already loaded for this user
+    if (
+      globalLoadingState.loadedUserId === user.id &&
+      !globalLoadingState.isLoading
+    ) {
+      return;
+    }
+
+    // GLOBAL GUARD: Prevent concurrent loads across all instances
+    if (globalLoadingState.isLoading) {
+      return;
+    }
+
+    // LOCAL GUARD: Prevent duplicate loads within this instance
+    if (loadedUserIdRef.current === user.id && !isLoadingRef.current) {
+      return;
+    }
+
+    // LOCAL GUARD: Prevent concurrent loads within this instance
+    if (isLoadingRef.current) {
+      return;
+    }
+
+    // Set both global and local loading flags
+    globalLoadingState.isLoading = true;
+    isLoadingRef.current = true;
     setLoading(true);
     setError(null);
 
     try {
-      const groceryData = await getUserGroceries(user.id);
+      // Use deduplication to prevent multiple simultaneous requests
+      const groceryData = await deduplicatedRequest(
+        `user-groceries-legacy-${user.id}`,
+        async () => {
+          return await getUserGroceries(user.id);
+        },
+        {
+          timeout: 10000, // 10 second timeout
+          retries: 2,
+        }
+      );
+
       const groceriesData = groceryData?.groceries || {};
       const shoppingListData = groceryData?.shopping_list || {};
 
@@ -152,6 +202,10 @@ export function useGroceries(): UseGroceriesReturn {
 
       setAllIngredients(combinedIngredients);
 
+      // Update both global and local state
+      loadedUserIdRef.current = user.id;
+      globalLoadingState.loadedUserId = user.id;
+
       if (import.meta.env.DEV) {
         console.log('Initialized states:', {
           groceries: groceriesData,
@@ -164,10 +218,12 @@ export function useGroceries(): UseGroceriesReturn {
       console.error('Error loading groceries:', err);
     } finally {
       setLoading(false);
+      isLoadingRef.current = false;
+      globalLoadingState.isLoading = false;
     }
   }, [user?.id]);
 
-  // Save groceries to database
+  // Save groceries to database with deduplication
   const saveGroceries = useCallback(async (): Promise<boolean> => {
     if (!user?.id) {
       setError('User not authenticated');
@@ -178,11 +234,16 @@ export function useGroceries(): UseGroceriesReturn {
     setError(null);
 
     try {
-      // Save both groceries (available) and shopping_list (unavailable)
-      const result = await updateUserGroceries(
-        user.id,
-        groceries,
-        shoppingList
+      // Use deduplication to prevent multiple simultaneous save requests
+      const result = await deduplicatedRequest(
+        `user-groceries-save-${user.id}`,
+        async () => {
+          return await updateUserGroceries(user.id, groceries, shoppingList);
+        },
+        {
+          timeout: 10000, // 10 second timeout
+          retries: 1, // Only retry once for saves
+        }
       );
 
       if (result.success) {
@@ -209,7 +270,7 @@ export function useGroceries(): UseGroceriesReturn {
     } finally {
       setLoading(false);
     }
-  }, [user?.id, groceries, toast]);
+  }, [user?.id, groceries, shoppingList, toast]);
 
   // Toggle ingredient selection (shopping list workflow)
   const toggleIngredient = useCallback(
@@ -334,10 +395,22 @@ export function useGroceries(): UseGroceriesReturn {
     }
   }, []);
 
-  // Load groceries on mount
+  // Load groceries when user changes - FIXED: Only depend on user.id, not loadGroceries
   useEffect(() => {
-    loadGroceries();
-  }, [user?.id]); // Only depend on user ID, not the function
+    if (user?.id) {
+      loadGroceries();
+    } else {
+      // Clear data when user logs out
+      setGroceries({});
+      setShoppingList({});
+      setAllIngredients({});
+      setOriginalGroceries({});
+      loadedUserIdRef.current = null;
+      globalLoadingState.loadedUserId = null;
+      globalLoadingState.isLoading = false;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]); // CRITICAL FIX: Only depend on user.id, loadGroceries handles its own deduplication
 
   // Debug: Log state changes in development (reduced logging)
   useEffect(() => {
