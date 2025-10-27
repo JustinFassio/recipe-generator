@@ -73,12 +73,10 @@ export function isLikelyExpiredUrl(url: string): boolean {
         if (expiresParam) {
           const expiresTime = new Date(expiresParam);
           const now = new Date();
-          // If current time is past the expiration, consider it likely expired
           return now.getTime() >= expiresTime.getTime();
         }
       } catch {
         // If we can't parse the expiration, DON'T assume it's expired
-        // Only return true if we're CERTAIN it's expired
         return false;
       }
     }
@@ -97,17 +95,18 @@ export function getSafeImageUrl(
   updatedAt: string,
   createdAt: string,
   fallbackUrl?: string
-): string {
+): string | null {
   // If the image_url is already the fallback logo, return it as-is
   if (imageUrl === '/recipe-generator-logo.png' || imageUrl === fallbackUrl) {
     return imageUrl;
   }
 
-  // If URL is likely expired (for DALL-E URLs or expired Azure blob URLs), return fallback
+  // If URL is likely expired (for DALL-E URLs or expired Azure blob URLs), return null if no fallback
   if (isLikelyExpiredUrl(imageUrl)) {
-    return fallbackUrl || '';
+    return fallbackUrl || null;
   }
 
-  // For valid URLs (Supabase storage URLs), return optimized URL
-  return getOptimizedImageUrl(imageUrl, updatedAt, createdAt);
+  // For all other URLs (including external URLs like Unsplash), apply cache-busting
+  const optimizedUrl = getOptimizedImageUrl(imageUrl, updatedAt, createdAt);
+  return optimizedUrl;
 }

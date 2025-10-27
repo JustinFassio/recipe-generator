@@ -13,6 +13,7 @@ import type { PublicRecipe, RecipeVersion } from '@/lib/types';
 import { useIngredientMatching } from '@/hooks/useIngredientMatching';
 import { getSafeImageUrl } from '@/lib/image-cache-utils';
 import { ProgressiveImage } from '@/components/shared/ProgressiveImage';
+import { FALLBACK_IMAGE_PATH } from '@/lib/constants';
 
 // Constants
 const RECIPE_TITLE_MAX_LENGTH = 45;
@@ -26,6 +27,7 @@ interface VersionedRecipeCardProps {
     latest_version?: number;
   };
   onView?: (recipe: PublicRecipe) => void;
+  onViewNew?: (recipe: PublicRecipe) => void; // New prop for new view page
   onSave?: (recipeId: string) => void;
   onRateVersion?: (
     recipeId: string,
@@ -40,6 +42,7 @@ interface VersionedRecipeCardProps {
 export function VersionedRecipeCard({
   recipe,
   onView,
+  onViewNew,
   onSave,
   onRateVersion,
   savingRecipeId,
@@ -121,17 +124,21 @@ export function VersionedRecipeCard({
               recipe.image_url,
               recipe.updated_at,
               recipe.created_at,
-              '/recipe-generator-logo.png'
+              FALLBACK_IMAGE_PATH
             );
             return (
               safeImageUrl && (
-                <div className="aspect-video overflow-hidden">
+                <div
+                  className="aspect-video overflow-hidden cursor-pointer"
+                  onClick={() => onViewNew?.(recipe)}
+                  title="View recipe details (new view)"
+                >
                   <ProgressiveImage
                     src={safeImageUrl}
                     alt={recipe.title}
                     className="h-full w-full transition-transform duration-200 group-hover:scale-105"
                     loading="lazy"
-                    placeholder="/recipe-generator-logo.png"
+                    placeholder={FALLBACK_IMAGE_PATH}
                   />
                 </div>
               )

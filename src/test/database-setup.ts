@@ -15,6 +15,12 @@ import {
  */
 export const setupDatabaseTests = () => {
   if (shouldRunDbTests()) {
+    // Clear all mocks to ensure clean state
+    vi.clearAllMocks();
+    
+    // Restore real fetch for database tests
+    vi.restoreAllMocks();
+    
     // Unmock Supabase for database tests
     vi.unmock('@/lib/supabase');
     vi.unmock('@supabase/supabase-js');

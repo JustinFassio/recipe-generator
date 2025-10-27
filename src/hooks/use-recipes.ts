@@ -104,6 +104,7 @@ export const useUpdateRecipe = () => {
       // Update detail cache
       if (updatedRecipe) {
         queryClient.setQueryData(['recipe', id], updatedRecipe);
+        queryClient.setQueryData(['public-recipe', id], updatedRecipe);
 
         // Optimistically update all recipes list caches so UI reflects immediately
         queryClient.setQueriesData(
@@ -123,6 +124,8 @@ export const useUpdateRecipe = () => {
 
       // Still invalidate in background to ensure fresh server state
       queryClient.invalidateQueries({ queryKey: ['recipes'], exact: false });
+      queryClient.invalidateQueries({ queryKey: ['recipe', id] });
+      queryClient.invalidateQueries({ queryKey: ['public-recipe', id] });
       queryClient.invalidateQueries({ queryKey: ['recipe-summary', id] });
       toast({
         title: 'Success',

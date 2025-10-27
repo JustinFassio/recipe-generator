@@ -17,7 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
 import type { Recipe, RecipeVersion } from '@/lib/types';
 
-export function RecipeViewPage() {
+export function ViewRecipePage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const location = useLocation();
@@ -31,7 +31,7 @@ export function RecipeViewPage() {
     : null;
 
   // Debug route parameters
-  console.log('🔍 [RecipeViewPage] Route debug:', {
+  console.log('🔍 [ViewRecipePage] Route debug:', {
     id,
     requestedVersion,
     fullUrl: window.location.href,
@@ -40,7 +40,7 @@ export function RecipeViewPage() {
   });
 
   // Debug logging
-  console.log('🔍 [RecipeViewPage] Component initialized:', {
+  console.log('🔍 [ViewRecipePage] Component initialized:', {
     recipeId: id,
     timestamp: new Date().toISOString(),
     url: window.location.href,
@@ -67,7 +67,7 @@ export function RecipeViewPage() {
     error: publicError,
   } = usePublicRecipe(id!, { enabled: shouldFetchPublic });
 
-  console.log('🚀 [RecipeViewPage] Query optimization strategy:', {
+  console.log('🚀 [ViewRecipePage] Query optimization strategy:', {
     shouldFetchUser,
     shouldFetchPublic,
     hasUser: !!user,
@@ -118,11 +118,7 @@ export function RecipeViewPage() {
         ingredients: versionContent.ingredients,
         instructions: versionContent.instructions,
         notes: updatedRecipeData?.notes ?? versionContent.notes ?? null, // Use updated notes if available
-        // Use version setup if available, otherwise fall back to base recipe setup
-        setup:
-          versionContent.setup && versionContent.setup.length > 0
-            ? versionContent.setup
-            : baseRecipe?.setup || [],
+        setup: versionContent.setup,
         categories: versionContent.categories,
         cooking_time: versionContent.cooking_time,
         difficulty: versionContent.difficulty,
@@ -280,13 +276,13 @@ export function RecipeViewPage() {
   useEffect(() => {
     if (recipe && user && !authLoading) {
       console.log(
-        '🔄 [RecipeViewPage] Loading version data with authenticated user'
+        '🔄 [ViewRecipePage] Loading version data with authenticated user'
       );
       loadVersionData(recipe);
       checkOwnership(recipe);
     } else {
       console.log(
-        '⏳ [RecipeViewPage] Waiting for authentication before loading versions',
+        '⏳ [ViewRecipePage] Waiting for authentication before loading versions',
         {
           hasRecipe: !!recipe,
           hasUser: !!user,
@@ -416,7 +412,7 @@ export function RecipeViewPage() {
   }
 
   // Enhanced debugging
-  console.log('📊 [RecipeViewPage] State summary:', {
+  console.log('📊 [ViewRecipePage] State summary:', {
     recipeId: id,
     userRecipe: userRecipe ? 'Found' : 'Not found',
     publicRecipe: publicRecipe ? 'Found' : 'Not found',
@@ -559,7 +555,7 @@ export function RecipeViewPage() {
   }
 
   if (error || !recipe) {
-    console.error('❌ [RecipeViewPage] Error state reached:', {
+    console.error('❌ [ViewRecipePage] Error state reached:', {
       recipeId: id,
       error: error?.message,
       userError: userError?.message,
@@ -702,7 +698,7 @@ export function RecipeViewPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50">
       <div className="mx-auto max-w-full sm:max-w-7xl px-4 py-8 sm:px-6 lg:px-8 overflow-x-hidden">
-        {/* Version Navigation Header - Show for owned recipes OR when versions exist */}
+        {/* Navigation Header - Show for owned recipes OR when versions exist */}
         {(isOwner || versions.length > 0) && (
           <div className="mb-6">
             {/* Mobile-optimized header layout */}
@@ -798,7 +794,7 @@ export function RecipeViewPage() {
 
         {/* Current Version Info */}
         {(isOwner || versions.length > 0) && (
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
+          <div className="bg-white rounded-lg border border-gray-200 p-4 mb-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div className="flex-1">
                 <div className="flex flex-wrap items-center gap-2">
@@ -911,7 +907,7 @@ export function RecipeViewPage() {
             }
             onVersionChange={(versionNumber) => {
               console.log(
-                `🔄 [RecipeViewPage] Version change requested: ${versionNumber}`
+                `🔄 [ViewRecipePage] Version change requested: ${versionNumber}`
               );
               navigate(`/recipe/${id}?version=${versionNumber}`);
             }}

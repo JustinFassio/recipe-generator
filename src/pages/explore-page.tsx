@@ -157,6 +157,21 @@ export default function ExplorePage() {
       });
   };
 
+  const handleViewRecipeNew = (recipe: Recipe | PublicRecipe) => {
+    const authorName = 'author_name' in recipe ? recipe.author_name : 'Unknown';
+    console.log('🔍 [Explore] View recipe clicked (new view):', {
+      recipeId: recipe.id,
+      recipeTitle: recipe.title,
+      isPublic: recipe.is_public,
+      authorName,
+      timestamp: new Date().toISOString(),
+    });
+
+    navigate(`/view-recipe/${recipe.id}`, {
+      state: { from: 'explore' },
+    });
+  };
+
   // Remove handleEditRecipe - community recipes should not be editable
 
   // Comprehensive filtering logic for public recipes
@@ -406,6 +421,7 @@ export default function ExplorePage() {
               key={recipe.id}
               recipe={recipe}
               onView={handleViewRecipe}
+              onViewNew={handleViewRecipeNew}
               onSave={handleSaveRecipe}
               onRateVersion={handleRateVersion}
               savingRecipeId={savingRecipeId}

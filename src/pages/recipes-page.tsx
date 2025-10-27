@@ -42,6 +42,13 @@ export function RecipesPage() {
     [navigate]
   );
 
+  const handleViewRecipeNew = useCallback(
+    (recipe: Recipe) => {
+      navigate(`/view-recipe/${recipe.id}`);
+    },
+    [navigate]
+  );
+
   const handleShareToggle = useCallback(() => {
     // The RecipeCard component handles the API call internally
     // This callback can be used for additional UI updates if needed
@@ -179,6 +186,7 @@ export function RecipesPage() {
                 recipe={recipe}
                 onEdit={handleEditRecipe}
                 onView={handleViewRecipe}
+                onViewNew={handleViewRecipeNew}
                 showShareButton={true}
                 onShareToggle={handleShareToggle}
               />
