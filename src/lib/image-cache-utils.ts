@@ -77,6 +77,7 @@ export function isLikelyExpiredUrl(url: string): boolean {
         }
       } catch {
         // If we can't parse the expiration, DON'T assume it's expired
+        // Only return true if we're CERTAIN it's expired
         return false;
       }
     }
