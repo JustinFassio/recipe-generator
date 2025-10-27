@@ -212,7 +212,7 @@ function tryPatternParsing(content: string): RecipeParseResult {
         lowerLine.includes('setup') ||
         lowerLine.includes('prep') ||
         lowerLine.includes('mise en place') ||
-        lowerLine.includes('prepare')
+        lowerLine.match(/\bprepare\b/)
       ) {
         inSetupSection = true;
         inIngredientsSection = false;
@@ -281,7 +281,7 @@ function tryPatternParsing(content: string): RecipeParseResult {
           lowerLine.includes('chop') ||
           lowerLine.includes('dice') ||
           lowerLine.includes('slice') ||
-          lowerLine.includes('prepare'))
+          lowerLine.match(/\bprepare\b/))
       ) {
         const cleanSetup = line
           .replace(/^[-*•]\s+/, '')
