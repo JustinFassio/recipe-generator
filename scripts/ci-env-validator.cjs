@@ -53,6 +53,10 @@ function checkClientCodeForSensitiveVars() {
       const stat = fs.statSync(filePath);
 
       if (stat.isDirectory()) {
+        // Skip database test directories as they are server-side tests
+        if (file === 'database' || file === '__tests__') {
+          continue;
+        }
         scanDirectory(filePath);
       } else if (
         file.endsWith('.ts') ||
@@ -60,6 +64,14 @@ function checkClientCodeForSensitiveVars() {
         file.endsWith('.js') ||
         file.endsWith('.jsx')
       ) {
+        // Skip database test files as they are server-side tests
+        if (
+          filePath.includes('/database/') ||
+          filePath.includes('/__tests__/database/')
+        ) {
+          continue;
+        }
+
         const content = fs.readFileSync(filePath, 'utf8');
 
         for (const varName of sensitiveVars) {

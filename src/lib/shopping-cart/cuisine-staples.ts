@@ -29,7 +29,6 @@ const __meta =
     ? (import.meta as unknown as { env?: { DEV?: boolean } })
     : undefined;
 if (__meta?.env?.DEV) {
-  // eslint-disable-next-line no-console
   console.warn(
     '[cuisine-staples] This file is now a thin compatibility layer. Please import from cuisine-staples/manager or group files directly.'
   );

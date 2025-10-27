@@ -18,12 +18,11 @@ import {
   Plus,
   Shield,
 } from 'lucide-react';
-import { ProgressiveImage } from '@/components/shared/ProgressiveImage';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import CategoryChip from '@/components/ui/CategoryChip';
 import { useMemo, useState, useEffect } from 'react';
 import { useGlobalIngredients } from '@/hooks/useGlobalIngredients';
+import { useUpdateRecipe } from '@/hooks/use-recipes';
 import { SaveToGlobalButton } from '@/components/groceries/save-to-global-button';
 import { GroceryCard } from '@/components/groceries/GroceryCard';
 import { parseIngredientText } from '@/lib/groceries/ingredient-parser';
@@ -35,7 +34,7 @@ import { CreatorRating, YourComment } from '@/components/ui/rating';
 import { CommentSystem } from './comment-system';
 import { AddToShoppingListButton } from '@/components/shopping-cart/AddToShoppingListButton';
 import { useUserGroceryCart } from '@/hooks/useUserGroceryCart';
-import { getSafeImageUrl } from '@/lib/image-cache-utils';
+import { EditableNotes } from '@/components/shared/patterns/EditableNotes';
 
 interface RecipeViewProps {
   recipe: Recipe;
@@ -47,6 +46,7 @@ interface RecipeViewProps {
     comment?: string;
   } | null;
   onEditComment?: () => void;
+  onNotesUpdated?: (updatedRecipe: Recipe) => void;
 }
 
 export function RecipeView({
@@ -56,6 +56,7 @@ export function RecipeView({
   onBack,
   userComment,
   onEditComment,
+  onNotesUpdated,
 }: RecipeViewProps) {
   const groceries = useGroceries();
   const {
@@ -69,6 +70,27 @@ export function RecipeView({
 
   // Use user grocery cart to check if ingredients are in user's collection
   const { isInCart, addToCart, loading: cartLoading } = useUserGroceryCart();
+
+  const updateRecipe = useUpdateRecipe();
+
+  // Handle notes save
+  const handleNotesSave = async (notes: string) => {
+    console.log('🔄 Saving notes:', {
+      recipeId: recipe.id,
+      notes,
+      currentNotes: recipe.notes,
+    });
+
+    const result = await updateRecipe.mutateAsync({
+      id: recipe.id,
+      updates: { notes },
+    });
+
+    console.log('✅ Notes save result:', result);
+
+    // Notify parent component of the update
+    onNotesUpdated?.(result);
+  };
 
   // Simple state to track clicked ingredients (immediate UI feedback)
   const [clickedIngredients, setClickedIngredients] = useState<Set<string>>(
@@ -258,36 +280,8 @@ export function RecipeView({
       <div className={createDaisyUICardClasses('bordered')}>
         <div className="card-body pb-4">
           <div className="flex flex-col gap-4 sm:gap-6 lg:flex-row lg:items-start">
-            {recipe.image_url &&
-              (() => {
-                const safeImageUrl = getSafeImageUrl(
-                  recipe.image_url,
-                  recipe.updated_at,
-                  recipe.created_at,
-                  '/recipe-generator-logo.png'
-                );
-                return (
-                  safeImageUrl && (
-                    <div className="lg:w-1/3">
-                      <ProgressiveImage
-                        src={safeImageUrl}
-                        alt={recipe.title}
-                        className="h-48 w-full rounded-lg sm:h-64 lg:h-48"
-                        loading="eager"
-                        placeholder="/recipe-generator-logo.png"
-                      />
-                    </div>
-                  )
-                );
-              })()}
             <div className="flex-1">
-              <h3
-                className={`${createDaisyUICardTitleClasses()} mb-4 text-lg font-bold sm:text-xl lg:text-2xl xl:text-3xl break-words`}
-              >
-                {recipe.title}
-              </h3>
-
-              {/* Recipe Description */}
+              {/* Recipe Description - Moved to top */}
               {recipe.description && (
                 <div className="mb-4">
                   <p className="text-base sm:text-lg text-gray-700 leading-relaxed break-words">
@@ -295,6 +289,12 @@ export function RecipeView({
                   </p>
                 </div>
               )}
+
+              <h3
+                className={`${createDaisyUICardTitleClasses()} mb-4 text-lg font-bold sm:text-xl lg:text-2xl xl:text-3xl break-words`}
+              >
+                {recipe.title}
+              </h3>
               <div className="flex flex-col gap-2 text-sm text-gray-600 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
                 <div className="flex items-center">
                   <Users className="mr-1 h-4 w-4" />
@@ -318,21 +318,93 @@ export function RecipeView({
                 )}
               </div>
 
-              {/* Recipe Tags */}
-              {recipe.categories && recipe.categories.length > 0 && (
+              {/* Setup */}
+              {recipe.setup && recipe.setup.length > 0 && (
                 <div className="mt-4">
-                  <div className="flex flex-wrap gap-2">
-                    {recipe.categories.map((category, index) => (
-                      <CategoryChip
-                        key={`${category}-${index}`}
-                        category={category}
-                        variant="readonly"
-                        size="sm"
-                      />
+                  <h4 className="text-lg font-semibold text-gray-900 mb-3">
+                    Setup & Preparation
+                  </h4>
+                  <div className="space-y-2">
+                    {recipe.setup.map((step, index) => (
+                      <div key={index} className="flex items-start">
+                        <div className="mt-0.5 mr-3 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-blue-100">
+                          <span className="text-xs font-semibold text-blue-700">
+                            {index + 1}
+                          </span>
+                        </div>
+                        <div className="flex-1 pt-0.5">
+                          <p className="text-sm text-gray-800 leading-relaxed">
+                            {step}
+                          </p>
+                        </div>
+                      </div>
                     ))}
                   </div>
                 </div>
               )}
+
+              {/* Instructions */}
+              <div className="mt-4">
+                <h4 className="text-lg font-semibold text-gray-900 mb-3">
+                  Instructions
+                </h4>
+                <div className="space-y-2">
+                  {recipe.instructions.split('\n').map((line, index) => {
+                    const trimmedLine = line.trim();
+
+                    if (!trimmedLine) return null;
+
+                    // Check if it's a section header (starts with **)
+                    if (
+                      trimmedLine.startsWith('**') &&
+                      trimmedLine.endsWith('**')
+                    ) {
+                      return (
+                        <div key={index} className="mt-4 first:mt-0">
+                          <h5 className="text-base font-semibold text-gray-800">
+                            {trimmedLine.replace(/\*\*/g, '')}
+                          </h5>
+                        </div>
+                      );
+                    }
+
+                    // Check if it's a numbered step
+                    const numberedMatch = trimmedLine.match(/^(\d+)\.\s*(.+)$/);
+                    if (numberedMatch) {
+                      return (
+                        <div key={index} className="flex items-start">
+                          <div className="mt-0.5 mr-3 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-teal-100">
+                            <span className="text-xs font-semibold text-teal-700">
+                              {numberedMatch[1]}
+                            </span>
+                          </div>
+                          <p className="pt-0.5 text-sm leading-relaxed text-gray-800">
+                            {numberedMatch[2]}
+                          </p>
+                        </div>
+                      );
+                    }
+
+                    // Regular paragraph
+                    return (
+                      <p
+                        key={index}
+                        className="ml-9 text-sm leading-relaxed text-gray-800"
+                      >
+                        {trimmedLine}
+                      </p>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Notes */}
+              <EditableNotes
+                notes={recipe.notes}
+                onSave={handleNotesSave}
+                placeholder="Additional notes, tips, or variations..."
+                rows={3}
+              />
 
               {/* Creator Rating */}
               {recipe.creator_rating && (
@@ -686,148 +758,6 @@ export function RecipeView({
           )}
         </div>
       </div>
-
-      {/* Setup */}
-      {recipe.setup && recipe.setup.length > 0 && (
-        <div className={createDaisyUICardClasses('bordered')}>
-          <div className="card-body">
-            <h3
-              className={`${createDaisyUICardTitleClasses()} text-xl font-semibold`}
-            >
-              Setup & Preparation
-            </h3>
-            <div className="space-y-3">
-              {recipe.setup.map((step, index) => (
-                <div key={index} className="flex items-start">
-                  <div className="mt-0.5 mr-4 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-blue-100">
-                    <span className="text-sm font-semibold text-blue-700">
-                      {index + 1}
-                    </span>
-                  </div>
-                  <div className="flex-1 pt-1">
-                    <p className="text-gray-800 leading-relaxed">{step}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Instructions */}
-      <div className={createDaisyUICardClasses('bordered')}>
-        <div className="card-body">
-          <h3
-            className={`${createDaisyUICardTitleClasses()} text-xl font-semibold`}
-          >
-            Instructions
-          </h3>
-          <div className="space-y-4">
-            {recipe.instructions.split('\n').map((line, index) => {
-              const trimmedLine = line.trim();
-
-              if (!trimmedLine) return null;
-
-              // Check if it's a section header (starts with **)
-              if (trimmedLine.startsWith('**') && trimmedLine.endsWith('**')) {
-                return (
-                  <div key={index} className="mt-6 first:mt-0">
-                    <div
-                      className={createDaisyUISeparatorClasses(
-                        'horizontal',
-                        'mb-3'
-                      )}
-                    />
-                    <h4 className="text-lg font-semibold text-gray-800">
-                      {trimmedLine.replace(/\*\*/g, '')}
-                    </h4>
-                  </div>
-                );
-              }
-
-              // Check if it's a numbered step
-              const numberedMatch = trimmedLine.match(/^(\d+)\.\s*(.+)$/);
-              if (numberedMatch) {
-                return (
-                  <div key={index} className="flex items-start">
-                    <div className="mt-0.5 mr-4 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-teal-100">
-                      <span className="text-sm font-semibold text-teal-700">
-                        {numberedMatch[1]}
-                      </span>
-                    </div>
-                    <p className="pt-1 leading-relaxed text-gray-700">
-                      {numberedMatch[2]}
-                    </p>
-                  </div>
-                );
-              }
-
-              // Regular paragraph
-              return (
-                <p key={index} className="ml-12 leading-relaxed text-gray-700">
-                  {trimmedLine}
-                </p>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-
-      {/* Notes */}
-      {recipe.notes && (
-        <div className={createDaisyUICardClasses('bordered')}>
-          <div className="card-body">
-            <h3
-              className={`${createDaisyUICardTitleClasses()} text-xl font-semibold`}
-            >
-              Notes
-            </h3>
-            <div className="space-y-4">
-              {recipe.notes.split('\n').map((line, index) => {
-                const trimmedLine = line.trim();
-
-                if (!trimmedLine) return null;
-
-                // Check if it's a section header (starts with **)
-                if (
-                  trimmedLine.startsWith('**') &&
-                  trimmedLine.endsWith('**')
-                ) {
-                  return (
-                    <div key={index} className="mt-6 first:mt-0">
-                      <h4 className="mb-2 text-lg font-semibold text-gray-800">
-                        {trimmedLine.replace(/\*\*/g, '')}
-                      </h4>
-                    </div>
-                  );
-                }
-
-                // Check if it's a bullet point
-                if (
-                  trimmedLine.startsWith('•') ||
-                  trimmedLine.startsWith('-')
-                ) {
-                  return (
-                    <div key={index} className="flex items-start">
-                      <div className="mt-2.5 mr-3 h-2 w-2 flex-shrink-0 rounded-full bg-gray-400"></div>
-                      <p className="leading-relaxed text-gray-700">
-                        {trimmedLine.replace(/^[•-]\s*/, '')}
-                      </p>
-                    </div>
-                  );
-                }
-
-                // Regular paragraph
-                return (
-                  <p key={index} className="leading-relaxed text-gray-700">
-                    {trimmedLine}
-                  </p>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Comments Section for Public Recipes */}
       {recipe.is_public && (

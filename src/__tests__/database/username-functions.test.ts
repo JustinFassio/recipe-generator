@@ -137,4 +137,4 @@ RUN
         expect(secondClaim.data).toBe(true);
       });
     })
-  : describe.skip('Database: Username Functions (integration) - missing SUPABASE_SERVICE_ROLE, skipping', () => {});
+  : describe.skip('Database: Username Functions (integration) - missing SUPABASE_SERVICE_ROLE_KEY, skipping', () => {});

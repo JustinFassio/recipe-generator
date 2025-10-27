@@ -8,6 +8,7 @@ import { AuthErrorBoundary } from '@/components/auth/AuthErrorBoundary';
 import { RecipesPage } from '@/pages/recipes-page';
 import { AddRecipePage } from '@/pages/add-recipe-page';
 import { RecipeViewPage } from '@/pages/recipe-view-page';
+import { ViewRecipePage } from '@/pages/view-recipe-page';
 import { ChatRecipePage } from '@/pages/chat-recipe-page';
 import { CoachChatPage } from '@/pages/coach-chat-page';
 import ProfilePage from '@/pages/profile-page';
@@ -131,6 +132,17 @@ function AppContent() {
             <Header />
             <main>
               <RecipeViewPage />
+            </main>
+          </div>
+        }
+      />
+      <Route
+        path="/view-recipe/:id"
+        element={
+          <div className="bg-base-100 min-h-screen">
+            <Header />
+            <main>
+              <ViewRecipePage />
             </main>
           </div>
         }

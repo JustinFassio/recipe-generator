@@ -103,4 +103,4 @@ RUN
         expect(beforeRow?.updated_at).not.toBe(afterRow?.updated_at);
       });
     })
-  : describe.skip('Database: Profile Functions (integration) - missing SUPABASE_SERVICE_ROLE, skipping', () => {});
+  : describe.skip('Database: Profile Functions (integration) - missing SUPABASE_SERVICE_ROLE_KEY, skipping', () => {});

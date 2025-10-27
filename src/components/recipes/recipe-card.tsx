@@ -18,6 +18,7 @@ import { Badge } from '@/components/ui/badge';
 import { useIngredientMatching } from '@/hooks/useIngredientMatching';
 import type { Recipe, PublicRecipe } from '@/lib/types';
 import { getSafeImageUrl } from '@/lib/image-cache-utils';
+import { FALLBACK_IMAGE_PATH } from '@/lib/constants';
 import { useDeleteRecipe } from '@/hooks/use-recipes';
 import { useState } from 'react';
 import { recipeApi } from '@/lib/api';
@@ -40,6 +41,7 @@ interface RecipeCardProps {
   recipe: Recipe | PublicRecipe;
   onEdit?: (recipe: Recipe) => void;
   onView?: (recipe: Recipe | PublicRecipe) => void;
+  onViewNew?: (recipe: Recipe | PublicRecipe) => void; // New prop for new view page
   showShareButton?: boolean;
   onShareToggle?:
     | ((recipeId: string, isPublic: boolean) => void)
@@ -51,6 +53,7 @@ export function RecipeCard({
   recipe,
   onEdit,
   onView,
+  onViewNew,
   showShareButton,
   onShareToggle,
   showEditDelete = true, // Default to true for backward compatibility
@@ -130,17 +133,29 @@ export function RecipeCard({
               recipe.image_url,
               recipe.updated_at,
               recipe.created_at,
-              '/recipe-generator-logo.png'
+              FALLBACK_IMAGE_PATH
             );
             return (
               safeImageUrl && (
-                <div className="aspect-video overflow-hidden">
+                <div
+                  className="aspect-video overflow-hidden cursor-pointer"
+                  onClick={() => onViewNew?.(recipe)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      onViewNew?.(recipe);
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
+                  title="View recipe details (new view)"
+                >
                   <ProgressiveImage
                     src={safeImageUrl}
                     alt={recipe.title}
                     className="h-full w-full transition-transform duration-200 group-hover:scale-105"
                     loading="lazy"
-                    placeholder="/recipe-generator-logo.png"
+                    placeholder={FALLBACK_IMAGE_PATH}
                   />
                 </div>
               )

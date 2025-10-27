@@ -24,6 +24,8 @@ jobs:
       VERCEL_ORG_ID: team_VZU6ueb8d87bTfJRAKJwvov5
       VERCEL_PROJECT_ID: prj_zfInTXIxP2XKALlnxO4elLt45Cxa
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      # Note: SUPABASE_SERVICE_ROLE_KEY is intentionally NOT included here
+      # as it should only be available in server-side contexts, not client validation
 
     steps:
       - name: Checkout code
@@ -177,3 +179,35 @@ jobs:
             
             console.log('✅ Security schema is properly configured');
           "
+
+  # Database tests that require service role key - only run in trusted contexts
+  db-tests-server-only:
+    name: Database Tests (Server Only)
+    runs-on: ubuntu-latest
+    # Only run on pushes to main, develop, or manual dispatch
+    if: |
+      (github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')) ||
+      github.event_name == 'workflow_dispatch'
+    env:
+      VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+      VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run database tests
+        run: |
+          echo "🔍 Running database tests with service role key..."
+          npm run test:run -- --run src/__tests__/database/

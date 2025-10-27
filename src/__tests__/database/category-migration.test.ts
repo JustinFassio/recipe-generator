@@ -19,8 +19,8 @@ RUN
         console.log('Environment check:', {
           url: process.env.VITE_SUPABASE_URL,
           anonKey: process.env.VITE_SUPABASE_ANON_KEY,
-          serviceKey: process.env.SUPABASE_SERVICE_ROLE,
-          serviceKeyLength: process.env.SUPABASE_SERVICE_ROLE?.length,
+          serviceKey: process.env.SUPABASE_SERVICE_ROLE_KEY,
+          serviceKeyLength: process.env.SUPABASE_SERVICE_ROLE_KEY?.length,
         });
 
         // Use database setup for conditional mocking

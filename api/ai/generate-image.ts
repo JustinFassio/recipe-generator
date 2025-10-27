@@ -155,7 +155,10 @@ export default async function handler(
       // Only attempt fallback if headers haven't been sent yet
       if (!res.headersSent) {
         try {
-          res.status(500).send(`Image generation failed: ${errorMessage}`);
+          res.status(500).json({
+            success: false,
+            error: `Image generation failed: ${errorMessage}`,
+          });
         } catch (fallbackError) {
           console.error(
             'Failed to send fallback error response:',

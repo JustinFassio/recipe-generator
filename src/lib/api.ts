@@ -242,6 +242,13 @@ export const recipeApi = {
     try {
       // Step 1: Fetch the recipe
       console.log('📋 [API] Fetching public recipe from database...');
+      console.log('🔍 [API] Query details:', {
+        table: 'recipes',
+        id: id.trim(),
+        isPublic: true,
+        hasAuth: !!supabase.auth.getSession(),
+      });
+
       const { data: recipe, error: recipeError } = await supabase
         .from('recipes')
         .select('*')
