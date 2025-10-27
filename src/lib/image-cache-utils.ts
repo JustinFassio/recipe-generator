@@ -2,6 +2,8 @@
  * Utility functions for smart image caching and cache invalidation
  */
 
+import { FALLBACK_IMAGE_PATH } from '@/lib/constants';
+
 /**
  * Generates an optimized image URL with selective cache-busting
  * Only adds cache-busting parameters for Supabase storage URLs and recently updated content
@@ -98,7 +100,7 @@ export function getSafeImageUrl(
   fallbackUrl?: string
 ): string | null {
   // If the image_url is already the fallback logo, return it as-is
-  if (imageUrl === '/recipe-generator-logo.png' || imageUrl === fallbackUrl) {
+  if (imageUrl === FALLBACK_IMAGE_PATH || imageUrl === fallbackUrl) {
     return imageUrl;
   }
 
