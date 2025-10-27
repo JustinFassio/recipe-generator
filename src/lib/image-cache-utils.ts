@@ -98,15 +98,15 @@ export function getSafeImageUrl(
   updatedAt: string,
   createdAt: string,
   fallbackUrl?: string
-): string | null {
+): string {
   // If the image_url is already the fallback logo, return it as-is
   if (imageUrl === FALLBACK_IMAGE_PATH || imageUrl === fallbackUrl) {
     return imageUrl;
   }
 
-  // If URL is likely expired (for DALL-E URLs or expired Azure blob URLs), return null if no fallback
+  // If URL is likely expired (for DALL-E URLs or expired Azure blob URLs), return fallback or default fallback
   if (isLikelyExpiredUrl(imageUrl)) {
-    return fallbackUrl || null;
+    return fallbackUrl || FALLBACK_IMAGE_PATH;
   }
 
   // For all other URLs (including external URLs like Unsplash), apply cache-busting
