@@ -395,7 +395,7 @@ export function RecipeViewPage() {
     return relaxedUuidRegex.test(str);
   };
 
-  if (!id || id === 'undefined' || !isValidUUID(id)) {
+  if (id === undefined || id === 'undefined' || !id || !isValidUUID(id)) {
     console.error('❌ Recipe ID is invalid in route:', {
       id,
       isValid: id ? isValidUUID(id) : false,
