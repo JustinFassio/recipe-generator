@@ -140,6 +140,14 @@ export function RecipeCard({
                 <div
                   className="aspect-video overflow-hidden cursor-pointer"
                   onClick={() => onViewNew?.(recipe)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      onViewNew?.(recipe);
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
                   title="View recipe details (new view)"
                 >
                   <ProgressiveImage
